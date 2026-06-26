@@ -23,9 +23,11 @@ MIN_ZOOM = 0.35
 MAX_ZOOM = 1.50
 DEFAULT_ZOOM = 1.0
 
+TOP_UI_HEIGHT = 88
+BOTTOM_UI_HEIGHT = 70
+
 BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
-PANEL_DARK_COLOR = (19, 23, 27)
 BUTTON_COLOR = (42, 50, 58)
 BUTTON_HOVER_COLOR = (62, 74, 84)
 BUTTON_BORDER_COLOR = (120, 140, 150)
@@ -57,36 +59,56 @@ TERRAINS = {
         "image": "rowniny.png",
         "fallback": (112, 156, 76),
         "weight": 30,
+        "land": True,
     },
     "forest": {
         "name": "Las",
         "image": "las.png",
         "fallback": (49, 107, 62),
         "weight": 22,
+        "land": True,
     },
     "hills": {
         "name": "Wzgorza",
         "image": "wzgorza.png",
         "fallback": (139, 116, 73),
         "weight": 18,
+        "land": True,
     },
     "mountain": {
         "name": "Gory",
         "image": "gory.png",
         "fallback": (116, 116, 112),
         "weight": 12,
+        "land": True,
     },
     "desert": {
         "name": "Pustynia",
         "image": "pustynia.png",
         "fallback": (194, 165, 92),
         "weight": 10,
+        "land": True,
     },
     "tundra": {
         "name": "Tundra",
         "image": "tundra.png",
         "fallback": (145, 170, 154),
         "weight": 8,
+        "land": True,
+    },
+    "coast": {
+        "name": "Wybrzeze",
+        "image": "wybrzeze.png",
+        "fallback": (56, 128, 164),
+        "weight": 0,
+        "land": False,
+    },
+    "ocean": {
+        "name": "Ocean",
+        "image": "ocean.png",
+        "fallback": (22, 64, 102),
+        "weight": 0,
+        "land": False,
     },
 }
 
@@ -135,31 +157,6 @@ def axial_to_pixel(q, r):
     return x, y
 
 
-def center_axial_positions(axial_positions):
-    raw_positions = []
-
-    for q, r in axial_positions:
-        x, y = axial_to_pixel(q, r)
-        raw_positions.append((q, r, x, y))
-
-    min_x = min(pos[2] for pos in raw_positions)
-    max_x = max(pos[2] for pos in raw_positions)
-    min_y = min(pos[3] for pos in raw_positions)
-    max_y = max(pos[3] for pos in raw_positions)
-
-    map_width = max_x - min_x
-    map_height = max_y - min_y
-
-    offset_x = (SCREEN_WIDTH - map_width) / 2 - min_x
-    offset_y = (SCREEN_HEIGHT - map_height) / 2 - min_y + 65
-
-    positions = []
-    for q, r, x, y in raw_positions:
-        positions.append((q, r, x + offset_x, y + offset_y))
-
-    return positions
-
-
 def neighbors(q, r):
     return [
         (q + 1, r),
@@ -171,39 +168,30 @@ def neighbors(q, r):
     ]
 
 
-def make_spiral_path(center_q, center_r, steps, seed=1):
-    """Tworzy zawijanca heksowego przez losowy, ale kontrolowany spacer."""
-    rng = random.Random(seed)
-    coords = [(center_q, center_r)]
-    used = {(center_q, center_r)}
-    q, r = center_q, center_r
-    direction_index = rng.randrange(6)
+def normalize_pixel_positions(raw_positions):
+    min_x = min(pos[2] for pos in raw_positions)
+    max_x = max(pos[2] for pos in raw_positions)
+    min_y = min(pos[3] for pos in raw_positions)
+    max_y = max(pos[3] for pos in raw_positions)
 
-    while len(coords) < steps:
-        possible = neighbors(q, r)
-        # Preferuj kierunek do przodu i lekki skret, zeby mapa robila zawijance.
-        preferred = []
-        base_dirs = neighbors(0, 0)
-        for turn in [0, 1, -1, 2, -2, 3]:
-            dq, dr = base_dirs[(direction_index + turn) % 6]
-            preferred.append((q + dq, r + dr, (direction_index + turn) % 6))
+    center_x = (min_x + max_x) / 2
+    center_y = (min_y + max_y) / 2
 
-        moved = False
-        for nq, nr, ndir in preferred:
-            if (nq, nr) not in used:
-                q, r = nq, nr
-                direction_index = ndir if rng.random() > 0.25 else rng.randrange(6)
-                used.add((q, r))
-                coords.append((q, r))
-                moved = True
-                break
+    positions = []
+    for col, row, x, y, terrain_override in raw_positions:
+        positions.append((col, row, x - center_x, y - center_y, terrain_override))
 
-        if not moved:
-            border = [coord for coord in used if any(n not in used for n in neighbors(*coord))]
-            q, r = rng.choice(border)
-            direction_index = rng.randrange(6)
+    return positions
 
-    return coords
+
+def axial_set_to_positions(terrain_by_coord):
+    raw_positions = []
+
+    for q, r in sorted(terrain_by_coord.keys(), key=lambda item: (item[1], item[0])):
+        x, y = axial_to_pixel(q, r)
+        raw_positions.append((q, r, x, y, terrain_by_coord[q, r]))
+
+    return normalize_pixel_positions(raw_positions)
 
 
 # =========================
@@ -233,6 +221,9 @@ def create_fallback_texture(color):
     fallback = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
     points = hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2)
     pygame.draw.polygon(fallback, color, points)
+
+    # Delikatny srodek dla wody, zeby ocean/wybrzeze byly czytelne nawet bez grafiki.
+    pygame.draw.circle(fallback, tuple(min(255, channel + 18) for channel in color), (TEXTURE_SIZE // 2, TEXTURE_SIZE // 2), TEXTURE_SIZE // 4)
     return fallback
 
 
@@ -259,7 +250,7 @@ def load_terrain_textures():
 class Camera:
     def __init__(self):
         self.x = 0
-        self.y = -80
+        self.y = 0
         self.zoom = DEFAULT_ZOOM
 
     def apply(self, x, y):
@@ -284,9 +275,29 @@ class Camera:
         self.x = mouse_x - world_x * self.zoom
         self.y = mouse_y - world_y * self.zoom
 
+    def center_on_tiles(self, tiles):
+        if not tiles:
+            self.reset()
+            return
+
+        min_x = min(tile.x for tile in tiles) - HEX_SIZE
+        max_x = max(tile.x for tile in tiles) + HEX_SIZE
+        min_y = min(tile.y for tile in tiles) - HEX_SIZE
+        max_y = max(tile.y for tile in tiles) + HEX_SIZE
+
+        map_center_x = (min_x + max_x) / 2
+        map_center_y = (min_y + max_y) / 2
+
+        target_x = SCREEN_WIDTH / 2
+        target_y = (TOP_UI_HEIGHT + (SCREEN_HEIGHT - BOTTOM_UI_HEIGHT)) / 2
+
+        self.zoom = DEFAULT_ZOOM
+        self.x = target_x - map_center_x * self.zoom
+        self.y = target_y - map_center_y * self.zoom
+
     def reset(self):
-        self.x = 0
-        self.y = -80
+        self.x = SCREEN_WIDTH / 2
+        self.y = (TOP_UI_HEIGHT + (SCREEN_HEIGHT - BOTTOM_UI_HEIGHT)) / 2
         self.zoom = DEFAULT_ZOOM
 
 
@@ -355,80 +366,132 @@ class HexTile:
 # GENERATORY MAP
 # =========================
 
+def make_spiral_path(center_q, center_r, steps, seed=1):
+    rng = random.Random(seed)
+    coords = [(center_q, center_r)]
+    used = {(center_q, center_r)}
+    q, r = center_q, center_r
+    direction_index = rng.randrange(6)
+    directions = neighbors(0, 0)
+
+    while len(coords) < steps:
+        preferred = []
+        for turn in [0, 1, -1, 2, -2, 3]:
+            dq, dr = directions[(direction_index + turn) % 6]
+            preferred.append((q + dq, r + dr, (direction_index + turn) % 6))
+
+        moved = False
+        for nq, nr, ndir in preferred:
+            if (nq, nr) not in used:
+                q, r = nq, nr
+                direction_index = ndir if rng.random() > 0.25 else rng.randrange(6)
+                used.add((q, r))
+                coords.append((q, r))
+                moved = True
+                break
+
+        if not moved:
+            border = [coord for coord in used if any(n not in used for n in neighbors(*coord))]
+            q, r = rng.choice(border)
+            direction_index = rng.randrange(6)
+
+    return coords
+
+
+def add_water_around_land(land_coords):
+    land_coords = set(land_coords)
+    terrain_by_coord = {}
+
+    for coord in land_coords:
+        terrain_by_coord[coord] = None
+
+    coast_coords = set()
+    for q, r in land_coords:
+        for neighbor in neighbors(q, r):
+            if neighbor not in land_coords:
+                coast_coords.add(neighbor)
+
+    ocean_coords = set()
+    for q, r in coast_coords:
+        for neighbor in neighbors(q, r):
+            if neighbor not in land_coords and neighbor not in coast_coords:
+                ocean_coords.add(neighbor)
+
+    for coord in coast_coords:
+        terrain_by_coord[coord] = "coast"
+    for coord in ocean_coords:
+        terrain_by_coord[coord] = "ocean"
+
+    return terrain_by_coord
+
+
 def generate_rosette_rows(row_lengths):
-    axial_positions = []
-    max_len = max(row_lengths)
-    center_row = len(row_lengths) // 2
+    raw_positions = []
+    vertical_spacing = HEX_SIZE * 1.5
+    horizontal_spacing = HEX_SIZE * math.sqrt(3)
+    center_row = (len(row_lengths) - 1) / 2
 
-    for row_index, row_len in enumerate(row_lengths):
-        r = row_index - center_row
-        q_start = -row_len // 2
-        if row_len % 2 == 0:
-            q_start += 1
+    for row_index, row_length in enumerate(row_lengths):
+        row_width = (row_length - 1) * horizontal_spacing
+        y = (row_index - center_row) * vertical_spacing
 
-        for col_index in range(row_len):
-            axial_positions.append((q_start + col_index, r))
+        for col_index in range(row_length):
+            x = col_index * horizontal_spacing - row_width / 2
+            raw_positions.append((col_index, row_index, x, y, None))
 
-    return center_axial_positions(axial_positions)
+    return raw_positions
 
 
 def generate_archipelago_positions():
     rng = random.Random(22)
     island_centers = [(-5, -3), (4, -2), (-3, 3), (5, 3)]
     sizes = [13, 12, 10, 11]
-    coords = set()
+    land = set()
 
     for index, center in enumerate(island_centers):
         island = make_spiral_path(center[0], center[1], sizes[index], seed=100 + index)
-        for coord in island:
-            coords.add(coord)
+        land.update(island)
 
-        # Drobne poszarpanie brzegu wysp.
-        border = [coord for coord in coords if any(n not in coords for n in neighbors(*coord))]
+        border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
         for _ in range(3):
             if border:
                 q, r = rng.choice(border)
-                coords.add(rng.choice(neighbors(q, r)))
+                land.add(rng.choice(neighbors(q, r)))
 
-    return center_axial_positions(sorted(coords, key=lambda item: (item[1], item[0])))
+    return axial_set_to_positions(add_water_around_land(land))
 
 
 def generate_fractal_positions():
     rng = random.Random(33)
-    coords = set(make_spiral_path(0, 0, 58, seed=33))
+    land = set(make_spiral_path(0, 0, 58, seed=33))
 
-    # Kilka dodatkowych odnog, zeby powstaly nieregularne zawijance.
-    starts = rng.sample(list(coords), 5)
+    starts = rng.sample(list(land), 5)
     for index, start in enumerate(starts):
         branch = make_spiral_path(start[0], start[1], 10, seed=300 + index)
-        coords.update(branch)
+        land.update(branch)
 
-    # Wycinamy kilka dziur, zeby mapa nie byla idealnie pelna.
-    candidates = [coord for coord in coords if len([n for n in neighbors(*coord) if n in coords]) >= 4]
-    for coord in rng.sample(candidates, min(8, len(candidates))):
+    candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) >= 4]
+    for coord in rng.sample(candidates, min(7, len(candidates))):
         if coord != (0, 0):
-            coords.remove(coord)
+            land.remove(coord)
 
-    return center_axial_positions(sorted(coords, key=lambda item: (item[1], item[0])))
+    return axial_set_to_positions(add_water_around_land(land))
 
 
 def generate_pangea_positions():
     rng = random.Random(44)
-    coords = set(make_spiral_path(0, 0, 72, seed=44))
+    land = set(make_spiral_path(0, 0, 72, seed=44))
 
-    # Pangea ma byc jednym duzym ladem, ale z zatokami i zawijancami na brzegach.
     for _ in range(45):
-        border = [coord for coord in coords if any(n not in coords for n in neighbors(*coord))]
+        border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
         q, r = rng.choice(border)
-        new_coord = rng.choice(neighbors(q, r))
-        coords.add(new_coord)
+        land.add(rng.choice(neighbors(q, r)))
 
-    # Lekko poszarpane wybrzeze.
-    edge_candidates = [coord for coord in coords if len([n for n in neighbors(*coord) if n in coords]) <= 2]
-    for coord in rng.sample(edge_candidates, min(10, len(edge_candidates))):
-        coords.remove(coord)
+    edge_candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) <= 2]
+    for coord in rng.sample(edge_candidates, min(8, len(edge_candidates))):
+        land.remove(coord)
 
-    return center_axial_positions(sorted(coords, key=lambda item: (item[1], item[0])))
+    return axial_set_to_positions(add_water_around_land(land))
 
 
 def generate_map_positions(map_key):
@@ -451,8 +514,8 @@ def generate_map_positions(map_key):
 
 
 def generate_map(map_key):
-    terrain_keys = list(TERRAINS.keys())
-    terrain_weights = [TERRAINS[key]["weight"] for key in terrain_keys]
+    land_keys = [key for key, terrain in TERRAINS.items() if terrain.get("land")]
+    land_weights = [TERRAINS[key]["weight"] for key in land_keys]
     random.seed(42)
 
     positions = generate_map_positions(map_key)
@@ -460,8 +523,12 @@ def generate_map(map_key):
     tiles = []
     tile_id = 1
 
-    for col, row, x, y in positions:
-        terrain_key = random.choices(terrain_keys, weights=terrain_weights, k=1)[0]
+    for col, row, x, y, terrain_override in positions:
+        if terrain_override:
+            terrain_key = terrain_override
+        else:
+            terrain_key = random.choices(land_keys, weights=land_weights, k=1)[0]
+
         tiles.append(HexTile(tile_id, col, row, x, y, terrain_key))
         tile_id += 1
 
@@ -536,7 +603,7 @@ def draw_map_select(screen, title_font, font, small_font, mouse_pos):
         button.draw(screen, font, mouse_pos)
 
     hint = small_font.render(
-        "Archipelag, fraktal i pangea generuja nieregularne zawijance kafelkowe.",
+        "Archipelag, fraktal i pangea maja wybrzeze oraz ocean wokol pustych pol.",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -560,20 +627,20 @@ def draw_multiplayer(screen, title_font, font, small_font, mouse_pos):
 
 
 def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key):
-    pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, 88))
+    pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, TOP_UI_HEIGHT))
 
     title = title_font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "ESC: menu | R: generuj ponownie | F11: fullscreen | Drag kamera | Scroll zoom | SPACJA: reset",
+        "ESC: menu | R: generuj ponownie | F11: fullscreen | Drag kamera | Scroll zoom | SPACJA: srodek",
         True,
         MUTED_TEXT_COLOR,
     )
     screen.blit(subtitle, (30, 55))
 
     info_y = SCREEN_HEIGHT - 52
-    pygame.draw.rect(screen, PANEL_COLOR, (0, SCREEN_HEIGHT - 70, SCREEN_WIDTH, 70))
+    pygame.draw.rect(screen, PANEL_COLOR, (0, SCREEN_HEIGHT - BOTTOM_UI_HEIGHT, SCREEN_WIDTH, BOTTOM_UI_HEIGHT))
 
     if hovered_tile:
         hover_text = font.render(
@@ -583,7 +650,7 @@ def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, 
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Mapa ma byc testem ukladu kafli i generatorow zawijancow.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Kamera startuje na srodku planszy. Puste miejsca map nieregularnych maja wybrzeze i ocean.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -591,7 +658,7 @@ def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, 
         True,
         MUTED_TEXT_COLOR,
     )
-    screen.blit(camera_text, (620, info_y))
+    screen.blit(camera_text, (760, info_y))
 
     if selected_tile:
         selected_text = font.render(
@@ -599,13 +666,19 @@ def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, 
             True,
             TEXT_COLOR,
         )
-        screen.blit(selected_text, (880, info_y))
+        screen.blit(selected_text, (1040, info_y))
 
 
 def create_window(fullscreen=False):
     if fullscreen:
         return pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     return pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+
+
+def create_tiles_for_map(map_key, camera):
+    tiles = generate_map(map_key)
+    camera.center_on_tiles(tiles)
+    return tiles
 
 
 # =========================
@@ -631,7 +704,7 @@ def main():
 
     game_state = GAME_STATE_MENU
     current_map_key = "rosette8"
-    tiles = generate_map(current_map_key)
+    tiles = create_tiles_for_map(current_map_key, camera)
     selected_tile = None
     running = True
 
@@ -662,7 +735,7 @@ def main():
                 SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, event.h)
                 screen = create_window(fullscreen)
                 if game_state == GAME_STATE_GAME:
-                    tiles = generate_map(current_map_key)
+                    tiles = create_tiles_for_map(current_map_key, camera)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -675,11 +748,11 @@ def main():
                         running = False
 
                 if event.key == pygame.K_r and game_state == GAME_STATE_GAME:
-                    tiles = generate_map(current_map_key)
+                    tiles = create_tiles_for_map(current_map_key, camera)
                     selected_tile = None
 
                 if event.key == pygame.K_SPACE and game_state == GAME_STATE_GAME:
-                    camera.reset()
+                    camera.center_on_tiles(tiles)
 
                 if event.key == pygame.K_F11:
                     fullscreen = not fullscreen
@@ -692,8 +765,7 @@ def main():
                         screen = create_window(fullscreen)
 
                     if game_state == GAME_STATE_GAME:
-                        tiles = generate_map(current_map_key)
-                        camera.reset()
+                        tiles = create_tiles_for_map(current_map_key, camera)
 
             if event.type == pygame.MOUSEWHEEL and game_state == GAME_STATE_GAME:
                 if mouse_in_window:
@@ -737,9 +809,8 @@ def main():
                                     game_state = GAME_STATE_MENU
                                 else:
                                     current_map_key = button.action
-                                    tiles = generate_map(current_map_key)
+                                    tiles = create_tiles_for_map(current_map_key, camera)
                                     selected_tile = None
-                                    camera.reset()
                                     game_state = GAME_STATE_GAME
 
                             elif game_state == GAME_STATE_MULTIPLAYER:
