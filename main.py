@@ -156,16 +156,28 @@ class Camera:
     def apply(self, x, y):
         return x + self.x, y + self.y
 
-    def update(self, mouse_pos, keys):
+    def update(self, mouse_pos, keys, mouse_in_window):
+        # Gdy kursor wyjdzie poza okno pygame, kamera przestaje jechac.
+        # Klawiatura dalej dziala, jesli okno gry ma fokus.
         mouse_x, mouse_y = mouse_pos
 
-        if mouse_x <= CAMERA_EDGE_SIZE or keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        keyboard_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
+        keyboard_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
+        keyboard_up = keys[pygame.K_UP] or keys[pygame.K_w]
+        keyboard_down = keys[pygame.K_DOWN] or keys[pygame.K_s]
+
+        mouse_left = mouse_in_window and mouse_x <= CAMERA_EDGE_SIZE
+        mouse_right = mouse_in_window and mouse_x >= SCREEN_WIDTH - CAMERA_EDGE_SIZE
+        mouse_up = mouse_in_window and mouse_y <= CAMERA_EDGE_SIZE
+        mouse_down = mouse_in_window and mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE
+
+        if mouse_left or keyboard_left:
             self.x += CAMERA_SPEED
-        if mouse_x >= SCREEN_WIDTH - CAMERA_EDGE_SIZE or keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        if mouse_right or keyboard_right:
             self.x -= CAMERA_SPEED
-        if mouse_y <= CAMERA_EDGE_SIZE or keys[pygame.K_UP] or keys[pygame.K_w]:
+        if mouse_up or keyboard_up:
             self.y += CAMERA_SPEED
-        if mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE or keys[pygame.K_DOWN] or keys[pygame.K_s]:
+        if mouse_down or keyboard_down:
             self.y -= CAMERA_SPEED
 
 
@@ -261,7 +273,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Ruch kamery: kursor przy krawedzi ekranu / WASD / strzalki | LPM: wybierz | R: losuj | ESC: zamknij",
+        "Ruch kamery: kursor przy krawedzi okna / WASD / strzalki | SPACJA: reset | ESC: zamknij",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -317,14 +329,16 @@ def main():
     while running:
         mouse_pos = pygame.mouse.get_pos()
         keys = pygame.key.get_pressed()
-        camera.update(mouse_pos, keys)
+        mouse_in_window = pygame.mouse.get_focused()
+        camera.update(mouse_pos, keys, mouse_in_window)
 
         hovered_tile = None
 
-        for tile in tiles:
-            if tile.contains_point(mouse_pos, camera):
-                hovered_tile = tile
-                break
+        if mouse_in_window:
+            for tile in tiles:
+                if tile.contains_point(mouse_pos, camera):
+                    hovered_tile = tile
+                    break
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
