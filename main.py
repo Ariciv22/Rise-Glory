@@ -15,13 +15,18 @@ FPS = 60
 # Uklad jak w Catanie: 3 / 4 / 5 / 4 / 3, razem 19 heksow.
 CATAN_ROW_LENGTHS = [3, 4, 5, 4, 3]
 
-# Wiekszy HEX_SIZE = przyblizona kamera i lepiej widoczne kafelki.
+# Bazowy rozmiar kafla. Zoom kamery powieksza/pomniejsza go scrollem.
 HEX_SIZE = 86
 
 # Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
 CAMERA_EDGE_SIZE = 70
 CAMERA_SPEED = 7
 DRAG_THRESHOLD = 4
+
+# Zoom kamery.
+ZOOM_STEP = 1.12
+MIN_ZOOM = 0.55
+MAX_ZOOM = 2.30
 
 BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
@@ -153,13 +158,36 @@ class Camera:
     def __init__(self):
         self.x = 0
         self.y = 0
+        self.zoom = 1.0
 
     def apply(self, x, y):
-        return x + self.x, y + self.y
+        return x * self.zoom + self.x, y * self.zoom + self.y
 
     def move(self, dx, dy):
         self.x += dx
         self.y += dy
+
+    def zoom_at(self, mouse_pos, zoom_factor):
+        old_zoom = self.zoom
+        new_zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom * zoom_factor))
+
+        if new_zoom == old_zoom:
+            return
+
+        mouse_x, mouse_y = mouse_pos
+
+        # Punkt mapy pod kursorem ma zostac pod kursorem po zmianie zoomu.
+        world_x = (mouse_x - self.x) / old_zoom
+        world_y = (mouse_y - self.y) / old_zoom
+
+        self.zoom = new_zoom
+        self.x = mouse_x - world_x * self.zoom
+        self.y = mouse_y - world_y * self.zoom
+
+    def reset(self):
+        self.x = 0
+        self.y = 0
+        self.zoom = 1.0
 
     def update(self, mouse_pos, keys, mouse_in_window, is_dragging):
         # Gdy kursor wyjdzie poza okno pygame, kamera przestaje jechac.
@@ -176,14 +204,16 @@ class Camera:
         mouse_up = mouse_in_window and not is_dragging and mouse_y <= CAMERA_EDGE_SIZE
         mouse_down = mouse_in_window and not is_dragging and mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE
 
+        speed = CAMERA_SPEED
+
         if mouse_left or keyboard_left:
-            self.x += CAMERA_SPEED
+            self.x += speed
         if mouse_right or keyboard_right:
-            self.x -= CAMERA_SPEED
+            self.x -= speed
         if mouse_up or keyboard_up:
-            self.y += CAMERA_SPEED
+            self.y += speed
         if mouse_down or keyboard_down:
-            self.y -= CAMERA_SPEED
+            self.y -= speed
 
 
 class HexTile:
@@ -206,16 +236,22 @@ class HexTile:
     def draw(self, screen, textures, camera, hovered=False, selected=False):
         texture = textures[self.terrain_key]
         screen_x, screen_y = self.screen_position(camera)
-        screen.blit(texture, (screen_x - HEX_SIZE, screen_y - HEX_SIZE))
+
+        scaled_size = max(1, int(HEX_SIZE * 2 * camera.zoom))
+        scaled_texture = pygame.transform.smoothscale(texture, (scaled_size, scaled_size))
+        screen.blit(scaled_texture, (screen_x - scaled_size / 2, screen_y - scaled_size / 2))
 
         points = self.screen_points(camera)
-        pygame.draw.polygon(screen, HEX_BORDER_COLOR, points, 2)
+        border_width = max(1, int(2 * camera.zoom))
+        highlight_width = max(2, int(5 * camera.zoom))
+
+        pygame.draw.polygon(screen, HEX_BORDER_COLOR, points, border_width)
 
         if hovered:
-            pygame.draw.polygon(screen, HEX_HOVER_COLOR, points, 5)
+            pygame.draw.polygon(screen, HEX_HOVER_COLOR, points, highlight_width)
 
         if selected:
-            pygame.draw.polygon(screen, HEX_SELECTED_COLOR, points, 5)
+            pygame.draw.polygon(screen, HEX_SELECTED_COLOR, points, highlight_width)
 
     def contains_point(self, mouse_pos, camera):
         return point_in_polygon(mouse_pos, self.screen_points(camera))
@@ -278,7 +314,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Ruch kamery: drag myszka / krawedz okna / WASD / strzalki | SPACJA: reset | ESC: zamknij",
+        "Ruch kamery: drag / scroll zoom / krawedz okna / WASD | SPACJA: reset | ESC: zamknij",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -295,11 +331,11 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Kliknij i przeciagaj myszka, zeby przesuwac kamere.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Scroll przybliza i oddala widok. Kliknij i przeciagaj, zeby przesuwac kamere.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
-        f"Kamera x={int(camera.x)} y={int(camera.y)}",
+        f"Kamera x={int(camera.x)} y={int(camera.y)} zoom={camera.zoom:.2f}",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -311,7 +347,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
             True,
             TEXT_COLOR,
         )
-        screen.blit(selected_text, (720, info_y))
+        screen.blit(selected_text, (760, info_y))
 
 
 def main():
@@ -361,8 +397,14 @@ def main():
                     tiles = generate_map()
                     selected_tile = None
                 if event.key == pygame.K_SPACE:
-                    camera.x = 0
-                    camera.y = 0
+                    camera.reset()
+
+            if event.type == pygame.MOUSEWHEEL:
+                if mouse_in_window:
+                    if event.y > 0:
+                        camera.zoom_at(mouse_pos, ZOOM_STEP)
+                    elif event.y < 0:
+                        camera.zoom_at(mouse_pos, 1 / ZOOM_STEP)
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if mouse_in_window:
