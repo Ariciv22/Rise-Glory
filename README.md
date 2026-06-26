@@ -1,4 +1,0 @@
-# Rise-Glory
-
-
-Pomoce
