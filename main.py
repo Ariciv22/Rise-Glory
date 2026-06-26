@@ -12,8 +12,9 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 900
 FPS = 60
 
-# Uklad jak w Catanie: 3 / 4 / 5 / 4 / 3, razem 19 heksow.
-CATAN_ROW_LENGTHS = [3, 4, 5, 4, 3]
+# Mapa 7x7 = 49 kafli.
+MAP_COLS = 7
+MAP_ROWS = 7
 
 # Wiekszy kafel = czytelniejsze grafiki.
 # Plansza nie musi cala miescic sie naraz, bo kamera ma drag i scroll.
@@ -264,23 +265,22 @@ class HexTile:
         return point_in_polygon(mouse_pos, self.screen_points(camera))
 
 
-def catan_positions():
+def grid_positions():
     positions = []
     vertical_spacing = HEX_SIZE * 1.5
     horizontal_spacing = HEX_SIZE * math.sqrt(3)
 
-    map_height = len(CATAN_ROW_LENGTHS) * vertical_spacing
+    map_width = (MAP_COLS - 1) * horizontal_spacing + HEX_SIZE * 2
+    map_height = (MAP_ROWS - 1) * vertical_spacing + HEX_SIZE * 2
 
-    # Plansza jest duza, wiec startowo widzimy jej centrum i gora nie wchodzi pod UI.
+    start_x = (SCREEN_WIDTH - map_width) / 2 + HEX_SIZE
     start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 90
 
-    for row_index, row_length in enumerate(CATAN_ROW_LENGTHS):
-        row_width = row_length * horizontal_spacing
-        start_x = (SCREEN_WIDTH - row_width) / 2 + HEX_SIZE * 0.85
-        y = start_y + row_index * vertical_spacing
-
-        for col_index in range(row_length):
-            x = start_x + col_index * horizontal_spacing
+    for row_index in range(MAP_ROWS):
+        for col_index in range(MAP_COLS):
+            # Co drugi rzad jest przesuniety o pol heksa, zeby siatka byla prawdziwie heksowa.
+            x = start_x + col_index * horizontal_spacing + (row_index % 2) * horizontal_spacing / 2
+            y = start_y + row_index * vertical_spacing
             positions.append((col_index, row_index, x, y))
 
     return positions
@@ -292,19 +292,13 @@ def generate_map():
 
     random.seed(42)
 
-    positions = catan_positions()
+    positions = grid_positions()
 
     tiles = []
     tile_id = 1
 
-    center_index = len(positions) // 2
-
-    for index, (col, row, x, y) in enumerate(positions):
-        if index == center_index:
-            terrain_key = "desert"
-        else:
-            terrain_key = random.choices(terrain_keys, weights=terrain_weights, k=1)[0]
-
+    for col, row, x, y in positions:
+        terrain_key = random.choices(terrain_keys, weights=terrain_weights, k=1)[0]
         tiles.append(HexTile(tile_id, col, row, x, y, terrain_key))
         tile_id += 1
 
@@ -318,11 +312,11 @@ def draw_background(screen):
 def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, 88))
 
-    title = title_font.render("Rise & Glory - mapa", True, TEXT_COLOR)
+    title = title_font.render("Rise & Glory - mapa 7x7", True, TEXT_COLOR)
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Duże kafle bez sztucznego wyostrzania | Drag / scroll zoom / WASD | SPACJA: reset",
+        "49 kafli | Drag / scroll zoom / WASD | SPACJA: reset",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -333,13 +327,13 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
 
     if hovered_tile:
         hover_text = font.render(
-            f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']}",
+            f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']} | kolumna {hovered_tile.board_col + 1}, rzad {hovered_tile.board_row + 1}",
             True,
             TEXT_COLOR,
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Kafle sa powiekszone. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Mapa 7x7. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -347,7 +341,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         True,
         MUTED_TEXT_COLOR,
     )
-    screen.blit(camera_text, (500, info_y))
+    screen.blit(camera_text, (540, info_y))
 
     if selected_tile:
         selected_text = font.render(
@@ -355,14 +349,14 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
             True,
             TEXT_COLOR,
         )
-        screen.blit(selected_text, (760, info_y))
+        screen.blit(selected_text, (800, info_y))
 
 
 def main():
     pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Rise & Glory - mapa")
+    pygame.display.set_caption("Rise & Glory - mapa 7x7")
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 18, bold=True)
