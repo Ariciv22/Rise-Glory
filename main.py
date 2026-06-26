@@ -24,9 +24,6 @@ HEX_SIZE = 118
 # Bez sztucznego wyostrzania, bo niszczylo wyglad grafik.
 TEXTURE_SIZE = 512
 
-# Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
-CAMERA_EDGE_SIZE = 70
-CAMERA_SPEED = 7
 DRAG_THRESHOLD = 4
 
 # Zoom kamery.
@@ -197,30 +194,6 @@ class Camera:
         self.y = -80
         self.zoom = DEFAULT_ZOOM
 
-    def update(self, mouse_pos, keys, mouse_in_window, is_dragging):
-        # Gdy kursor wyjdzie poza okno pygame, kamera przestaje jechac.
-        # Podczas przeciagania myszka wylaczamy auto-scroll z krawedzi.
-        mouse_x, mouse_y = mouse_pos
-
-        keyboard_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
-        keyboard_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
-        keyboard_up = keys[pygame.K_UP] or keys[pygame.K_w]
-        keyboard_down = keys[pygame.K_DOWN] or keys[pygame.K_s]
-
-        mouse_left = mouse_in_window and not is_dragging and mouse_x <= CAMERA_EDGE_SIZE
-        mouse_right = mouse_in_window and not is_dragging and mouse_x >= SCREEN_WIDTH - CAMERA_EDGE_SIZE
-        mouse_up = mouse_in_window and not is_dragging and mouse_y <= CAMERA_EDGE_SIZE
-        mouse_down = mouse_in_window and not is_dragging and mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE
-
-        if mouse_left or keyboard_left:
-            self.x += CAMERA_SPEED
-        if mouse_right or keyboard_right:
-            self.x -= CAMERA_SPEED
-        if mouse_up or keyboard_up:
-            self.y += CAMERA_SPEED
-        if mouse_down or keyboard_down:
-            self.y -= CAMERA_SPEED
-
 
 class HexTile:
     def __init__(self, tile_id, board_col, board_row, x, y, terrain_key):
@@ -270,7 +243,6 @@ def rosette_positions():
     vertical_spacing = HEX_SIZE * 1.5
     horizontal_spacing = HEX_SIZE * math.sqrt(3)
 
-    max_row_length = max(ROSETTE_ROW_LENGTHS)
     map_height = len(ROSETTE_ROW_LENGTHS) * vertical_spacing
 
     # Srodek rozety ustawiony na ekranie. Kazdy rzad jest centrowany osobno,
@@ -319,7 +291,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Uklad: 4 / 5 / 6 / 7 / 6 / 5 / 4 = 37 kafli | Drag / scroll zoom / WASD | SPACJA: reset",
+        "Uklad: 4 / 5 / 6 / 7 / 6 / 5 / 4 = 37 kafli | Drag / scroll zoom | SPACJA: reset",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -336,7 +308,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Mapa w rozecie jak Catan. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Kamera rusza sie tylko przez drag myszka albo zoom scrollem.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -379,9 +351,7 @@ def main():
 
     while running:
         mouse_pos = pygame.mouse.get_pos()
-        keys = pygame.key.get_pressed()
         mouse_in_window = pygame.mouse.get_focused()
-        camera.update(mouse_pos, keys, mouse_in_window, is_dragging)
 
         hovered_tile = None
 
