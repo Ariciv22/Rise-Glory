@@ -26,23 +26,29 @@ DEFAULT_ZOOM = 1.0
 
 TOP_UI_HEIGHT = 88
 BOTTOM_UI_HEIGHT = 70
+SIDE_PANEL_WIDTH = 320
 
 BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
+PANEL_DARK_COLOR = (18, 22, 26)
 BUTTON_COLOR = (42, 50, 58)
 BUTTON_HOVER_COLOR = (62, 74, 84)
+BUTTON_ACTIVE_COLOR = (74, 92, 72)
 BUTTON_BORDER_COLOR = (120, 140, 150)
 TEXT_COLOR = (235, 235, 235)
 MUTED_TEXT_COLOR = (180, 185, 190)
 HEX_BORDER_COLOR = (24, 24, 24)
 HEX_HOVER_COLOR = (255, 230, 120)
 HEX_SELECTED_COLOR = (120, 210, 255)
+CITY_COLOR = (245, 230, 170)
+CITY_BORDER_COLOR = (42, 32, 18)
 
 ROOT_DIR = Path(__file__).resolve().parent
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
 
 GAME_STATE_MENU = "menu"
 GAME_STATE_MAP_SELECT = "map_select"
+GAME_STATE_PLAYER_SELECT = "player_select"
 GAME_STATE_GAME = "game"
 GAME_STATE_MULTIPLAYER = "multiplayer"
 
@@ -54,63 +60,22 @@ MAP_OPTIONS = [
     ("pangea", "Pangea"),
 ]
 
+PLAYERS = [
+    {"id": 1, "name": "Gracz 1", "color": (215, 70, 55)},
+    {"id": 2, "name": "Gracz 2", "color": (65, 130, 220)},
+    {"id": 3, "name": "Gracz 3", "color": (70, 170, 85)},
+    {"id": 4, "name": "Gracz 4", "color": (220, 170, 55)},
+]
+
 TERRAINS = {
-    "plains": {
-        "name": "Rowniny",
-        "image": "rowniny.png",
-        "fallback": (112, 156, 76),
-        "weight": 30,
-        "land": True,
-    },
-    "forest": {
-        "name": "Las",
-        "image": "las.png",
-        "fallback": (49, 107, 62),
-        "weight": 22,
-        "land": True,
-    },
-    "hills": {
-        "name": "Wzgorza",
-        "image": "wzgorza.png",
-        "fallback": (139, 116, 73),
-        "weight": 18,
-        "land": True,
-    },
-    "mountain": {
-        "name": "Gory",
-        "image": "gory.png",
-        "fallback": (116, 116, 112),
-        "weight": 12,
-        "land": True,
-    },
-    "desert": {
-        "name": "Pustynia",
-        "image": "pustynia.png",
-        "fallback": (194, 165, 92),
-        "weight": 10,
-        "land": True,
-    },
-    "tundra": {
-        "name": "Tundra",
-        "image": "tundra.png",
-        "fallback": (145, 170, 154),
-        "weight": 8,
-        "land": True,
-    },
-    "coast": {
-        "name": "Wybrzeze",
-        "image": "wybrzeze.png",
-        "fallback": (56, 128, 164),
-        "weight": 0,
-        "land": False,
-    },
-    "ocean": {
-        "name": "Ocean",
-        "image": "ocean.png",
-        "fallback": (22, 64, 102),
-        "weight": 0,
-        "land": False,
-    },
+    "plains": {"name": "Rowniny", "image": "rowniny.png", "fallback": (112, 156, 76), "weight": 30, "land": True},
+    "forest": {"name": "Las", "image": "las.png", "fallback": (49, 107, 62), "weight": 22, "land": True},
+    "hills": {"name": "Wzgorza", "image": "wzgorza.png", "fallback": (139, 116, 73), "weight": 18, "land": True},
+    "mountain": {"name": "Gory", "image": "gory.png", "fallback": (116, 116, 112), "weight": 12, "land": True},
+    "desert": {"name": "Pustynia", "image": "pustynia.png", "fallback": (194, 165, 92), "weight": 10, "land": True},
+    "tundra": {"name": "Tundra", "image": "tundra.png", "fallback": (145, 170, 154), "weight": 8, "land": True},
+    "coast": {"name": "Wybrzeze", "image": "wybrzeze.png", "fallback": (56, 128, 164), "weight": 0, "land": False},
+    "ocean": {"name": "Ocean", "image": "ocean.png", "fallback": (22, 64, 102), "weight": 0, "land": False},
 }
 
 
@@ -120,14 +85,9 @@ TERRAINS = {
 
 def hex_corners(center_x, center_y, size):
     points = []
-
     for i in range(6):
-        angle_deg = 60 * i - 30
-        angle_rad = math.radians(angle_deg)
-        x = center_x + size * math.cos(angle_rad)
-        y = center_y + size * math.sin(angle_rad)
-        points.append((x, y))
-
+        angle_rad = math.radians(60 * i - 30)
+        points.append((center_x + size * math.cos(angle_rad), center_y + size * math.sin(angle_rad)))
     return points
 
 
@@ -135,38 +95,22 @@ def point_in_polygon(point, polygon):
     x, y = point
     inside = False
     j = len(polygon) - 1
-
     for i in range(len(polygon)):
         xi, yi = polygon[i]
         xj, yj = polygon[j]
-
-        intersects = ((yi > y) != (yj > y)) and (
-            x < (xj - xi) * (y - yi) / ((yj - yi) + 0.00001) + xi
-        )
-
+        intersects = ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / ((yj - yi) + 0.00001) + xi)
         if intersects:
             inside = not inside
-
         j = i
-
     return inside
 
 
 def axial_to_pixel(q, r):
-    x = HEX_SIZE * math.sqrt(3) * (q + r / 2)
-    y = HEX_SIZE * 1.5 * r
-    return x, y
+    return HEX_SIZE * math.sqrt(3) * (q + r / 2), HEX_SIZE * 1.5 * r
 
 
 def neighbors(q, r):
-    return [
-        (q + 1, r),
-        (q - 1, r),
-        (q, r + 1),
-        (q, r - 1),
-        (q + 1, r - 1),
-        (q - 1, r + 1),
-    ]
+    return [(q + 1, r), (q - 1, r), (q, r + 1), (q, r - 1), (q + 1, r - 1), (q - 1, r + 1)]
 
 
 def normalize_pixel_positions(raw_positions):
@@ -174,24 +118,16 @@ def normalize_pixel_positions(raw_positions):
     max_x = max(pos[2] for pos in raw_positions)
     min_y = min(pos[3] for pos in raw_positions)
     max_y = max(pos[3] for pos in raw_positions)
-
     center_x = (min_x + max_x) / 2
     center_y = (min_y + max_y) / 2
-
-    positions = []
-    for col, row, x, y, terrain_override in raw_positions:
-        positions.append((col, row, x - center_x, y - center_y, terrain_override))
-
-    return positions
+    return [(col, row, x - center_x, y - center_y, terrain) for col, row, x, y, terrain in raw_positions]
 
 
 def axial_set_to_positions(terrain_by_coord):
     raw_positions = []
-
     for q, r in sorted(terrain_by_coord.keys(), key=lambda item: (item[1], item[0])):
         x, y = axial_to_pixel(q, r)
         raw_positions.append((q, r, x, y, terrain_by_coord[q, r]))
-
     return normalize_pixel_positions(raw_positions)
 
 
@@ -201,20 +137,14 @@ def axial_set_to_positions(terrain_by_coord):
 
 def create_hex_texture(source_image):
     target = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
-
     scaled = pygame.transform.smoothscale(source_image, (TEXTURE_SIZE, TEXTURE_SIZE))
     target.blit(scaled, (0, 0))
-
     center = TEXTURE_SIZE / 2
     radius = TEXTURE_SIZE / 2 - 2
-    points = []
-    for x, y in hex_corners(center, center, radius):
-        points.append((int(x), int(y)))
-
+    points = [(int(x), int(y)) for x, y in hex_corners(center, center, radius)]
     mask = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
     pygame.draw.polygon(mask, (255, 255, 255, 255), points)
     target.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-
     return target
 
 
@@ -222,29 +152,20 @@ def create_fallback_texture(color):
     fallback = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
     points = hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2)
     pygame.draw.polygon(fallback, color, points)
-
-    pygame.draw.circle(
-        fallback,
-        tuple(min(255, channel + 18) for channel in color),
-        (TEXTURE_SIZE // 2, TEXTURE_SIZE // 2),
-        TEXTURE_SIZE // 4,
-    )
+    pygame.draw.circle(fallback, tuple(min(255, channel + 18) for channel in color), (TEXTURE_SIZE // 2, TEXTURE_SIZE // 2), TEXTURE_SIZE // 4)
     return fallback
 
 
 def load_terrain_textures():
     textures = {}
-
     for terrain_key, terrain in TERRAINS.items():
         image_path = GRAPHICS_DIR / terrain["image"]
-
         if image_path.exists():
             source = pygame.image.load(str(image_path)).convert_alpha()
             textures[terrain_key] = create_hex_texture(source)
         else:
             textures[terrain_key] = create_fallback_texture(terrain["fallback"])
             print(f"Brak grafiki: {image_path}. Uzywam koloru zastepczego.")
-
     return textures
 
 
@@ -268,14 +189,11 @@ class Camera:
     def zoom_at(self, mouse_pos, zoom_factor):
         old_zoom = self.zoom
         new_zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom * zoom_factor))
-
         if new_zoom == old_zoom:
             return
-
         mouse_x, mouse_y = mouse_pos
         world_x = (mouse_x - self.x) / old_zoom
         world_y = (mouse_y - self.y) / old_zoom
-
         self.zoom = new_zoom
         self.x = mouse_x - world_x * self.zoom
         self.y = mouse_y - world_y * self.zoom
@@ -284,24 +202,20 @@ class Camera:
         if not tiles:
             self.reset()
             return
-
         min_x = min(tile.x for tile in tiles) - HEX_SIZE
         max_x = max(tile.x for tile in tiles) + HEX_SIZE
         min_y = min(tile.y for tile in tiles) - HEX_SIZE
         max_y = max(tile.y for tile in tiles) + HEX_SIZE
-
         map_center_x = (min_x + max_x) / 2
         map_center_y = (min_y + max_y) / 2
-
-        target_x = SCREEN_WIDTH / 2
+        target_x = (SCREEN_WIDTH - SIDE_PANEL_WIDTH) / 2
         target_y = (TOP_UI_HEIGHT + (SCREEN_HEIGHT - BOTTOM_UI_HEIGHT)) / 2
-
         self.zoom = DEFAULT_ZOOM
         self.x = target_x - map_center_x * self.zoom
         self.y = target_y - map_center_y * self.zoom
 
     def reset(self):
-        self.x = SCREEN_WIDTH / 2
+        self.x = (SCREEN_WIDTH - SIDE_PANEL_WIDTH) / 2
         self.y = (TOP_UI_HEIGHT + (SCREEN_HEIGHT - BOTTOM_UI_HEIGHT)) / 2
         self.zoom = DEFAULT_ZOOM
 
@@ -312,15 +226,13 @@ class Button:
         self.action = action
         self.rect = pygame.Rect(rect)
 
-    def draw(self, screen, font, mouse_pos):
+    def draw(self, screen, font, mouse_pos, active=False):
         hovered = self.rect.collidepoint(mouse_pos)
-        color = BUTTON_HOVER_COLOR if hovered else BUTTON_COLOR
+        color = BUTTON_ACTIVE_COLOR if active else (BUTTON_HOVER_COLOR if hovered else BUTTON_COLOR)
         pygame.draw.rect(screen, color, self.rect, border_radius=12)
         pygame.draw.rect(screen, BUTTON_BORDER_COLOR, self.rect, 2, border_radius=12)
-
         label = font.render(self.text, True, TEXT_COLOR)
-        label_rect = label.get_rect(center=self.rect.center)
-        screen.blit(label, label_rect)
+        screen.blit(label, label.get_rect(center=self.rect.center))
 
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
@@ -336,6 +248,7 @@ class HexTile:
         self.terrain_key = terrain_key
         self.terrain = TERRAINS[terrain_key]
         self.base_points = hex_corners(x, y, HEX_SIZE)
+        self.city = None
 
     def screen_points(self, camera):
         return [camera.apply(x, y) for x, y in self.base_points]
@@ -343,25 +256,38 @@ class HexTile:
     def screen_position(self, camera):
         return camera.apply(self.x, self.y)
 
-    def draw(self, screen, textures, camera, hovered=False, selected=False):
+    def can_place_city(self):
+        return self.terrain.get("land") and self.terrain_key != "mountain" and self.city is None
+
+    def draw_city(self, screen, camera, font):
+        if not self.city:
+            return
+        screen_x, screen_y = self.screen_position(camera)
+        radius = max(10, int(17 * camera.zoom))
+        owner = self.city["player"]
+        pygame.draw.circle(screen, owner["color"], (int(screen_x), int(screen_y)), radius + 4)
+        pygame.draw.circle(screen, CITY_COLOR, (int(screen_x), int(screen_y)), radius)
+        pygame.draw.circle(screen, CITY_BORDER_COLOR, (int(screen_x), int(screen_y)), radius, max(2, int(3 * camera.zoom)))
+        label = font.render("M", True, CITY_BORDER_COLOR)
+        screen.blit(label, label.get_rect(center=(screen_x, screen_y)))
+
+    def draw(self, screen, textures, camera, font, hovered=False, selected=False, placement_mode=False):
         texture = textures[self.terrain_key]
         screen_x, screen_y = self.screen_position(camera)
         draw_size = max(1, int(HEX_SIZE * 2 * camera.zoom))
-
         tile_texture = pygame.transform.smoothscale(texture, (draw_size, draw_size))
         screen.blit(tile_texture, (screen_x - draw_size / 2, screen_y - draw_size / 2))
-
         points = self.screen_points(camera)
         border_width = max(1, int(2 * camera.zoom))
         highlight_width = max(2, int(5 * camera.zoom))
-
         pygame.draw.polygon(screen, HEX_BORDER_COLOR, points, border_width)
-
         if hovered:
             pygame.draw.polygon(screen, HEX_HOVER_COLOR, points, highlight_width)
-
         if selected:
             pygame.draw.polygon(screen, HEX_SELECTED_COLOR, points, highlight_width)
+        if placement_mode and self.can_place_city():
+            pygame.draw.polygon(screen, (120, 255, 150), points, max(1, int(3 * camera.zoom)))
+        self.draw_city(screen, camera, font)
 
     def contains_point(self, mouse_pos, camera):
         return point_in_polygon(mouse_pos, self.screen_points(camera))
@@ -378,13 +304,11 @@ def make_spiral_path(center_q, center_r, steps, seed=1):
     q, r = center_q, center_r
     direction_index = rng.randrange(6)
     directions = neighbors(0, 0)
-
     while len(coords) < steps:
         preferred = []
         for turn in [0, 1, -1, 2, -2, 3]:
             dq, dr = directions[(direction_index + turn) % 6]
             preferred.append((q + dq, r + dr, (direction_index + turn) % 6))
-
         moved = False
         for nq, nr, ndir in preferred:
             if (nq, nr) not in used:
@@ -394,12 +318,10 @@ def make_spiral_path(center_q, center_r, steps, seed=1):
                 coords.append((q, r))
                 moved = True
                 break
-
         if not moved:
             border = [coord for coord in used if any(n not in used for n in neighbors(*coord))]
             q, r = rng.choice(border)
             direction_index = rng.randrange(6)
-
     return coords
 
 
@@ -409,36 +331,27 @@ def sorted_by_center(coords):
 
 def add_water_around_land(land_coords, max_tiles=MAX_MAP_TILES):
     land_coords = set(land_coords)
-
     if len(land_coords) > max_tiles:
         land_coords = set(sorted_by_center(land_coords)[:max_tiles])
-
-    terrain_by_coord = {}
-    for coord in land_coords:
-        terrain_by_coord[coord] = None
-
+    terrain_by_coord = {coord: None for coord in land_coords}
     coast_coords = set()
     for q, r in land_coords:
         for neighbor in neighbors(q, r):
             if neighbor not in land_coords:
                 coast_coords.add(neighbor)
-
     for coord in sorted_by_center(coast_coords):
         if len(terrain_by_coord) >= max_tiles:
             return terrain_by_coord
         terrain_by_coord[coord] = "coast"
-
     ocean_coords = set()
     for q, r in coast_coords:
         for neighbor in neighbors(q, r):
             if neighbor not in land_coords and neighbor not in coast_coords:
                 ocean_coords.add(neighbor)
-
     for coord in sorted_by_center(ocean_coords):
         if len(terrain_by_coord) >= max_tiles:
             return terrain_by_coord
         terrain_by_coord[coord] = "ocean"
-
     return terrain_by_coord
 
 
@@ -447,15 +360,12 @@ def generate_rosette_rows(row_lengths):
     vertical_spacing = HEX_SIZE * 1.5
     horizontal_spacing = HEX_SIZE * math.sqrt(3)
     center_row = (len(row_lengths) - 1) / 2
-
     for row_index, row_length in enumerate(row_lengths):
         row_width = (row_length - 1) * horizontal_spacing
         y = (row_index - center_row) * vertical_spacing
-
         for col_index in range(row_length):
             x = col_index * horizontal_spacing - row_width / 2
             raw_positions.append((col_index, row_index, x, y, None))
-
     return raw_positions
 
 
@@ -464,69 +374,54 @@ def generate_archipelago_positions():
     island_centers = [(-4, -3), (4, -2), (-3, 3), (4, 3)]
     sizes = [6, 6, 5, 5]
     land = set()
-
     for index, center in enumerate(island_centers):
         island = make_spiral_path(center[0], center[1], sizes[index], seed=100 + index)
         land.update(island)
-
         border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
-        for _ in range(1):
-            if border:
-                q, r = rng.choice(border)
-                land.add(rng.choice(neighbors(q, r)))
-
+        if border:
+            q, r = rng.choice(border)
+            land.add(rng.choice(neighbors(q, r)))
     return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
 
 
 def generate_fractal_positions():
     rng = random.Random(33)
     land = set(make_spiral_path(0, 0, 34, seed=33))
-
     starts = rng.sample(list(land), 3)
     for index, start in enumerate(starts):
         branch = make_spiral_path(start[0], start[1], 5, seed=300 + index)
         land.update(branch)
-
     candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) >= 4]
     for coord in rng.sample(candidates, min(4, len(candidates))):
         if coord != (0, 0):
             land.remove(coord)
-
     return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
 
 
 def generate_pangea_positions():
     rng = random.Random(44)
     land = set(make_spiral_path(0, 0, 38, seed=44))
-
     for _ in range(8):
         border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
         q, r = rng.choice(border)
         land.add(rng.choice(neighbors(q, r)))
-
     edge_candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) <= 2]
     for coord in rng.sample(edge_candidates, min(5, len(edge_candidates))):
         land.remove(coord)
-
     return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
 
 
 def generate_map_positions(map_key):
     if map_key == "catan":
         return generate_rosette_rows([3, 4, 5, 4, 3])
-
     if map_key == "rosette8":
         return generate_rosette_rows([4, 5, 6, 7, 8, 7, 6, 5, 4])
-
     if map_key == "archipelago":
         return generate_archipelago_positions()
-
     if map_key == "fractal":
         return generate_fractal_positions()
-
     if map_key == "pangea":
         return generate_pangea_positions()
-
     return generate_rosette_rows([4, 5, 6, 7, 8, 7, 6, 5, 4])
 
 
@@ -534,24 +429,13 @@ def generate_map(map_key):
     land_keys = [key for key, terrain in TERRAINS.items() if terrain.get("land")]
     land_weights = [TERRAINS[key]["weight"] for key in land_keys]
     random.seed(42)
-
     positions = generate_map_positions(map_key)
-
     if len(positions) > MAX_MAP_TILES:
         positions = positions[:MAX_MAP_TILES]
-
     tiles = []
-    tile_id = 1
-
-    for col, row, x, y, terrain_override in positions:
-        if terrain_override:
-            terrain_key = terrain_override
-        else:
-            terrain_key = random.choices(land_keys, weights=land_weights, k=1)[0]
-
+    for tile_id, (col, row, x, y, terrain_override) in enumerate(positions, start=1):
+        terrain_key = terrain_override or random.choices(land_keys, weights=land_weights, k=1)[0]
         tiles.append(HexTile(tile_id, col, row, x, y, terrain_key))
-        tile_id += 1
-
     return tiles
 
 
@@ -573,120 +457,158 @@ def draw_background(screen):
 def build_vertical_buttons(items, start_y, button_width=360, button_height=64, gap=18):
     buttons = []
     x = SCREEN_WIDTH / 2 - button_width / 2
-
     for index, (text, action) in enumerate(items):
         y = start_y + index * (button_height + gap)
         buttons.append(Button(text, action, (x, y, button_width, button_height)))
-
     return buttons
 
 
 def draw_title(screen, title_font, subtitle_font, title, subtitle):
     title_surface = title_font.render(title, True, TEXT_COLOR)
-    title_rect = title_surface.get_rect(center=(SCREEN_WIDTH / 2, 170))
-    screen.blit(title_surface, title_rect)
-
+    screen.blit(title_surface, title_surface.get_rect(center=(SCREEN_WIDTH / 2, 170)))
     subtitle_surface = subtitle_font.render(subtitle, True, MUTED_TEXT_COLOR)
-    subtitle_rect = subtitle_surface.get_rect(center=(SCREEN_WIDTH / 2, 220))
-    screen.blit(subtitle_surface, subtitle_rect)
+    screen.blit(subtitle_surface, subtitle_surface.get_rect(center=(SCREEN_WIDTH / 2, 220)))
 
 
 def draw_menu(screen, title_font, font, small_font, mouse_pos):
     draw_background(screen)
     draw_title(screen, title_font, font, "Rise & Glory", "Strategiczna gra heksowa")
-
-    items = [
-        ("Nowa gra", "new_game"),
-        ("Multiplayer", "multiplayer"),
-        ("Wyjscie", "exit"),
-    ]
-    buttons = build_vertical_buttons(items, 310)
-
+    buttons = build_vertical_buttons([("Nowa gra", "new_game"), ("Multiplayer", "multiplayer"), ("Wyjscie", "exit")], 310)
     for button in buttons:
         button.draw(screen, font, mouse_pos)
-
     hint = small_font.render("Wybierz opcje z menu", True, MUTED_TEXT_COLOR)
     screen.blit(hint, hint.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 90)))
-
     return buttons
 
 
 def draw_map_select(screen, title_font, font, small_font, mouse_pos):
     draw_background(screen)
     draw_title(screen, title_font, font, "Nowa gra", "Wybierz typ mapy")
-
     items = [(name, key) for key, name in MAP_OPTIONS]
     items.append(("Powrot", "back"))
     buttons = build_vertical_buttons(items, 290, button_width=420, button_height=58, gap=14)
-
     for button in buttons:
         button.draw(screen, font, mouse_pos)
-
-    hint = small_font.render(
-        "Kazdy generator ma maksymalnie 64 kafle, czyli limit 8x8.",
-        True,
-        MUTED_TEXT_COLOR,
-    )
+    hint = small_font.render("Kazdy generator ma maksymalnie 64 kafle, czyli limit 8x8.", True, MUTED_TEXT_COLOR)
     screen.blit(hint, hint.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80)))
+    return buttons
 
+
+def draw_player_select(screen, title_font, font, small_font, mouse_pos):
+    draw_background(screen)
+    draw_title(screen, title_font, font, "Wybierz gracza", "Na razie wybieramy kolor i wlasciciela pierwszych miast")
+    items = [(player["name"], player["id"]) for player in PLAYERS]
+    items.append(("Powrot", "back"))
+    buttons = build_vertical_buttons(items, 300, button_width=420, button_height=58, gap=14)
+    for button in buttons:
+        button.draw(screen, font, mouse_pos)
+        if isinstance(button.action, int):
+            player = PLAYERS[button.action - 1]
+            pygame.draw.circle(screen, player["color"], (button.rect.left + 34, button.rect.centery), 12)
+    hint = small_font.render("Po starcie gry kliknij 'Zaloz miasto', a potem wybierz kafel ladowy.", True, MUTED_TEXT_COLOR)
+    screen.blit(hint, hint.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80)))
     return buttons
 
 
 def draw_multiplayer(screen, title_font, font, small_font, mouse_pos):
     draw_background(screen)
     draw_title(screen, title_font, font, "Multiplayer", "Tryb do dodania pozniej")
-
     info = small_font.render("Na razie zostawilem ekran jako placeholder.", True, MUTED_TEXT_COLOR)
     screen.blit(info, info.get_rect(center=(SCREEN_WIDTH / 2, 310)))
-
     buttons = build_vertical_buttons([("Powrot", "back")], 390)
     for button in buttons:
         button.draw(screen, font, mouse_pos)
+    return buttons
+
+
+def draw_side_panel(screen, font, small_font, mouse_pos, current_player, players, selected_tile, placement_mode, city_count):
+    panel_x = SCREEN_WIDTH - SIDE_PANEL_WIDTH
+    pygame.draw.rect(screen, PANEL_DARK_COLOR, (panel_x, TOP_UI_HEIGHT, SIDE_PANEL_WIDTH, SCREEN_HEIGHT - TOP_UI_HEIGHT - BOTTOM_UI_HEIGHT))
+    pygame.draw.line(screen, BUTTON_BORDER_COLOR, (panel_x, TOP_UI_HEIGHT), (panel_x, SCREEN_HEIGHT - BOTTOM_UI_HEIGHT), 2)
+
+    y = TOP_UI_HEIGHT + 24
+    title = font.render("Panel gracza", True, TEXT_COLOR)
+    screen.blit(title, (panel_x + 24, y))
+    y += 48
+
+    active_label = small_font.render("Aktualny gracz:", True, MUTED_TEXT_COLOR)
+    screen.blit(active_label, (panel_x + 24, y))
+    y += 28
+
+    pygame.draw.circle(screen, current_player["color"], (panel_x + 40, y + 10), 12)
+    player_name = font.render(current_player["name"], True, TEXT_COLOR)
+    screen.blit(player_name, (panel_x + 62, y - 4))
+    y += 50
+
+    city_label = small_font.render(f"Miasta na mapie: {city_count}", True, MUTED_TEXT_COLOR)
+    screen.blit(city_label, (panel_x + 24, y))
+    y += 38
+
+    buttons = [
+        Button("Zaloz miasto", "place_city", (panel_x + 24, y, SIDE_PANEL_WIDTH - 48, 48)),
+        Button("Nastepny gracz", "next_player", (panel_x + 24, y + 60, SIDE_PANEL_WIDTH - 48, 48)),
+        Button("Anuluj akcje", "cancel_action", (panel_x + 24, y + 120, SIDE_PANEL_WIDTH - 48, 48)),
+    ]
+
+    for button in buttons:
+        button.draw(screen, small_font, mouse_pos, active=(placement_mode and button.action == "place_city"))
+
+    y += 195
+    selected_title = small_font.render("Wybrany kafel:", True, MUTED_TEXT_COLOR)
+    screen.blit(selected_title, (panel_x + 24, y))
+    y += 28
+
+    if selected_tile:
+        terrain_text = font.render(selected_tile.terrain["name"], True, TEXT_COLOR)
+        screen.blit(terrain_text, (panel_x + 24, y))
+        y += 30
+        status = "Mozna zalozyc miasto" if selected_tile.can_place_city() else "Nie mozna zalozyc miasta"
+        status_text = small_font.render(status, True, TEXT_COLOR if selected_tile.can_place_city() else MUTED_TEXT_COLOR)
+        screen.blit(status_text, (panel_x + 24, y))
+        y += 30
+        if selected_tile.city:
+            owner_text = small_font.render(f"Miasto: {selected_tile.city['name']} ({selected_tile.city['player']['name']})", True, TEXT_COLOR)
+            screen.blit(owner_text, (panel_x + 24, y))
+    else:
+        none_text = small_font.render("Kliknij kafel na mapie.", True, MUTED_TEXT_COLOR)
+        screen.blit(none_text, (panel_x + 24, y))
+
+    y = SCREEN_HEIGHT - BOTTOM_UI_HEIGHT - 110
+    help_lines = [
+        "Tryb miasta:",
+        "1. Kliknij Zaloz miasto",
+        "2. Kliknij kafel ladowy",
+        "3. Miasto pojawi sie na mapie",
+    ]
+    for line in help_lines:
+        text = small_font.render(line, True, MUTED_TEXT_COLOR)
+        screen.blit(text, (panel_x + 24, y))
+        y += 22
 
     return buttons
 
 
-def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key, tile_count):
+def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key, tile_count, current_player, placement_mode):
     pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, TOP_UI_HEIGHT))
-
     title = title_font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
     screen.blit(title, (28, 18))
-
-    subtitle = font.render(
-        f"Kafle: {tile_count}/{MAX_MAP_TILES} | ESC: menu | R: generuj ponownie | F11: fullscreen | Drag kamera | Scroll zoom | SPACJA: srodek",
-        True,
-        MUTED_TEXT_COLOR,
-    )
+    mode = " | TRYB: zakladanie miasta" if placement_mode else ""
+    subtitle = font.render(f"Kafle: {tile_count}/{MAX_MAP_TILES} | Gracz: {current_player['name']}{mode} | ESC: menu | R: generuj | F11 | Drag | Scroll | SPACJA", True, MUTED_TEXT_COLOR)
     screen.blit(subtitle, (30, 55))
 
     info_y = SCREEN_HEIGHT - 52
     pygame.draw.rect(screen, PANEL_COLOR, (0, SCREEN_HEIGHT - BOTTOM_UI_HEIGHT, SCREEN_WIDTH, BOTTOM_UI_HEIGHT))
-
     if hovered_tile:
-        hover_text = font.render(
-            f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']}",
-            True,
-            TEXT_COLOR,
-        )
-        screen.blit(hover_text, (30, info_y))
+        text = f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']}"
+        if placement_mode:
+            text += " | kliknij, aby zalozyc miasto" if hovered_tile.can_place_city() else " | tutaj nie mozna zalozyc miasta"
+        hover_text = font.render(text, True, TEXT_COLOR)
     else:
-        hover_text = font.render("Mapy archipelag, fraktal i pangea sa ograniczone do maksymalnie 8x8 kafli.", True, MUTED_TEXT_COLOR)
-        screen.blit(hover_text, (30, info_y))
+        hover_text = font.render("Panel po prawej: wybor gracza i zakladanie miast.", True, MUTED_TEXT_COLOR)
+    screen.blit(hover_text, (30, info_y))
 
-    camera_text = font.render(
-        f"Kamera x={int(camera.x)} y={int(camera.y)} zoom={camera.zoom:.2f}",
-        True,
-        MUTED_TEXT_COLOR,
-    )
-    screen.blit(camera_text, (760, info_y))
-
-    if selected_tile:
-        selected_text = font.render(
-            f"Wybrany: heks {selected_tile.tile_id} | {selected_tile.terrain['name']}",
-            True,
-            TEXT_COLOR,
-        )
-        screen.blit(selected_text, (1040, info_y))
+    camera_text = font.render(f"Kamera x={int(camera.x)} y={int(camera.y)} zoom={camera.zoom:.2f}", True, MUTED_TEXT_COLOR)
+    screen.blit(camera_text, (800, info_y))
 
 
 def create_window(fullscreen=False):
@@ -701,15 +623,23 @@ def create_tiles_for_map(map_key, camera):
     return tiles
 
 
+def place_city_on_tile(tile, player, cities):
+    if not tile or not tile.can_place_city():
+        return False
+    city_number = len(cities) + 1
+    city = {"name": f"Miasto {city_number}", "player": player, "tile_id": tile.tile_id}
+    tile.city = city
+    cities.append(city)
+    return True
+
+
 # =========================
 # GLOWNA PETLA
 # =========================
 
 def main():
     global SCREEN_WIDTH, SCREEN_HEIGHT
-
     pygame.init()
-
     fullscreen = False
     screen = create_window(fullscreen)
     pygame.display.set_caption("Rise & Glory")
@@ -717,6 +647,7 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 20, bold=True)
     small_font = pygame.font.SysFont("arial", 17, bold=True)
+    city_font = pygame.font.SysFont("arial", 17, bold=True)
     title_font = pygame.font.SysFont("arial", 42, bold=True)
 
     textures = load_terrain_textures()
@@ -724,21 +655,25 @@ def main():
 
     game_state = GAME_STATE_MENU
     current_map_key = "rosette8"
+    current_player_index = 0
     tiles = create_tiles_for_map(current_map_key, camera)
+    cities = []
     selected_tile = None
+    placement_mode = False
     running = True
 
     is_dragging = False
     drag_moved = False
     drag_start_pos = (0, 0)
     last_mouse_pos = (0, 0)
-
     active_buttons = []
+    side_buttons = []
 
     while running:
         mouse_pos = pygame.mouse.get_pos()
         mouse_in_window = pygame.mouse.get_focused()
         hovered_tile = None
+        current_player = PLAYERS[current_player_index]
 
         if game_state == GAME_STATE_GAME and mouse_in_window and not is_dragging:
             for tile in tiles:
@@ -755,25 +690,31 @@ def main():
                 SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, event.h)
                 screen = create_window(fullscreen)
                 if game_state == GAME_STATE_GAME:
-                    tiles = create_tiles_for_map(current_map_key, camera)
+                    camera.center_on_tiles(tiles)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if game_state == GAME_STATE_GAME:
-                        game_state = GAME_STATE_MENU
-                        selected_tile = None
-                    elif game_state in [GAME_STATE_MAP_SELECT, GAME_STATE_MULTIPLAYER]:
+                        if placement_mode:
+                            placement_mode = False
+                        else:
+                            game_state = GAME_STATE_MENU
+                            selected_tile = None
+                    elif game_state in [GAME_STATE_MAP_SELECT, GAME_STATE_PLAYER_SELECT, GAME_STATE_MULTIPLAYER]:
                         game_state = GAME_STATE_MENU
                     else:
                         running = False
-
                 if event.key == pygame.K_r and game_state == GAME_STATE_GAME:
                     tiles = create_tiles_for_map(current_map_key, camera)
+                    cities = []
                     selected_tile = None
-
+                    placement_mode = False
                 if event.key == pygame.K_SPACE and game_state == GAME_STATE_GAME:
                     camera.center_on_tiles(tiles)
-
+                if event.key == pygame.K_TAB and game_state == GAME_STATE_GAME:
+                    current_player_index = (current_player_index + 1) % len(PLAYERS)
+                if event.key == pygame.K_c and game_state == GAME_STATE_GAME:
+                    placement_mode = True
                 if event.key == pygame.K_F11:
                     fullscreen = not fullscreen
                     if fullscreen:
@@ -783,37 +724,32 @@ def main():
                         SCREEN_WIDTH = 1600
                         SCREEN_HEIGHT = 1000
                         screen = create_window(fullscreen)
-
                     if game_state == GAME_STATE_GAME:
-                        tiles = create_tiles_for_map(current_map_key, camera)
+                        camera.center_on_tiles(tiles)
 
-            if event.type == pygame.MOUSEWHEEL and game_state == GAME_STATE_GAME:
-                if mouse_in_window:
-                    if event.y > 0:
-                        camera.zoom_at(mouse_pos, ZOOM_STEP)
-                    elif event.y < 0:
-                        camera.zoom_at(mouse_pos, 1 / ZOOM_STEP)
+            if event.type == pygame.MOUSEWHEEL and game_state == GAME_STATE_GAME and mouse_in_window:
+                camera.zoom_at(mouse_pos, ZOOM_STEP if event.y > 0 else 1 / ZOOM_STEP)
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if game_state == GAME_STATE_GAME and mouse_in_window:
-                    is_dragging = True
-                    drag_moved = False
-                    drag_start_pos = event.pos
-                    last_mouse_pos = event.pos
+                    panel_x = SCREEN_WIDTH - SIDE_PANEL_WIDTH
+                    if mouse_pos[0] < panel_x and mouse_pos[1] > TOP_UI_HEIGHT and mouse_pos[1] < SCREEN_HEIGHT - BOTTOM_UI_HEIGHT:
+                        is_dragging = True
+                        drag_moved = False
+                        drag_start_pos = event.pos
+                        last_mouse_pos = event.pos
 
             if event.type == pygame.MOUSEMOTION and is_dragging and game_state == GAME_STATE_GAME:
                 current_pos = event.pos
                 dx = current_pos[0] - last_mouse_pos[0]
                 dy = current_pos[1] - last_mouse_pos[1]
-
                 if abs(current_pos[0] - drag_start_pos[0]) > DRAG_THRESHOLD or abs(current_pos[1] - drag_start_pos[1]) > DRAG_THRESHOLD:
                     drag_moved = True
-
                 camera.move(dx, dy)
                 last_mouse_pos = current_pos
 
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                if game_state in [GAME_STATE_MENU, GAME_STATE_MAP_SELECT, GAME_STATE_MULTIPLAYER]:
+                if game_state in [GAME_STATE_MENU, GAME_STATE_MAP_SELECT, GAME_STATE_PLAYER_SELECT, GAME_STATE_MULTIPLAYER]:
                     for button in active_buttons:
                         if button.is_clicked(event.pos):
                             if game_state == GAME_STATE_MENU:
@@ -823,32 +759,50 @@ def main():
                                     game_state = GAME_STATE_MULTIPLAYER
                                 elif button.action == "exit":
                                     running = False
-
                             elif game_state == GAME_STATE_MAP_SELECT:
                                 if button.action == "back":
                                     game_state = GAME_STATE_MENU
                                 else:
                                     current_map_key = button.action
+                                    game_state = GAME_STATE_PLAYER_SELECT
+                            elif game_state == GAME_STATE_PLAYER_SELECT:
+                                if button.action == "back":
+                                    game_state = GAME_STATE_MAP_SELECT
+                                else:
+                                    current_player_index = int(button.action) - 1
                                     tiles = create_tiles_for_map(current_map_key, camera)
+                                    cities = []
                                     selected_tile = None
+                                    placement_mode = False
                                     game_state = GAME_STATE_GAME
-
                             elif game_state == GAME_STATE_MULTIPLAYER:
                                 if button.action == "back":
                                     game_state = GAME_STATE_MENU
                             break
 
                 elif game_state == GAME_STATE_GAME:
+                    was_dragging = is_dragging
                     is_dragging = False
+                    clicked_side_button = False
+                    for button in side_buttons:
+                        if button.is_clicked(event.pos):
+                            clicked_side_button = True
+                            if button.action == "place_city":
+                                placement_mode = True
+                            elif button.action == "next_player":
+                                current_player_index = (current_player_index + 1) % len(PLAYERS)
+                                placement_mode = False
+                            elif button.action == "cancel_action":
+                                placement_mode = False
+                            break
 
-                    if not drag_moved and mouse_in_window:
+                    if not clicked_side_button and not drag_moved and mouse_in_window and not was_dragging:
                         for tile in tiles:
                             if tile.contains_point(event.pos, camera):
                                 selected_tile = tile
-                                print(
-                                    f"Wybrano heks {selected_tile.tile_id}: "
-                                    f"{selected_tile.terrain['name']}"
-                                )
+                                if placement_mode:
+                                    if place_city_on_tile(tile, current_player, cities):
+                                        placement_mode = False
                                 break
 
         if not mouse_in_window:
@@ -856,27 +810,23 @@ def main():
 
         if game_state == GAME_STATE_MENU:
             active_buttons = draw_menu(screen, title_font, font, small_font, mouse_pos)
-
+            side_buttons = []
         elif game_state == GAME_STATE_MAP_SELECT:
             active_buttons = draw_map_select(screen, title_font, font, small_font, mouse_pos)
-
+            side_buttons = []
+        elif game_state == GAME_STATE_PLAYER_SELECT:
+            active_buttons = draw_player_select(screen, title_font, font, small_font, mouse_pos)
+            side_buttons = []
         elif game_state == GAME_STATE_MULTIPLAYER:
             active_buttons = draw_multiplayer(screen, title_font, font, small_font, mouse_pos)
-
+            side_buttons = []
         elif game_state == GAME_STATE_GAME:
             active_buttons = []
             draw_background(screen)
-
             for tile in tiles:
-                tile.draw(
-                    screen,
-                    textures,
-                    camera,
-                    hovered=(tile == hovered_tile),
-                    selected=(tile == selected_tile),
-                )
-
-            draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key, len(tiles))
+                tile.draw(screen, textures, camera, city_font, hovered=(tile == hovered_tile), selected=(tile == selected_tile), placement_mode=placement_mode)
+            draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key, len(tiles), current_player, placement_mode)
+            side_buttons = draw_side_panel(screen, font, small_font, mouse_pos, current_player, PLAYERS, selected_tile, placement_mode, len(cities))
 
         pygame.display.flip()
         clock.tick(FPS)
