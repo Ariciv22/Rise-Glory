@@ -22,6 +22,7 @@ HEX_SIZE = 104
 # Tekstury renderujemy z duzej jakosci i dopiero potem skalujemy do widoku.
 # To poprawia czytelnosc przy zoomie.
 TEXTURE_SIZE = 512
+SHARPEN_STRENGTH = 70
 
 # Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
 CAMERA_EDGE_SIZE = 70
@@ -119,10 +120,24 @@ def point_in_polygon(point, polygon):
     return inside
 
 
+def sharpen_surface(surface):
+    """
+    Proste wyostrzenie bez dodatkowych bibliotek.
+    Laplacian podbija krawedzie i detale tekstury.
+    """
+    edges = pygame.transform.laplacian(surface)
+    edges.set_alpha(SHARPEN_STRENGTH)
+
+    sharpened = surface.copy()
+    sharpened.blit(edges, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
+    return sharpened
+
+
 def create_hex_texture(source_image):
     target = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
 
     scaled = pygame.transform.smoothscale(source_image, (TEXTURE_SIZE, TEXTURE_SIZE))
+    scaled = sharpen_surface(scaled)
     target.blit(scaled, (0, 0))
 
     center = TEXTURE_SIZE / 2
@@ -323,7 +338,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Duże kafle + ostre tekstury | Drag / scroll zoom / WASD | SPACJA: reset",
+        "Duże kafle + wyostrzone tekstury | Drag / scroll zoom / WASD | SPACJA: reset",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -340,7 +355,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Kafle sa wieksze. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Kafle sa wieksze i wyostrzone. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
