@@ -17,12 +17,11 @@ CATAN_ROW_LENGTHS = [3, 4, 5, 4, 3]
 
 # Wiekszy kafel = czytelniejsze grafiki.
 # Plansza nie musi cala miescic sie naraz, bo kamera ma drag i scroll.
-HEX_SIZE = 104
+HEX_SIZE = 118
 
 # Tekstury renderujemy z duzej jakosci i dopiero potem skalujemy do widoku.
-# To poprawia czytelnosc przy zoomie.
+# Bez sztucznego wyostrzania, bo niszczylo wyglad grafik.
 TEXTURE_SIZE = 512
-SHARPEN_STRENGTH = 70
 
 # Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
 CAMERA_EDGE_SIZE = 70
@@ -31,8 +30,8 @@ DRAG_THRESHOLD = 4
 
 # Zoom kamery.
 ZOOM_STEP = 1.10
-MIN_ZOOM = 0.50
-MAX_ZOOM = 1.60
+MIN_ZOOM = 0.45
+MAX_ZOOM = 1.50
 DEFAULT_ZOOM = 1.0
 
 BACKGROUND_COLOR = (18, 22, 26)
@@ -120,24 +119,10 @@ def point_in_polygon(point, polygon):
     return inside
 
 
-def sharpen_surface(surface):
-    """
-    Proste wyostrzenie bez dodatkowych bibliotek.
-    Laplacian podbija krawedzie i detale tekstury.
-    """
-    edges = pygame.transform.laplacian(surface)
-    edges.set_alpha(SHARPEN_STRENGTH)
-
-    sharpened = surface.copy()
-    sharpened.blit(edges, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
-    return sharpened
-
-
 def create_hex_texture(source_image):
     target = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
 
     scaled = pygame.transform.smoothscale(source_image, (TEXTURE_SIZE, TEXTURE_SIZE))
-    scaled = sharpen_surface(scaled)
     target.blit(scaled, (0, 0))
 
     center = TEXTURE_SIZE / 2
@@ -179,7 +164,7 @@ def load_terrain_textures():
 class Camera:
     def __init__(self):
         self.x = 0
-        self.y = -35
+        self.y = -80
         self.zoom = DEFAULT_ZOOM
 
     def apply(self, x, y):
@@ -208,7 +193,7 @@ class Camera:
 
     def reset(self):
         self.x = 0
-        self.y = -35
+        self.y = -80
         self.zoom = DEFAULT_ZOOM
 
     def update(self, mouse_pos, keys, mouse_in_window, is_dragging):
@@ -259,8 +244,7 @@ class HexTile:
 
         draw_size = max(1, int(HEX_SIZE * 2 * camera.zoom))
 
-        # Skalujemy z bardzo duzej tekstury bazowej 512px, a nie z malego kafla.
-        # Dzieki temu szczegoly sa czytelniejsze po przyblizeniu.
+        # Skalujemy z duzej tekstury bazowej 512px, bez sztucznego wyostrzania.
         tile_texture = pygame.transform.smoothscale(texture, (draw_size, draw_size))
         screen.blit(tile_texture, (screen_x - draw_size / 2, screen_y - draw_size / 2))
 
@@ -288,7 +272,7 @@ def catan_positions():
     map_height = len(CATAN_ROW_LENGTHS) * vertical_spacing
 
     # Plansza jest duza, wiec startowo widzimy jej centrum i gora nie wchodzi pod UI.
-    start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 80
+    start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 90
 
     for row_index, row_length in enumerate(CATAN_ROW_LENGTHS):
         row_width = row_length * horizontal_spacing
@@ -338,7 +322,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Duże kafle + wyostrzone tekstury | Drag / scroll zoom / WASD | SPACJA: reset",
+        "Duże kafle bez sztucznego wyostrzania | Drag / scroll zoom / WASD | SPACJA: reset",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -355,7 +339,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Kafle sa wieksze i wyostrzone. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Kafle sa powiekszone. Przesun kamera drag albo oddal/przybliz scrollem.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
