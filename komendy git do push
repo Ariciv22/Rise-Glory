@@ -3,4 +3,4 @@ git commit -m "Opis zmian"
 git push
 
 
-git add -A; git commit -m "Aktualizacja"; git push
+git add -A; git commit -m "Aktualizacja lokalna z pc"; git push
