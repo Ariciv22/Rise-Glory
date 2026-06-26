@@ -12,9 +12,9 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 900
 FPS = 60
 
-# Rozeta jak w Catanie, tylko wieksza: 4 / 5 / 6 / 7 / 6 / 5 / 4.
-# Srodkowy rzad ma 7 kafli, razem 37 heksow.
-ROSETTE_ROW_LENGTHS = [4, 5, 6, 7, 6, 5, 4]
+# Rozeta jak w Catanie, tylko wieksza: 4 / 5 / 6 / 7 / 8 / 7 / 6 / 5 / 4.
+# Srodkowy rzad ma 8 kafli, razem 52 heksy.
+ROSETTE_ROW_LENGTHS = [4, 5, 6, 7, 8, 7, 6, 5, 4]
 
 # Wiekszy kafel = czytelniejsze grafiki.
 # Plansza nie musi cala miescic sie naraz, bo kamera ma drag i scroll.
@@ -287,11 +287,11 @@ def draw_background(screen):
 def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, 88))
 
-    title = title_font.render("Rise & Glory - rozeta 7", True, TEXT_COLOR)
+    title = title_font.render("Rise & Glory - rozeta 8", True, TEXT_COLOR)
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Uklad: 4 / 5 / 6 / 7 / 6 / 5 / 4 = 37 kafli | Drag / scroll zoom | SPACJA: reset",
+        "Uklad: 4 / 5 / 6 / 7 / 8 / 7 / 6 / 5 / 4 = 52 kafle | Drag / scroll zoom | SPACJA: reset",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -308,7 +308,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Kamera rusza sie tylko przez drag myszka albo zoom scrollem.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Rozeta 8. Kamera rusza sie tylko przez drag myszka albo zoom scrollem.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -331,7 +331,7 @@ def main():
     pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Rise & Glory - rozeta 7")
+    pygame.display.set_caption("Rise & Glory - rozeta 8")
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 18, bold=True)
