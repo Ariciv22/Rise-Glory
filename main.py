@@ -21,6 +21,7 @@ HEX_SIZE = 86
 # Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
 CAMERA_EDGE_SIZE = 70
 CAMERA_SPEED = 7
+DRAG_THRESHOLD = 4
 
 BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
@@ -156,9 +157,13 @@ class Camera:
     def apply(self, x, y):
         return x + self.x, y + self.y
 
-    def update(self, mouse_pos, keys, mouse_in_window):
+    def move(self, dx, dy):
+        self.x += dx
+        self.y += dy
+
+    def update(self, mouse_pos, keys, mouse_in_window, is_dragging):
         # Gdy kursor wyjdzie poza okno pygame, kamera przestaje jechac.
-        # Klawiatura dalej dziala, jesli okno gry ma fokus.
+        # Podczas przeciagania myszka wyłączamy auto-scroll z krawedzi.
         mouse_x, mouse_y = mouse_pos
 
         keyboard_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
@@ -166,10 +171,10 @@ class Camera:
         keyboard_up = keys[pygame.K_UP] or keys[pygame.K_w]
         keyboard_down = keys[pygame.K_DOWN] or keys[pygame.K_s]
 
-        mouse_left = mouse_in_window and mouse_x <= CAMERA_EDGE_SIZE
-        mouse_right = mouse_in_window and mouse_x >= SCREEN_WIDTH - CAMERA_EDGE_SIZE
-        mouse_up = mouse_in_window and mouse_y <= CAMERA_EDGE_SIZE
-        mouse_down = mouse_in_window and mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE
+        mouse_left = mouse_in_window and not is_dragging and mouse_x <= CAMERA_EDGE_SIZE
+        mouse_right = mouse_in_window and not is_dragging and mouse_x >= SCREEN_WIDTH - CAMERA_EDGE_SIZE
+        mouse_up = mouse_in_window and not is_dragging and mouse_y <= CAMERA_EDGE_SIZE
+        mouse_down = mouse_in_window and not is_dragging and mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE
 
         if mouse_left or keyboard_left:
             self.x += CAMERA_SPEED
@@ -273,7 +278,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Ruch kamery: kursor przy krawedzi okna / WASD / strzalki | SPACJA: reset | ESC: zamknij",
+        "Ruch kamery: drag myszka / krawedz okna / WASD / strzalki | SPACJA: reset | ESC: zamknij",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -290,7 +295,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Najedz myszka na heks, zeby zobaczyc informacje.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Kliknij i przeciagaj myszka, zeby przesuwac kamere.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -326,15 +331,20 @@ def main():
     selected_tile = None
     running = True
 
+    is_dragging = False
+    drag_moved = False
+    drag_start_pos = (0, 0)
+    last_mouse_pos = (0, 0)
+
     while running:
         mouse_pos = pygame.mouse.get_pos()
         keys = pygame.key.get_pressed()
         mouse_in_window = pygame.mouse.get_focused()
-        camera.update(mouse_pos, keys, mouse_in_window)
+        camera.update(mouse_pos, keys, mouse_in_window, is_dragging)
 
         hovered_tile = None
 
-        if mouse_in_window:
+        if mouse_in_window and not is_dragging:
             for tile in tiles:
                 if tile.contains_point(mouse_pos, camera):
                     hovered_tile = tile
@@ -355,12 +365,38 @@ def main():
                     camera.y = 0
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if hovered_tile:
-                    selected_tile = hovered_tile
-                    print(
-                        f"Wybrano heks {selected_tile.tile_id}: "
-                        f"{selected_tile.terrain['name']}"
-                    )
+                if mouse_in_window:
+                    is_dragging = True
+                    drag_moved = False
+                    drag_start_pos = event.pos
+                    last_mouse_pos = event.pos
+
+            if event.type == pygame.MOUSEMOTION and is_dragging:
+                current_pos = event.pos
+                dx = current_pos[0] - last_mouse_pos[0]
+                dy = current_pos[1] - last_mouse_pos[1]
+
+                if abs(current_pos[0] - drag_start_pos[0]) > DRAG_THRESHOLD or abs(current_pos[1] - drag_start_pos[1]) > DRAG_THRESHOLD:
+                    drag_moved = True
+
+                camera.move(dx, dy)
+                last_mouse_pos = current_pos
+
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                is_dragging = False
+
+                if not drag_moved and mouse_in_window:
+                    for tile in tiles:
+                        if tile.contains_point(event.pos, camera):
+                            selected_tile = tile
+                            print(
+                                f"Wybrano heks {selected_tile.tile_id}: "
+                                f"{selected_tile.terrain['name']}"
+                            )
+                            break
+
+        if not mouse_in_window:
+            is_dragging = False
 
         draw_background(screen)
 
