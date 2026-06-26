@@ -18,14 +18,17 @@ CATAN_ROW_LENGTHS = [3, 4, 5, 4, 3]
 # Wiekszy HEX_SIZE = przyblizona kamera i lepiej widoczne kafelki.
 HEX_SIZE = 86
 
-BACKGROUND_COLOR = (32, 76, 116)
+# Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
+CAMERA_EDGE_SIZE = 70
+CAMERA_SPEED = 7
+
+BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
 TEXT_COLOR = (235, 235, 235)
 MUTED_TEXT_COLOR = (180, 185, 190)
 HEX_BORDER_COLOR = (24, 24, 24)
 HEX_HOVER_COLOR = (255, 230, 120)
 HEX_SELECTED_COLOR = (120, 210, 255)
-WATER_COLOR = (38, 104, 158)
 
 ROOT_DIR = Path(__file__).resolve().parent
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
@@ -145,6 +148,27 @@ def load_terrain_textures():
     return textures
 
 
+class Camera:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+
+    def apply(self, x, y):
+        return x + self.x, y + self.y
+
+    def update(self, mouse_pos, keys):
+        mouse_x, mouse_y = mouse_pos
+
+        if mouse_x <= CAMERA_EDGE_SIZE or keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            self.x += CAMERA_SPEED
+        if mouse_x >= SCREEN_WIDTH - CAMERA_EDGE_SIZE or keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            self.x -= CAMERA_SPEED
+        if mouse_y <= CAMERA_EDGE_SIZE or keys[pygame.K_UP] or keys[pygame.K_w]:
+            self.y += CAMERA_SPEED
+        if mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE or keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            self.y -= CAMERA_SPEED
+
+
 class HexTile:
     def __init__(self, tile_id, board_col, board_row, x, y, terrain_key):
         self.tile_id = tile_id
@@ -154,22 +178,30 @@ class HexTile:
         self.y = y
         self.terrain_key = terrain_key
         self.terrain = TERRAINS[terrain_key]
-        self.points = hex_corners(x, y, HEX_SIZE)
+        self.base_points = hex_corners(x, y, HEX_SIZE)
 
-    def draw(self, screen, textures, hovered=False, selected=False):
+    def screen_points(self, camera):
+        return [camera.apply(x, y) for x, y in self.base_points]
+
+    def screen_position(self, camera):
+        return camera.apply(self.x, self.y)
+
+    def draw(self, screen, textures, camera, hovered=False, selected=False):
         texture = textures[self.terrain_key]
-        screen.blit(texture, (self.x - HEX_SIZE, self.y - HEX_SIZE))
+        screen_x, screen_y = self.screen_position(camera)
+        screen.blit(texture, (screen_x - HEX_SIZE, screen_y - HEX_SIZE))
 
-        pygame.draw.polygon(screen, HEX_BORDER_COLOR, self.points, 2)
+        points = self.screen_points(camera)
+        pygame.draw.polygon(screen, HEX_BORDER_COLOR, points, 2)
 
         if hovered:
-            pygame.draw.polygon(screen, HEX_HOVER_COLOR, self.points, 5)
+            pygame.draw.polygon(screen, HEX_HOVER_COLOR, points, 5)
 
         if selected:
-            pygame.draw.polygon(screen, HEX_SELECTED_COLOR, self.points, 5)
+            pygame.draw.polygon(screen, HEX_SELECTED_COLOR, points, 5)
 
-    def contains_point(self, mouse_pos):
-        return point_in_polygon(mouse_pos, self.points)
+    def contains_point(self, mouse_pos, camera):
+        return point_in_polygon(mouse_pos, self.screen_points(camera))
 
 
 def catan_positions():
@@ -179,7 +211,6 @@ def catan_positions():
 
     map_height = len(CATAN_ROW_LENGTHS) * vertical_spacing
 
-    # Wyzej na ekranie i mocniej przyblizone, ale nadal calosc widoczna.
     start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 20
 
     for row_index, row_length in enumerate(CATAN_ROW_LENGTHS):
@@ -205,7 +236,6 @@ def generate_map():
     tiles = []
     tile_id = 1
 
-    # Srodek mapy robimy jako pustynie, ale bez numerka.
     center_index = len(positions) // 2
 
     for index, (col, row, x, y) in enumerate(positions):
@@ -220,24 +250,18 @@ def generate_map():
     return tiles
 
 
-def draw_water_background(screen):
-    screen.fill(WATER_COLOR)
-
-    center_x = SCREEN_WIDTH / 2
-    center_y = SCREEN_HEIGHT / 2 + 40
-    island_border = hex_corners(center_x, center_y, 485)
-    pygame.draw.polygon(screen, (30, 92, 145), island_border)
-    pygame.draw.polygon(screen, (17, 63, 105), island_border, 5)
+def draw_background(screen):
+    screen.fill(BACKGROUND_COLOR)
 
 
-def draw_ui(screen, title_font, font, selected_tile, hovered_tile):
+def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, 88))
 
-    title = title_font.render("Rise & Glory - mapa w stylu Catan", True, TEXT_COLOR)
+    title = title_font.render("Rise & Glory - mapa", True, TEXT_COLOR)
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Przyblizona kamera | LPM: wybierz heks | R: losuj od nowa | ESC: zamknij",
+        "Ruch kamery: kursor przy krawedzi ekranu / WASD / strzalki | LPM: wybierz | R: losuj | ESC: zamknij",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -257,20 +281,27 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile):
         hover_text = font.render("Najedz myszka na heks, zeby zobaczyc informacje.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
+    camera_text = font.render(
+        f"Kamera x={int(camera.x)} y={int(camera.y)}",
+        True,
+        MUTED_TEXT_COLOR,
+    )
+    screen.blit(camera_text, (500, info_y))
+
     if selected_tile:
         selected_text = font.render(
             f"Wybrany: heks {selected_tile.tile_id} | {selected_tile.terrain['name']}",
             True,
             TEXT_COLOR,
         )
-        screen.blit(selected_text, (690, info_y))
+        screen.blit(selected_text, (720, info_y))
 
 
 def main():
     pygame.init()
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Rise & Glory - mapa Catan")
+    pygame.display.set_caption("Rise & Glory - mapa")
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 18, bold=True)
@@ -278,16 +309,20 @@ def main():
 
     textures = load_terrain_textures()
     tiles = generate_map()
+    camera = Camera()
 
     selected_tile = None
     running = True
 
     while running:
         mouse_pos = pygame.mouse.get_pos()
+        keys = pygame.key.get_pressed()
+        camera.update(mouse_pos, keys)
+
         hovered_tile = None
 
         for tile in tiles:
-            if tile.contains_point(mouse_pos):
+            if tile.contains_point(mouse_pos, camera):
                 hovered_tile = tile
                 break
 
@@ -301,6 +336,9 @@ def main():
                 if event.key == pygame.K_r:
                     tiles = generate_map()
                     selected_tile = None
+                if event.key == pygame.K_SPACE:
+                    camera.x = 0
+                    camera.y = 0
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if hovered_tile:
@@ -310,17 +348,18 @@ def main():
                         f"{selected_tile.terrain['name']}"
                     )
 
-        draw_water_background(screen)
+        draw_background(screen)
 
         for tile in tiles:
             tile.draw(
                 screen,
                 textures,
+                camera,
                 hovered=(tile == hovered_tile),
                 selected=(tile == selected_tile),
             )
 
-        draw_ui(screen, title_font, font, selected_tile, hovered_tile)
+        draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera)
 
         pygame.display.flip()
         clock.tick(FPS)
