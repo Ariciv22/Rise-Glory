@@ -15,8 +15,9 @@ FPS = 60
 # Uklad jak w Catanie: 3 / 4 / 5 / 4 / 3, razem 19 heksow.
 CATAN_ROW_LENGTHS = [3, 4, 5, 4, 3]
 
-# Bazowy rozmiar kafla. Zoom kamery powieksza/pomniejsza go scrollem.
-HEX_SIZE = 86
+# Mniejszy bazowy rozmiar = cala plansza miesci sie w kadrze bez skalowania.
+# Dzieki temu grafiki sa ostrzejsze przy domyslnym widoku.
+HEX_SIZE = 74
 
 # Ruch kamery po dojechaniu kursorem do krawedzi ekranu.
 CAMERA_EDGE_SIZE = 70
@@ -24,9 +25,10 @@ CAMERA_SPEED = 7
 DRAG_THRESHOLD = 4
 
 # Zoom kamery.
-ZOOM_STEP = 1.12
-MIN_ZOOM = 0.55
-MAX_ZOOM = 2.30
+ZOOM_STEP = 1.10
+MIN_ZOOM = 0.70
+MAX_ZOOM = 1.80
+DEFAULT_ZOOM = 1.0
 
 BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
@@ -157,8 +159,8 @@ def load_terrain_textures():
 class Camera:
     def __init__(self):
         self.x = 0
-        self.y = 0
-        self.zoom = 1.0
+        self.y = 45
+        self.zoom = DEFAULT_ZOOM
 
     def apply(self, x, y):
         return x * self.zoom + self.x, y * self.zoom + self.y
@@ -186,12 +188,12 @@ class Camera:
 
     def reset(self):
         self.x = 0
-        self.y = 0
-        self.zoom = 1.0
+        self.y = 45
+        self.zoom = DEFAULT_ZOOM
 
     def update(self, mouse_pos, keys, mouse_in_window, is_dragging):
         # Gdy kursor wyjdzie poza okno pygame, kamera przestaje jechac.
-        # Podczas przeciagania myszka wyłączamy auto-scroll z krawedzi.
+        # Podczas przeciagania myszka wylaczamy auto-scroll z krawedzi.
         mouse_x, mouse_y = mouse_pos
 
         keyboard_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
@@ -204,16 +206,14 @@ class Camera:
         mouse_up = mouse_in_window and not is_dragging and mouse_y <= CAMERA_EDGE_SIZE
         mouse_down = mouse_in_window and not is_dragging and mouse_y >= SCREEN_HEIGHT - CAMERA_EDGE_SIZE
 
-        speed = CAMERA_SPEED
-
         if mouse_left or keyboard_left:
-            self.x += speed
+            self.x += CAMERA_SPEED
         if mouse_right or keyboard_right:
-            self.x -= speed
+            self.x -= CAMERA_SPEED
         if mouse_up or keyboard_up:
-            self.y += speed
+            self.y += CAMERA_SPEED
         if mouse_down or keyboard_down:
-            self.y -= speed
+            self.y -= CAMERA_SPEED
 
 
 class HexTile:
@@ -237,9 +237,18 @@ class HexTile:
         texture = textures[self.terrain_key]
         screen_x, screen_y = self.screen_position(camera)
 
-        scaled_size = max(1, int(HEX_SIZE * 2 * camera.zoom))
-        scaled_texture = pygame.transform.smoothscale(texture, (scaled_size, scaled_size))
-        screen.blit(scaled_texture, (screen_x - scaled_size / 2, screen_y - scaled_size / 2))
+        base_size = HEX_SIZE * 2
+        scaled_size = max(1, int(base_size * camera.zoom))
+
+        # Przy zoomie 1.0 nie skalujemy tekstury ponownie, zeby nie tracic ostrosci.
+        if abs(camera.zoom - 1.0) < 0.01:
+            tile_texture = texture
+            draw_size = base_size
+        else:
+            tile_texture = pygame.transform.smoothscale(texture, (scaled_size, scaled_size))
+            draw_size = scaled_size
+
+        screen.blit(tile_texture, (screen_x - draw_size / 2, screen_y - draw_size / 2))
 
         points = self.screen_points(camera)
         border_width = max(1, int(2 * camera.zoom))
@@ -264,7 +273,8 @@ def catan_positions():
 
     map_height = len(CATAN_ROW_LENGTHS) * vertical_spacing
 
-    start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 20
+    # Plansza nizej, zeby gorne kafle nie siedzialy pod paskiem UI.
+    start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 45
 
     for row_index, row_length in enumerate(CATAN_ROW_LENGTHS):
         row_width = row_length * horizontal_spacing
@@ -314,7 +324,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Ruch kamery: drag / scroll zoom / krawedz okna / WASD | SPACJA: reset | ESC: zamknij",
+        "Drag / scroll zoom / WASD | SPACJA: reset | domyslny zoom 1.0 = najostrzejszy widok",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -331,7 +341,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Scroll przybliza i oddala widok. Kliknij i przeciagaj, zeby przesuwac kamere.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Wszystkie kafle mieszcza sie w kadrze. Scroll przybliza/oddala widok.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
