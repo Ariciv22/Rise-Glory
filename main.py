@@ -17,6 +17,7 @@ FPS = 60
 HEX_SIZE = 118
 TEXTURE_SIZE = 512
 DRAG_THRESHOLD = 4
+MAX_MAP_TILES = 64
 
 ZOOM_STEP = 1.10
 MIN_ZOOM = 0.35
@@ -222,8 +223,12 @@ def create_fallback_texture(color):
     points = hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2)
     pygame.draw.polygon(fallback, color, points)
 
-    # Delikatny srodek dla wody, zeby ocean/wybrzeze byly czytelne nawet bez grafiki.
-    pygame.draw.circle(fallback, tuple(min(255, channel + 18) for channel in color), (TEXTURE_SIZE // 2, TEXTURE_SIZE // 2), TEXTURE_SIZE // 4)
+    pygame.draw.circle(
+        fallback,
+        tuple(min(255, channel + 18) for channel in color),
+        (TEXTURE_SIZE // 2, TEXTURE_SIZE // 2),
+        TEXTURE_SIZE // 4,
+    )
     return fallback
 
 
@@ -398,10 +403,17 @@ def make_spiral_path(center_q, center_r, steps, seed=1):
     return coords
 
 
-def add_water_around_land(land_coords):
-    land_coords = set(land_coords)
-    terrain_by_coord = {}
+def sorted_by_center(coords):
+    return sorted(coords, key=lambda coord: (abs(coord[0]) + abs(coord[1]), coord[1], coord[0]))
 
+
+def add_water_around_land(land_coords, max_tiles=MAX_MAP_TILES):
+    land_coords = set(land_coords)
+
+    if len(land_coords) > max_tiles:
+        land_coords = set(sorted_by_center(land_coords)[:max_tiles])
+
+    terrain_by_coord = {}
     for coord in land_coords:
         terrain_by_coord[coord] = None
 
@@ -411,15 +423,20 @@ def add_water_around_land(land_coords):
             if neighbor not in land_coords:
                 coast_coords.add(neighbor)
 
+    for coord in sorted_by_center(coast_coords):
+        if len(terrain_by_coord) >= max_tiles:
+            return terrain_by_coord
+        terrain_by_coord[coord] = "coast"
+
     ocean_coords = set()
     for q, r in coast_coords:
         for neighbor in neighbors(q, r):
             if neighbor not in land_coords and neighbor not in coast_coords:
                 ocean_coords.add(neighbor)
 
-    for coord in coast_coords:
-        terrain_by_coord[coord] = "coast"
-    for coord in ocean_coords:
+    for coord in sorted_by_center(ocean_coords):
+        if len(terrain_by_coord) >= max_tiles:
+            return terrain_by_coord
         terrain_by_coord[coord] = "ocean"
 
     return terrain_by_coord
@@ -444,8 +461,8 @@ def generate_rosette_rows(row_lengths):
 
 def generate_archipelago_positions():
     rng = random.Random(22)
-    island_centers = [(-5, -3), (4, -2), (-3, 3), (5, 3)]
-    sizes = [13, 12, 10, 11]
+    island_centers = [(-4, -3), (4, -2), (-3, 3), (4, 3)]
+    sizes = [6, 6, 5, 5]
     land = set()
 
     for index, center in enumerate(island_centers):
@@ -453,45 +470,45 @@ def generate_archipelago_positions():
         land.update(island)
 
         border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
-        for _ in range(3):
+        for _ in range(1):
             if border:
                 q, r = rng.choice(border)
                 land.add(rng.choice(neighbors(q, r)))
 
-    return axial_set_to_positions(add_water_around_land(land))
+    return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
 
 
 def generate_fractal_positions():
     rng = random.Random(33)
-    land = set(make_spiral_path(0, 0, 58, seed=33))
+    land = set(make_spiral_path(0, 0, 34, seed=33))
 
-    starts = rng.sample(list(land), 5)
+    starts = rng.sample(list(land), 3)
     for index, start in enumerate(starts):
-        branch = make_spiral_path(start[0], start[1], 10, seed=300 + index)
+        branch = make_spiral_path(start[0], start[1], 5, seed=300 + index)
         land.update(branch)
 
     candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) >= 4]
-    for coord in rng.sample(candidates, min(7, len(candidates))):
+    for coord in rng.sample(candidates, min(4, len(candidates))):
         if coord != (0, 0):
             land.remove(coord)
 
-    return axial_set_to_positions(add_water_around_land(land))
+    return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
 
 
 def generate_pangea_positions():
     rng = random.Random(44)
-    land = set(make_spiral_path(0, 0, 72, seed=44))
+    land = set(make_spiral_path(0, 0, 38, seed=44))
 
-    for _ in range(45):
+    for _ in range(8):
         border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
         q, r = rng.choice(border)
         land.add(rng.choice(neighbors(q, r)))
 
     edge_candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) <= 2]
-    for coord in rng.sample(edge_candidates, min(8, len(edge_candidates))):
+    for coord in rng.sample(edge_candidates, min(5, len(edge_candidates))):
         land.remove(coord)
 
-    return axial_set_to_positions(add_water_around_land(land))
+    return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
 
 
 def generate_map_positions(map_key):
@@ -519,6 +536,9 @@ def generate_map(map_key):
     random.seed(42)
 
     positions = generate_map_positions(map_key)
+
+    if len(positions) > MAX_MAP_TILES:
+        positions = positions[:MAX_MAP_TILES]
 
     tiles = []
     tile_id = 1
@@ -603,7 +623,7 @@ def draw_map_select(screen, title_font, font, small_font, mouse_pos):
         button.draw(screen, font, mouse_pos)
 
     hint = small_font.render(
-        "Archipelag, fraktal i pangea maja wybrzeze oraz ocean wokol pustych pol.",
+        "Kazdy generator ma maksymalnie 64 kafle, czyli limit 8x8.",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -626,14 +646,14 @@ def draw_multiplayer(screen, title_font, font, small_font, mouse_pos):
     return buttons
 
 
-def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key):
+def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key, tile_count):
     pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, TOP_UI_HEIGHT))
 
     title = title_font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "ESC: menu | R: generuj ponownie | F11: fullscreen | Drag kamera | Scroll zoom | SPACJA: srodek",
+        f"Kafle: {tile_count}/{MAX_MAP_TILES} | ESC: menu | R: generuj ponownie | F11: fullscreen | Drag kamera | Scroll zoom | SPACJA: srodek",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -650,7 +670,7 @@ def draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, 
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Kamera startuje na srodku planszy. Puste miejsca map nieregularnych maja wybrzeze i ocean.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Mapy archipelag, fraktal i pangea sa ograniczone do maksymalnie 8x8 kafli.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -856,7 +876,7 @@ def main():
                     selected=(tile == selected_tile),
                 )
 
-            draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key)
+            draw_game_ui(screen, title_font, font, selected_tile, hovered_tile, camera, current_map_key, len(tiles))
 
         pygame.display.flip()
         clock.tick(FPS)
