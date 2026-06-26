@@ -8,8 +8,10 @@ import pygame
 # USTAWIENIA
 # =========================
 
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 1600
+SCREEN_HEIGHT = 1000
+MIN_SCREEN_WIDTH = 1000
+MIN_SCREEN_HEIGHT = 700
 FPS = 60
 
 # Rozeta jak w Catanie, tylko wieksza: 4 / 5 / 6 / 7 / 8 / 7 / 6 / 5 / 4.
@@ -291,7 +293,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Uklad: 4 / 5 / 6 / 7 / 8 / 7 / 6 / 5 / 4 = 52 kafle | Drag / scroll zoom | SPACJA: reset",
+        "Okno mozna powiekszac | F11: fullscreen | Drag / scroll zoom | SPACJA: reset",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -308,7 +310,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         )
         screen.blit(hover_text, (30, info_y))
     else:
-        hover_text = font.render("Rozeta 8. Kamera rusza sie tylko przez drag myszka albo zoom scrollem.", True, MUTED_TEXT_COLOR)
+        hover_text = font.render("Rozeta 8. Zlap rog okna, aby je powiekszyc, albo nacisnij F11.", True, MUTED_TEXT_COLOR)
         screen.blit(hover_text, (30, info_y))
 
     camera_text = font.render(
@@ -327,10 +329,19 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile, camera):
         screen.blit(selected_text, (880, info_y))
 
 
+def create_window(fullscreen=False):
+    if fullscreen:
+        return pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    return pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+
+
 def main():
+    global SCREEN_WIDTH, SCREEN_HEIGHT
+
     pygame.init()
 
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    fullscreen = False
+    screen = create_window(fullscreen)
     pygame.display.set_caption("Rise & Glory - rozeta 8")
 
     clock = pygame.time.Clock()
@@ -365,6 +376,12 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+            if event.type == pygame.VIDEORESIZE and not fullscreen:
+                SCREEN_WIDTH = max(MIN_SCREEN_WIDTH, event.w)
+                SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, event.h)
+                screen = create_window(fullscreen)
+                tiles = generate_map()
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
@@ -372,6 +389,17 @@ def main():
                     tiles = generate_map()
                     selected_tile = None
                 if event.key == pygame.K_SPACE:
+                    camera.reset()
+                if event.key == pygame.K_F11:
+                    fullscreen = not fullscreen
+                    if fullscreen:
+                        screen = create_window(fullscreen)
+                        SCREEN_WIDTH, SCREEN_HEIGHT = screen.get_size()
+                    else:
+                        SCREEN_WIDTH = 1600
+                        SCREEN_HEIGHT = 1000
+                        screen = create_window(fullscreen)
+                    tiles = generate_map()
                     camera.reset()
 
             if event.type == pygame.MOUSEWHEEL:
