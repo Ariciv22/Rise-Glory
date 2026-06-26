@@ -14,7 +14,9 @@ FPS = 60
 
 # Uklad jak w Catanie: 3 / 4 / 5 / 4 / 3, razem 19 heksow.
 CATAN_ROW_LENGTHS = [3, 4, 5, 4, 3]
-HEX_SIZE = 62
+
+# Wiekszy HEX_SIZE = przyblizona kamera i lepiej widoczne kafelki.
+HEX_SIZE = 86
 
 BACKGROUND_COLOR = (32, 76, 116)
 PANEL_COLOR = (28, 33, 38)
@@ -66,9 +68,6 @@ TERRAINS = {
         "weight": 8,
     },
 }
-
-# Numery jak w Catanie, bez 7. Na start sa tylko wizualne.
-CATAN_NUMBER_TOKENS = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
 
 
 def hex_corners(center_x, center_y, size):
@@ -147,7 +146,7 @@ def load_terrain_textures():
 
 
 class HexTile:
-    def __init__(self, tile_id, board_col, board_row, x, y, terrain_key, number_token=None):
+    def __init__(self, tile_id, board_col, board_row, x, y, terrain_key):
         self.tile_id = tile_id
         self.board_col = board_col
         self.board_row = board_row
@@ -155,39 +154,19 @@ class HexTile:
         self.y = y
         self.terrain_key = terrain_key
         self.terrain = TERRAINS[terrain_key]
-        self.number_token = number_token
         self.points = hex_corners(x, y, HEX_SIZE)
 
-    def draw(self, screen, textures, font, token_font, hovered=False, selected=False):
+    def draw(self, screen, textures, hovered=False, selected=False):
         texture = textures[self.terrain_key]
         screen.blit(texture, (self.x - HEX_SIZE, self.y - HEX_SIZE))
 
         pygame.draw.polygon(screen, HEX_BORDER_COLOR, self.points, 2)
-
-        if self.number_token is not None:
-            self.draw_number_token(screen, token_font)
 
         if hovered:
             pygame.draw.polygon(screen, HEX_HOVER_COLOR, self.points, 5)
 
         if selected:
             pygame.draw.polygon(screen, HEX_SELECTED_COLOR, self.points, 5)
-
-    def draw_number_token(self, screen, token_font):
-        token_radius = 18
-        token_color = (232, 218, 169)
-        token_border = (84, 62, 34)
-        text_color = (40, 29, 18)
-
-        if self.number_token in [6, 8]:
-            text_color = (170, 24, 24)
-
-        pygame.draw.circle(screen, token_color, (int(self.x), int(self.y)), token_radius)
-        pygame.draw.circle(screen, token_border, (int(self.x), int(self.y)), token_radius, 2)
-
-        text = token_font.render(str(self.number_token), True, text_color)
-        text_rect = text.get_rect(center=(self.x, self.y))
-        screen.blit(text, text_rect)
 
     def contains_point(self, mouse_pos):
         return point_in_polygon(mouse_pos, self.points)
@@ -198,11 +177,10 @@ def catan_positions():
     vertical_spacing = HEX_SIZE * 1.5
     horizontal_spacing = HEX_SIZE * math.sqrt(3)
 
-    max_row_length = max(CATAN_ROW_LENGTHS)
-    map_width = max_row_length * horizontal_spacing
     map_height = len(CATAN_ROW_LENGTHS) * vertical_spacing
 
-    start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 35
+    # Wyzej na ekranie i mocniej przyblizone, ale nadal calosc widoczna.
+    start_y = (SCREEN_HEIGHT - map_height) / 2 + HEX_SIZE + 20
 
     for row_index, row_length in enumerate(CATAN_ROW_LENGTHS):
         row_width = row_length * horizontal_spacing
@@ -223,28 +201,20 @@ def generate_map():
     random.seed(42)
 
     positions = catan_positions()
-    random.shuffle(CATAN_NUMBER_TOKENS)
 
     tiles = []
     tile_id = 1
-    number_index = 0
 
-    # Srodek mapy robimy jako pustynie bez numeru, podobnie jak w klasycznym Catanie.
+    # Srodek mapy robimy jako pustynie, ale bez numerka.
     center_index = len(positions) // 2
 
     for index, (col, row, x, y) in enumerate(positions):
         if index == center_index:
             terrain_key = "desert"
-            number_token = None
         else:
             terrain_key = random.choices(terrain_keys, weights=terrain_weights, k=1)[0]
-            if terrain_key == "desert":
-                terrain_key = "plains"
 
-            number_token = CATAN_NUMBER_TOKENS[number_index]
-            number_index += 1
-
-        tiles.append(HexTile(tile_id, col, row, x, y, terrain_key, number_token))
+        tiles.append(HexTile(tile_id, col, row, x, y, terrain_key))
         tile_id += 1
 
     return tiles
@@ -253,10 +223,9 @@ def generate_map():
 def draw_water_background(screen):
     screen.fill(WATER_COLOR)
 
-    # Duzy szesciokat w tle, zeby cala plansza bardziej przypominala wyspe z Catana.
     center_x = SCREEN_WIDTH / 2
     center_y = SCREEN_HEIGHT / 2 + 40
-    island_border = hex_corners(center_x, center_y, 390)
+    island_border = hex_corners(center_x, center_y, 485)
     pygame.draw.polygon(screen, (30, 92, 145), island_border)
     pygame.draw.polygon(screen, (17, 63, 105), island_border, 5)
 
@@ -268,7 +237,7 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile):
     screen.blit(title, (28, 18))
 
     subtitle = font.render(
-        "Uklad: 3 / 4 / 5 / 4 / 3 | LPM: wybierz heks | R: losuj od nowa | ESC: zamknij",
+        "Przyblizona kamera | LPM: wybierz heks | R: losuj od nowa | ESC: zamknij",
         True,
         MUTED_TEXT_COLOR,
     )
@@ -278,9 +247,8 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile):
     pygame.draw.rect(screen, PANEL_COLOR, (0, SCREEN_HEIGHT - 70, SCREEN_WIDTH, 70))
 
     if hovered_tile:
-        token = hovered_tile.number_token if hovered_tile.number_token is not None else "brak"
         hover_text = font.render(
-            f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']} | token: {token}",
+            f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']}",
             True,
             TEXT_COLOR,
         )
@@ -290,9 +258,8 @@ def draw_ui(screen, title_font, font, selected_tile, hovered_tile):
         screen.blit(hover_text, (30, info_y))
 
     if selected_tile:
-        token = selected_tile.number_token if selected_tile.number_token is not None else "brak"
         selected_text = font.render(
-            f"Wybrany: heks {selected_tile.tile_id} | {selected_tile.terrain['name']} | token: {token}",
+            f"Wybrany: heks {selected_tile.tile_id} | {selected_tile.terrain['name']}",
             True,
             TEXT_COLOR,
         )
@@ -308,7 +275,6 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 18, bold=True)
     title_font = pygame.font.SysFont("arial", 28, bold=True)
-    token_font = pygame.font.SysFont("arial", 20, bold=True)
 
     textures = load_terrain_textures()
     tiles = generate_map()
@@ -341,7 +307,7 @@ def main():
                     selected_tile = hovered_tile
                     print(
                         f"Wybrano heks {selected_tile.tile_id}: "
-                        f"{selected_tile.terrain['name']} | token: {selected_tile.number_token}"
+                        f"{selected_tile.terrain['name']}"
                     )
 
         draw_water_background(screen)
@@ -350,8 +316,6 @@ def main():
             tile.draw(
                 screen,
                 textures,
-                font,
-                token_font,
                 hovered=(tile == hovered_tile),
                 selected=(tile == selected_tile),
             )
