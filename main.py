@@ -61,6 +61,7 @@ MAP_OPTIONS = [
     ("archipelago", "Archipelag"),
     ("fractal", "Fraktal"),
     ("pangea", "Pangea"),
+    ("rosette9", "Rozeta 9x9"),
 ]
 
 PLAYERS = [
@@ -479,6 +480,8 @@ def generate_pangea_positions():
 
 
 def generate_map_positions(map_key):
+    if map_key == "rosette9":
+        return generate_rosette_rows([5, 6, 7, 8, 9, 8, 7, 6, 5])
     if map_key == "catan":
         return generate_rosette_rows([3, 4, 5, 4, 3])
     if map_key == "rosette8":
