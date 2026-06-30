@@ -29,9 +29,23 @@ TOP_UI_HEIGHT = 88
 BOTTOM_UI_HEIGHT = 70
 SIDE_PANEL_WIDTH = 330
 
+# Nowy szkic UI gracza
+PLAYER_TOPBAR_HEIGHT = 88
+LEFT_SCORE_WIDTH = 280
+LEFT_SCORE_HEIGHT = 210
+LEFT_CARDS_WIDTH = 300
+LEFT_CARDS_HEIGHT = 260
+RIGHT_LOG_WIDTH = 300
+BOTTOM_CITY_HEIGHT = 160
+PANEL_HANDLE = 34
+PANEL_GAP = 12
+EVENT_CARD_W = 210
+EVENT_CARD_H = 260
+
 BACKGROUND_COLOR = (18, 22, 26)
 PANEL_COLOR = (28, 33, 38)
 PANEL_DARK_COLOR = (18, 22, 26)
+PANEL_SOFT_COLOR = (35, 42, 49)
 BUTTON_COLOR = (42, 50, 58)
 BUTTON_HOVER_COLOR = (62, 74, 84)
 BUTTON_ACTIVE_COLOR = (74, 92, 72)
@@ -45,6 +59,12 @@ CITY_COLOR = (245, 230, 170)
 CITY_BORDER_COLOR = (42, 32, 18)
 UNIT_FILL_COLOR = (238, 238, 220)
 VALID_MOVE_COLOR = (120, 210, 255)
+UI_PINK = (255, 155, 200)
+UI_ORANGE = (255, 122, 30)
+UI_GREEN = (20, 180, 70)
+UI_BLUE = (0, 160, 220)
+UI_RED = (235, 40, 45)
+UI_BLACK = (20, 20, 20)
 
 ROOT_DIR = Path(__file__).resolve().parent
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
@@ -81,7 +101,6 @@ TERRAINS = {
     "coast": {"name": "Wybrzeze", "image": "wybrzeze.png", "fallback": (56, 128, 164), "weight": 0, "land": False, "passable": False},
     "ocean": {"name": "Ocean", "image": "ocean.png", "fallback": (22, 64, 102), "weight": 0, "land": False, "passable": False},
 }
-
 
 # =========================
 # GEOMETRIA HEKSOW
@@ -141,7 +160,6 @@ def are_adjacent_tiles(tile_a, tile_b):
     distance = math.hypot(tile_a.x - tile_b.x, tile_a.y - tile_b.y)
     return distance <= HEX_SIZE * 1.85
 
-
 # =========================
 # TEKSTURY
 # =========================
@@ -178,7 +196,6 @@ def load_terrain_textures():
             textures[terrain_key] = create_fallback_texture(terrain["fallback"])
             print(f"Brak grafiki: {image_path}. Uzywam koloru zastepczego.")
     return textures
-
 
 # =========================
 # KLASY
@@ -219,15 +236,15 @@ class Camera:
         max_y = max(tile.y for tile in tiles) + HEX_SIZE
         map_center_x = (min_x + max_x) / 2
         map_center_y = (min_y + max_y) / 2
-        target_x = (SCREEN_WIDTH - SIDE_PANEL_WIDTH) / 2
-        target_y = (TOP_UI_HEIGHT + (SCREEN_HEIGHT - BOTTOM_UI_HEIGHT)) / 2
+        target_x = SCREEN_WIDTH / 2
+        target_y = PLAYER_TOPBAR_HEIGHT + (SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT - BOTTOM_CITY_HEIGHT) / 2
         self.zoom = DEFAULT_ZOOM
         self.x = target_x - map_center_x * self.zoom
         self.y = target_y - map_center_y * self.zoom
 
     def reset(self):
-        self.x = (SCREEN_WIDTH - SIDE_PANEL_WIDTH) / 2
-        self.y = (TOP_UI_HEIGHT + (SCREEN_HEIGHT - BOTTOM_UI_HEIGHT)) / 2
+        self.x = SCREEN_WIDTH / 2
+        self.y = PLAYER_TOPBAR_HEIGHT + (SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT - BOTTOM_CITY_HEIGHT) / 2
         self.zoom = DEFAULT_ZOOM
 
 
@@ -360,6 +377,34 @@ class HexTile:
     def contains_point(self, mouse_pos, camera):
         return point_in_polygon(mouse_pos, self.screen_points(camera))
 
+
+class GameUIState:
+    def __init__(self):
+        self.score_open = True
+        self.cards_open = True
+        self.log_open = True
+        self.city_open = True
+        self.show_event_card = True
+        self.logs = [
+            "Start gry. Wybierz osadnika i odkrywaj mape.",
+            "Panele chowasz roznymi strzalkami.",
+        ]
+
+    def toggle(self, name):
+        if name == "score":
+            self.score_open = not self.score_open
+        elif name == "cards":
+            self.cards_open = not self.cards_open
+        elif name == "log":
+            self.log_open = not self.log_open
+        elif name == "city":
+            self.city_open = not self.city_open
+        elif name == "event":
+            self.show_event_card = not self.show_event_card
+
+    def add_log(self, message):
+        self.logs.append(message)
+        self.logs = self.logs[-12:]
 
 # =========================
 # GENERATORY MAP
@@ -522,7 +567,6 @@ def find_start_tile(tiles):
             return tile
     return tiles[0] if tiles else None
 
-
 # =========================
 # UI
 # =========================
@@ -598,100 +642,244 @@ def draw_multiplayer(screen, title_font, font, small_font, mouse_pos):
     return buttons
 
 
-def draw_side_panel(screen, font, small_font, mouse_pos, current_player, selected_tile, selected_unit, placement_mode, city_count, unit_count):
-    panel_x = SCREEN_WIDTH - SIDE_PANEL_WIDTH
-    pygame.draw.rect(screen, PANEL_DARK_COLOR, (panel_x, TOP_UI_HEIGHT, SIDE_PANEL_WIDTH, SCREEN_HEIGHT - TOP_UI_HEIGHT - BOTTOM_UI_HEIGHT))
-    pygame.draw.line(screen, BUTTON_BORDER_COLOR, (panel_x, TOP_UI_HEIGHT), (panel_x, SCREEN_HEIGHT - BOTTOM_UI_HEIGHT), 2)
+def draw_text_lines(screen, font, lines, x, y, color=MUTED_TEXT_COLOR, line_height=22, max_width=None):
+    for line in lines:
+        text = line
+        if max_width:
+            while font.size(text)[0] > max_width and len(text) > 3:
+                text = text[:-4] + "..."
+        screen.blit(font.render(text, True, color), (x, y))
+        y += line_height
+    return y
 
-    y = TOP_UI_HEIGHT + 24
-    title = font.render("Panel gracza", True, TEXT_COLOR)
-    screen.blit(title, (panel_x + 24, y))
-    y += 48
 
-    screen.blit(small_font.render("Aktualny gracz:", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-    y += 28
-    pygame.draw.circle(screen, current_player["color"], (panel_x + 40, y + 10), 12)
-    screen.blit(font.render(current_player["name"], True, TEXT_COLOR), (panel_x + 62, y - 4))
-    y += 48
+def draw_arrow_handle(screen, rect, direction, mouse_pos):
+    hovered = rect.collidepoint(mouse_pos)
+    bg = (64, 45, 58) if hovered else (42, 34, 44)
+    pygame.draw.rect(screen, bg, rect, border_radius=8)
+    pygame.draw.rect(screen, UI_PINK, rect, 3, border_radius=8)
+    cx, cy = rect.center
+    if direction == "left":
+        points = [(cx - 9, cy), (cx + 7, cy - 10), (cx + 7, cy + 10)]
+    elif direction == "right":
+        points = [(cx + 9, cy), (cx - 7, cy - 10), (cx - 7, cy + 10)]
+    elif direction == "down":
+        points = [(cx, cy + 9), (cx - 10, cy - 7), (cx + 10, cy - 7)]
+    else:
+        points = [(cx, cy - 9), (cx - 10, cy + 7), (cx + 10, cy + 7)]
+    pygame.draw.polygon(screen, UI_PINK, points)
 
-    screen.blit(small_font.render(f"Miasta: {city_count}   Jednostki: {unit_count}", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-    y += 38
 
-    buttons = [
-        Button("Zaloz miasto", "place_city", (panel_x + 24, y, SIDE_PANEL_WIDTH - 48, 48)),
-        Button("Nastepny gracz", "next_player", (panel_x + 24, y + 60, SIDE_PANEL_WIDTH - 48, 48)),
-        Button("Nowa tura ruchu", "reset_moves", (panel_x + 24, y + 120, SIDE_PANEL_WIDTH - 48, 48)),
-        Button("Anuluj akcje", "cancel_action", (panel_x + 24, y + 180, SIDE_PANEL_WIDTH - 48, 48)),
+def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, current_map_key, city_count, unit_count):
+    rect = pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)
+    pygame.draw.rect(screen, PANEL_COLOR, rect)
+    pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 3)
+
+    title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
+    screen.blit(title, (24, 12))
+    subtitle = small_font.render("Wszystkie surowce i najwazniejsze informacje gracza beda tutaj aktualizowane na biezaco", True, (255, 125, 105))
+    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH / 2, 34)))
+
+    resources = [
+        ("Zywnosc", city_count * 2),
+        ("Produkcja", city_count + 1),
+        ("Zloto", 3),
+        ("Nauka", 0),
+        ("Kultura", 0),
+        ("Kafle", f"{tile_count}/{MAX_MAP_TILES}"),
+        ("Jedn.", unit_count),
     ]
-    for button in buttons:
-        button.draw(screen, small_font, mouse_pos, active=(placement_mode and button.action == "place_city"))
+    x = 24
+    y = 54
+    pygame.draw.circle(screen, current_player["color"], (x + 12, y + 12), 11)
+    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (x + 32, y))
+    x += 130
+    for label, value in resources:
+        chip = pygame.Rect(x, y - 3, 116, 32)
+        pygame.draw.rect(screen, PANEL_SOFT_COLOR, chip, border_radius=14)
+        pygame.draw.rect(screen, BUTTON_BORDER_COLOR, chip, 1, border_radius=14)
+        screen.blit(small_font.render(f"{label}: {value}", True, TEXT_COLOR), (x + 10, y + 4))
+        x += 124
 
-    y += 250
-    screen.blit(small_font.render("Wybrany kafel:", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-    y += 28
+
+def draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, units):
+    buttons = []
+    x = 0 if ui_state.score_open else -LEFT_SCORE_WIDTH + PANEL_HANDLE
+    y = PLAYER_TOPBAR_HEIGHT + PANEL_GAP
+    panel = pygame.Rect(x, y, LEFT_SCORE_WIDTH, LEFT_SCORE_HEIGHT)
+    pygame.draw.rect(screen, PANEL_DARK_COLOR, panel, border_radius=8)
+    pygame.draw.rect(screen, UI_GREEN, panel, 3, border_radius=8)
+    handle = pygame.Rect(x + LEFT_SCORE_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
+    draw_arrow_handle(screen, handle, "left" if ui_state.score_open else "right", mouse_pos)
+    buttons.append(Button("", "toggle_score", handle))
+
+    if ui_state.score_open:
+        screen.blit(font.render("Tabela wynikow", True, TEXT_COLOR), (x + 54, y + 22))
+        py = y + 70
+        for player in PLAYERS:
+            city_count = len([city for city in cities if city["player"]["id"] == player["id"]])
+            unit_count = len([unit for unit in units if unit.player["id"] == player["id"]])
+            score = city_count * 3 + unit_count
+            pygame.draw.circle(screen, player["color"], (x + 30, py + 10), 8)
+            screen.blit(small_font.render(f"{player['name']}  {score} pkt", True, TEXT_COLOR), (x + 48, py))
+            py += 28
+    return buttons, [panel]
+
+
+def draw_cards_panel(screen, font, small_font, mouse_pos, ui_state):
+    buttons = []
+    x = 0 if ui_state.cards_open else -LEFT_CARDS_WIDTH + PANEL_HANDLE
+    y = PLAYER_TOPBAR_HEIGHT + LEFT_SCORE_HEIGHT + PANEL_GAP * 2 + 145
+    panel = pygame.Rect(x, y, LEFT_CARDS_WIDTH, LEFT_CARDS_HEIGHT)
+    pygame.draw.rect(screen, PANEL_DARK_COLOR, panel, border_radius=8)
+    pygame.draw.rect(screen, UI_BLACK, panel, 3, border_radius=8)
+    handle = pygame.Rect(x + LEFT_CARDS_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
+    draw_arrow_handle(screen, handle, "left" if ui_state.cards_open else "right", mouse_pos)
+    buttons.append(Button("", "toggle_cards", handle))
+
+    if ui_state.cards_open:
+        screen.blit(font.render("Talie kart", True, TEXT_COLOR), (x + 54, y + 24))
+        lines = [
+            "Przygody: 50",
+            "Technologie: 0 / do dodania",
+            "Polityki: 0 / do dodania",
+            "Cuda: 0 / do dodania",
+            "Liderzy: 0 / do dodania",
+            "Klik w zeton odkrycia -> karta",
+        ]
+        draw_text_lines(screen, small_font, lines, x + 24, y + 76, max_width=LEFT_CARDS_WIDTH - 48)
+    return buttons, [panel]
+
+
+def draw_log_panel(screen, font, small_font, mouse_pos, ui_state):
+    buttons = []
+    x = SCREEN_WIDTH - RIGHT_LOG_WIDTH if ui_state.log_open else SCREEN_WIDTH - PANEL_HANDLE
+    y = PLAYER_TOPBAR_HEIGHT
+    h = SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT
+    if ui_state.city_open:
+        h -= BOTTOM_CITY_HEIGHT
+    panel = pygame.Rect(x, y, RIGHT_LOG_WIDTH, h)
+    pygame.draw.rect(screen, PANEL_DARK_COLOR, panel)
+    pygame.draw.line(screen, UI_BLUE, (x, y), (x, y + h), 4)
+    handle = pygame.Rect(x, y + 18, PANEL_HANDLE, 54)
+    draw_arrow_handle(screen, handle, "right" if ui_state.log_open else "left", mouse_pos)
+    buttons.append(Button("", "toggle_log", handle))
+
+    if ui_state.log_open:
+        screen.blit(font.render("Chat i logi gry", True, TEXT_COLOR), (x + 48, y + 24))
+        screen.blit(small_font.render("Co sie dzieje na planszy", True, MUTED_TEXT_COLOR), (x + 48, y + 54))
+        py = y + 92
+        for line in ui_state.logs[-10:]:
+            pygame.draw.rect(screen, PANEL_SOFT_COLOR, (x + 18, py - 4, RIGHT_LOG_WIDTH - 36, 34), border_radius=8)
+            draw_text_lines(screen, small_font, [line], x + 28, py + 4, TEXT_COLOR, max_width=RIGHT_LOG_WIDTH - 56)
+            py += 40
+    return buttons, [panel]
+
+
+def draw_event_card(screen, font, small_font, mouse_pos, ui_state, selected_tile):
+    if not ui_state.show_event_card:
+        handle = pygame.Rect(SCREEN_WIDTH // 2 - 45, PLAYER_TOPBAR_HEIGHT + 12, 90, 34)
+        draw_arrow_handle(screen, handle, "down", mouse_pos)
+        return [Button("", "toggle_event", handle)], [handle]
+
+    card_x = SCREEN_WIDTH / 2 - EVENT_CARD_W / 2
+    card_y = PLAYER_TOPBAR_HEIGHT + 250
+    card = pygame.Rect(card_x, card_y, EVENT_CARD_W, EVENT_CARD_H)
+    hex_points = hex_corners(SCREEN_WIDTH / 2, PLAYER_TOPBAR_HEIGHT + 285, 270)
+    pygame.draw.polygon(screen, (34, 19, 22), hex_points)
+    pygame.draw.polygon(screen, UI_RED, hex_points, 5)
+    pygame.draw.rect(screen, PANEL_DARK_COLOR, card, border_radius=10)
+    pygame.draw.rect(screen, UI_RED, card, 4, border_radius=10)
+
+    title = "Karta odkrycia"
+    desc = "Tu pojawi sie karta, ktora gracz odkrywa i pokazuje wszystkim."
     if selected_tile:
-        screen.blit(font.render(selected_tile.terrain["name"], True, TEXT_COLOR), (panel_x + 24, y))
-        y += 30
-        status = "Mozna zalozyc miasto" if selected_tile.can_place_city() else "Nie mozna zalozyc miasta"
-        screen.blit(small_font.render(status, True, TEXT_COLOR if selected_tile.can_place_city() else MUTED_TEXT_COLOR), (panel_x + 24, y))
-        y += 28
-        if selected_tile.city:
-            city_owner = selected_tile.city["player"]["name"]
-            screen.blit(small_font.render(f"Miasto: {selected_tile.city['name']} ({city_owner})", True, TEXT_COLOR), (panel_x + 24, y))
-    else:
-        screen.blit(small_font.render("Kliknij kafel na mapie.", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-
-    y += 62
-    screen.blit(small_font.render("Wybrana jednostka:", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-    y += 28
-    if selected_unit:
-        screen.blit(font.render(selected_unit.name, True, TEXT_COLOR), (panel_x + 24, y))
-        y += 30
-        screen.blit(small_font.render(f"Ruchy: {selected_unit.moves_left}/{UNIT_MOVES_PER_TURN}", True, TEXT_COLOR), (panel_x + 24, y))
-        y += 26
-        screen.blit(small_font.render("Kliknij sasiedni podswietlony heks.", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-    else:
-        screen.blit(small_font.render("Kliknij token osadnika na mapie.", True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-
-    y = SCREEN_HEIGHT - BOTTOM_UI_HEIGHT - 128
-    help_lines = [
-        "Sterowanie:",
-        "Osadnik: kliknij token, potem heks",
-        "C: tryb miasta, TAB: kolejny gracz",
-        "N: nowa tura ruchu jednostek",
-        "SPACJA: srodek kamery",
-    ]
-    for line in help_lines:
-        screen.blit(small_font.render(line, True, MUTED_TEXT_COLOR), (panel_x + 24, y))
-        y += 22
-
-    return buttons
+        title = selected_tile.terrain["name"]
+        desc = f"Wybrany heks #{selected_tile.tile_id}. Tutaj pozniej podepniemy przygody i zeton odkrycia."
+    screen.blit(font.render(title, True, TEXT_COLOR), (card.x + 22, card.y + 24))
+    draw_text_lines(screen, small_font, [desc], card.x + 18, card.y + 72, MUTED_TEXT_COLOR, max_width=EVENT_CARD_W - 36)
+    hint = small_font.render("Kliknij karte, aby schowac", True, UI_PINK)
+    screen.blit(hint, (card.x + 18, card.bottom - 38))
+    return [Button("", "toggle_event", card)], [card]
 
 
-def draw_game_ui(screen, title_font, font, hovered_tile, camera, current_map_key, tile_count, current_player, placement_mode, selected_unit):
-    pygame.draw.rect(screen, PANEL_COLOR, (0, 0, SCREEN_WIDTH, TOP_UI_HEIGHT))
-    title = title_font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
-    screen.blit(title, (28, 18))
-    mode = " | TRYB: zakladanie miasta" if placement_mode else ""
-    unit_info = f" | Osadnik ruchy: {selected_unit.moves_left}" if selected_unit else ""
-    subtitle = font.render(f"Kafle: {tile_count}/{MAX_MAP_TILES} | Gracz: {current_player['name']}{mode}{unit_info} | ESC | R | F11 | Drag | Scroll", True, MUTED_TEXT_COLOR)
-    screen.blit(subtitle, (30, 55))
+def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_player, selected_tile, selected_unit, placement_mode, cities, units):
+    buttons = []
+    y = SCREEN_HEIGHT - BOTTOM_CITY_HEIGHT if ui_state.city_open else SCREEN_HEIGHT - PANEL_HANDLE
+    h = BOTTOM_CITY_HEIGHT if ui_state.city_open else PANEL_HANDLE
+    panel = pygame.Rect(LEFT_CARDS_WIDTH + PANEL_GAP, y, SCREEN_WIDTH - LEFT_CARDS_WIDTH - RIGHT_LOG_WIDTH - PANEL_GAP * 2, h)
+    if not ui_state.log_open:
+        panel.width += RIGHT_LOG_WIDTH - PANEL_HANDLE
+    pygame.draw.rect(screen, PANEL_DARK_COLOR, panel, border_radius=8)
+    pygame.draw.rect(screen, UI_PINK, panel, 3, border_radius=8)
+    handle = pygame.Rect(panel.right - 70, y + 8, 54, PANEL_HANDLE)
+    draw_arrow_handle(screen, handle, "down" if ui_state.city_open else "up", mouse_pos)
+    buttons.append(Button("", "toggle_city", handle))
 
-    info_y = SCREEN_HEIGHT - 52
-    pygame.draw.rect(screen, PANEL_COLOR, (0, SCREEN_HEIGHT - BOTTOM_UI_HEIGHT, SCREEN_WIDTH, BOTTOM_UI_HEIGHT))
-    if hovered_tile:
-        text = f"Najazd: heks {hovered_tile.tile_id} | {hovered_tile.terrain['name']}"
-        if placement_mode:
-            text += " | kliknij, aby zalozyc miasto" if hovered_tile.can_place_city() else " | tutaj nie mozna zalozyc miasta"
-        elif selected_unit:
-            text += " | kliknij, aby ruszyc osadnika" if selected_unit.can_move_to(hovered_tile, []) else ""
-        hover_text = font.render(text, True, TEXT_COLOR)
-    else:
-        hover_text = font.render("Kliknij osadnika i rusz nim maksymalnie 2 heksy na ture. Miasto zakladasz z panelu lub C.", True, MUTED_TEXT_COLOR)
-    screen.blit(hover_text, (30, info_y))
-    camera_text = font.render(f"Kamera x={int(camera.x)} y={int(camera.y)} zoom={camera.zoom:.2f}", True, MUTED_TEXT_COLOR)
-    screen.blit(camera_text, (920, info_y))
+    if ui_state.city_open:
+        screen.blit(font.render("Miasta gracza i ich rozwoj", True, TEXT_COLOR), (panel.x + 18, panel.y + 18))
+        player_cities = [city for city in cities if city["player"]["id"] == current_player["id"]]
+        city_text = ", ".join(city["name"] for city in player_cities) if player_cities else "Brak miast - zaloz pierwsze miasto osadnikiem."
+        draw_text_lines(screen, small_font, [city_text], panel.x + 18, panel.y + 52, MUTED_TEXT_COLOR, max_width=panel.width - 36)
 
+        bx = panel.x + 18
+        by = panel.y + 92
+        action_buttons = [
+            Button("Zaloz miasto", "place_city", (bx, by, 160, 42)),
+            Button("Nastepny gracz", "next_player", (bx + 172, by, 170, 42)),
+            Button("Nowa tura ruchu", "reset_moves", (bx + 354, by, 180, 42)),
+            Button("Anuluj akcje", "cancel_action", (bx + 546, by, 150, 42)),
+        ]
+        for button in action_buttons:
+            button.draw(screen, small_font, mouse_pos, active=(placement_mode and button.action == "place_city"))
+        buttons.extend(action_buttons)
+
+        info_x = bx + 720
+        selected_tile_name = selected_tile.terrain["name"] if selected_tile else "brak"
+        selected_unit_name = selected_unit.name if selected_unit else "brak"
+        lines = [
+            f"Kafel: {selected_tile_name}",
+            f"Jednostka: {selected_unit_name}",
+            f"Ruchy: {selected_unit.moves_left}/{UNIT_MOVES_PER_TURN}" if selected_unit else "Ruchy: -",
+        ]
+        draw_text_lines(screen, small_font, lines, info_x, panel.y + 50, TEXT_COLOR, max_width=max(120, panel.right - info_x - 20))
+    return buttons, [panel]
+
+
+def draw_player_ui(screen, title_font, font, small_font, mouse_pos, ui_state, hovered_tile, camera, current_map_key, tile_count, current_player, placement_mode, selected_tile, selected_unit, cities, units):
+    draw_top_resource_bar(screen, font, small_font, current_player, tile_count, current_map_key, len(cities), len(units))
+    buttons = []
+    blocking_rects = [pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)]
+
+    score_buttons, score_rects = draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, units)
+    card_buttons, card_rects = draw_cards_panel(screen, font, small_font, mouse_pos, ui_state)
+    buttons.extend(score_buttons + card_buttons)
+    blocking_rects.extend(score_rects + card_rects)
+
+    event_buttons, event_rects = draw_event_card(screen, font, small_font, mouse_pos, ui_state, selected_tile)
+    buttons.extend(event_buttons)
+    blocking_rects.extend(event_rects)
+
+    city_buttons, city_rects = draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_player, selected_tile, selected_unit, placement_mode, cities, units)
+    buttons.extend(city_buttons)
+    blocking_rects.extend(city_rects)
+
+    log_buttons, log_rects = draw_log_panel(screen, font, small_font, mouse_pos, ui_state)
+    buttons.extend(log_buttons)
+    blocking_rects.extend(log_rects)
+
+    if not ui_state.city_open:
+        info = "Kliknij osadnika i rusz nim maksymalnie 2 heksy. C = miasto, TAB = gracz, N = ruchy, SPACJA = kamera."
+        screen.blit(small_font.render(info, True, MUTED_TEXT_COLOR), (24, SCREEN_HEIGHT - 28))
+    return buttons, blocking_rects
+
+
+def is_over_ui(mouse_pos, rects):
+    return any(rect.collidepoint(mouse_pos) for rect in rects)
+
+# =========================
+# LOGIKA GRY
+# =========================
 
 def create_window(fullscreen=False):
     if fullscreen:
@@ -734,7 +922,6 @@ def reset_player_units(units, player):
         if unit.player["id"] == player["id"]:
             unit.reset_moves()
 
-
 # =========================
 # GLOWNA PETLA
 # =========================
@@ -754,6 +941,7 @@ def main():
 
     textures = load_terrain_textures()
     camera = Camera()
+    ui_state = GameUIState()
 
     game_state = GAME_STATE_MENU
     current_map_key = "rosette8"
@@ -771,7 +959,8 @@ def main():
     drag_start_pos = (0, 0)
     last_mouse_pos = (0, 0)
     active_buttons = []
-    side_buttons = []
+    game_ui_buttons = []
+    ui_blocking_rects = []
 
     while running:
         mouse_pos = pygame.mouse.get_pos()
@@ -779,7 +968,7 @@ def main():
         hovered_tile = None
         current_player = PLAYERS[current_player_index]
 
-        if game_state == GAME_STATE_GAME and mouse_in_window and not is_dragging:
+        if game_state == GAME_STATE_GAME and mouse_in_window and not is_dragging and not is_over_ui(mouse_pos, ui_blocking_rects):
             for tile in tiles:
                 if tile.contains_point(mouse_pos, camera):
                     hovered_tile = tile
@@ -817,6 +1006,7 @@ def main():
                     selected_tile = None
                     selected_unit = units[0] if units else None
                     placement_mode = False
+                    ui_state.add_log("Mapa zresetowana.")
                 if event.key == pygame.K_SPACE and game_state == GAME_STATE_GAME:
                     camera.center_on_tiles(tiles)
                 if event.key == pygame.K_TAB and game_state == GAME_STATE_GAME:
@@ -824,11 +1014,14 @@ def main():
                     selected_unit = None
                     placement_mode = False
                     reset_player_units(units, PLAYERS[current_player_index])
+                    ui_state.add_log(f"Tura: {PLAYERS[current_player_index]['name']}.")
                 if event.key == pygame.K_c and game_state == GAME_STATE_GAME:
                     placement_mode = True
                     selected_unit = None
+                    ui_state.add_log("Tryb zakladania miasta wlaczony.")
                 if event.key == pygame.K_n and game_state == GAME_STATE_GAME:
                     reset_player_units(units, current_player)
+                    ui_state.add_log(f"Odnowiono ruchy: {current_player['name']}.")
                 if event.key == pygame.K_F11:
                     fullscreen = not fullscreen
                     if fullscreen:
@@ -841,17 +1034,15 @@ def main():
                     if game_state == GAME_STATE_GAME:
                         camera.center_on_tiles(tiles)
 
-            if event.type == pygame.MOUSEWHEEL and game_state == GAME_STATE_GAME and mouse_in_window:
+            if event.type == pygame.MOUSEWHEEL and game_state == GAME_STATE_GAME and mouse_in_window and not is_over_ui(mouse_pos, ui_blocking_rects):
                 camera.zoom_at(mouse_pos, ZOOM_STEP if event.y > 0 else 1 / ZOOM_STEP)
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if game_state == GAME_STATE_GAME and mouse_in_window:
-                    panel_x = SCREEN_WIDTH - SIDE_PANEL_WIDTH
-                    if mouse_pos[0] < panel_x and TOP_UI_HEIGHT < mouse_pos[1] < SCREEN_HEIGHT - BOTTOM_UI_HEIGHT:
-                        is_dragging = True
-                        drag_moved = False
-                        drag_start_pos = event.pos
-                        last_mouse_pos = event.pos
+                if game_state == GAME_STATE_GAME and mouse_in_window and not is_over_ui(mouse_pos, ui_blocking_rects):
+                    is_dragging = True
+                    drag_moved = False
+                    drag_start_pos = event.pos
+                    last_mouse_pos = event.pos
 
             if event.type == pygame.MOUSEMOTION and is_dragging and game_state == GAME_STATE_GAME:
                 current_pos = event.pos
@@ -891,6 +1082,8 @@ def main():
                                     selected_tile = None
                                     selected_unit = units[0] if units else None
                                     placement_mode = False
+                                    ui_state = GameUIState()
+                                    ui_state.add_log(f"Nowa gra: {map_display_name(current_map_key)}.")
                                     game_state = GAME_STATE_GAME
                             elif game_state == GAME_STATE_MULTIPLAYER:
                                 if button.action == "back":
@@ -899,26 +1092,32 @@ def main():
 
                 elif game_state == GAME_STATE_GAME:
                     is_dragging = False
-                    clicked_side_button = False
-                    for button in side_buttons:
+                    clicked_ui_button = False
+                    for button in game_ui_buttons:
                         if button.is_clicked(event.pos):
-                            clicked_side_button = True
-                            if button.action == "place_city":
+                            clicked_ui_button = True
+                            if button.action.startswith("toggle_"):
+                                ui_state.toggle(button.action.replace("toggle_", ""))
+                            elif button.action == "place_city":
                                 placement_mode = True
                                 selected_unit = None
+                                ui_state.add_log("Wybierz heks pod miasto.")
                             elif button.action == "next_player":
                                 current_player_index = (current_player_index + 1) % len(PLAYERS)
                                 selected_unit = None
                                 placement_mode = False
                                 reset_player_units(units, PLAYERS[current_player_index])
+                                ui_state.add_log(f"Tura: {PLAYERS[current_player_index]['name']}.")
                             elif button.action == "reset_moves":
                                 reset_player_units(units, current_player)
+                                ui_state.add_log(f"Odnowiono ruchy: {current_player['name']}.")
                             elif button.action == "cancel_action":
                                 placement_mode = False
                                 selected_unit = None
+                                ui_state.add_log("Anulowano akcje.")
                             break
 
-                    if not clicked_side_button and not drag_moved and mouse_in_window:
+                    if not clicked_ui_button and not drag_moved and mouse_in_window and not is_over_ui(event.pos, ui_blocking_rects):
                         for tile in tiles:
                             if tile.contains_point(event.pos, camera):
                                 selected_tile = tile
@@ -926,12 +1125,17 @@ def main():
                                 if placement_mode:
                                     if place_city_on_tile(tile, current_player, cities):
                                         placement_mode = False
+                                        ui_state.add_log(f"{current_player['name']} zalozyl miasto na heksie {tile.tile_id}.")
+                                    else:
+                                        ui_state.add_log("Nie mozna zalozyc miasta na tym heksie.")
                                 elif selected_unit and selected_unit.can_move_to(tile, units):
                                     selected_unit.move_to(tile, units)
                                     selected_tile = tile
+                                    ui_state.add_log(f"{selected_unit.name} ruszyl sie na heks {tile.tile_id}.")
                                 elif tile_unit and tile_unit.player["id"] == current_player["id"]:
                                     selected_unit = tile_unit
                                     placement_mode = False
+                                    ui_state.add_log(f"Wybrano jednostke: {tile_unit.name}.")
                                 else:
                                     selected_unit = None
                                 break
@@ -941,16 +1145,20 @@ def main():
 
         if game_state == GAME_STATE_MENU:
             active_buttons = draw_menu(screen, title_font, font, small_font, mouse_pos)
-            side_buttons = []
+            game_ui_buttons = []
+            ui_blocking_rects = []
         elif game_state == GAME_STATE_MAP_SELECT:
             active_buttons = draw_map_select(screen, title_font, font, small_font, mouse_pos)
-            side_buttons = []
+            game_ui_buttons = []
+            ui_blocking_rects = []
         elif game_state == GAME_STATE_PLAYER_SELECT:
             active_buttons = draw_player_select(screen, title_font, font, small_font, mouse_pos)
-            side_buttons = []
+            game_ui_buttons = []
+            ui_blocking_rects = []
         elif game_state == GAME_STATE_MULTIPLAYER:
             active_buttons = draw_multiplayer(screen, title_font, font, small_font, mouse_pos)
-            side_buttons = []
+            game_ui_buttons = []
+            ui_blocking_rects = []
         elif game_state == GAME_STATE_GAME:
             active_buttons = []
             draw_background(screen)
@@ -959,8 +1167,10 @@ def main():
                 tile.draw(screen, textures, camera, token_font, hovered=(tile == hovered_tile), selected=(tile == selected_tile), placement_mode=placement_mode, valid_unit_move=valid_move)
             for unit in units:
                 unit.draw(screen, camera, token_font, selected=(unit == selected_unit))
-            draw_game_ui(screen, title_font, font, hovered_tile, camera, current_map_key, len(tiles), current_player, placement_mode, selected_unit)
-            side_buttons = draw_side_panel(screen, font, small_font, mouse_pos, current_player, selected_tile, selected_unit, placement_mode, len(cities), len(units))
+            game_ui_buttons, ui_blocking_rects = draw_player_ui(
+                screen, title_font, font, small_font, mouse_pos, ui_state, hovered_tile, camera,
+                current_map_key, len(tiles), current_player, placement_mode, selected_tile, selected_unit, cities, units,
+            )
 
         pygame.display.flip()
         clock.tick(FPS)
