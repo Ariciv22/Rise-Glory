@@ -809,32 +809,50 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
 
     old_clip = screen.get_clip()
-    screen.set_clip(rect.inflate(-70, -20))
-    title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
-    screen.blit(title, (60, 20))
-    subtitle = small_font.render("Surowce i najwazniejsze informacje gracza", True, (255, 210, 150))
-    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH / 2, 44)))
+    content = rect.inflate(-70, -22)
+    screen.set_clip(content)
+
+    title_text = f"Rise & Glory - {map_display_name(current_map_key)}"
+    title_box = pygame.Rect(56, 18, min(420, SCREEN_WIDTH - 130), 32)
+    pygame.draw.rect(screen, (18, 15, 12), title_box, border_radius=10)
+    pygame.draw.rect(screen, GOLD_BORDER, title_box, 1, border_radius=10)
+    title = font.render(title_text, True, TEXT_COLOR)
+    screen.blit(title, (title_box.x + 14, title_box.y + 5))
 
     resources = [
-        ("Zywnosc", city_count * 2),
-        ("Produkcja", city_count + 1),
-        ("Zloto", 3),
-        ("Nauka", 0),
-        ("Kultura", 0),
-        ("Kafle", f"{tile_count}/{MAX_MAP_TILES}"),
-        ("Jedn.", unit_count),
+        ("Zywnosc", city_count * 2, 132),
+        ("Produkcja", city_count + 1, 138),
+        ("Zloto", 3, 100),
+        ("Nauka", 0, 104),
+        ("Kultura", 0, 112),
+        ("Kafle", f"{tile_count}/{MAX_MAP_TILES}", 118),
+        ("Jedn.", unit_count, 100),
     ]
+
+    y = 66
     x = 28
-    y = 74
-    pygame.draw.circle(screen, current_player["color"], (x + 12, y + 12), 11)
-    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (x + 34, y))
-    x += 140
-    for label, value in resources:
-        chip = pygame.Rect(x, y - 3, 116, 32)
-        pygame.draw.rect(screen, (20, 18, 15), chip, border_radius=14)
-        pygame.draw.rect(screen, GOLD_BORDER, chip, 1, border_radius=14)
-        screen.blit(small_font.render(f"{label}: {value}", True, TEXT_COLOR), (x + 10, y + 4))
-        x += 124
+    player_box = pygame.Rect(x, y, 118, 34)
+    pygame.draw.rect(screen, (18, 15, 12), player_box, border_radius=10)
+    pygame.draw.rect(screen, GOLD_BORDER, player_box, 1, border_radius=10)
+    pygame.draw.circle(screen, current_player["color"], (player_box.x + 16, player_box.centery), 10)
+    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (player_box.x + 34, player_box.y + 7))
+    x = player_box.right + 12
+
+    max_right = SCREEN_WIDTH - 48
+    gap = 10
+    for label, value, width in resources:
+        if x + width > max_right:
+            break
+        box = pygame.Rect(x, y, width, 34)
+        pygame.draw.rect(screen, (18, 15, 12), box, border_radius=10)
+        pygame.draw.rect(screen, GOLD_BORDER, box, 1, border_radius=10)
+        text = f"{label}: {value}"
+        while small_font.size(text)[0] > box.width - 20 and len(text) > 4:
+            text = text[:-4] + "..."
+        label_surface = small_font.render(text, True, TEXT_COLOR)
+        screen.blit(label_surface, (box.x + 10, box.y + 7))
+        x = box.right + gap
+
     screen.set_clip(old_clip)
 
 
