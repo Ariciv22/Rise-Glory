@@ -25,7 +25,7 @@ MIN_ZOOM = 0.35
 MAX_ZOOM = 1.50
 DEFAULT_ZOOM = 1.0
 
-PLAYER_TOPBAR_HEIGHT = 88
+PLAYER_TOPBAR_HEIGHT = 112
 LEFT_SCORE_WIDTH = 280
 LEFT_SCORE_HEIGHT = 210
 LEFT_CARDS_WIDTH = 300
@@ -809,9 +809,9 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
 
     title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
-    screen.blit(title, (24, 12))
+    screen.blit(title, (24, 16))
     subtitle = small_font.render("Surowce i najwazniejsze informacje gracza", True, (255, 210, 150))
-    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH / 2, 32)))
+    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH / 2, 42)))
 
     resources = [
         ("Zywnosc", city_count * 2),
@@ -823,7 +823,7 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
         ("Jedn.", unit_count),
     ]
     x = 24
-    y = 54
+    y = 74
     pygame.draw.circle(screen, current_player["color"], (x + 12, y + 12), 11)
     screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (x + 32, y))
     x += 130
