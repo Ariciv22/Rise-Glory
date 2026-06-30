@@ -260,12 +260,31 @@ def blit_fit_center(screen, image, rect):
     screen.blit(scaled, (x, y))
 
 
-def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=45):
+def blit_fill_crop(screen, image, rect):
+    iw, ih = image.get_size()
+    if iw <= 0 or ih <= 0 or rect.width <= 0 or rect.height <= 0:
+        return
+    scale = max(rect.width / iw, rect.height / ih)
+    new_w = max(1, int(iw * scale))
+    new_h = max(1, int(ih * scale))
+    scaled = pygame.transform.smoothscale(image, (new_w, new_h))
+    src_x = max(0, (new_w - rect.width) // 2)
+    src_y = max(0, (new_h - rect.height) // 2)
+    source_rect = pygame.Rect(src_x, src_y, min(rect.width, new_w), min(rect.height, new_h))
+    target_x = rect.x + max(0, (rect.width - new_w) // 2)
+    target_y = rect.y + max(0, (rect.height - new_h) // 2)
+    screen.blit(scaled, (target_x, target_y), source_rect)
+
+
+def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=45, mode="fit"):
     dark_back = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
     dark_back.fill((0, 0, 0, 135))
     screen.blit(dark_back, rect.topleft)
     if image:
-        blit_fit_center(screen, image, rect)
+        if mode == "fill":
+            blit_fill_crop(screen, image, rect)
+        else:
+            blit_fit_center(screen, image, rect)
         if fill_alpha:
             shade = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
             shade.fill((0, 0, 0, fill_alpha))
@@ -748,7 +767,7 @@ def draw_arrow_handle(screen, rect, direction, mouse_pos):
 
 def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, current_map_key, city_count, unit_count, ui_graphics):
     rect = pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)
-    draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25)
+    draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25, mode="fill")
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
 
     title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
