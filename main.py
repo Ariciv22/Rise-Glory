@@ -276,15 +276,53 @@ def blit_fill_crop(screen, image, rect):
     screen.blit(scaled, (target_x, target_y), source_rect)
 
 
-def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=45, mode="fit"):
+def blit_nine_slice(screen, image, rect, border=38):
+    iw, ih = image.get_size()
+    if iw <= 0 or ih <= 0 or rect.width <= 0 or rect.height <= 0:
+        return
+    b = max(8, min(border, iw // 3, ih // 3, rect.width // 3, rect.height // 3))
+
+    src = {
+        "tl": pygame.Rect(0, 0, b, b),
+        "t": pygame.Rect(b, 0, iw - 2 * b, b),
+        "tr": pygame.Rect(iw - b, 0, b, b),
+        "l": pygame.Rect(0, b, b, ih - 2 * b),
+        "c": pygame.Rect(b, b, iw - 2 * b, ih - 2 * b),
+        "r": pygame.Rect(iw - b, b, b, ih - 2 * b),
+        "bl": pygame.Rect(0, ih - b, b, b),
+        "bt": pygame.Rect(b, ih - b, iw - 2 * b, b),
+        "br": pygame.Rect(iw - b, ih - b, b, b),
+    }
+    dst = {
+        "tl": pygame.Rect(rect.x, rect.y, b, b),
+        "t": pygame.Rect(rect.x + b, rect.y, rect.width - 2 * b, b),
+        "tr": pygame.Rect(rect.right - b, rect.y, b, b),
+        "l": pygame.Rect(rect.x, rect.y + b, b, rect.height - 2 * b),
+        "c": pygame.Rect(rect.x + b, rect.y + b, rect.width - 2 * b, rect.height - 2 * b),
+        "r": pygame.Rect(rect.right - b, rect.y + b, b, rect.height - 2 * b),
+        "bl": pygame.Rect(rect.x, rect.bottom - b, b, b),
+        "bt": pygame.Rect(rect.x + b, rect.bottom - b, rect.width - 2 * b, b),
+        "br": pygame.Rect(rect.right - b, rect.bottom - b, b, b),
+    }
+    for key in ["tl", "t", "tr", "l", "c", "r", "bl", "bt", "br"]:
+        if src[key].width <= 0 or src[key].height <= 0 or dst[key].width <= 0 or dst[key].height <= 0:
+            continue
+        part = image.subsurface(src[key])
+        scaled = pygame.transform.smoothscale(part, (dst[key].width, dst[key].height))
+        screen.blit(scaled, dst[key].topleft)
+
+
+def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=35, mode="slice"):
     dark_back = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
-    dark_back.fill((0, 0, 0, 135))
+    dark_back.fill((0, 0, 0, 125))
     screen.blit(dark_back, rect.topleft)
     if image:
         if mode == "fill":
             blit_fill_crop(screen, image, rect)
-        else:
+        elif mode == "fit":
             blit_fit_center(screen, image, rect)
+        else:
+            blit_nine_slice(screen, image, rect)
         if fill_alpha:
             shade = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
             shade.fill((0, 0, 0, fill_alpha))
@@ -767,7 +805,7 @@ def draw_arrow_handle(screen, rect, direction, mouse_pos):
 
 def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, current_map_key, city_count, unit_count, ui_graphics):
     rect = pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)
-    draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25, mode="fill")
+    draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25, mode="slice")
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
 
     title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
@@ -802,7 +840,7 @@ def draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, unit
     x = 0 if ui_state.score_open else -LEFT_SCORE_WIDTH + PANEL_HANDLE
     y = PLAYER_TOPBAR_HEIGHT + PANEL_GAP
     panel = pygame.Rect(x, y, LEFT_SCORE_WIDTH, LEFT_SCORE_HEIGHT)
-    draw_image_panel(screen, panel, ui_graphics.get("panel1"), UI_GREEN, fill_alpha=25)
+    draw_image_panel(screen, panel, ui_graphics.get("panel1"), UI_GREEN, fill_alpha=25, mode="slice")
     handle = pygame.Rect(x + LEFT_SCORE_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "left" if ui_state.score_open else "right", mouse_pos)
     buttons.append(Button("", "toggle_score", handle))
@@ -825,7 +863,7 @@ def draw_cards_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics)
     x = 0 if ui_state.cards_open else -LEFT_CARDS_WIDTH + PANEL_HANDLE
     y = PLAYER_TOPBAR_HEIGHT + LEFT_SCORE_HEIGHT + PANEL_GAP * 2 + 145
     panel = pygame.Rect(x, y, LEFT_CARDS_WIDTH, LEFT_CARDS_HEIGHT)
-    draw_image_panel(screen, panel, ui_graphics.get("panel1"), UI_BLACK, fill_alpha=25)
+    draw_image_panel(screen, panel, ui_graphics.get("panel1"), UI_BLACK, fill_alpha=25, mode="slice")
     handle = pygame.Rect(x + LEFT_CARDS_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "left" if ui_state.cards_open else "right", mouse_pos)
     buttons.append(Button("", "toggle_cards", handle))
@@ -852,7 +890,7 @@ def draw_log_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics):
     if ui_state.city_open:
         h -= BOTTOM_CITY_HEIGHT
     panel = pygame.Rect(x, y, RIGHT_LOG_WIDTH, h)
-    draw_image_panel(screen, panel, ui_graphics.get("panel3"), UI_BLUE, fill_alpha=25)
+    draw_image_panel(screen, panel, ui_graphics.get("panel3"), UI_BLUE, fill_alpha=25, mode="slice")
     handle = pygame.Rect(x, y + 18, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "right" if ui_state.log_open else "left", mouse_pos)
     buttons.append(Button("", "toggle_log", handle))
@@ -903,7 +941,7 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
     panel = pygame.Rect(LEFT_CARDS_WIDTH + PANEL_GAP, y, SCREEN_WIDTH - LEFT_CARDS_WIDTH - RIGHT_LOG_WIDTH - PANEL_GAP * 2, h)
     if not ui_state.log_open:
         panel.width += RIGHT_LOG_WIDTH - PANEL_HANDLE
-    draw_image_panel(screen, panel, ui_graphics.get("panel2"), UI_PINK, fill_alpha=25)
+    draw_image_panel(screen, panel, ui_graphics.get("panel2"), UI_PINK, fill_alpha=25, mode="slice")
     handle = pygame.Rect(panel.right - 70, y + 8, 54, PANEL_HANDLE)
     draw_arrow_handle(screen, handle, "down" if ui_state.city_open else "up", mouse_pos)
     buttons.append(Button("", "toggle_city", handle))
