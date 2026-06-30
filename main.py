@@ -808,10 +808,12 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
     draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25, mode="slice")
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
 
+    old_clip = screen.get_clip()
+    screen.set_clip(rect.inflate(-70, -20))
     title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
-    screen.blit(title, (24, 16))
+    screen.blit(title, (60, 20))
     subtitle = small_font.render("Surowce i najwazniejsze informacje gracza", True, (255, 210, 150))
-    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH / 2, 42)))
+    screen.blit(subtitle, subtitle.get_rect(center=(SCREEN_WIDTH / 2, 44)))
 
     resources = [
         ("Zywnosc", city_count * 2),
@@ -822,17 +824,18 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
         ("Kafle", f"{tile_count}/{MAX_MAP_TILES}"),
         ("Jedn.", unit_count),
     ]
-    x = 24
+    x = 28
     y = 74
     pygame.draw.circle(screen, current_player["color"], (x + 12, y + 12), 11)
-    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (x + 32, y))
-    x += 130
+    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (x + 34, y))
+    x += 140
     for label, value in resources:
         chip = pygame.Rect(x, y - 3, 116, 32)
         pygame.draw.rect(screen, (20, 18, 15), chip, border_radius=14)
         pygame.draw.rect(screen, GOLD_BORDER, chip, 1, border_radius=14)
         screen.blit(small_font.render(f"{label}: {value}", True, TEXT_COLOR), (x + 10, y + 4))
         x += 124
+    screen.set_clip(old_clip)
 
 
 def draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, units, ui_graphics):
@@ -846,15 +849,18 @@ def draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, unit
     buttons.append(Button("", "toggle_score", handle))
 
     if ui_state.score_open:
-        screen.blit(font.render("Tabela wynikow", True, TEXT_COLOR), (x + 54, y + 22))
-        py = y + 70
+        old_clip = screen.get_clip()
+        screen.set_clip(panel.inflate(-52, -36))
+        screen.blit(font.render("Tabela wynikow", True, TEXT_COLOR), (x + 52, y + 28))
+        py = y + 82
         for player in PLAYERS:
             city_count = len([city for city in cities if city["player"]["id"] == player["id"]])
             unit_count = len([unit for unit in units if unit.player["id"] == player["id"]])
             score = city_count * 3 + unit_count
-            pygame.draw.circle(screen, player["color"], (x + 30, py + 10), 8)
-            screen.blit(small_font.render(f"{player['name']}  {score} pkt", True, TEXT_COLOR), (x + 48, py))
-            py += 28
+            pygame.draw.circle(screen, player["color"], (x + 34, py + 10), 8)
+            screen.blit(small_font.render(f"{player['name']}  {score} pkt", True, TEXT_COLOR), (x + 56, py))
+            py += 27
+        screen.set_clip(old_clip)
     return buttons, [panel]
 
 
@@ -869,7 +875,9 @@ def draw_cards_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics)
     buttons.append(Button("", "toggle_cards", handle))
 
     if ui_state.cards_open:
-        screen.blit(font.render("Talie kart", True, TEXT_COLOR), (x + 54, y + 24))
+        old_clip = screen.get_clip()
+        screen.set_clip(panel.inflate(-48, -38))
+        screen.blit(font.render("Talie kart", True, TEXT_COLOR), (x + 52, y + 30))
         lines = [
             "Przygody: 50",
             "Technologie: 0 / do dodania",
@@ -878,7 +886,8 @@ def draw_cards_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics)
             "Liderzy: 0 / do dodania",
             "Klik w zeton odkrycia -> karta",
         ]
-        draw_text_lines(screen, small_font, lines, x + 24, y + 76, max_width=LEFT_CARDS_WIDTH - 48)
+        draw_text_lines(screen, small_font, lines, x + 32, y + 86, max_width=LEFT_CARDS_WIDTH - 76, line_height=21)
+        screen.set_clip(old_clip)
     return buttons, [panel]
 
 
@@ -896,14 +905,18 @@ def draw_log_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics):
     buttons.append(Button("", "toggle_log", handle))
 
     if ui_state.log_open:
-        screen.blit(font.render("Chat i logi gry", True, TEXT_COLOR), (x + 48, y + 24))
-        screen.blit(small_font.render("Co sie dzieje na planszy", True, MUTED_TEXT_COLOR), (x + 48, y + 54))
-        py = y + 92
+        old_clip = screen.get_clip()
+        screen.set_clip(panel.inflate(-54, -44))
+        screen.blit(font.render("Chat i logi gry", True, TEXT_COLOR), (x + 62, y + 30))
+        screen.blit(small_font.render("Co sie dzieje na planszy", True, MUTED_TEXT_COLOR), (x + 62, y + 62))
+        py = y + 102
         for line in ui_state.logs[-10:]:
-            pygame.draw.rect(screen, (20, 18, 15), (x + 18, py - 4, RIGHT_LOG_WIDTH - 36, 34), border_radius=8)
-            pygame.draw.rect(screen, (125, 92, 52), (x + 18, py - 4, RIGHT_LOG_WIDTH - 36, 34), 1, border_radius=8)
-            draw_text_lines(screen, small_font, [line], x + 28, py + 4, TEXT_COLOR, max_width=RIGHT_LOG_WIDTH - 56)
+            row = pygame.Rect(x + 34, py - 4, RIGHT_LOG_WIDTH - 68, 34)
+            pygame.draw.rect(screen, (20, 18, 15), row, border_radius=8)
+            pygame.draw.rect(screen, (125, 92, 52), row, 1, border_radius=8)
+            draw_text_lines(screen, small_font, [line], x + 44, py + 4, TEXT_COLOR, max_width=RIGHT_LOG_WIDTH - 88)
             py += 40
+        screen.set_clip(old_clip)
     return buttons, [panel]
 
 
@@ -947,13 +960,15 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
     buttons.append(Button("", "toggle_city", handle))
 
     if ui_state.city_open:
-        screen.blit(font.render("Miasta gracza i ich rozwoj", True, TEXT_COLOR), (panel.x + 18, panel.y + 18))
+        old_clip = screen.get_clip()
+        screen.set_clip(panel.inflate(-44, -30))
+        screen.blit(font.render("Miasta gracza i ich rozwoj", True, TEXT_COLOR), (panel.x + 34, panel.y + 28))
         player_cities = [city for city in cities if city["player"]["id"] == current_player["id"]]
         city_text = ", ".join(city["name"] for city in player_cities) if player_cities else "Brak miast - zaloz pierwsze miasto osadnikiem."
-        draw_text_lines(screen, small_font, [city_text], panel.x + 18, panel.y + 52, MUTED_TEXT_COLOR, max_width=panel.width - 36)
+        draw_text_lines(screen, small_font, [city_text], panel.x + 34, panel.y + 62, MUTED_TEXT_COLOR, max_width=panel.width - 68)
 
-        bx = panel.x + 18
-        by = panel.y + 92
+        bx = panel.x + 34
+        by = panel.y + 98
         action_buttons = [
             Button("Zaloz miasto", "place_city", (bx, by, 160, 42)),
             Button("Nastepny gracz", "next_player", (bx + 172, by, 170, 42)),
@@ -964,7 +979,7 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
             button.draw(screen, small_font, mouse_pos, active=(placement_mode and button.action == "place_city"))
         buttons.extend(action_buttons)
 
-        info_x = bx + 720
+        info_x = bx + 740
         selected_tile_name = selected_tile.terrain["name"] if selected_tile else "brak"
         selected_unit_name = selected_unit.name if selected_unit else "brak"
         lines = [
@@ -972,7 +987,8 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
             f"Jednostka: {selected_unit_name}",
             f"Ruchy: {selected_unit.moves_left}/{UNIT_MOVES_PER_TURN}" if selected_unit else "Ruchy: -",
         ]
-        draw_text_lines(screen, small_font, lines, info_x, panel.y + 50, TEXT_COLOR, max_width=max(120, panel.right - info_x - 20))
+        draw_text_lines(screen, small_font, lines, info_x, panel.y + 56, TEXT_COLOR, max_width=max(120, panel.right - info_x - 30))
+        screen.set_clip(old_clip)
     return buttons, [panel]
 
 
