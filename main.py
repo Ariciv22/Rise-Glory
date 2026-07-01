@@ -20,7 +20,7 @@ MIN_ZOOM = 0.35
 MAX_ZOOM = 1.50
 DEFAULT_ZOOM = 1.0
 
-PLAYER_TOPBAR_HEIGHT = 112
+PLAYER_TOPBAR_HEIGHT = 142
 LEFT_SCORE_WIDTH = 280
 LEFT_SCORE_HEIGHT = 210
 LEFT_CARDS_WIDTH = 300
@@ -650,35 +650,47 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
     rect = pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)
     draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25)
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
+
     old_clip = screen.get_clip()
-    screen.set_clip(rect.inflate(-70, -22))
-    title_box = pygame.Rect(56, 18, min(420, SCREEN_WIDTH - 130), 32)
+    inner = rect.inflate(-72, -32)
+    screen.set_clip(inner)
+
+    title_box = pygame.Rect(58, 24, min(420, SCREEN_WIDTH - 132), 34)
     pygame.draw.rect(screen, (18, 15, 12), title_box, border_radius=10)
     pygame.draw.rect(screen, GOLD_BORDER, title_box, 1, border_radius=10)
     title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
-    screen.blit(title, (title_box.x + 14, title_box.y + 5))
+    screen.blit(title, (title_box.x + 14, title_box.y + 6))
+
     resources = [
-        ("Zywnosc", city_count * 2, 132), ("Produkcja", city_count + 1, 138), ("Zloto", 3, 100),
-        ("Nauka", 0, 104), ("Kultura", 0, 112), ("Kafle", f"{tile_count}/{MAX_MAP_TILES}", 118), ("Jedn.", unit_count, 100),
+        ("Zywnosc", city_count * 2, 132),
+        ("Produkcja", city_count + 1, 138),
+        ("Zloto", 3, 100),
+        ("Nauka", 0, 104),
+        ("Kultura", 0, 112),
+        ("Kafle", f"{tile_count}/{MAX_MAP_TILES}", 118),
+        ("Jedn.", unit_count, 100),
     ]
-    y = 66
-    x = 28
-    player_box = pygame.Rect(x, y, 118, 34)
-    pygame.draw.rect(screen, (18, 15, 12), player_box, border_radius=10)
-    pygame.draw.rect(screen, GOLD_BORDER, player_box, 1, border_radius=10)
-    pygame.draw.circle(screen, current_player["color"], (player_box.x + 16, player_box.centery), 10)
-    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (player_box.x + 34, player_box.y + 7))
+
+    y = 86
+    x = 34
+    box_h = 30
+    player_box = pygame.Rect(x, y, 118, box_h)
+    pygame.draw.rect(screen, (18, 15, 12), player_box, border_radius=9)
+    pygame.draw.rect(screen, GOLD_BORDER, player_box, 1, border_radius=9)
+    pygame.draw.circle(screen, current_player["color"], (player_box.x + 16, player_box.centery), 9)
+    screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (player_box.x + 34, player_box.y + 5))
     x = player_box.right + 12
+
     for label, value, width in resources:
-        if x + width > SCREEN_WIDTH - 48:
+        if x + width > SCREEN_WIDTH - 56:
             break
-        box = pygame.Rect(x, y, width, 34)
-        pygame.draw.rect(screen, (18, 15, 12), box, border_radius=10)
-        pygame.draw.rect(screen, GOLD_BORDER, box, 1, border_radius=10)
+        box = pygame.Rect(x, y, width, box_h)
+        pygame.draw.rect(screen, (18, 15, 12), box, border_radius=9)
+        pygame.draw.rect(screen, GOLD_BORDER, box, 1, border_radius=9)
         text = f"{label}: {value}"
-        while small_font.size(text)[0] > box.width - 20 and len(text) > 4:
+        while small_font.size(text)[0] > box.width - 18 and len(text) > 4:
             text = text[:-4] + "..."
-        screen.blit(small_font.render(text, True, TEXT_COLOR), (box.x + 10, box.y + 7))
+        screen.blit(small_font.render(text, True, TEXT_COLOR), (box.x + 9, box.y + 5))
         x = box.right + 10
     screen.set_clip(old_clip)
 
@@ -758,11 +770,9 @@ def draw_event_card(screen, font, small_font, mouse_pos, ui_state, selected_tile
         handle = pygame.Rect(SCREEN_WIDTH // 2 - 45, PLAYER_TOPBAR_HEIGHT + 12, 90, 34)
         draw_arrow_handle(screen, handle, "down", mouse_pos)
         return [Button("", "toggle_event", handle)], [handle]
-
     card_x = SCREEN_WIDTH / 2 - EVENT_CARD_W / 2
     card_y = PLAYER_TOPBAR_HEIGHT + 250
     card = pygame.Rect(card_x, card_y, EVENT_CARD_W, EVENT_CARD_H)
-    # Usunieto duzego dekoracyjnego heksa spod karty odkrycia.
     pygame.draw.rect(screen, (20, 18, 15), card, border_radius=10)
     pygame.draw.rect(screen, (160, 108, 55), card, 4, border_radius=10)
     title = "Karta odkrycia"
