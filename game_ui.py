@@ -26,6 +26,16 @@ GOLD_BORDER = (145, 104, 48)
 
 ROOT_DIR = Path(__file__).resolve().parent
 UI_GRAPHICS_DIR = ROOT_DIR / "Grafiki" / "grafiki UI"
+DECK_GRAPHICS_DIR = ROOT_DIR / "Grafiki" / "talie kart"
+
+DECKS = [
+    {"name": "Przygody", "keys": ("przygody", "deck_przygody", "adventures")},
+    {"name": "Technologia", "keys": ("technologia", "deck_technologia", "technology")},
+    {"name": "Polityki i Intrygi", "keys": ("polityki_i_intrygi", "polityki intrygi", "deck_polityki_i_intrygi")},
+    {"name": "Ekonomia", "keys": ("ekonomia", "deck_ekonomia", "economy")},
+    {"name": "Doradcy i Emisariusze", "keys": ("doradcy_i_emisariusze", "doradcy emisariusze", "deck_doradcy_i_emisariusze")},
+    {"name": "Talia Osobista", "keys": ("talia_osobista", "deck_talia_osobista", "personal_deck")},
+]
 
 
 class Button:
@@ -84,13 +94,22 @@ def draw_background(screen):
     screen.fill(BACKGROUND_COLOR)
 
 
-def find_ui_image(*names):
-    for name in names:
-        for ext in ["", ".png", ".jpg", ".jpeg", ".webp"]:
-            path = UI_GRAPHICS_DIR / f"{name}{ext}"
-            if path.exists():
-                return path
+def find_image_in_dirs(directories, *names):
+    for directory in directories:
+        for name in names:
+            for ext in ["", ".png", ".jpg", ".jpeg", ".webp"]:
+                path = directory / f"{name}{ext}"
+                if path.exists():
+                    return path
     return None
+
+
+def find_ui_image(*names):
+    return find_image_in_dirs([UI_GRAPHICS_DIR], *names)
+
+
+def find_deck_image(*names):
+    return find_image_in_dirs([DECK_GRAPHICS_DIR, UI_GRAPHICS_DIR], *names)
 
 
 def remove_checker_background(surface):
@@ -114,6 +133,18 @@ def crop_to_visible(surface, alpha_threshold=8):
     return cropped
 
 
+def load_deck_images():
+    images = {}
+    for deck in DECKS:
+        path = find_deck_image(*deck["keys"])
+        if path:
+            image = pygame.image.load(str(path)).convert_alpha()
+            images[deck["name"]] = crop_to_visible(remove_checker_background(image))
+        else:
+            images[deck["name"]] = None
+    return images
+
+
 def load_ui_panel_graphics():
     mapping = {
         "panel1": ("panel1", "panel 1"),
@@ -129,6 +160,7 @@ def load_ui_panel_graphics():
             loaded[key] = crop_to_visible(remove_checker_background(image))
         else:
             loaded[key] = None
+    loaded["decks"] = load_deck_images()
     return loaded
 
 
@@ -138,26 +170,14 @@ def blit_nine_slice(screen, image, rect, border=38):
         return
     b = max(8, min(border, iw // 3, ih // 3, rect.width // 3, rect.height // 3))
     src = {
-        "tl": pygame.Rect(0, 0, b, b),
-        "t": pygame.Rect(b, 0, iw - 2 * b, b),
-        "tr": pygame.Rect(iw - b, 0, b, b),
-        "l": pygame.Rect(0, b, b, ih - 2 * b),
-        "c": pygame.Rect(b, b, iw - 2 * b, ih - 2 * b),
-        "r": pygame.Rect(iw - b, b, b, ih - 2 * b),
-        "bl": pygame.Rect(0, ih - b, b, b),
-        "bt": pygame.Rect(b, ih - b, iw - 2 * b, b),
-        "br": pygame.Rect(iw - b, ih - b, b, b),
+        "tl": pygame.Rect(0, 0, b, b), "t": pygame.Rect(b, 0, iw - 2 * b, b), "tr": pygame.Rect(iw - b, 0, b, b),
+        "l": pygame.Rect(0, b, b, ih - 2 * b), "c": pygame.Rect(b, b, iw - 2 * b, ih - 2 * b), "r": pygame.Rect(iw - b, b, b, ih - 2 * b),
+        "bl": pygame.Rect(0, ih - b, b, b), "bt": pygame.Rect(b, ih - b, iw - 2 * b, b), "br": pygame.Rect(iw - b, ih - b, b, b),
     }
     dst = {
-        "tl": pygame.Rect(rect.x, rect.y, b, b),
-        "t": pygame.Rect(rect.x + b, rect.y, rect.width - 2 * b, b),
-        "tr": pygame.Rect(rect.right - b, rect.y, b, b),
-        "l": pygame.Rect(rect.x, rect.y + b, b, rect.height - 2 * b),
-        "c": pygame.Rect(rect.x + b, rect.y + b, rect.width - 2 * b, rect.height - 2 * b),
-        "r": pygame.Rect(rect.right - b, rect.y + b, b, rect.height - 2 * b),
-        "bl": pygame.Rect(rect.x, rect.bottom - b, b, b),
-        "bt": pygame.Rect(rect.x + b, rect.bottom - b, rect.width - 2 * b, b),
-        "br": pygame.Rect(rect.right - b, rect.bottom - b, b, b),
+        "tl": pygame.Rect(rect.x, rect.y, b, b), "t": pygame.Rect(rect.x + b, rect.y, rect.width - 2 * b, b), "tr": pygame.Rect(rect.right - b, rect.y, b, b),
+        "l": pygame.Rect(rect.x, rect.y + b, b, rect.height - 2 * b), "c": pygame.Rect(rect.x + b, rect.y + b, rect.width - 2 * b, rect.height - 2 * b), "r": pygame.Rect(rect.right - b, rect.y + b, b, rect.height - 2 * b),
+        "bl": pygame.Rect(rect.x, rect.bottom - b, b, b), "bt": pygame.Rect(rect.x + b, rect.bottom - b, rect.width - 2 * b, b), "br": pygame.Rect(rect.right - b, rect.bottom - b, b, b),
     }
     for key in src:
         if src[key].width > 0 and src[key].height > 0 and dst[key].width > 0 and dst[key].height > 0:
@@ -325,21 +345,78 @@ def draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, unit
     return buttons, [panel]
 
 
+def blit_fit_center(screen, image, rect):
+    iw, ih = image.get_size()
+    if iw <= 0 or ih <= 0 or rect.width <= 0 or rect.height <= 0:
+        return
+    scale = min(rect.width / iw, rect.height / ih)
+    size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
+    scaled = pygame.transform.smoothscale(image, size)
+    screen.blit(scaled, (rect.x + (rect.width - size[0]) // 2, rect.y + (rect.height - size[1]) // 2))
+
+
+def draw_fallback_deck(screen, font, rect, name):
+    pygame.draw.rect(screen, (38, 30, 22), rect, border_radius=8)
+    pygame.draw.rect(screen, (128, 92, 48), rect, 2, border_radius=8)
+    words = name.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if font.size(candidate)[0] <= rect.width - 16:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    y = rect.centery - (len(lines) * 20) // 2
+    for line in lines:
+        label = font.render(line, True, TEXT_COLOR)
+        screen.blit(label, label.get_rect(center=(rect.centerx, y + 10)))
+        y += 20
+
+
+def draw_deck_slot(screen, font, slot, deck_name, image):
+    pygame.draw.rect(screen, (18, 15, 12), slot, border_radius=8)
+    pygame.draw.rect(screen, GOLD_BORDER, slot, 1, border_radius=8)
+    inner = slot.inflate(-10, -10)
+    if image:
+        blit_fit_center(screen, image, inner)
+    else:
+        draw_fallback_deck(screen, font, inner, deck_name)
+
+
 def draw_cards_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics):
+    _, sh = screen.get_size()
     buttons = []
     x = 0 if ui_state.cards_open else -LEFT_CARDS_WIDTH + PANEL_HANDLE
     y = PLAYER_TOPBAR_HEIGHT + LEFT_SCORE_HEIGHT + PANEL_GAP * 2 + 24
-    panel = pygame.Rect(x, y, LEFT_CARDS_WIDTH, LEFT_CARDS_HEIGHT)
+    panel_h = max(220, sh - y)
+    panel = pygame.Rect(x, y, LEFT_CARDS_WIDTH, panel_h)
     draw_image_panel(screen, panel, ui_graphics.get("panel1"), fill_alpha=25)
     handle = pygame.Rect(x + LEFT_CARDS_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "left" if ui_state.cards_open else "right", mouse_pos)
     buttons.append(Button("", "toggle_cards", handle))
+
     if ui_state.cards_open:
         old_clip = screen.get_clip()
-        screen.set_clip(panel.inflate(-48, -38))
+        screen.set_clip(panel.inflate(-46, -36))
         screen.blit(font.render("Talie kart", True, TEXT_COLOR), (x + 52, y + 30))
-        lines = ["Przygody: 50", "Technologie: 0 / do dodania", "Polityki: 0 / do dodania", "Cuda: 0 / do dodania", "Liderzy: 0 / do dodania", "Klik w zeton odkrycia -> karta"]
-        draw_text_lines(screen, small_font, lines, x + 32, y + 86, max_width=LEFT_CARDS_WIDTH - 76, line_height=21)
+        deck_images = ui_graphics.get("decks", {})
+        content_x = x + 28
+        content_top = y + 72
+        content_w = LEFT_CARDS_WIDTH - 66
+        content_h = panel.bottom - content_top - 28
+        gap = 8
+        slot_h = max(46, min(92, (content_h - gap * (len(DECKS) - 1)) // len(DECKS)))
+        py = content_top
+        for deck in DECKS:
+            slot = pygame.Rect(content_x, py, content_w, slot_h)
+            draw_deck_slot(screen, small_font, slot, deck["name"], deck_images.get(deck["name"]))
+            buttons.append(Button("", f"deck:{deck['name']}", slot))
+            py += slot_h + gap
         screen.set_clip(old_clip)
     return buttons, [panel]
 
