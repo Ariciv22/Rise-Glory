@@ -4,10 +4,6 @@ from pathlib import Path
 
 import pygame
 
-# =========================
-# USTAWIENIA
-# =========================
-
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 1000
 MIN_SCREEN_WIDTH = 1000
@@ -19,7 +15,6 @@ TEXTURE_SIZE = 512
 DRAG_THRESHOLD = 4
 MAX_MAP_TILES = 64
 UNIT_MOVES_PER_TURN = 2
-
 ZOOM_STEP = 1.10
 MIN_ZOOM = 0.35
 MAX_ZOOM = 1.50
@@ -34,13 +29,10 @@ RIGHT_LOG_WIDTH = 300
 BOTTOM_CITY_HEIGHT = 160
 PANEL_HANDLE = 34
 PANEL_GAP = 12
-EVENT_CARD_W = 210
-EVENT_CARD_H = 260
+EVENT_CARD_W = 250
+EVENT_CARD_H = 270
 
 BACKGROUND_COLOR = (18, 22, 26)
-PANEL_COLOR = (28, 33, 38)
-PANEL_DARK_COLOR = (18, 22, 26)
-PANEL_SOFT_COLOR = (35, 42, 49)
 BUTTON_COLOR = (42, 50, 58)
 BUTTON_HOVER_COLOR = (62, 74, 84)
 BUTTON_ACTIVE_COLOR = (74, 92, 72)
@@ -56,10 +48,6 @@ UNIT_FILL_COLOR = (238, 238, 220)
 VALID_MOVE_COLOR = (120, 210, 255)
 UI_PINK = (255, 155, 200)
 UI_ORANGE = (255, 122, 30)
-UI_GREEN = (20, 180, 70)
-UI_BLUE = (0, 160, 220)
-UI_RED = (235, 40, 45)
-UI_BLACK = (20, 20, 20)
 GOLD_BORDER = (145, 104, 48)
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -99,16 +87,9 @@ TERRAINS = {
     "ocean": {"name": "Ocean", "image": "ocean.png", "fallback": (22, 64, 102), "weight": 0, "land": False, "passable": False},
 }
 
-# =========================
-# GEOMETRIA HEKSOW
-# =========================
 
 def hex_corners(center_x, center_y, size):
-    points = []
-    for i in range(6):
-        angle_rad = math.radians(60 * i - 30)
-        points.append((center_x + size * math.cos(angle_rad), center_y + size * math.sin(angle_rad)))
-    return points
+    return [(center_x + size * math.cos(math.radians(60 * i - 30)), center_y + size * math.sin(math.radians(60 * i - 30))) for i in range(6)]
 
 
 def point_in_polygon(point, polygon):
@@ -118,8 +99,7 @@ def point_in_polygon(point, polygon):
     for i in range(len(polygon)):
         xi, yi = polygon[i]
         xj, yj = polygon[j]
-        intersects = ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / ((yj - yi) + 0.00001) + xi)
-        if intersects:
+        if ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / ((yj - yi) + 0.00001) + xi):
             inside = not inside
         j = i
     return inside
@@ -154,20 +134,14 @@ def axial_set_to_positions(terrain_by_coord):
 def are_adjacent_tiles(tile_a, tile_b):
     if not tile_a or not tile_b or tile_a == tile_b:
         return False
-    distance = math.hypot(tile_a.x - tile_b.x, tile_a.y - tile_b.y)
-    return distance <= HEX_SIZE * 1.85
+    return math.hypot(tile_a.x - tile_b.x, tile_a.y - tile_b.y) <= HEX_SIZE * 1.85
 
-# =========================
-# TEKSTURY I GRAFIKI UI
-# =========================
 
 def create_hex_texture(source_image):
     target = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
     scaled = pygame.transform.smoothscale(source_image, (TEXTURE_SIZE, TEXTURE_SIZE))
     target.blit(scaled, (0, 0))
-    center = TEXTURE_SIZE / 2
-    radius = TEXTURE_SIZE / 2 - 2
-    points = [(int(x), int(y)) for x, y in hex_corners(center, center, radius)]
+    points = [(int(x), int(y)) for x, y in hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2)]
     mask = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
     pygame.draw.polygon(mask, (255, 255, 255, 255), points)
     target.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
@@ -176,9 +150,7 @@ def create_hex_texture(source_image):
 
 def create_fallback_texture(color):
     fallback = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
-    points = hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2)
-    pygame.draw.polygon(fallback, color, points)
-    pygame.draw.circle(fallback, tuple(min(255, channel + 18) for channel in color), (TEXTURE_SIZE // 2, TEXTURE_SIZE // 2), TEXTURE_SIZE // 4)
+    pygame.draw.polygon(fallback, color, hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2))
     return fallback
 
 
@@ -196,9 +168,8 @@ def load_terrain_textures():
 
 
 def find_ui_image(*names):
-    extensions = ["", ".png", ".jpg", ".jpeg", ".webp"]
     for name in names:
-        for ext in extensions:
+        for ext in ["", ".png", ".jpg", ".jpeg", ".webp"]:
             path = UI_GRAPHICS_DIR / f"{name}{ext}"
             if path.exists():
                 return path
@@ -212,8 +183,7 @@ def remove_checker_background(surface):
         for x in range(width):
             r, g, b, a = cleaned.get_at((x, y))
             near_gray = abs(r - g) <= 10 and abs(g - b) <= 10 and abs(r - b) <= 10
-            checker_white_or_gray = near_gray and r >= 185 and g >= 185 and b >= 185
-            if a > 0 and checker_white_or_gray:
+            if a > 0 and near_gray and r >= 185 and g >= 185 and b >= 185:
                 cleaned.set_at((x, y), (r, g, b, 0))
     return cleaned
 
@@ -239,41 +209,10 @@ def load_ui_panel_graphics():
         path = find_ui_image(*variants)
         if path:
             image = pygame.image.load(str(path)).convert_alpha()
-            image = remove_checker_background(image)
-            loaded[key] = crop_to_visible(image)
+            loaded[key] = crop_to_visible(remove_checker_background(image))
         else:
             loaded[key] = None
-            print(f"Brak grafiki UI dla {key} w: {UI_GRAPHICS_DIR}")
     return loaded
-
-
-def blit_fit_center(screen, image, rect):
-    iw, ih = image.get_size()
-    if iw <= 0 or ih <= 0 or rect.width <= 0 or rect.height <= 0:
-        return
-    scale = min(rect.width / iw, rect.height / ih)
-    new_w = max(1, int(iw * scale))
-    new_h = max(1, int(ih * scale))
-    scaled = pygame.transform.smoothscale(image, (new_w, new_h))
-    x = rect.x + (rect.width - new_w) // 2
-    y = rect.y + (rect.height - new_h) // 2
-    screen.blit(scaled, (x, y))
-
-
-def blit_fill_crop(screen, image, rect):
-    iw, ih = image.get_size()
-    if iw <= 0 or ih <= 0 or rect.width <= 0 or rect.height <= 0:
-        return
-    scale = max(rect.width / iw, rect.height / ih)
-    new_w = max(1, int(iw * scale))
-    new_h = max(1, int(ih * scale))
-    scaled = pygame.transform.smoothscale(image, (new_w, new_h))
-    src_x = max(0, (new_w - rect.width) // 2)
-    src_y = max(0, (new_h - rect.height) // 2)
-    source_rect = pygame.Rect(src_x, src_y, min(rect.width, new_w), min(rect.height, new_h))
-    target_x = rect.x + max(0, (rect.width - new_w) // 2)
-    target_y = rect.y + max(0, (rect.height - new_h) // 2)
-    screen.blit(scaled, (target_x, target_y), source_rect)
 
 
 def blit_nine_slice(screen, image, rect, border=38):
@@ -281,48 +220,27 @@ def blit_nine_slice(screen, image, rect, border=38):
     if iw <= 0 or ih <= 0 or rect.width <= 0 or rect.height <= 0:
         return
     b = max(8, min(border, iw // 3, ih // 3, rect.width // 3, rect.height // 3))
-
     src = {
-        "tl": pygame.Rect(0, 0, b, b),
-        "t": pygame.Rect(b, 0, iw - 2 * b, b),
-        "tr": pygame.Rect(iw - b, 0, b, b),
-        "l": pygame.Rect(0, b, b, ih - 2 * b),
-        "c": pygame.Rect(b, b, iw - 2 * b, ih - 2 * b),
-        "r": pygame.Rect(iw - b, b, b, ih - 2 * b),
-        "bl": pygame.Rect(0, ih - b, b, b),
-        "bt": pygame.Rect(b, ih - b, iw - 2 * b, b),
-        "br": pygame.Rect(iw - b, ih - b, b, b),
+        "tl": pygame.Rect(0, 0, b, b), "t": pygame.Rect(b, 0, iw - 2 * b, b), "tr": pygame.Rect(iw - b, 0, b, b),
+        "l": pygame.Rect(0, b, b, ih - 2 * b), "c": pygame.Rect(b, b, iw - 2 * b, ih - 2 * b), "r": pygame.Rect(iw - b, b, b, ih - 2 * b),
+        "bl": pygame.Rect(0, ih - b, b, b), "bt": pygame.Rect(b, ih - b, iw - 2 * b, b), "br": pygame.Rect(iw - b, ih - b, b, b),
     }
     dst = {
-        "tl": pygame.Rect(rect.x, rect.y, b, b),
-        "t": pygame.Rect(rect.x + b, rect.y, rect.width - 2 * b, b),
-        "tr": pygame.Rect(rect.right - b, rect.y, b, b),
-        "l": pygame.Rect(rect.x, rect.y + b, b, rect.height - 2 * b),
-        "c": pygame.Rect(rect.x + b, rect.y + b, rect.width - 2 * b, rect.height - 2 * b),
-        "r": pygame.Rect(rect.right - b, rect.y + b, b, rect.height - 2 * b),
-        "bl": pygame.Rect(rect.x, rect.bottom - b, b, b),
-        "bt": pygame.Rect(rect.x + b, rect.bottom - b, rect.width - 2 * b, b),
-        "br": pygame.Rect(rect.right - b, rect.bottom - b, b, b),
+        "tl": pygame.Rect(rect.x, rect.y, b, b), "t": pygame.Rect(rect.x + b, rect.y, rect.width - 2 * b, b), "tr": pygame.Rect(rect.right - b, rect.y, b, b),
+        "l": pygame.Rect(rect.x, rect.y + b, b, rect.height - 2 * b), "c": pygame.Rect(rect.x + b, rect.y + b, rect.width - 2 * b, rect.height - 2 * b), "r": pygame.Rect(rect.right - b, rect.y + b, b, rect.height - 2 * b),
+        "bl": pygame.Rect(rect.x, rect.bottom - b, b, b), "bt": pygame.Rect(rect.x + b, rect.bottom - b, rect.width - 2 * b, b), "br": pygame.Rect(rect.right - b, rect.bottom - b, b, b),
     }
-    for key in ["tl", "t", "tr", "l", "c", "r", "bl", "bt", "br"]:
-        if src[key].width <= 0 or src[key].height <= 0 or dst[key].width <= 0 or dst[key].height <= 0:
-            continue
-        part = image.subsurface(src[key])
-        scaled = pygame.transform.smoothscale(part, (dst[key].width, dst[key].height))
-        screen.blit(scaled, dst[key].topleft)
+    for key in src:
+        if src[key].width > 0 and src[key].height > 0 and dst[key].width > 0 and dst[key].height > 0:
+            screen.blit(pygame.transform.smoothscale(image.subsurface(src[key]), (dst[key].width, dst[key].height)), dst[key].topleft)
 
 
-def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=35, mode="slice"):
+def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=35):
     dark_back = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
     dark_back.fill((0, 0, 0, 125))
     screen.blit(dark_back, rect.topleft)
     if image:
-        if mode == "fill":
-            blit_fill_crop(screen, image, rect)
-        elif mode == "fit":
-            blit_fit_center(screen, image, rect)
-        else:
-            blit_nine_slice(screen, image, rect)
+        blit_nine_slice(screen, image, rect)
         if fill_alpha:
             shade = pygame.Surface((rect.width, rect.height), pygame.SRCALPHA)
             shade.fill((0, 0, 0, fill_alpha))
@@ -330,9 +248,6 @@ def draw_image_panel(screen, rect, image, fallback_border=None, fill_alpha=35, m
     elif fallback_border:
         pygame.draw.rect(screen, fallback_border, rect, 3, border_radius=8)
 
-# =========================
-# KLASY
-# =========================
 
 class Camera:
     def __init__(self):
@@ -367,13 +282,9 @@ class Camera:
         max_x = max(tile.x for tile in tiles) + HEX_SIZE
         min_y = min(tile.y for tile in tiles) - HEX_SIZE
         max_y = max(tile.y for tile in tiles) + HEX_SIZE
-        map_center_x = (min_x + max_x) / 2
-        map_center_y = (min_y + max_y) / 2
-        target_x = SCREEN_WIDTH / 2
-        target_y = PLAYER_TOPBAR_HEIGHT + (SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT - BOTTOM_CITY_HEIGHT) / 2
         self.zoom = DEFAULT_ZOOM
-        self.x = target_x - map_center_x * self.zoom
-        self.y = target_y - map_center_y * self.zoom
+        self.x = SCREEN_WIDTH / 2 - ((min_x + max_x) / 2) * self.zoom
+        self.y = PLAYER_TOPBAR_HEIGHT + (SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT - BOTTOM_CITY_HEIGHT) / 2 - ((min_y + max_y) / 2) * self.zoom
 
     def reset(self):
         self.x = SCREEN_WIDTH / 2
@@ -409,17 +320,13 @@ class Unit:
 
     @property
     def name(self):
-        if self.unit_type == "settler":
-            return "Osadnik"
-        return self.unit_type
+        return "Osadnik" if self.unit_type == "settler" else self.unit_type
 
     def reset_moves(self):
         self.moves_left = UNIT_MOVES_PER_TURN
 
     def can_move_to(self, target_tile, units):
-        if self.moves_left <= 0 or not target_tile:
-            return False
-        if not target_tile.terrain.get("passable"):
+        if self.moves_left <= 0 or not target_tile or not target_tile.terrain.get("passable"):
             return False
         if any(unit.tile == target_tile for unit in units):
             return False
@@ -465,7 +372,7 @@ class HexTile:
     def can_place_city(self):
         return self.terrain.get("land") and self.terrain_key != "mountain" and self.city is None
 
-    def draw_city(self, screen, camera, font):
+    def draw_city(self, screen, camera):
         if not self.city:
             return
         screen_x, screen_y = self.screen_position(camera)
@@ -476,16 +383,12 @@ class HexTile:
         x = int(screen_x - base_w / 2)
         y = int(screen_y - base_h / 2)
         owner = self.city["player"]
-
         pygame.draw.circle(screen, owner["color"], (int(screen_x), int(screen_y)), max(24, int(31 * scale)))
         pygame.draw.rect(screen, CITY_COLOR, (x, y, base_w, base_h), border_radius=max(3, int(5 * scale)))
         roof = [(screen_x - base_w / 2 - 5 * scale, y), (screen_x, y - roof_h), (screen_x + base_w / 2 + 5 * scale, y)]
         pygame.draw.polygon(screen, owner["color"], roof)
         pygame.draw.polygon(screen, CITY_BORDER_COLOR, roof, max(2, int(3 * scale)))
         pygame.draw.rect(screen, CITY_BORDER_COLOR, (x, y, base_w, base_h), max(2, int(3 * scale)), border_radius=max(3, int(5 * scale)))
-        gate_w = max(8, int(10 * scale))
-        gate_h = max(10, int(14 * scale))
-        pygame.draw.rect(screen, CITY_BORDER_COLOR, (int(screen_x - gate_w / 2), int(y + base_h - gate_h), gate_w, gate_h))
 
     def draw(self, screen, textures, camera, font, hovered=False, selected=False, placement_mode=False, valid_unit_move=False):
         texture = textures[self.terrain_key]
@@ -494,18 +397,16 @@ class HexTile:
         tile_texture = pygame.transform.smoothscale(texture, (draw_size, draw_size))
         screen.blit(tile_texture, (screen_x - draw_size / 2, screen_y - draw_size / 2))
         points = self.screen_points(camera)
-        border_width = max(1, int(2 * camera.zoom))
-        highlight_width = max(2, int(5 * camera.zoom))
-        pygame.draw.polygon(screen, HEX_BORDER_COLOR, points, border_width)
+        pygame.draw.polygon(screen, HEX_BORDER_COLOR, points, max(1, int(2 * camera.zoom)))
         if valid_unit_move:
             pygame.draw.polygon(screen, VALID_MOVE_COLOR, points, max(2, int(4 * camera.zoom)))
         if hovered:
-            pygame.draw.polygon(screen, HEX_HOVER_COLOR, points, highlight_width)
+            pygame.draw.polygon(screen, HEX_HOVER_COLOR, points, max(2, int(5 * camera.zoom)))
         if selected:
-            pygame.draw.polygon(screen, HEX_SELECTED_COLOR, points, highlight_width)
+            pygame.draw.polygon(screen, HEX_SELECTED_COLOR, points, max(2, int(5 * camera.zoom)))
         if placement_mode and self.can_place_city():
             pygame.draw.polygon(screen, (120, 255, 150), points, max(1, int(3 * camera.zoom)))
-        self.draw_city(screen, camera, font)
+        self.draw_city(screen, camera)
 
     def contains_point(self, mouse_pos, camera):
         return point_in_polygon(mouse_pos, self.screen_points(camera))
@@ -518,10 +419,7 @@ class GameUIState:
         self.log_open = True
         self.city_open = True
         self.show_event_card = True
-        self.logs = [
-            "Start gry. Wybierz osadnika i odkrywaj mape.",
-            "Panele chowasz roznymi strzalkami.",
-        ]
+        self.logs = ["Start gry. Wybierz osadnika i odkrywaj mape.", "Panele chowasz roznymi strzalkami."]
 
     def toggle(self, name):
         if name == "score":
@@ -539,9 +437,6 @@ class GameUIState:
         self.logs.append(message)
         self.logs = self.logs[-12:]
 
-# =========================
-# GENERATORY MAP
-# =========================
 
 def make_spiral_path(center_q, center_r, steps, seed=1):
     rng = random.Random(seed)
@@ -589,15 +484,6 @@ def add_water_around_land(land_coords, max_tiles=MAX_MAP_TILES):
         if len(terrain_by_coord) >= max_tiles:
             return terrain_by_coord
         terrain_by_coord[coord] = "coast"
-    ocean_coords = set()
-    for q, r in coast_coords:
-        for neighbor in neighbors(q, r):
-            if neighbor not in land_coords and neighbor not in coast_coords:
-                ocean_coords.add(neighbor)
-    for coord in sorted_by_center(ocean_coords):
-        if len(terrain_by_coord) >= max_tiles:
-            return terrain_by_coord
-        terrain_by_coord[coord] = "ocean"
     return terrain_by_coord
 
 
@@ -616,45 +502,15 @@ def generate_rosette_rows(row_lengths):
 
 
 def generate_archipelago_positions():
-    rng = random.Random(22)
-    island_centers = [(-4, -3), (4, -2), (-3, 3), (4, 3)]
-    sizes = [6, 6, 5, 5]
-    land = set()
-    for index, center in enumerate(island_centers):
-        island = make_spiral_path(center[0], center[1], sizes[index], seed=100 + index)
-        land.update(island)
-        border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
-        if border:
-            q, r = rng.choice(border)
-            land.add(rng.choice(neighbors(q, r)))
-    return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
+    return axial_set_to_positions(add_water_around_land(set(make_spiral_path(-3, -2, 12, 22) + make_spiral_path(3, 2, 12, 23))))
 
 
 def generate_fractal_positions():
-    rng = random.Random(33)
-    land = set(make_spiral_path(0, 0, 34, seed=33))
-    starts = rng.sample(list(land), 3)
-    for index, start in enumerate(starts):
-        branch = make_spiral_path(start[0], start[1], 5, seed=300 + index)
-        land.update(branch)
-    candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) >= 4]
-    for coord in rng.sample(candidates, min(4, len(candidates))):
-        if coord != (0, 0):
-            land.remove(coord)
-    return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
+    return axial_set_to_positions(add_water_around_land(set(make_spiral_path(0, 0, 42, 33))))
 
 
 def generate_pangea_positions():
-    rng = random.Random(44)
-    land = set(make_spiral_path(0, 0, 38, seed=44))
-    for _ in range(8):
-        border = [coord for coord in land if any(n not in land for n in neighbors(*coord))]
-        q, r = rng.choice(border)
-        land.add(rng.choice(neighbors(q, r)))
-    edge_candidates = [coord for coord in land if len([n for n in neighbors(*coord) if n in land]) <= 2]
-    for coord in rng.sample(edge_candidates, min(5, len(edge_candidates))):
-        land.remove(coord)
-    return axial_set_to_positions(add_water_around_land(land, MAX_MAP_TILES))
+    return axial_set_to_positions(add_water_around_land(set(make_spiral_path(0, 0, 48, 44))))
 
 
 def generate_map_positions(map_key):
@@ -677,9 +533,7 @@ def generate_map(map_key):
     land_keys = [key for key, terrain in TERRAINS.items() if terrain.get("land")]
     land_weights = [TERRAINS[key]["weight"] for key in land_keys]
     random.seed(42)
-    positions = generate_map_positions(map_key)
-    if len(positions) > MAX_MAP_TILES:
-        positions = positions[:MAX_MAP_TILES]
+    positions = generate_map_positions(map_key)[:MAX_MAP_TILES]
     tiles = []
     for tile_id, (col, row, x, y, terrain_override) in enumerate(positions, start=1):
         terrain_key = terrain_override or random.choices(land_keys, weights=land_weights, k=1)[0]
@@ -700,9 +554,6 @@ def find_start_tile(tiles):
             return tile
     return tiles[0] if tiles else None
 
-# =========================
-# UI
-# =========================
 
 def draw_background(screen):
     screen.fill(BACKGROUND_COLOR)
@@ -730,8 +581,6 @@ def draw_menu(screen, title_font, font, small_font, mouse_pos):
     buttons = build_vertical_buttons([("Nowa gra", "new_game"), ("Multiplayer", "multiplayer"), ("Wyjscie", "exit")], 310)
     for button in buttons:
         button.draw(screen, font, mouse_pos)
-    hint = small_font.render("Wybierz opcje z menu", True, MUTED_TEXT_COLOR)
-    screen.blit(hint, hint.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 90)))
     return buttons
 
 
@@ -743,8 +592,6 @@ def draw_map_select(screen, title_font, font, small_font, mouse_pos):
     buttons = build_vertical_buttons(items, 290, button_width=420, button_height=58, gap=14)
     for button in buttons:
         button.draw(screen, font, mouse_pos)
-    hint = small_font.render("Kazdy generator ma maksymalnie 64 kafle, czyli limit 8x8.", True, MUTED_TEXT_COLOR)
-    screen.blit(hint, hint.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80)))
     return buttons
 
 
@@ -759,16 +606,12 @@ def draw_player_select(screen, title_font, font, small_font, mouse_pos):
         if isinstance(button.action, int):
             player = PLAYERS[button.action - 1]
             pygame.draw.circle(screen, player["color"], (button.rect.left + 34, button.rect.centery), 12)
-    hint = small_font.render("W grze kliknij osadnika, potem sasiedni heks. C = zaloz miasto.", True, MUTED_TEXT_COLOR)
-    screen.blit(hint, hint.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 80)))
     return buttons
 
 
 def draw_multiplayer(screen, title_font, font, small_font, mouse_pos):
     draw_background(screen)
     draw_title(screen, title_font, font, "Multiplayer", "Tryb do dodania pozniej")
-    info = small_font.render("Na razie zostawilem ekran jako placeholder.", True, MUTED_TEXT_COLOR)
-    screen.blit(info, info.get_rect(center=(SCREEN_WIDTH / 2, 310)))
     buttons = build_vertical_buttons([("Powrot", "back")], 390)
     for button in buttons:
         button.draw(screen, font, mouse_pos)
@@ -805,30 +648,19 @@ def draw_arrow_handle(screen, rect, direction, mouse_pos):
 
 def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, current_map_key, city_count, unit_count, ui_graphics):
     rect = pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)
-    draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25, mode="slice")
+    draw_image_panel(screen, rect, ui_graphics.get("panel4"), UI_ORANGE, fill_alpha=25)
     pygame.draw.line(screen, UI_ORANGE, (0, PLAYER_TOPBAR_HEIGHT - 2), (SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT - 2), 2)
-
     old_clip = screen.get_clip()
-    content = rect.inflate(-70, -22)
-    screen.set_clip(content)
-
-    title_text = f"Rise & Glory - {map_display_name(current_map_key)}"
+    screen.set_clip(rect.inflate(-70, -22))
     title_box = pygame.Rect(56, 18, min(420, SCREEN_WIDTH - 130), 32)
     pygame.draw.rect(screen, (18, 15, 12), title_box, border_radius=10)
     pygame.draw.rect(screen, GOLD_BORDER, title_box, 1, border_radius=10)
-    title = font.render(title_text, True, TEXT_COLOR)
+    title = font.render(f"Rise & Glory - {map_display_name(current_map_key)}", True, TEXT_COLOR)
     screen.blit(title, (title_box.x + 14, title_box.y + 5))
-
     resources = [
-        ("Zywnosc", city_count * 2, 132),
-        ("Produkcja", city_count + 1, 138),
-        ("Zloto", 3, 100),
-        ("Nauka", 0, 104),
-        ("Kultura", 0, 112),
-        ("Kafle", f"{tile_count}/{MAX_MAP_TILES}", 118),
-        ("Jedn.", unit_count, 100),
+        ("Zywnosc", city_count * 2, 132), ("Produkcja", city_count + 1, 138), ("Zloto", 3, 100),
+        ("Nauka", 0, 104), ("Kultura", 0, 112), ("Kafle", f"{tile_count}/{MAX_MAP_TILES}", 118), ("Jedn.", unit_count, 100),
     ]
-
     y = 66
     x = 28
     player_box = pygame.Rect(x, y, 118, 34)
@@ -837,11 +669,8 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
     pygame.draw.circle(screen, current_player["color"], (player_box.x + 16, player_box.centery), 10)
     screen.blit(small_font.render(current_player["name"], True, TEXT_COLOR), (player_box.x + 34, player_box.y + 7))
     x = player_box.right + 12
-
-    max_right = SCREEN_WIDTH - 48
-    gap = 10
     for label, value, width in resources:
-        if x + width > max_right:
+        if x + width > SCREEN_WIDTH - 48:
             break
         box = pygame.Rect(x, y, width, 34)
         pygame.draw.rect(screen, (18, 15, 12), box, border_radius=10)
@@ -849,10 +678,8 @@ def draw_top_resource_bar(screen, font, small_font, current_player, tile_count, 
         text = f"{label}: {value}"
         while small_font.size(text)[0] > box.width - 20 and len(text) > 4:
             text = text[:-4] + "..."
-        label_surface = small_font.render(text, True, TEXT_COLOR)
-        screen.blit(label_surface, (box.x + 10, box.y + 7))
-        x = box.right + gap
-
+        screen.blit(small_font.render(text, True, TEXT_COLOR), (box.x + 10, box.y + 7))
+        x = box.right + 10
     screen.set_clip(old_clip)
 
 
@@ -861,11 +688,10 @@ def draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, unit
     x = 0 if ui_state.score_open else -LEFT_SCORE_WIDTH + PANEL_HANDLE
     y = PLAYER_TOPBAR_HEIGHT + PANEL_GAP
     panel = pygame.Rect(x, y, LEFT_SCORE_WIDTH, LEFT_SCORE_HEIGHT)
-    draw_image_panel(screen, panel, ui_graphics.get("panel1"), UI_GREEN, fill_alpha=25, mode="slice")
+    draw_image_panel(screen, panel, ui_graphics.get("panel1"), fill_alpha=25)
     handle = pygame.Rect(x + LEFT_SCORE_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "left" if ui_state.score_open else "right", mouse_pos)
     buttons.append(Button("", "toggle_score", handle))
-
     if ui_state.score_open:
         old_clip = screen.get_clip()
         screen.set_clip(panel.inflate(-52, -36))
@@ -887,23 +713,15 @@ def draw_cards_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics)
     x = 0 if ui_state.cards_open else -LEFT_CARDS_WIDTH + PANEL_HANDLE
     y = PLAYER_TOPBAR_HEIGHT + LEFT_SCORE_HEIGHT + PANEL_GAP * 2 + 145
     panel = pygame.Rect(x, y, LEFT_CARDS_WIDTH, LEFT_CARDS_HEIGHT)
-    draw_image_panel(screen, panel, ui_graphics.get("panel1"), UI_BLACK, fill_alpha=25, mode="slice")
+    draw_image_panel(screen, panel, ui_graphics.get("panel1"), fill_alpha=25)
     handle = pygame.Rect(x + LEFT_CARDS_WIDTH - PANEL_HANDLE, y + 14, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "left" if ui_state.cards_open else "right", mouse_pos)
     buttons.append(Button("", "toggle_cards", handle))
-
     if ui_state.cards_open:
         old_clip = screen.get_clip()
         screen.set_clip(panel.inflate(-48, -38))
         screen.blit(font.render("Talie kart", True, TEXT_COLOR), (x + 52, y + 30))
-        lines = [
-            "Przygody: 50",
-            "Technologie: 0 / do dodania",
-            "Polityki: 0 / do dodania",
-            "Cuda: 0 / do dodania",
-            "Liderzy: 0 / do dodania",
-            "Klik w zeton odkrycia -> karta",
-        ]
+        lines = ["Przygody: 50", "Technologie: 0 / do dodania", "Polityki: 0 / do dodania", "Cuda: 0 / do dodania", "Liderzy: 0 / do dodania", "Klik w zeton odkrycia -> karta"]
         draw_text_lines(screen, small_font, lines, x + 32, y + 86, max_width=LEFT_CARDS_WIDTH - 76, line_height=21)
         screen.set_clip(old_clip)
     return buttons, [panel]
@@ -913,15 +731,12 @@ def draw_log_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics):
     buttons = []
     x = SCREEN_WIDTH - RIGHT_LOG_WIDTH if ui_state.log_open else SCREEN_WIDTH - PANEL_HANDLE
     y = PLAYER_TOPBAR_HEIGHT
-    h = SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT
-    if ui_state.city_open:
-        h -= BOTTOM_CITY_HEIGHT
+    h = SCREEN_HEIGHT - PLAYER_TOPBAR_HEIGHT - (BOTTOM_CITY_HEIGHT if ui_state.city_open else 0)
     panel = pygame.Rect(x, y, RIGHT_LOG_WIDTH, h)
-    draw_image_panel(screen, panel, ui_graphics.get("panel3"), UI_BLUE, fill_alpha=25, mode="slice")
+    draw_image_panel(screen, panel, ui_graphics.get("panel3"), fill_alpha=25)
     handle = pygame.Rect(x, y + 18, PANEL_HANDLE, 54)
     draw_arrow_handle(screen, handle, "right" if ui_state.log_open else "left", mouse_pos)
     buttons.append(Button("", "toggle_log", handle))
-
     if ui_state.log_open:
         old_clip = screen.get_clip()
         screen.set_clip(panel.inflate(-54, -44))
@@ -947,12 +762,9 @@ def draw_event_card(screen, font, small_font, mouse_pos, ui_state, selected_tile
     card_x = SCREEN_WIDTH / 2 - EVENT_CARD_W / 2
     card_y = PLAYER_TOPBAR_HEIGHT + 250
     card = pygame.Rect(card_x, card_y, EVENT_CARD_W, EVENT_CARD_H)
-    hex_points = hex_corners(SCREEN_WIDTH / 2, PLAYER_TOPBAR_HEIGHT + 285, 270)
-    pygame.draw.polygon(screen, (34, 19, 22), hex_points)
-    pygame.draw.polygon(screen, (130, 85, 38), hex_points, 5)
+    # Usunieto duzego dekoracyjnego heksa spod karty odkrycia.
     pygame.draw.rect(screen, (20, 18, 15), card, border_radius=10)
     pygame.draw.rect(screen, (160, 108, 55), card, 4, border_radius=10)
-
     title = "Karta odkrycia"
     desc = "Tu pojawi sie karta, ktora gracz odkrywa i pokazuje wszystkim."
     if selected_tile:
@@ -972,11 +784,10 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
     panel = pygame.Rect(LEFT_CARDS_WIDTH + PANEL_GAP, y, SCREEN_WIDTH - LEFT_CARDS_WIDTH - RIGHT_LOG_WIDTH - PANEL_GAP * 2, h)
     if not ui_state.log_open:
         panel.width += RIGHT_LOG_WIDTH - PANEL_HANDLE
-    draw_image_panel(screen, panel, ui_graphics.get("panel2"), UI_PINK, fill_alpha=25, mode="slice")
+    draw_image_panel(screen, panel, ui_graphics.get("panel2"), fill_alpha=25)
     handle = pygame.Rect(panel.right - 70, y + 8, 54, PANEL_HANDLE)
     draw_arrow_handle(screen, handle, "down" if ui_state.city_open else "up", mouse_pos)
     buttons.append(Button("", "toggle_city", handle))
-
     if ui_state.city_open:
         old_clip = screen.get_clip()
         screen.set_clip(panel.inflate(-44, -30))
@@ -984,7 +795,6 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
         player_cities = [city for city in cities if city["player"]["id"] == current_player["id"]]
         city_text = ", ".join(city["name"] for city in player_cities) if player_cities else "Brak miast - zaloz pierwsze miasto osadnikiem."
         draw_text_lines(screen, small_font, [city_text], panel.x + 34, panel.y + 62, MUTED_TEXT_COLOR, max_width=panel.width - 68)
-
         bx = panel.x + 34
         by = panel.y + 98
         action_buttons = [
@@ -996,15 +806,10 @@ def draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_playe
         for button in action_buttons:
             button.draw(screen, small_font, mouse_pos, active=(placement_mode and button.action == "place_city"))
         buttons.extend(action_buttons)
-
         info_x = bx + 740
         selected_tile_name = selected_tile.terrain["name"] if selected_tile else "brak"
         selected_unit_name = selected_unit.name if selected_unit else "brak"
-        lines = [
-            f"Kafel: {selected_tile_name}",
-            f"Jednostka: {selected_unit_name}",
-            f"Ruchy: {selected_unit.moves_left}/{UNIT_MOVES_PER_TURN}" if selected_unit else "Ruchy: -",
-        ]
+        lines = [f"Kafel: {selected_tile_name}", f"Jednostka: {selected_unit_name}", f"Ruchy: {selected_unit.moves_left}/{UNIT_MOVES_PER_TURN}" if selected_unit else "Ruchy: -"]
         draw_text_lines(screen, small_font, lines, info_x, panel.y + 56, TEXT_COLOR, max_width=max(120, panel.right - info_x - 30))
         screen.set_clip(old_clip)
     return buttons, [panel]
@@ -1014,36 +819,25 @@ def draw_player_ui(screen, title_font, font, small_font, mouse_pos, ui_state, ho
     draw_top_resource_bar(screen, font, small_font, current_player, tile_count, current_map_key, len(cities), len(units), ui_graphics)
     buttons = []
     blocking_rects = [pygame.Rect(0, 0, SCREEN_WIDTH, PLAYER_TOPBAR_HEIGHT)]
-
     score_buttons, score_rects = draw_score_panel(screen, font, small_font, mouse_pos, ui_state, cities, units, ui_graphics)
     card_buttons, card_rects = draw_cards_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics)
     buttons.extend(score_buttons + card_buttons)
     blocking_rects.extend(score_rects + card_rects)
-
     event_buttons, event_rects = draw_event_card(screen, font, small_font, mouse_pos, ui_state, selected_tile)
     buttons.extend(event_buttons)
     blocking_rects.extend(event_rects)
-
     city_buttons, city_rects = draw_city_panel(screen, font, small_font, mouse_pos, ui_state, current_player, selected_tile, selected_unit, placement_mode, cities, units, ui_graphics)
     buttons.extend(city_buttons)
     blocking_rects.extend(city_rects)
-
     log_buttons, log_rects = draw_log_panel(screen, font, small_font, mouse_pos, ui_state, ui_graphics)
     buttons.extend(log_buttons)
     blocking_rects.extend(log_rects)
-
-    if not ui_state.city_open:
-        info = "Kliknij osadnika i rusz nim maksymalnie 2 heksy. C = miasto, TAB = gracz, N = ruchy, SPACJA = kamera."
-        screen.blit(small_font.render(info, True, MUTED_TEXT_COLOR), (24, SCREEN_HEIGHT - 28))
     return buttons, blocking_rects
 
 
 def is_over_ui(mouse_pos, rects):
     return any(rect.collidepoint(mouse_pos) for rect in rects)
 
-# =========================
-# LOGIKA GRY
-# =========================
 
 def create_window(fullscreen=False):
     if fullscreen:
@@ -1059,9 +853,7 @@ def create_tiles_for_map(map_key, camera):
 
 def create_starting_units(tiles, player):
     start_tile = find_start_tile(tiles)
-    if not start_tile:
-        return []
-    return [Unit(1, "settler", player, start_tile)]
+    return [Unit(1, "settler", player, start_tile)] if start_tile else []
 
 
 def place_city_on_tile(tile, player, cities):
@@ -1086,9 +878,6 @@ def reset_player_units(units, player):
         if unit.player["id"] == player["id"]:
             unit.reset_moves()
 
-# =========================
-# GLOWNA PETLA
-# =========================
 
 def main():
     global SCREEN_WIDTH, SCREEN_HEIGHT
@@ -1096,18 +885,15 @@ def main():
     fullscreen = False
     screen = create_window(fullscreen)
     pygame.display.set_caption("Rise & Glory")
-
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 20, bold=True)
     small_font = pygame.font.SysFont("arial", 17, bold=True)
     token_font = pygame.font.SysFont("arial", 17, bold=True)
     title_font = pygame.font.SysFont("arial", 42, bold=True)
-
     textures = load_terrain_textures()
     ui_graphics = load_ui_panel_graphics()
     camera = Camera()
     ui_state = GameUIState()
-
     game_state = GAME_STATE_MENU
     current_map_key = "rosette8"
     current_player_index = 0
@@ -1118,7 +904,6 @@ def main():
     selected_unit = None
     placement_mode = False
     running = True
-
     is_dragging = False
     drag_moved = False
     drag_start_pos = (0, 0)
@@ -1132,7 +917,6 @@ def main():
         mouse_in_window = pygame.mouse.get_focused()
         hovered_tile = None
         current_player = PLAYERS[current_player_index]
-
         if game_state == GAME_STATE_GAME and mouse_in_window and not is_dragging and not is_over_ui(mouse_pos, ui_blocking_rects):
             for tile in tiles:
                 if tile.contains_point(mouse_pos, camera):
@@ -1142,14 +926,12 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
             if event.type == pygame.VIDEORESIZE and not fullscreen:
                 SCREEN_WIDTH = max(MIN_SCREEN_WIDTH, event.w)
                 SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, event.h)
                 screen = create_window(fullscreen)
                 if game_state == GAME_STATE_GAME:
                     camera.center_on_tiles(tiles)
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     if game_state == GAME_STATE_GAME:
@@ -1159,7 +941,6 @@ def main():
                             selected_unit = None
                         else:
                             game_state = GAME_STATE_MENU
-                            selected_tile = None
                     elif game_state in [GAME_STATE_MAP_SELECT, GAME_STATE_PLAYER_SELECT, GAME_STATE_MULTIPLAYER]:
                         game_state = GAME_STATE_MENU
                     else:
@@ -1198,17 +979,14 @@ def main():
                         screen = create_window(fullscreen)
                     if game_state == GAME_STATE_GAME:
                         camera.center_on_tiles(tiles)
-
             if event.type == pygame.MOUSEWHEEL and game_state == GAME_STATE_GAME and mouse_in_window and not is_over_ui(mouse_pos, ui_blocking_rects):
                 camera.zoom_at(mouse_pos, ZOOM_STEP if event.y > 0 else 1 / ZOOM_STEP)
-
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if game_state == GAME_STATE_GAME and mouse_in_window and not is_over_ui(mouse_pos, ui_blocking_rects):
                     is_dragging = True
                     drag_moved = False
                     drag_start_pos = event.pos
                     last_mouse_pos = event.pos
-
             if event.type == pygame.MOUSEMOTION and is_dragging and game_state == GAME_STATE_GAME:
                 current_pos = event.pos
                 dx = current_pos[0] - last_mouse_pos[0]
@@ -1217,7 +995,6 @@ def main():
                     drag_moved = True
                 camera.move(dx, dy)
                 last_mouse_pos = current_pos
-
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 if game_state in [GAME_STATE_MENU, GAME_STATE_MAP_SELECT, GAME_STATE_PLAYER_SELECT, GAME_STATE_MULTIPLAYER]:
                     for button in active_buttons:
@@ -1250,11 +1027,9 @@ def main():
                                     ui_state = GameUIState()
                                     ui_state.add_log(f"Nowa gra: {map_display_name(current_map_key)}.")
                                     game_state = GAME_STATE_GAME
-                            elif game_state == GAME_STATE_MULTIPLAYER:
-                                if button.action == "back":
-                                    game_state = GAME_STATE_MENU
+                            elif game_state == GAME_STATE_MULTIPLAYER and button.action == "back":
+                                game_state = GAME_STATE_MENU
                             break
-
                 elif game_state == GAME_STATE_GAME:
                     is_dragging = False
                     clicked_ui_button = False
@@ -1281,7 +1056,6 @@ def main():
                                 selected_unit = None
                                 ui_state.add_log("Anulowano akcje.")
                             break
-
                     if not clicked_ui_button and not drag_moved and mouse_in_window and not is_over_ui(event.pos, ui_blocking_rects):
                         for tile in tiles:
                             if tile.contains_point(event.pos, camera):
@@ -1304,7 +1078,6 @@ def main():
                                 else:
                                     selected_unit = None
                                 break
-
         if not mouse_in_window:
             is_dragging = False
 
@@ -1336,10 +1109,8 @@ def main():
                 screen, title_font, font, small_font, mouse_pos, ui_state, hovered_tile, camera,
                 current_map_key, len(tiles), current_player, placement_mode, selected_tile, selected_unit, cities, units, ui_graphics,
             )
-
         pygame.display.flip()
         clock.tick(FPS)
-
     pygame.quit()
 
 
