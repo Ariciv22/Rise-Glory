@@ -23,13 +23,14 @@ if pygame is not None and game_ui is not None:
 
     DECKS = [
         {"name": "Przygody", "keys": ("przygody", "deck_przygody", "adventures")},
-        {"name": "Technologia", "keys": ("technologia", "deck_technologia", "technology")},
-        {"name": "Polityki i Intrygi", "keys": ("polityki_i_intrygi", "polityki intrygi", "deck_polityki_i_intrygi")},
+        {"name": "Technologia", "keys": ("nauka", "technologia", "deck_technologia", "technology")},
+        {"name": "Polityki i Intrygi", "keys": ("polityki_intrygi", "polityki_i_intrygi", "polityki intrygi", "deck_polityki_i_intrygi")},
         {"name": "Ekonomia", "keys": ("ekonomia", "deck_ekonomia", "economy")},
-        {"name": "Doradcy i Emisariusze", "keys": ("doradcy_i_emisariusze", "doradcy emisariusze", "deck_doradcy_i_emisariusze")},
+        {"name": "Doradcy i Emisariusze", "keys": ("doradcy_emisariusze", "doradcy_i_emisariusze", "doradcy emisariusze", "deck_doradcy_i_emisariusze")},
         {"name": "Talia Osobista", "keys": ("talia_osobista", "deck_talia_osobista", "personal_deck")},
     ]
 
+    game_ui.DECKS = DECKS
     original_load_ui_panel_graphics = game_ui.load_ui_panel_graphics
 
     def _find_image(*names):
