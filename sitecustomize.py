@@ -17,6 +17,7 @@ except Exception:  # pragma: no cover
 if pygame is not None and game_ui is not None:
     ROOT_DIR = Path(__file__).resolve().parent
     DECK_GRAPHICS_DIRS = [
+        ROOT_DIR / "Grafiki",
         ROOT_DIR / "Grafiki" / "talie kart",
         ROOT_DIR / "Grafiki" / "grafiki UI",
     ]
