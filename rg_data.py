@@ -1,0 +1,123 @@
+SCREEN_WIDTH = 1600
+SCREEN_HEIGHT = 1000
+MIN_SCREEN_WIDTH = 1000
+MIN_SCREEN_HEIGHT = 700
+FPS = 60
+
+HEX_SIZE = 104
+TEXTURE_SIZE = 512
+MAX_MAP_TILES = 64
+HERO_MOVES_PER_TURN = 4
+DRAG_THRESHOLD = 4
+ZOOM_STEP = 1.10
+MIN_ZOOM = 0.35
+MAX_ZOOM = 1.55
+DEFAULT_ZOOM = 1.0
+
+TOP_BAR_H = 126
+LEFT_PANEL_W = 330
+SIDE_MARGIN = 12
+MAP_MARGIN = 28
+
+TEXT = (235, 235, 235)
+MUTED = (180, 185, 190)
+BG = (18, 22, 26)
+PANEL = (24, 20, 16)
+PANEL_DARK = (15, 13, 11)
+GOLD = (145, 104, 48)
+ORANGE = (255, 122, 30)
+HOVER = (255, 230, 120)
+SELECTED = (120, 210, 255)
+MOVE = (120, 210, 255)
+
+STATE_MENU = "menu"
+STATE_MAP_SELECT = "map_select"
+STATE_HERO_SELECT = "hero_select"
+STATE_GAME = "game"
+STATE_MULTIPLAYER = "multiplayer"
+
+MAP_OPTIONS = [
+    ("rosette9", "Rozeta 9x9"),
+    ("rosette8", "Rozeta 8x8"),
+    ("small", "Mala mapa testowa"),
+    ("pangea", "Pangea"),
+]
+
+HERO_ARCHETYPES = [
+    {
+        "id": 1,
+        "name": "Wojownik",
+        "color": (215, 70, 55),
+        "stats": {"Walka": 5, "Handel": 2, "Dyplomacja": 2, "Intryga": 1, "Nauka": 1, "Kultura": 1},
+        "basic_item": "Prosty miecz",
+        "class_item": "Skorzana zbroja",
+        "role": "Najlepszy do walki i eskorty.",
+    },
+    {
+        "id": 2,
+        "name": "Handlarz",
+        "color": (220, 170, 55),
+        "stats": {"Handel": 5, "Dyplomacja": 3, "Intryga": 2, "Kultura": 1, "Nauka": 1, "Walka": 0},
+        "basic_item": "Sakwa kupca",
+        "class_item": "Pierscien kupiecki",
+        "role": "Najlepszy do wymiany, kontraktow i towarow.",
+    },
+    {
+        "id": 3,
+        "name": "Dyplomata",
+        "color": (90, 145, 220),
+        "stats": {"Dyplomacja": 5, "Kultura": 3, "Handel": 2, "Nauka": 1, "Intryga": 1, "Walka": 0},
+        "basic_item": "Elegancki stroj",
+        "class_item": "Pieczec rodu / glejt",
+        "role": "Najlepszy do rozmow, lokacji i konfliktow spolecznych.",
+    },
+    {
+        "id": 4,
+        "name": "Kulturowiec",
+        "color": (170, 95, 210),
+        "stats": {"Kultura": 5, "Dyplomacja": 3, "Handel": 1, "Nauka": 1, "Intryga": 1, "Walka": 1},
+        "basic_item": "Ozdobny stroj",
+        "class_item": "Instrument / kronika",
+        "role": "Najlepszy do wydarzen, tlumu i slawy.",
+    },
+    {
+        "id": 5,
+        "name": "Intrygant",
+        "color": (70, 170, 85),
+        "stats": {"Intryga": 5, "Dyplomacja": 2, "Handel": 2, "Walka": 1, "Nauka": 1, "Kultura": 1},
+        "basic_item": "Sztylet",
+        "class_item": "Kaptur intryganta / pierscien sekretow",
+        "role": "Najlepszy do omijania, sabotazu i informacji.",
+    },
+    {
+        "id": 6,
+        "name": "Uczony",
+        "color": (70, 190, 190),
+        "stats": {"Nauka": 5, "Kultura": 2, "Handel": 2, "Dyplomacja": 1, "Intryga": 1, "Walka": 1},
+        "basic_item": "Torba badacza",
+        "class_item": "Ksiega / mapa ruin",
+        "role": "Najlepszy do ruin, mechanizmow i odkrywania slabosci.",
+    },
+]
+
+TERRAINS = {
+    "plains": {"name": "Rowniny", "image": "rowniny.png", "fallback": (112, 156, 76), "weight": 30, "passable": True, "move": 1},
+    "forest": {"name": "Las", "image": "las.png", "fallback": (49, 107, 62), "weight": 22, "passable": True, "move": 2},
+    "hills": {"name": "Wzgorza", "image": "wzgorza.png", "fallback": (139, 116, 73), "weight": 18, "passable": True, "move": 2},
+    "mountain": {"name": "Gory", "image": "gory.png", "fallback": (116, 116, 112), "weight": 12, "passable": False, "move": 99},
+    "desert": {"name": "Pustynia", "image": "pustynia.png", "fallback": (194, 165, 92), "weight": 10, "passable": True, "move": 1},
+    "tundra": {"name": "Tundra", "image": "tundra.png", "fallback": (145, 170, 154), "weight": 8, "passable": True, "move": 1},
+}
+
+
+def clone_hero(template):
+    hero = dict(template)
+    hero["stats"] = dict(template["stats"])
+    hero["gold"] = 3
+    hero["wounds"] = 0
+    hero["legend"] = 0
+    return hero
+
+
+def map_name(key):
+    return next((name for item_key, name in MAP_OPTIONS if item_key == key), "Mapa")
