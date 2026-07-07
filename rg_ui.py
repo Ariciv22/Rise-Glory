@@ -1,0 +1,71 @@
+import pygame
+
+from rg_data import GOLD, LEFT_PANEL_W, MUTED, PANEL, SCREEN_WIDTH, SIDE_MARGIN, TEXT, TOP_BAR_H
+
+
+class Button:
+    def __init__(self, text, action, rect):
+        self.text = text
+        self.action = action
+        self.rect = pygame.Rect(rect)
+
+    def draw(self, screen, font, mouse_pos, active=False):
+        hovered = self.rect.collidepoint(mouse_pos)
+        bg = (74, 92, 72) if active else ((62, 74, 84) if hovered else (42, 50, 58))
+        pygame.draw.rect(screen, bg, self.rect, border_radius=12)
+        pygame.draw.rect(screen, (120, 140, 150), self.rect, 2, border_radius=12)
+        if self.text:
+            label = font.render(self.text, True, TEXT)
+            screen.blit(label, label.get_rect(center=self.rect.center))
+
+    def clicked(self, pos):
+        return self.rect.collidepoint(pos)
+
+
+def wrap(font, text, width):
+    words = str(text).split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if font.size(candidate)[0] <= width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
+
+
+def draw_lines(screen, font, lines, x, y, color=MUTED, line_h=22, max_width=None):
+    for line in lines:
+        text = str(line)
+        if max_width:
+            while font.size(text)[0] > max_width and len(text) > 4:
+                text = text[:-4] + "..."
+        screen.blit(font.render(text, True, color), (x, y))
+        y += line_h
+    return y
+
+
+def draw_panel(screen, rect, border=GOLD):
+    pygame.draw.rect(screen, PANEL, rect, border_radius=12)
+    pygame.draw.rect(screen, border, rect, 2, border_radius=12)
+
+
+def ui_rects(screen):
+    sw, sh = screen.get_size()
+    return [
+        pygame.Rect(0, 0, sw, TOP_BAR_H),
+        pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
+    ]
+
+
+def over_ui(pos, rects):
+    return any(rect.collidepoint(pos) for rect in rects)
+
+
+def centered_x(width):
+    return SCREEN_WIDTH / 2 - width / 2
