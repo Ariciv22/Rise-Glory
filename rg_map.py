@@ -77,6 +77,13 @@ class Camera:
         self.x = mx - wx * self.zoom
         self.y = my - wy * self.zoom
 
+    def map_view_center(self):
+        map_left = LEFT_PANEL_W + MAP_MARGIN
+        map_right = SCREEN_WIDTH - MAP_MARGIN
+        map_top = TOP_BAR_H + MAP_MARGIN
+        map_bottom = SCREEN_HEIGHT - MAP_MARGIN
+        return map_left + (map_right - map_left) / 2, map_top + (map_bottom - map_top) / 2
+
     def center_on_tiles(self, tiles):
         if not tiles:
             return
@@ -85,14 +92,17 @@ class Camera:
         min_y = min(tile.y for tile in tiles) - HEX_SIZE
         max_y = max(tile.y for tile in tiles) + HEX_SIZE
         self.zoom = DEFAULT_ZOOM
-        map_left = LEFT_PANEL_W + MAP_MARGIN
-        map_right = SCREEN_WIDTH - MAP_MARGIN
-        map_top = TOP_BAR_H + MAP_MARGIN
-        map_bottom = SCREEN_HEIGHT - MAP_MARGIN
-        map_center_x = map_left + (map_right - map_left) / 2
-        map_center_y = map_top + (map_bottom - map_top) / 2
-        self.x = map_center_x - ((min_x + max_x) / 2) * self.zoom
-        self.y = map_center_y - ((min_y + max_y) / 2) * self.zoom
+        cx, cy = self.map_view_center()
+        self.x = cx - ((min_x + max_x) / 2) * self.zoom
+        self.y = cy - ((min_y + max_y) / 2) * self.zoom
+
+    def center_on_tile(self, tile):
+        if not tile:
+            return
+        self.zoom = DEFAULT_ZOOM
+        cx, cy = self.map_view_center()
+        self.x = cx - tile.x * self.zoom
+        self.y = cy - tile.y * self.zoom
 
 
 class Tile:
