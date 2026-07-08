@@ -20,6 +20,7 @@ from rg_data import (
 from rg_hud import draw_game_ui
 from rg_map import Camera, HeroToken, find_start_tile, load_textures
 from rg_screens import draw_hero_select, draw_map_select, draw_menu, draw_multiplayer
+from rg_tooltip import draw_location_tooltip
 from rg_ui import over_ui, ui_rects
 from rg_world import generate_world
 
@@ -192,6 +193,7 @@ def main():
                 tile.draw(screen, textures, camera, token_font, hovered=(tile == hovered), selected=(tile == selected_tile), valid_move=valid)
             token.draw(screen, camera, token_font, selected=(selected_token == token))
             game_buttons = draw_game_ui(screen, font, small_font, hero, token, selected_tile, current_map, active_player)
+            draw_location_tooltip(screen, font, small_font, hovered, mouse)
         pygame.display.flip()
         clock.tick(FPS)
 
