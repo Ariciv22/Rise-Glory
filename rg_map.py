@@ -11,13 +11,13 @@ from rg_data import (
     HEX_SIZE,
     LEFT_PANEL_W,
     MAP_MARGIN,
-    MAX_MAP_TILES,
     MIN_ZOOM,
     MAX_ZOOM,
     MOVE,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     SELECTED,
+    TEXT,
     TEXTURE_SIZE,
     TERRAINS,
     TOP_BAR_H,
@@ -114,6 +114,7 @@ class Tile:
         self.y = y
         self.terrain_key = terrain_key
         self.terrain = TERRAINS[terrain_key]
+        self.location = None
         self.points = hex_corners(x, y, HEX_SIZE)
 
     def screen_points(self, camera):
@@ -125,7 +126,20 @@ class Tile:
     def contains(self, pos, camera):
         return point_in_polygon(pos, self.screen_points(camera))
 
-    def draw(self, screen, textures, camera, hovered=False, selected=False, valid_move=False):
+    def draw_location_marker(self, screen, camera, font):
+        if not self.location:
+            return
+        sx, sy = self.center(camera)
+        radius = max(13, int(19 * camera.zoom))
+        marker_y = int(sy + 30 * camera.zoom)
+        color = self.location["color"]
+        pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 4)
+        pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
+        pygame.draw.circle(screen, (30, 24, 18), (int(sx), marker_y), radius, max(2, int(3 * camera.zoom)))
+        label = font.render(self.location["symbol"], True, TEXT)
+        screen.blit(label, label.get_rect(center=(int(sx), marker_y)))
+
+    def draw(self, screen, textures, camera, font, hovered=False, selected=False, valid_move=False):
         sx, sy = self.center(camera)
         size = max(1, int(HEX_SIZE * 2 * camera.zoom))
         texture = pygame.transform.smoothscale(textures[self.terrain_key], (size, size))
@@ -138,6 +152,7 @@ class Tile:
             pygame.draw.polygon(screen, HOVER, pts, max(2, int(5 * camera.zoom)))
         if selected:
             pygame.draw.polygon(screen, SELECTED, pts, max(2, int(5 * camera.zoom)))
+        self.draw_location_marker(screen, camera, font)
 
 
 class HeroToken:
@@ -248,17 +263,16 @@ def generate_positions(map_key):
         return generate_rosette_rows([4, 5, 6, 7, 8, 7, 6, 5, 4])
     if map_key == "small":
         return generate_rosette_rows([3, 4, 5, 4, 3])
-    return make_spiral(48, 44)
+    return make_spiral(48, random.randint(1, 999999))
 
 
 def generate_map(map_key):
-    keys = list(TERRAINS.keys())
-    weights = [TERRAINS[key]["weight"] for key in keys]
-    random.seed(42)
+    terrain_keys = list(TERRAINS.keys())
+    weights = [TERRAINS[key]["weight"] for key in terrain_keys]
     tiles = []
-    for idx, (q, r, x, y) in enumerate(generate_positions(map_key)[:MAX_MAP_TILES], start=1):
-        terrain = random.choices(keys, weights=weights, k=1)[0]
-        tiles.append(Tile(idx, q, r, x, y, terrain))
+    for idx, (q, r, x, y) in enumerate(generate_positions(map_key), start=1):
+        terrain_key = random.choices(terrain_keys, weights=weights, k=1)[0]
+        tiles.append(Tile(idx, q, r, x, y, terrain_key))
     return tiles
 
 
