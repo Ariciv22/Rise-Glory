@@ -34,6 +34,7 @@ STATE_MENU = "menu"
 STATE_MAP_SELECT = "map_select"
 STATE_HERO_SELECT = "hero_select"
 STATE_GAME = "game"
+STATE_CITY = "city"
 STATE_MULTIPLAYER = "multiplayer"
 
 MAP_OPTIONS = [
