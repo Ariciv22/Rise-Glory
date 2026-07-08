@@ -4,11 +4,11 @@ from rg_data import TERRAINS
 from rg_map import Tile, generate_positions
 
 LOCATIONS = [
-    {"kind": "city", "name": "Miasto", "symbol": "M", "count": 2, "color": (220, 180, 85)},
-    {"kind": "village", "name": "Wies", "symbol": "W", "count": 2, "color": (105, 190, 95)},
-    {"kind": "fort", "name": "Grod", "symbol": "G", "count": 1, "color": (165, 165, 175)},
-    {"kind": "ruins", "name": "Ruiny", "symbol": "R", "count": 2, "color": (145, 105, 180)},
-    {"kind": "special", "name": "Miejsce specjalne", "symbol": "S", "count": 1, "color": (75, 155, 120)},
+    {"kind": "city", "type_name": "Miasto", "name": "Miasto", "symbol": "M", "count": 2, "color": (220, 180, 85)},
+    {"kind": "village", "type_name": "Wies", "name": "Wies", "symbol": "W", "count": 2, "color": (105, 190, 95)},
+    {"kind": "fort", "type_name": "Grod", "name": "Grod", "symbol": "G", "count": 1, "color": (165, 165, 175)},
+    {"kind": "ruins", "type_name": "Ruiny", "name": "Ruiny", "symbol": "R", "count": 2, "color": (145, 105, 180)},
+    {"kind": "special", "type_name": "Miejsce specjalne", "name": "Miejsce specjalne", "symbol": "S", "count": 1, "color": (75, 155, 120)},
 ]
 
 
@@ -22,6 +22,21 @@ def create_random_tiles(map_key):
     return tiles
 
 
+def build_location_data(location, number):
+    data = {
+        "kind": location["kind"],
+        "type_name": location["type_name"],
+        "name": location["name"],
+        "symbol": location["symbol"],
+        "color": location["color"],
+        "number": number + 1,
+    }
+    if location["kind"] == "city" and number == 0:
+        data["name"] = "Lirion"
+        data["background"] = "lirion_miasto"
+    return data
+
+
 def assign_locations(tiles):
     used = set()
     for tile in tiles:
@@ -33,13 +48,7 @@ def assign_locations(tiles):
                 return tiles
             tile = random.choice(candidates)
             used.add(tile)
-            tile.location = {
-                "kind": location["kind"],
-                "name": location["name"],
-                "symbol": location["symbol"],
-                "color": location["color"],
-                "number": number + 1,
-            }
+            tile.location = build_location_data(location, number)
     return tiles
 
 
