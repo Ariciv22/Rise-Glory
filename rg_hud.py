@@ -64,8 +64,15 @@ def draw_game_ui(screen, font, small_font, hero, token, selected_tile, current_m
     draw_lines(screen, small_font, equip, left.x + 28, y, MUTED, max_width=left.width - 56)
 
     if selected_tile:
-        info_y = left.bottom - 92
+        info_y = left.bottom - 112
         pygame.draw.line(screen, GOLD, (left.x + 24, info_y - 12), (left.right - 24, info_y - 12), 1)
-        lines = [f"Heks: {selected_tile.terrain['name']}", f"Koszt ruchu: {selected_tile.terrain['move']}", "Questy dodamy pozniej."]
+        location = selected_tile.location
+        location_name = location["name"] if location else "brak"
+        lines = [
+            f"Heks: {selected_tile.terrain['name']}",
+            f"Koszt ruchu: {selected_tile.terrain['move']}",
+            f"Lokacja: {location_name}",
+            "Questy dodamy pozniej.",
+        ]
         draw_lines(screen, small_font, lines, left.x + 28, info_y, TEXT, max_width=left.width - 56)
     return [end_turn]
