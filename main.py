@@ -47,8 +47,8 @@ def main():
     active_player = 1
     hero = clone_hero(HERO_ARCHETYPES[0])
     tiles = generate_map(current_map)
-    camera.center_on_tiles(tiles)
     token = HeroToken(hero, find_start_tile(tiles))
+    camera.center_on_tile(token.tile)
     selected_tile = None
     selected_token = token
     buttons = []
@@ -78,19 +78,19 @@ def main():
                 SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, event.h)
                 screen = create_window(False)
                 if state == STATE_GAME:
-                    camera.center_on_tiles(tiles)
+                    camera.center_on_tile(token.tile)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     state = STATE_MENU if state != STATE_MENU else STATE_MENU
                 elif event.key == pygame.K_SPACE and state == STATE_GAME:
-                    camera.center_on_tiles(tiles)
+                    camera.center_on_tile(token.tile)
                 elif event.key in [pygame.K_TAB, pygame.K_n] and state == STATE_GAME:
                     active_player = active_player % 4 + 1
                     token.reset_moves()
                 elif event.key == pygame.K_r and state == STATE_GAME:
                     tiles = generate_map(current_map)
-                    camera.center_on_tiles(tiles)
                     token = HeroToken(hero, find_start_tile(tiles))
+                    camera.center_on_tile(token.tile)
                     selected_token = token
                     selected_tile = None
                 elif event.key == pygame.K_F11:
@@ -102,7 +102,7 @@ def main():
                         SCREEN_WIDTH, SCREEN_HEIGHT = 1600, 1000
                         screen = create_window(False)
                     if state == STATE_GAME:
-                        camera.center_on_tiles(tiles)
+                        camera.center_on_tile(token.tile)
             elif event.type == pygame.MOUSEWHEEL and state == STATE_GAME and not over_ui(mouse, rects):
                 camera.zoom_at(mouse, ZOOM_STEP if event.y > 0 else 1 / ZOOM_STEP)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and state == STATE_GAME and not over_ui(event.pos, rects):
@@ -142,8 +142,8 @@ def main():
                                     hero = clone_hero(template)
                                     active_player = 1
                                     tiles = generate_map(current_map)
-                                    camera.center_on_tiles(tiles)
                                     token = HeroToken(hero, find_start_tile(tiles))
+                                    camera.center_on_tile(token.tile)
                                     selected_token = token
                                     selected_tile = None
                                     state = STATE_GAME
