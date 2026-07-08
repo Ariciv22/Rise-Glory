@@ -9,6 +9,7 @@ from rg_data import (
     MIN_SCREEN_WIDTH,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
+    STATE_CITY,
     STATE_GAME,
     STATE_HERO_SELECT,
     STATE_MAP_SELECT,
@@ -17,6 +18,7 @@ from rg_data import (
     ZOOM_STEP,
     clone_hero,
 )
+from rg_city_screen import draw_city_screen
 from rg_hud import draw_game_ui
 from rg_map import Camera, HeroToken, find_start_tile, load_textures
 from rg_screens import draw_hero_select, draw_map_select, draw_menu, draw_multiplayer
@@ -53,8 +55,11 @@ def main():
     camera.center_on_tile(token.tile)
     selected_tile = None
     selected_token = token
+    current_city = None
+    selected_city_place = None
     buttons = []
     game_buttons = []
+    city_buttons = []
     dragging = False
     drag_moved = False
     drag_start = (0, 0)
@@ -83,7 +88,10 @@ def main():
                     camera.center_on_tile(token.tile)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    state = STATE_MENU if state != STATE_MENU else STATE_MENU
+                    if state == STATE_CITY:
+                        state = STATE_GAME
+                    else:
+                        state = STATE_MENU if state != STATE_MENU else STATE_MENU
                 elif event.key == pygame.K_SPACE and state == STATE_GAME:
                     camera.center_on_tile(token.tile)
                 elif event.key in [pygame.K_TAB, pygame.K_n] and state == STATE_GAME:
@@ -148,9 +156,19 @@ def main():
                                     camera.center_on_tile(token.tile)
                                     selected_token = token
                                     selected_tile = None
+                                    current_city = None
+                                    selected_city_place = None
                                     state = STATE_GAME
                             elif state == STATE_MULTIPLAYER:
                                 state = STATE_MENU
+                            break
+                elif state == STATE_CITY:
+                    for button in city_buttons:
+                        if button.clicked(event.pos):
+                            if button.action == "back_to_map":
+                                state = STATE_GAME
+                            else:
+                                selected_city_place = button.action
                             break
                 elif state == STATE_GAME:
                     dragging = False
@@ -166,7 +184,11 @@ def main():
                         for tile in tiles:
                             if tile.contains(event.pos, camera):
                                 selected_tile = tile
-                                if selected_token and selected_token.can_move_to(tile):
+                                if tile.location and tile.location.get("kind") == "city":
+                                    current_city = tile.location
+                                    selected_city_place = None
+                                    state = STATE_CITY
+                                elif selected_token and selected_token.can_move_to(tile):
                                     selected_token.move_to(tile)
                                 elif tile == token.tile:
                                     selected_token = token
@@ -177,16 +199,27 @@ def main():
         if state == STATE_MENU:
             buttons = draw_menu(screen, title_font, font, mouse)
             game_buttons = []
+            city_buttons = []
         elif state == STATE_MAP_SELECT:
             buttons = draw_map_select(screen, title_font, font, mouse)
             game_buttons = []
+            city_buttons = []
         elif state == STATE_HERO_SELECT:
             buttons = draw_hero_select(screen, title_font, font, small_font, mouse)
             game_buttons = []
+            city_buttons = []
         elif state == STATE_MULTIPLAYER:
             buttons = draw_multiplayer(screen, title_font, font, mouse)
             game_buttons = []
+            city_buttons = []
+        elif state == STATE_CITY:
+            buttons = []
+            game_buttons = []
+            city = current_city or {"name": "Miasto", "type_name": "Miasto"}
+            city_buttons = draw_city_screen(screen, title_font, font, small_font, mouse, city, selected_city_place)
         elif state == STATE_GAME:
+            buttons = []
+            city_buttons = []
             screen.fill(BG)
             for tile in tiles:
                 valid = selected_token.can_move_to(tile) if selected_token else False
