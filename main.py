@@ -18,9 +18,10 @@ from rg_data import (
     clone_hero,
 )
 from rg_hud import draw_game_ui
-from rg_map import Camera, HeroToken, find_start_tile, generate_map, load_textures
+from rg_map import Camera, HeroToken, find_start_tile, load_textures
 from rg_screens import draw_hero_select, draw_map_select, draw_menu, draw_multiplayer
 from rg_ui import over_ui, ui_rects
+from rg_world import generate_world
 
 
 def create_window(fullscreen=False):
@@ -46,7 +47,7 @@ def main():
     current_map = "rosette9"
     active_player = 1
     hero = clone_hero(HERO_ARCHETYPES[0])
-    tiles = generate_map(current_map)
+    tiles = generate_world(current_map)
     token = HeroToken(hero, find_start_tile(tiles))
     camera.center_on_tile(token.tile)
     selected_tile = None
@@ -88,7 +89,7 @@ def main():
                     active_player = active_player % 4 + 1
                     token.reset_moves()
                 elif event.key == pygame.K_r and state == STATE_GAME:
-                    tiles = generate_map(current_map)
+                    tiles = generate_world(current_map)
                     token = HeroToken(hero, find_start_tile(tiles))
                     camera.center_on_tile(token.tile)
                     selected_token = token
@@ -141,7 +142,7 @@ def main():
                                     template = next(item for item in HERO_ARCHETYPES if item["id"] == int(button.action))
                                     hero = clone_hero(template)
                                     active_player = 1
-                                    tiles = generate_map(current_map)
+                                    tiles = generate_world(current_map)
                                     token = HeroToken(hero, find_start_tile(tiles))
                                     camera.center_on_tile(token.tile)
                                     selected_token = token
@@ -188,7 +189,7 @@ def main():
             screen.fill(BG)
             for tile in tiles:
                 valid = selected_token.can_move_to(tile) if selected_token else False
-                tile.draw(screen, textures, camera, hovered=(tile == hovered), selected=(tile == selected_tile), valid_move=valid)
+                tile.draw(screen, textures, camera, token_font, hovered=(tile == hovered), selected=(tile == selected_tile), valid_move=valid)
             token.draw(screen, camera, token_font, selected=(selected_token == token))
             game_buttons = draw_game_ui(screen, font, small_font, hero, token, selected_tile, current_map, active_player)
         pygame.display.flip()
