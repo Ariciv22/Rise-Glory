@@ -71,7 +71,7 @@ Zmniejsza się tylko nagrody liczbowe: monety, towary i Punkty Legendy. Wynik za
 
 Naturalne 1 w teście nie jest automatyczną porażką: liczy się 1 + statystyka + premie. Niezależnie od wyniku podnosi próg następnego testu w tym samym queście o 2; utrudnienia się kumulują. Jeżeli ostatni test nie zostanie zaliczony, wyższy próg obowiązuje przy ponowieniu. Quest kończy się dopiero po zaliczeniu wymaganego testu albo po czwartej porażce. Zaliczona naturalna 1 na ostatnim teście kończy quest, a +2 nie ma już kolejnego testu, na który mogłoby zadziałać.
 
-Naturalne 20 oznacza automatyczny sukces. Zasada dwóch pozytywnych testów wymaga jeszcze dokładnego określenia sposobu rozliczania kolejnych etapów.
+Naturalne 20 oznacza automatyczny sukces bieżącego testu oraz automatyczne zaliczenie kolejnego etapu tego samego questa. Jeżeli quest nie posiada kolejnego etapu, dodatkowy sukces nie wywołuje dalszego efektu.
 
 Po ukończeniu karta główna i rozwinięcia trafiają do wykonanych questów. Po czwartej porażce, porzuceniu albo innym efekcie przegranej trafiają na stos przegranych. Pokonanie bohatera nie usuwa aktywnych questów.
 
