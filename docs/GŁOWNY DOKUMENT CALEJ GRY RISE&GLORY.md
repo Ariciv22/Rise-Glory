@@ -112,7 +112,7 @@ Atak przeciwnika = k20 + Atak przeciwnika + premie. Trafia przy wyniku równym l
 
 Naturalne 20 podczas ataku oznacza 2 trafienia i dwukrotne rozpatrzenie obrażeń. Naturalne 1 oznacza automatyczne pudło bez względu na statystyki i premie.
 
-Bazowe HP przeciwników zależy od poziomu: poziom 1 – 2 HP, poziom 2 – 4 HP, poziom 3 – 6 HP, poziom 4 – 8 HP, przeciwnik legendarny – 10 HP.
+Przeciwnik posiada bazową wartość HP określoną na swojej karcie. Wraz ze wzrostem poziomu świata otrzymuje dodatkowe HP: na poziomie świata 1 +2 HP, na poziomie 2 +4 HP, na poziomie 3 +6 HP, na poziomie 4 +8 HP, a przeciwnik legendarny +10 HP.
 
 Bohater może uciec, przekupując przeciwnika za koszt zależny od poziomu świata albo wykonując pojedynczy test statystyki i progu wskazanych na karcie wroga. Po nieudanej próbie natychmiast następuje tura przeciwnika. Na razie nie ma walki między graczami. Nagrodę za zwycięstwo określa karta.
 
