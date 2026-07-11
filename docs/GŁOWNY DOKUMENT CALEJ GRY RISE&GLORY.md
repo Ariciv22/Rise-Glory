@@ -269,3 +269,57 @@ Nagrody za wykonanie questów mogą obejmować:
 - punkty Legendy.
 
 Questy są głównym sposobem zdobywania punktów Legendy.
+
+## Statystyki bohatera
+
+Bohater posiada sześć głównych statystyk:
+
+- Walka,
+- Handel,
+- Intryga,
+- Dyplomacja,
+- Kultura,
+- Nauka.
+
+Każda z tych statystyk rozpoczyna grę na poziomie 0.
+
+Na początku gry gracz będzie mógł wykupić wybrane statystyki albo skorzystać z jednego z gotowych zestawów startowych.
+
+Maksymalna podstawowa wartość każdej statystyki wynosi 6.
+
+## Rozwój statystyk i trening
+
+Statystyki bohatera mogą być rozwijane na dwa sposoby:
+
+- poprzez treningi wykupywane we wsiach, miastach i zamkach,
+- poprzez nagrody z questów pozwalające podnieść wskazaną statystykę.
+
+Rozwój bohatera nie pochodzi więc wyłącznie z wykonywania questów.
+
+## Ekwipunek bohatera
+
+Bohater posiada osobne sloty ekwipunku:
+
+- 2 sloty na pierścienie,
+- 1 slot na broń,
+- 1 slot na zbroję,
+- 1 slot na buty,
+- 1 slot na hełm.
+
+Dodatkowo bohater posiada 10 slotów na pozostałe przedmioty.
+
+## Kompania bohatera
+
+Bohater może posiadać maksymalnie 5 pomocników w swojej kompanii.
+
+Doradcy, emisariusze, przyjaciele oraz inne postacie z Talii Kompanii są traktowani jako pomocnicy i zajmują miejsca w tym limicie.
+
+Pomocnicy mogą zostać utraceni w wyniku działania zasad gry, questów albo innych efektów.
+
+## Rany i pokonanie bohatera
+
+Bohater posiada Rany zamiast klasycznych punktów życia.
+
+Questy, walka oraz inne efekty mogą zadawać bohaterowi Rany.
+
+Po pokonaniu bohater wraca do swojej lokacji startowej wskazanej na jego karcie postaci.
