@@ -50,6 +50,14 @@ Zawiera globalne wydarzenia wpływające na wszystkich graczy niezależnie od te
 
 Jedna karta z Talii Wydarzeń Świata jest odkrywana co 5 tur. Odkrycie takiej karty działa jak spotkanie bohaterów przy wspólnym stole, podczas którego omawiane są wydarzenia świata i rozstrzygane różne sprawy.
 
+## Rada Bohaterów
+
+Rada Bohaterów odbywa się automatycznie co 5 tur.
+
+Uczestniczą w niej wszyscy gracze niezależnie od miejsca, w którym ich bohaterowie znajdują się na mapie. Bohaterowie nie muszą fizycznie znajdować się w tej samej lokacji.
+
+Podczas Rady Bohaterów odkrywana jest karta z Talii Wydarzeń Świata. Gracze mogą również wymieniać się aktywnymi questami bez konieczności fizycznego spotkania swoich bohaterów na mapie.
+
 ## Tablice questów w lokacjach
 
 Karty z sześciu głównych talii opartych na statystykach bohatera są questami wykładanymi na tablicach ogłoszeń we wsiach, miastach oraz grodach, czyli zamkach.
@@ -87,7 +95,7 @@ Oznacza to, że ograniczenie dotyczy pojedynczej tury spędzanej w danej lokacji
 
 ## Wymiana i porzucanie questów
 
-Podczas Rady Bohaterów gracze mogą wymieniać się posiadanymi aktywnymi questami.
+Podczas Rady Bohaterów gracze mogą wymieniać się posiadanymi aktywnymi questami. Wymiana nie wymaga fizycznego spotkania bohaterów ani znajdowania się w tej samej lokacji na mapie.
 
 Gracz może również dobrowolnie porzucić aktywny quest.
 
