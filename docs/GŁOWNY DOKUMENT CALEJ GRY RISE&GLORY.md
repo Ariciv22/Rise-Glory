@@ -85,6 +85,20 @@ Jeżeli bohater pozostaje w tej samej wsi, mieście albo grodzie do swojej kolej
 
 Oznacza to, że ograniczenie dotyczy pojedynczej tury spędzanej w danej lokacji, a nie całego pobytu ani całej gry.
 
+## Wymiana i porzucanie questów
+
+Podczas Rady Bohaterów gracze mogą wymieniać się posiadanymi aktywnymi questami.
+
+Gracz może również dobrowolnie porzucić aktywny quest.
+
+Porzucenie questa:
+
+- nie kosztuje żadnej akcji,
+- nie wymaga wykonywania testu,
+- nie zapewnia żadnej nagrody.
+
+Po porzuceniu karta główna oraz wszystkie jej rozwinięcia trafiają na stos przegranych questów.
+
 ## Rozpoczynanie i rozstrzyganie questów
 
 Po pobraniu karta trafia na planszetkę gracza jako aktywny quest. Pierwszy etap można rozpocząć dopiero po dotarciu do miejsca wskazanego przez kartę i spełnieniu warunków początkowych questa.
