@@ -145,7 +145,7 @@ Drugi nieudany test w tym samym queście oznacza przegraną całego questa. Kart
 
 Znacznik pierwszej porażki dotyczy całego questa, a nie tylko jednego etapu. Oznacza to, że kolejna porażka na dowolnym późniejszym etapie również kończy cały quest.
 
-Kara do nagrody wynikająca ze znacznika porażki sumuje się z karami do nagrody wynikającymi z wyrzuconych naturalnych 1. Łączne zmniejszenie nagrody nie może przekroczyć całej nagrody — po osiągnięciu 100% gracz nie otrzymuje żadnej nagrody.
+Tylko nieudany test zmniejsza końcową nagrodę i powoduje położenie znacznika porażki na głównej karcie questa.
 
 ### Wyniki specjalne na k20
 
@@ -155,20 +155,11 @@ Naturalne 1 nie oznacza automatycznej porażki. Nadal obliczany jest pełny wyni
 
 **1 + wartość wymaganej statystyki bohatera + premie z odpowiednich przedmiotów.**
 
-Jeżeli ten wynik jest niższy od progu, test kończy się zwykłą porażką i podlega systemowi dwóch porażek. Jeżeli wynik jest równy lub wyższy od progu, test zostaje zaliczony i nie jest liczony jako przegrany test, ale naturalne 1 powoduje dodatkowe kary.
+Jeżeli ten wynik jest niższy od progu, test kończy się zwykłą porażką i podlega systemowi dwóch porażek. Jeżeli wynik jest równy lub wyższy od progu, test zostaje zaliczony i nie jest liczony jako przegrany test.
 
-Każde wyrzucenie naturalnej 1 zwiększa próg kolejnego testu w tym samym queście o 2 oraz zmniejsza końcową nagrodę.
+Naturalne 1 nie zmniejsza nagrody i nie powoduje położenia znacznika porażki, jeżeli test został zaliczony.
 
-Kary za kolejne naturalne 1 kumulują się:
-
-- pierwsza naturalna 1: próg kolejnego testu +2, nagroda zmniejszona o 1/4,
-- druga naturalna 1: łączna kara do progu +4, nagroda zmniejszona o 1/2,
-- trzecia naturalna 1: łączna kara do progu +6, nagroda zmniejszona o 3/4,
-- czwarta naturalna 1: łączna kara do progu +8, brak nagrody za ukończenie questa.
-
-Wartości liczbowe nagrody po zmniejszeniu są zaokrąglane w górę do najbliższej liczby całkowitej.
-
-Przykład: nagroda wynosząca 10 złota po pierwszej naturalnej 1 zostaje zmniejszona do 7,5, a następnie zaokrąglona w górę do 8 złota.
+Każde wyrzucenie naturalnej 1 zwiększa próg kolejnego testu w tym samym queście o 2. Jeżeli podczas jednego questa wypadnie kilka naturalnych 1, utrudnienia kumulują się: każda kolejna naturalna 1 zwiększa łączną karę do progów następnych testów o kolejne 2.
 
 ## Rozwinięcia questów
 
