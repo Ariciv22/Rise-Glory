@@ -81,9 +81,9 @@ Na planszetce gracza można posiadać maksymalnie 3 aktywne questy.
 
 Podczas jednej wizyty w konkretnej lokacji gracz może pobrać tylko 1 quest z jej tablicy ogłoszeń.
 
-Jeżeli w swojej kolejnej turze gracz ponownie wejdzie do tej samej wsi, miasta albo grodu, może pobrać z tej lokacji kolejny quest, o ile nadal posiada wolne miejsce na planszetce questów.
+Jeżeli bohater pozostaje w tej samej wsi, mieście albo grodzie do swojej kolejnej tury, może wtedy pobrać z tej lokacji kolejny quest, o ile nadal posiada wolne miejsce na planszetce questów. Nie musi wychodzić z lokacji i ponownie do niej wchodzić.
 
-Oznacza to, że ograniczenie dotyczy pojedynczej wizyty w lokacji, a nie całej gry.
+Oznacza to, że ograniczenie dotyczy pojedynczej tury spędzanej w danej lokacji, a nie całego pobytu ani całej gry.
 
 ## Rozpoczynanie i rozstrzyganie questów
 
