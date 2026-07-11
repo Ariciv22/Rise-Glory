@@ -128,7 +128,11 @@ Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4 i wyrzuca 11
 
 Naturalne 20 oznacza automatyczny sukces, niezależnie od wartości statystyki bohatera i progu trudności questa.
 
-Naturalne 1 nie oznacza automatycznej porażki. Po wyrzuceniu naturalnej 1 próg testu zwiększa się o 2. Dodatkowo końcowa nagroda za quest zostaje zmniejszona, nawet jeżeli bohater ostatecznie ukończy zadanie. Dokładna skala zmniejszenia nagrody zostanie ustalona osobno.
+Naturalne 1 nie oznacza automatycznej porażki. Po wyrzuceniu naturalnej 1 próg testu zwiększa się o 2. Dodatkowo końcowa nagroda za quest zostaje zmniejszona o 1/4, nawet jeżeli bohater ostatecznie ukończy zadanie.
+
+Wartości liczbowe nagrody po zmniejszeniu są zaokrąglane w górę do najbliższej liczby całkowitej.
+
+Przykład: nagroda wynosząca 10 złota zostaje zmniejszona do 7,5, a następnie zaokrąglona w górę do 8 złota.
 
 ## Rozwinięcia questów
 
