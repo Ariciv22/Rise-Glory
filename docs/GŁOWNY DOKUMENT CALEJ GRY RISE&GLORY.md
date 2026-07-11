@@ -132,9 +132,16 @@ Po pierwszej porażce gracz kładzie na queście znacznik porażki. Quest pozost
 
 Pierwsza porażka zmniejsza końcową nagrodę za quest o 1/4.
 
-Drugi nieudany test w tym samym queście oznacza przegraną całego questa. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
+Liczba znaczników porażki znajdujących się na queście pokazuje, jak bardzo zostanie zmniejszona nagroda po jego ukończeniu. Przy systemie dwóch porażek quest może zostać ukończony z maksymalnie jednym znacznikiem porażki:
+
+- 0 znaczników porażki: brak zmniejszenia nagrody z tytułu nieudanych testów,
+- 1 znacznik porażki: nagroda zmniejszona o 1/4.
+
+Drugi nieudany test w tym samym queście oznacza przegraną całego questa. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów, dlatego drugi znacznik porażki nie jest dokładany.
 
 Znacznik pierwszej porażki dotyczy całego questa, a nie tylko jednego etapu. Oznacza to, że kolejna porażka na dowolnym późniejszym etapie również kończy cały quest.
+
+Kara do nagrody wynikająca ze znacznika porażki sumuje się z karami do nagrody wynikającymi z wyrzuconych naturalnych 1. Łączne zmniejszenie nagrody nie może przekroczyć całej nagrody — po osiągnięciu 100% gracz nie otrzymuje żadnej nagrody.
 
 ### Wyniki specjalne na k20
 
