@@ -85,7 +85,7 @@ Oznacza to, że ograniczenie dotyczy pojedynczej wizyty w lokacji, a nie całej 
 
 ## Rozpoczynanie i rozstrzyganie questów
 
-Quest rozpoczyna się natychmiast po pobraniu jego karty z tablicy ogłoszeń.
+Po pobraniu karta trafia na planszetkę gracza jako aktywny quest. Pierwszy etap można rozpocząć dopiero po dotarciu do miejsca wskazanego przez kartę i spełnieniu warunków początkowych questa.
 
 Każda karta questa zawiera:
 
@@ -112,7 +112,17 @@ Quest ma tylko dwa możliwe wyniki:
 
 Nie występują częściowe sukcesy ani różne poziomy porażki.
 
-## Test statystyki w queście
+### Akcje i tempo wykonywania questów
+
+W swojej turze gracz dysponuje 4 akcjami.
+
+Może na przykład przeznaczyć 2 akcje na ruch, a pozostałe 2 akcje na rozpoczęcie lub wykonywanie questa po dotarciu na miejsce i spełnieniu jego warunków początkowych.
+
+Rozpoczęcie pierwszego etapu, wykonanie kolejnego etapu oraz ponowienie nieudanego testu kosztuje 2 akcje.
+
+Jeżeli po ukończeniu etapu gracz nadal posiada co najmniej 2 niewykorzystane akcje, może w tej samej turze od razu wykonać kolejny etap tego questa.
+
+### Test statystyki w queście
 
 Do rozstrzygania questów używana jest kość k20.
 
@@ -132,7 +142,7 @@ Po pierwszej porażce gracz kładzie znacznik porażki bezpośrednio na główne
 
 Dzięki umieszczeniu znacznika na głównym queście gracz może od razu sprawdzić, ile nieudanych testów wystąpiło w danym zadaniu oraz jak bardzo zostanie zmniejszona nagroda po jego ukończeniu.
 
-Quest pozostaje aktywny, a gracz może ponowić ten sam etap w swojej kolejnej turze.
+Quest pozostaje aktywny, a gracz może ponowić ten sam etap, wydając kolejne 2 akcje.
 
 Pierwsza porażka zmniejsza końcową nagrodę za quest o 1/4.
 
@@ -173,7 +183,7 @@ Każdy etap może wskazywać inną statystykę i inny próg testu. W większośc
 
 Planszetka gracza posiada 3 sloty przeznaczone na 3 aktywne questy wraz z ich rozwinięciami. Rozwinięcia wsuwane pod kartę główną nie zajmują dodatkowych slotów.
 
-Pierwsza porażka na dowolnym etapie nie kończy questa. Gracz umieszcza znacznik porażki na głównej karcie questa i może ponowić ten sam etap w swojej kolejnej turze.
+Pierwsza porażka na dowolnym etapie nie kończy questa. Gracz umieszcza znacznik porażki na głównej karcie questa i może ponowić ten sam etap, wydając 2 akcje.
 
 Druga porażka w tym samym queście, niezależnie od etapu, kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
 
