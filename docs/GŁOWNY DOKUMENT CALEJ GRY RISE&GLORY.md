@@ -128,21 +128,40 @@ Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4 i wyrzuca 11
 
 Naturalne 20 oznacza automatyczny sukces, niezależnie od wartości statystyki bohatera i progu trudności questa.
 
-Naturalne 1 nie oznacza automatycznej porażki. Po wyrzuceniu naturalnej 1 próg testu zwiększa się o 2. Dodatkowo końcowa nagroda za quest zostaje zmniejszona o 1/4, nawet jeżeli bohater ostatecznie ukończy zadanie.
+Naturalne 1 nie oznacza automatycznej porażki. Każde wyrzucenie naturalnej 1 zwiększa próg kolejnego testu w tym samym queście o 2 oraz zmniejsza końcową nagrodę.
+
+Kary za kolejne naturalne 1 kumulują się:
+
+- pierwsza naturalna 1: próg kolejnego testu +2, nagroda zmniejszona o 1/4,
+- druga naturalna 1: łączna kara do progu +4, nagroda zmniejszona o 1/2,
+- trzecia naturalna 1: łączna kara do progu +6, nagroda zmniejszona o 3/4,
+- czwarta naturalna 1: łączna kara do progu +8, brak nagrody za ukończenie questa.
 
 Wartości liczbowe nagrody po zmniejszeniu są zaokrąglane w górę do najbliższej liczby całkowitej.
 
-Przykład: nagroda wynosząca 10 złota zostaje zmniejszona do 7,5, a następnie zaokrąglona w górę do 8 złota.
+Przykład: nagroda wynosząca 10 złota po pierwszej naturalnej 1 zostaje zmniejszona do 7,5, a następnie zaokrąglona w górę do 8 złota.
 
 ## Rozwinięcia questów
 
-Questy mogą posiadać dalsze rozwinięcia fabularne. Jedno zadanie może rozciągać się maksymalnie na 3 kolejne etapy.
+Quest może składać się z kilku etapów.
+
+Jeżeli karta posiada dalszy etap, zawiera polecenie: **„Znajdź rozwinięcie o numerze XXX i wsuń je pod questa głównego.”**
+
+Gracz odnajduje wskazaną kartę rozwinięcia i umieszcza ją pod kartą głównego questa. Kolejne rozwinięcia pozostają częścią tego samego zadania.
+
+Każdy etap może wskazywać inną statystykę i inny próg testu. W większości przypadków rozwinięcia powinny jednak korzystać ze statystyki odpowiadającej talii, z której pochodzi główny quest.
+
+Planszetka gracza posiada 3 sloty przeznaczone na 3 aktywne questy wraz z ich rozwinięciami. Rozwinięcia wsuwane pod kartę główną nie zajmują dodatkowych slotów.
+
+Porażka na dowolnym etapie kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
+
+Nagroda za quest jest przyznawana dopiero po ukończeniu jego ostatniego etapu. Etapy pośrednie nie przyznają nagrody końcowej.
 
 ## Zakończone i przegrane questy
 
-Po udanym wykonaniu questa jego karta trafia do gracza na slot „Wykonane questy”.
+Po udanym wykonaniu questa jego karta trafia do gracza na slot „Wykonane questy”. W przypadku questa wieloetapowego razem z kartą główną zachowywane są jego rozwinięcia.
 
-Po porażce karta trafia na stos przegranych questów.
+Po porażce karta główna oraz wszystkie rozwinięcia questa trafiają na stos przegranych questów.
 
 ## Nagrody za questy
 
