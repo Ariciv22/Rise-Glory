@@ -122,9 +122,19 @@ Gracz rzuca kością k20, a następnie dodaje do wyniku wartość statystyki wsk
 
 Jeżeli łączny wynik jest równy lub wyższy od progu podanego na karcie, test kończy się sukcesem. Jeżeli łączny wynik jest niższy od wymaganego progu, test kończy się porażką.
 
-W queście wieloetapowym niezaliczenie dowolnego testu oznacza porażkę całego questa.
-
 Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4, przedmiot zapewniający +2 do tego testu i wyrzuca 9 na k20. Łączny wynik wynosi 15, więc test kończy się sukcesem.
+
+### System dwóch porażek
+
+Pierwszy nieudany test nie kończy całego questa.
+
+Po pierwszej porażce gracz kładzie na queście znacznik porażki. Quest pozostaje aktywny, a gracz może ponowić ten sam etap w swojej kolejnej turze.
+
+Pierwsza porażka zmniejsza końcową nagrodę za quest o 1/4.
+
+Drugi nieudany test w tym samym queście oznacza przegraną całego questa. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
+
+Znacznik pierwszej porażki dotyczy całego questa, a nie tylko jednego etapu. Oznacza to, że kolejna porażka na dowolnym późniejszym etapie również kończy cały quest.
 
 ### Wyniki specjalne na k20
 
@@ -134,7 +144,7 @@ Naturalne 1 nie oznacza automatycznej porażki. Nadal obliczany jest pełny wyni
 
 **1 + wartość wymaganej statystyki bohatera + premie z odpowiednich przedmiotów.**
 
-Jeżeli ten wynik jest niższy od progu, test kończy się zwykłą porażką i cały quest zostaje przegrany. Jeżeli wynik jest równy lub wyższy od progu, test zostaje zaliczony, ale naturalne 1 powoduje dodatkowe kary.
+Jeżeli ten wynik jest niższy od progu, test kończy się zwykłą porażką i podlega systemowi dwóch porażek. Jeżeli wynik jest równy lub wyższy od progu, test zostaje zaliczony i nie jest liczony jako przegrany test, ale naturalne 1 powoduje dodatkowe kary.
 
 Każde wyrzucenie naturalnej 1 zwiększa próg kolejnego testu w tym samym queście o 2 oraz zmniejsza końcową nagrodę.
 
@@ -161,7 +171,9 @@ Każdy etap może wskazywać inną statystykę i inny próg testu. W większośc
 
 Planszetka gracza posiada 3 sloty przeznaczone na 3 aktywne questy wraz z ich rozwinięciami. Rozwinięcia wsuwane pod kartę główną nie zajmują dodatkowych slotów.
 
-Niezaliczenie dowolnego testu na którymkolwiek etapie kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
+Pierwsza porażka na dowolnym etapie nie kończy questa. Gracz oznacza quest znacznikiem porażki i może ponowić ten sam etap w swojej kolejnej turze.
+
+Druga porażka w tym samym queście, niezależnie od etapu, kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
 
 Nagroda za quest jest przyznawana dopiero po ukończeniu jego ostatniego etapu. Etapy pośrednie nie przyznają nagrody końcowej.
 
@@ -169,7 +181,7 @@ Nagroda za quest jest przyznawana dopiero po ukończeniu jego ostatniego etapu. 
 
 Po udanym wykonaniu questa jego karta trafia do gracza na slot „Wykonane questy”. W przypadku questa wieloetapowego razem z kartą główną zachowywane są jego rozwinięcia.
 
-Po porażce karta główna oraz wszystkie rozwinięcia questa trafiają na stos przegranych questów.
+Quest zostaje przegrany po drugim nieudanym teście w obrębie tego samego zadania. Karta główna oraz wszystkie rozwinięcia questa trafiają wtedy na stos przegranych questów.
 
 ## Nagrody za questy
 
