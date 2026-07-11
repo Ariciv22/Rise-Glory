@@ -49,3 +49,30 @@ Zawiera wyposażenie bohatera, między innymi zbroje, miecze, pierścienie, szat
 Zawiera globalne wydarzenia wpływające na wszystkich graczy niezależnie od tego, gdzie znajdują się na mapie.
 
 Jedna karta z Talii Wydarzeń Świata jest odkrywana co 5 tur. Odkrycie takiej karty działa jak spotkanie bohaterów przy wspólnym stole, podczas którego omawiane są wydarzenia świata i rozstrzygane różne sprawy.
+
+## Tablice questów w lokacjach
+
+Karty z sześciu głównych talii opartych na statystykach bohatera są questami wykładanymi na tablicach ogłoszeń we wsiach, miastach oraz grodach, czyli zamkach.
+
+Do tej grupy należą:
+
+- Talia Wojenna,
+- Talia Ekonomiczna,
+- Talia Intrygi,
+- Talia Dyplomacji,
+- Talia Kultury,
+- Talia Nauki.
+
+Każda tablica ogłoszeń posiada 3 sloty na karty questów.
+
+Na każdym z 3 slotów znajduje się jedna odkryta karta questa. Karty na slotach są losowane z sześciu głównych talii, ale na jednej tablicy zawsze muszą znajdować się questy z 3 różnych talii. Nie mogą więc pojawić się jednocześnie dwa questy z tej samej talii na tej samej tablicy.
+
+Gracz pobiera kartę questa bezpośrednio z jednego z 3 dostępnych slotów na tablicy ogłoszeń w danej lokacji.
+
+## Limit aktywnych questów
+
+Na planszetce gracza można posiadać maksymalnie 3 aktywne questy.
+
+W jednej konkretnej lokacji gracz może pobrać tylko 1 quest. Dotyczy to każdej wsi, miasta i grodu osobno.
+
+Oznacza to, że nawet jeśli na tablicy w danej lokacji znajdują się 3 dostępne karty, gracz wybiera tylko jedną z nich. Kolejne questy musi pobierać w innych lokacjach, o ile nadal posiada wolne miejsce na swojej planszetce questów.
