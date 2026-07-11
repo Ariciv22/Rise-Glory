@@ -69,6 +69,8 @@ Na każdym z 3 slotów znajduje się jedna odkryta karta questa. Karty na slotac
 
 Gracz pobiera kartę questa bezpośrednio z jednego z 3 dostępnych slotów na tablicy ogłoszeń w danej lokacji.
 
+Pobranie questa z tablicy ogłoszeń nie kosztuje żadnej akcji.
+
 Po zabraniu karty pusty slot jest natychmiast uzupełniany nową kartą. Tablica zawsze ma być pełna i zawsze mają znajdować się na niej 3 odkryte questy z 3 różnych talii.
 
 Questy nie są przypisane do lokacji, w której zostały pobrane.
@@ -117,6 +119,8 @@ Nie występują częściowe sukcesy ani różne poziomy porażki.
 W swojej turze gracz dysponuje 4 akcjami.
 
 Może na przykład przeznaczyć 2 akcje na ruch, a pozostałe 2 akcje na rozpoczęcie lub wykonywanie questa po dotarciu na miejsce i spełnieniu jego warunków początkowych.
+
+Pobranie questa z tablicy ogłoszeń nie zużywa akcji gracza.
 
 Rozpoczęcie pierwszego etapu, wykonanie kolejnego etapu oraz ponowienie nieudanego testu kosztuje 2 akcje.
 
