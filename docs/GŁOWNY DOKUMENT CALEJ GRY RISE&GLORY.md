@@ -128,11 +128,15 @@ Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4, przedmiot z
 
 Pierwszy nieudany test nie kończy całego questa.
 
-Po pierwszej porażce gracz kładzie na queście znacznik porażki. Quest pozostaje aktywny, a gracz może ponowić ten sam etap w swojej kolejnej turze.
+Po pierwszej porażce gracz kładzie znacznik porażki bezpośrednio na głównej karcie questa. Znacznik pozostaje na niej do momentu zakończenia albo przegrania całego zadania, także wtedy, gdy pod kartę główną wsuwane są kolejne rozwinięcia.
+
+Dzięki umieszczeniu znacznika na głównym queście gracz może od razu sprawdzić, ile nieudanych testów wystąpiło w danym zadaniu oraz jak bardzo zostanie zmniejszona nagroda po jego ukończeniu.
+
+Quest pozostaje aktywny, a gracz może ponowić ten sam etap w swojej kolejnej turze.
 
 Pierwsza porażka zmniejsza końcową nagrodę za quest o 1/4.
 
-Liczba znaczników porażki znajdujących się na queście pokazuje, jak bardzo zostanie zmniejszona nagroda po jego ukończeniu. Przy systemie dwóch porażek quest może zostać ukończony z maksymalnie jednym znacznikiem porażki:
+Liczba znaczników porażki znajdujących się na głównej karcie questa pokazuje zmniejszenie nagrody wynikające z nieudanych testów. Przy systemie dwóch porażek quest może zostać ukończony z maksymalnie jednym znacznikiem porażki:
 
 - 0 znaczników porażki: brak zmniejszenia nagrody z tytułu nieudanych testów,
 - 1 znacznik porażki: nagroda zmniejszona o 1/4.
@@ -178,7 +182,7 @@ Każdy etap może wskazywać inną statystykę i inny próg testu. W większośc
 
 Planszetka gracza posiada 3 sloty przeznaczone na 3 aktywne questy wraz z ich rozwinięciami. Rozwinięcia wsuwane pod kartę główną nie zajmują dodatkowych slotów.
 
-Pierwsza porażka na dowolnym etapie nie kończy questa. Gracz oznacza quest znacznikiem porażki i może ponowić ten sam etap w swojej kolejnej turze.
+Pierwsza porażka na dowolnym etapie nie kończy questa. Gracz umieszcza znacznik porażki na głównej karcie questa i może ponowić ten sam etap w swojej kolejnej turze.
 
 Druga porażka w tym samym queście, niezależnie od etapu, kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
 
