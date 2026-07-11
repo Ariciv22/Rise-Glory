@@ -69,6 +69,10 @@ Na każdym z 3 slotów znajduje się jedna odkryta karta questa. Karty na slotac
 
 Gracz pobiera kartę questa bezpośrednio z jednego z 3 dostępnych slotów na tablicy ogłoszeń w danej lokacji.
 
+Po zabraniu karty pusty slot jest natychmiast uzupełniany nową kartą. Tablica zawsze ma być pełna i zawsze mają znajdować się na niej 3 odkryte questy z 3 różnych talii.
+
+Questy nie są przypisane do lokacji, w której zostały pobrane.
+
 ## Limit aktywnych questów
 
 Na planszetce gracza można posiadać maksymalnie 3 aktywne questy.
@@ -78,3 +82,56 @@ Podczas jednej wizyty w konkretnej lokacji gracz może pobrać tylko 1 quest z j
 Jeżeli w swojej kolejnej turze gracz ponownie wejdzie do tej samej wsi, miasta albo grodu, może pobrać z tej lokacji kolejny quest, o ile nadal posiada wolne miejsce na planszetce questów.
 
 Oznacza to, że ograniczenie dotyczy pojedynczej wizyty w lokacji, a nie całej gry.
+
+## Rozpoczynanie i rozstrzyganie questów
+
+Quest rozpoczyna się natychmiast po pobraniu jego karty z tablicy ogłoszeń.
+
+Każda karta questa zawiera:
+
+- obrazek,
+- nazwę zadania,
+- poziom trudności,
+- wskazaną statystykę bohatera używaną w zadaniu,
+- wymagany wynik rzutu potrzebny do osiągnięcia sukcesu.
+
+Trudność questa wynika z aktualnego poziomu świata. Poziomy świata to:
+
+1. poziom 1,
+2. poziom 2,
+3. poziom 3,
+4. poziom 4,
+5. poziom Legendarny.
+
+Każdy quest wskazuje, z jakiej statystyki bohater musi skorzystać oraz jaki wynik musi osiągnąć podczas rzutu.
+
+Quest ma tylko dwa możliwe wyniki:
+
+- sukces,
+- porażka.
+
+Nie występują częściowe sukcesy ani różne poziomy porażki.
+
+## Rozwinięcia questów
+
+Questy mogą posiadać dalsze rozwinięcia fabularne. Jedno zadanie może rozciągać się maksymalnie na 3 kolejne etapy.
+
+## Zakończone i przegrane questy
+
+Po udanym wykonaniu questa jego karta trafia do gracza na slot „Wykonane questy”.
+
+Po porażce karta trafia na stos przegranych questów.
+
+## Nagrody za questy
+
+Nagrody za wykonanie questów mogą obejmować:
+
+- złoto,
+- przedmioty luksusowe,
+- jedzenie,
+- zwykłe przedmioty i surowce, na przykład wełnę lub drewno,
+- ekwipunek,
+- wzrost statystyki bohatera,
+- punkty Legendy.
+
+Questy są głównym sposobem zdobywania punktów Legendy.
