@@ -73,6 +73,8 @@ Gracz pobiera kartę questa bezpośrednio z jednego z 3 dostępnych slotów na t
 
 Na planszetce gracza można posiadać maksymalnie 3 aktywne questy.
 
-W jednej konkretnej lokacji gracz może pobrać tylko 1 quest. Dotyczy to każdej wsi, miasta i grodu osobno.
+Podczas jednej wizyty w konkretnej lokacji gracz może pobrać tylko 1 quest z jej tablicy ogłoszeń.
 
-Oznacza to, że nawet jeśli na tablicy w danej lokacji znajdują się 3 dostępne karty, gracz wybiera tylko jedną z nich. Kolejne questy musi pobierać w innych lokacjach, o ile nadal posiada wolne miejsce na swojej planszetce questów.
+Jeżeli w swojej kolejnej turze gracz ponownie wejdzie do tej samej wsi, miasta albo grodu, może pobrać z tej lokacji kolejny quest, o ile nadal posiada wolne miejsce na planszetce questów.
+
+Oznacza to, że ograniczenie dotyczy pojedynczej wizyty w lokacji, a nie całej gry.
