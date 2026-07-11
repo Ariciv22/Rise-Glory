@@ -116,19 +116,27 @@ Nie występują częściowe sukcesy ani różne poziomy porażki.
 
 Do rozstrzygania questów używana jest kość k20.
 
-Gracz rzuca kością k20, a następnie dodaje do wyniku wartość statystyki wskazanej na karcie questa.
+Gracz rzuca kością k20, a następnie dodaje do wyniku wartość statystyki wskazanej na karcie questa oraz wszystkie premie z przedmiotów, które zwiększają możliwość przejścia danego testu.
 
-**Wynik testu = rzut k20 + wartość wymaganej statystyki bohatera.**
+**Wynik testu = rzut k20 + wartość wymaganej statystyki bohatera + premie z odpowiednich przedmiotów.**
 
-Jeżeli łączny wynik jest równy lub wyższy od progu podanego na karcie, quest kończy się sukcesem. Jeżeli łączny wynik jest niższy od wymaganego progu, quest kończy się porażką.
+Jeżeli łączny wynik jest równy lub wyższy od progu podanego na karcie, test kończy się sukcesem. Jeżeli łączny wynik jest niższy od wymaganego progu, test kończy się porażką.
 
-Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4 i wyrzuca 11 na k20. Łączny wynik wynosi 15, więc quest kończy się sukcesem.
+W queście wieloetapowym niezaliczenie dowolnego testu oznacza porażkę całego questa.
+
+Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4, przedmiot zapewniający +2 do tego testu i wyrzuca 9 na k20. Łączny wynik wynosi 15, więc test kończy się sukcesem.
 
 ### Wyniki specjalne na k20
 
-Naturalne 20 oznacza automatyczny sukces, niezależnie od wartości statystyki bohatera i progu trudności questa.
+Naturalne 20 oznacza automatyczny sukces, niezależnie od wartości statystyki bohatera, premii z przedmiotów i progu trudności questa.
 
-Naturalne 1 nie oznacza automatycznej porażki. Każde wyrzucenie naturalnej 1 zwiększa próg kolejnego testu w tym samym queście o 2 oraz zmniejsza końcową nagrodę.
+Naturalne 1 nie oznacza automatycznej porażki. Nadal obliczany jest pełny wynik testu:
+
+**1 + wartość wymaganej statystyki bohatera + premie z odpowiednich przedmiotów.**
+
+Jeżeli ten wynik jest niższy od progu, test kończy się zwykłą porażką i cały quest zostaje przegrany. Jeżeli wynik jest równy lub wyższy od progu, test zostaje zaliczony, ale naturalne 1 powoduje dodatkowe kary.
+
+Każde wyrzucenie naturalnej 1 zwiększa próg kolejnego testu w tym samym queście o 2 oraz zmniejsza końcową nagrodę.
 
 Kary za kolejne naturalne 1 kumulują się:
 
@@ -153,7 +161,7 @@ Każdy etap może wskazywać inną statystykę i inny próg testu. W większośc
 
 Planszetka gracza posiada 3 sloty przeznaczone na 3 aktywne questy wraz z ich rozwinięciami. Rozwinięcia wsuwane pod kartę główną nie zajmują dodatkowych slotów.
 
-Porażka na dowolnym etapie kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
+Niezaliczenie dowolnego testu na którymkolwiek etapie kończy cały quest. Karta główna oraz wszystkie jej rozwinięcia trafiają wtedy na stos przegranych questów.
 
 Nagroda za quest jest przyznawana dopiero po ukończeniu jego ostatniego etapu. Etapy pośrednie nie przyznają nagrody końcowej.
 
