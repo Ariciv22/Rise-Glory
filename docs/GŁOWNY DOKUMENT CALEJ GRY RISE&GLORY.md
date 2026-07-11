@@ -112,6 +112,18 @@ Quest ma tylko dwa możliwe wyniki:
 
 Nie występują częściowe sukcesy ani różne poziomy porażki.
 
+## Test statystyki w queście
+
+Do rozstrzygania questów używana jest kość k20.
+
+Gracz rzuca kością k20, a następnie dodaje do wyniku wartość statystyki wskazanej na karcie questa.
+
+**Wynik testu = rzut k20 + wartość wymaganej statystyki bohatera.**
+
+Jeżeli łączny wynik jest równy lub wyższy od progu podanego na karcie, quest kończy się sukcesem. Jeżeli łączny wynik jest niższy od wymaganego progu, quest kończy się porażką.
+
+Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4 i wyrzuca 11 na k20. Łączny wynik wynosi 15, więc quest kończy się sukcesem.
+
 ## Rozwinięcia questów
 
 Questy mogą posiadać dalsze rozwinięcia fabularne. Jedno zadanie może rozciągać się maksymalnie na 3 kolejne etapy.
