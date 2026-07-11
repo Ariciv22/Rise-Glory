@@ -56,9 +56,9 @@ Rada Bohaterów odbywa się automatycznie co 5 tur.
 
 Uczestniczą w niej wszyscy gracze niezależnie od miejsca, w którym ich bohaterowie znajdują się na mapie. Bohaterowie nie muszą fizycznie znajdować się w tej samej lokacji.
 
-Podczas Rady Bohaterów odkrywana jest karta z Talii Wydarzeń Świata. Gracze mogą również wymieniać się aktywnymi questami oraz kupować je od innych graczy bez konieczności fizycznego spotkania swoich bohaterów na mapie.
+Najpierw odkrywana i rozpatrywana jest karta z Talii Wydarzeń Świata. Dopiero po zakończeniu wydarzenia gracze mogą handlować aktywnymi questami bez konieczności fizycznego spotkania swoich bohaterów na mapie.
 
-Każdy gracz może podczas jednej Rady Bohaterów przeprowadzić tylko jedną transakcję dotyczącą questa: albo kupić jeden quest, albo wymienić jeden quest na quest innego gracza.
+Każdy gracz może podczas jednej Rady Bohaterów uczestniczyć tylko w jednej transakcji dotyczącej questa i tylko z jednym innym graczem. Transakcja może być sprzedażą lub zakupem jednego questa albo wymianą jednego questa za quest.
 
 ## Tablice questów w lokacjach
 
@@ -97,13 +97,20 @@ Oznacza to, że ograniczenie dotyczy pojedynczej tury spędzanej w danej lokacji
 
 ## Wymiana, sprzedaż i porzucanie questów
 
-Podczas Rady Bohaterów gracze mogą wymieniać się posiadanymi aktywnymi questami. Wymiana nie wymaga fizycznego spotkania bohaterów ani znajdowania się w tej samej lokacji na mapie.
+Handel questami odbywa się podczas Rady Bohaterów, po pełnym rozpatrzeniu karty Wydarzenia Świata. Nie wymaga fizycznego spotkania bohaterów ani znajdowania się w tej samej lokacji na mapie.
 
-Każdy gracz może podczas jednej Rady Bohaterów tylko raz kupić quest albo wymienić quest za quest. Nie może podczas tej samej Rady wykonać obu tych czynności ani przeprowadzić więcej niż jednej transakcji questem.
+Każda transakcja wymaga zgody obu graczy. Właściciel questa może odmówić jego sprzedaży albo wymiany.
+
+Każdy gracz może podczas jednej Rady Bohaterów uczestniczyć tylko w jednej transakcji i tylko z jednym innym graczem. Transakcją jest:
+
+- sprzedaż lub zakup jednego questa,
+- wymiana jednego questa za jeden quest.
+
+Gracz uczestniczący w sprzedaży, zakupie albo wymianie nie może podczas tej samej Rady przeprowadzić kolejnej transakcji z tym samym ani z innym graczem.
 
 Wymiana odbywa się na zasadzie quest za quest. Obaj gracze przekazują sobie po jednym aktywnym queście, dlatego nie muszą posiadać wolnego slotu na planszetce.
 
-Podczas Rady Bohaterów gracz może także kupić aktywny quest od innego gracza. Kupujący przekazuje sprzedającemu monety i musi posiadać wolny slot na aktywny quest.
+Przy sprzedaży kupujący przekazuje sprzedającemu monety i musi posiadać wolny slot na aktywny quest.
 
 Cena zakupu questa zależy od aktualnego poziomu świata:
 
@@ -113,11 +120,13 @@ Cena zakupu questa zależy od aktualnego poziomu świata:
 - poziom 4: 8 monet,
 - poziom Legendarny: 10 monet.
 
+Cena jest taka sama dla questa nierozpoczętego i rozpoczętego. Znacznik porażki ani inne zgromadzone na queście efekty nie zmniejszają jego ceny.
+
 Można wymienić albo sprzedać także quest już rozpoczęty. Gracz przejmujący zadanie otrzymuje je w aktualnym stanie, razem z kartą główną, wszystkimi odkrytymi rozwinięciami, znacznikiem porażki oraz pozostałymi efektami nałożonymi na ten quest.
 
 Postęp zadania nie jest resetowany. Nowy właściciel kontynuuje questa od etapu, na którym zakończył go poprzedni gracz.
 
-Gracz może również dobrowolnie porzucić aktywny quest.
+Gracz może również dobrowolnie porzucić aktywny quest. Podczas jednej Rady Bohaterów może porzucić dowolną liczbę swoich aktywnych questów. Porzucanie questów nie jest transakcją z innym graczem i nie wlicza się do limitu jednej transakcji.
 
 Porzucenie questa:
 
