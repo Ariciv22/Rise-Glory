@@ -329,3 +329,13 @@ Po otrzymaniu czwartej Rany bohater zostaje pokonany i wraca do swojej lokacji s
 Po powrocie bohater usuwa wszystkie Rany i odzyskuje pełny stan zdrowia.
 
 Powrót do lokacji startowej nie powoduje utraty całej następnej tury. Bohater rozpoczyna swoją kolejną turę normalnie z lokacji startowej.
+
+Pokonany bohater traci monety w liczbie zależnej od aktualnego poziomu świata:
+
+- poziom 1: 1 monetę,
+- poziom 2: 2 monety,
+- poziom 3: 3 monety,
+- poziom 4: 4 monety,
+- poziom Legendarny: 5 monet.
+
+Pokonanie nie powoduje utraty ekwipunku, pomocników ani aktywnych questów.
