@@ -97,6 +97,10 @@ Oznacza to, że ograniczenie dotyczy pojedynczej tury spędzanej w danej lokacji
 
 Podczas Rady Bohaterów gracze mogą wymieniać się posiadanymi aktywnymi questami. Wymiana nie wymaga fizycznego spotkania bohaterów ani znajdowania się w tej samej lokacji na mapie.
 
+Można wymienić także quest już rozpoczęty. Gracz przejmujący zadanie otrzymuje je w aktualnym stanie, razem z kartą główną, wszystkimi odkrytymi rozwinięciami, znacznikiem porażki oraz pozostałymi efektami nałożonymi na ten quest.
+
+Postęp zadania nie jest resetowany. Nowy właściciel kontynuuje questa od etapu, na którym zakończył go poprzedni gracz.
+
 Gracz może również dobrowolnie porzucić aktywny quest.
 
 Porzucenie questa:
