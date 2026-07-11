@@ -124,6 +124,12 @@ Jeżeli łączny wynik jest równy lub wyższy od progu podanego na karcie, ques
 
 Przykład: quest wymaga Walki i wyniku 15. Bohater posiada Walkę 4 i wyrzuca 11 na k20. Łączny wynik wynosi 15, więc quest kończy się sukcesem.
 
+### Wyniki specjalne na k20
+
+Naturalne 20 oznacza automatyczny sukces, niezależnie od wartości statystyki bohatera i progu trudności questa.
+
+Naturalne 1 nie oznacza automatycznej porażki. Zamiast tego utrudnia dalszy przebieg questa. Dokładny sposób zwiększenia trudności po wyrzuceniu naturalnej 1 zostanie ustalony osobno.
+
 ## Rozwinięcia questów
 
 Questy mogą posiadać dalsze rozwinięcia fabularne. Jedno zadanie może rozciągać się maksymalnie na 3 kolejne etapy.
