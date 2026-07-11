@@ -320,6 +320,12 @@ Pomocnicy mogą zostać utraceni w wyniku działania zasad gry, questów albo in
 
 Bohater posiada Rany zamiast klasycznych punktów życia.
 
+Każdy bohater może otrzymać maksymalnie 4 Rany. Limit jest taki sam dla wszystkich bohaterów.
+
 Questy, walka oraz inne efekty mogą zadawać bohaterowi Rany.
 
-Po pokonaniu bohater wraca do swojej lokacji startowej wskazanej na jego karcie postaci.
+Po otrzymaniu czwartej Rany bohater zostaje pokonany i wraca do swojej lokacji startowej wskazanej na jego karcie postaci.
+
+Po powrocie bohater usuwa wszystkie Rany i odzyskuje pełny stan zdrowia.
+
+Powrót do lokacji startowej nie powoduje utraty całej następnej tury. Bohater rozpoczyna swoją kolejną turę normalnie z lokacji startowej.
