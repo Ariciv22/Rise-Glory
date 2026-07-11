@@ -56,7 +56,7 @@ Rada Bohaterów odbywa się automatycznie co 5 tur.
 
 Uczestniczą w niej wszyscy gracze niezależnie od miejsca, w którym ich bohaterowie znajdują się na mapie. Bohaterowie nie muszą fizycznie znajdować się w tej samej lokacji.
 
-Podczas Rady Bohaterów odkrywana jest karta z Talii Wydarzeń Świata. Gracze mogą również wymieniać się aktywnymi questami bez konieczności fizycznego spotkania swoich bohaterów na mapie.
+Podczas Rady Bohaterów odkrywana jest karta z Talii Wydarzeń Świata. Gracze mogą również wymieniać się aktywnymi questami oraz kupować je od innych graczy bez konieczności fizycznego spotkania swoich bohaterów na mapie.
 
 ## Tablice questów w lokacjach
 
@@ -93,11 +93,23 @@ Jeżeli bohater pozostaje w tej samej wsi, mieście albo grodzie do swojej kolej
 
 Oznacza to, że ograniczenie dotyczy pojedynczej tury spędzanej w danej lokacji, a nie całego pobytu ani całej gry.
 
-## Wymiana i porzucanie questów
+## Wymiana, sprzedaż i porzucanie questów
 
 Podczas Rady Bohaterów gracze mogą wymieniać się posiadanymi aktywnymi questami. Wymiana nie wymaga fizycznego spotkania bohaterów ani znajdowania się w tej samej lokacji na mapie.
 
-Można wymienić także quest już rozpoczęty. Gracz przejmujący zadanie otrzymuje je w aktualnym stanie, razem z kartą główną, wszystkimi odkrytymi rozwinięciami, znacznikiem porażki oraz pozostałymi efektami nałożonymi na ten quest.
+Wymiana odbywa się na zasadzie quest za quest. Obaj gracze przekazują sobie po jednym aktywnym queście, dlatego nie muszą posiadać wolnego slotu na planszetce.
+
+Podczas Rady Bohaterów gracz może także kupić aktywny quest od innego gracza. Kupujący przekazuje sprzedającemu monety i musi posiadać wolny slot na aktywny quest.
+
+Cena zakupu questa zależy od aktualnego poziomu świata:
+
+- poziom 1: 2 monety,
+- poziom 2: 4 monety,
+- poziom 3: 6 monet,
+- poziom 4: 8 monet,
+- poziom Legendarny: 10 monet.
+
+Można wymienić albo sprzedać także quest już rozpoczęty. Gracz przejmujący zadanie otrzymuje je w aktualnym stanie, razem z kartą główną, wszystkimi odkrytymi rozwinięciami, znacznikiem porażki oraz pozostałymi efektami nałożonymi na ten quest.
 
 Postęp zadania nie jest resetowany. Nowy właściciel kontynuuje questa od etapu, na którym zakończył go poprzedni gracz.
 
