@@ -117,9 +117,52 @@ Przeciwnik posiada bazową wartość HP określoną na swojej karcie. Wraz ze wz
 Bohater może uciec, przekupując przeciwnika za koszt zależny od poziomu świata albo wykonując pojedynczy test statystyki i progu wskazanych na karcie wroga. Po nieudanej próbie natychmiast następuje tura przeciwnika. Na razie nie ma walki między graczami. Nagrodę za zwycięstwo określa karta.
 
 ## Towary, sklepy i głód
-Przykładowe towary zwykłe: suszone mięso, bandaże, zioła lecznicze, pochodnie, mapa, wytrych. Luksusowe: wino, srebro, klejnoty, kryształowe kości do gry, futra, przyprawy.
 
-Jedzenie uzupełnia głód i może leczyć. Towary można sprzedawać albo wykorzystywać w questach i nie mają limitu przechowywania. Wsie, miasta i zamki mają sklepy ze stałymi cenami, chyba że karta mówi inaczej. System głodu zostanie opracowany później.
+Każda wieś, miasto i zamek posiada własny sklep z 5 odkrytymi slotami. Oferta każdej lokacji jest osobna i pozostaje widoczna między turami graczy.
+
+Składy sklepów są stałe:
+- **Wieś:** 2 sloty jedzenia i 3 sloty towarów podstawowych.
+- **Zamek:** 3 sloty broni i 2 sloty zbroi.
+- **Miasto:** 3 sloty towarów luksusowych i 2 sloty pierścieni.
+
+Każda karta na slocie oznacza jedną dostępną sztukę. Po zakupie karta zostaje zabrana przez gracza, a pusty slot jest natychmiast uzupełniany nową kartą z odpowiedniej talii sklepu.
+
+Na pięciu slotach jednego sklepu nie mogą znajdować się dwie identyczne karty. Jeżeli zostanie odkryta karta identyczna z kartą już dostępną w tym sklepie, jest natychmiast odkładana i zastępowana kolejną kartą z odpowiedniej talii.
+
+Zakupy i sprzedaż w sklepie nie kosztują akcji. Gracz może podczas swojej wizyty kupić albo sprzedać dowolną liczbę kart, o ile posiada wystarczającą liczbę monet oraz miejsce na zabierane przedmioty.
+
+Ceny podstawowe:
+- towar zwykły: 3 monety,
+- towar luksusowy: 6 monet.
+
+Jedzenie posiada różne ceny i różne wartości leczenia. Cena oraz efekt każdego rodzaju jedzenia są podane bezpośrednio na jego karcie.
+
+Ceny ekwipunku zależą od jakości:
+- przedmiot zwykły: 6 monet,
+- przedmiot dobry: 10 monet,
+- przedmiot rzadki: 15 monet,
+- przedmiot legendarny: 20 monet.
+
+Dostępna jakość ekwipunku zależy od aktualnego poziomu świata:
+- poziom świata 1: przedmioty zwykłe,
+- poziom świata 2: przedmioty zwykłe i dobre,
+- poziom świata 3: przedmioty dobre i rzadkie,
+- poziom świata 4: przedmioty rzadkie i najmocniejsze przedmioty dopuszczone do zwykłych sklepów,
+- ekwipunek legendarny jest związany przede wszystkim z Questami Legendarnymi i nie trafia do zwykłej oferty sklepu, chyba że karta lub inna zasada wyraźnie stanowi inaczej.
+
+Gracz może sprzedawać w odpowiednim sklepie towary, jedzenie, broń, zbroje i pierścienie. Sklep odkupuje kartę za połowę jej ceny zakupu, zaokrąglając wynik w dół. Minimalna cena odkupu wynosi 1 monetę.
+
+Sprzedana karta trafia na spód odpowiedniej talii sklepu.
+
+Po wzroście poziomu świata wszystkie sklepy są odświeżane. Dotychczasowe odkryte karty zostają usunięte z oferty, a każdy sklep wykłada 5 nowych kart zgodnych z nowym poziomem świata i swoim podziałem slotów.
+
+Na obecnym etapie konkretne lokacje nie posiadają specjalizacji ani wyjątkowych premii sklepowych. Statystyka Handel nie zmienia automatycznie cen kupna ani sprzedaży. Ceny mogą zostać zmienione wyłącznie przez wyraźny efekt karty lub inną szczególną zasadę.
+
+Jeżeli talia sklepu się wyczerpie, jej stos kart odrzuconych zostaje przetasowany i tworzy nową talię.
+
+Przykładowe towary zwykłe: suszone mięso, bandaże, zioła lecznicze, pochodnie, mapa, wytrych. Przykładowe towary luksusowe: wino, srebro, klejnoty, kryształowe kości do gry, futra, przyprawy.
+
+Jedzenie uzupełnia głód i może leczyć zgodnie z opisem karty. Towary można sprzedawać albo wykorzystywać w questach i nie mają limitu przechowywania. System głodu zostanie opracowany później.
 
 ## Poziom świata
 Poziom jest wspólny i zależy od Punktów Legendy lidera:
