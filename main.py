@@ -10,21 +10,24 @@ from rg_data import (
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     STATE_CITY,
+    STATE_COUNCIL,
     STATE_CUSTOM_HERO,
     STATE_GAME,
+    STATE_INITIATIVE,
     STATE_MAP_SELECT,
     STATE_MENU,
     STATE_MULTIPLAYER,
     STATE_PLAYER_CONFIG,
     STATE_PLAYER_COUNT,
-    STAT_NAMES,
     ZOOM_STEP,
 )
 from rg_city_screen import draw_city_screen
 from rg_hud import draw_game_ui
 from rg_map import Camera, load_textures
 from rg_screens import (
+    draw_council,
     draw_custom_hero,
+    draw_initiative,
     draw_map_select,
     draw_menu,
     draw_multiplayer,
@@ -33,6 +36,7 @@ from rg_screens import (
 )
 from rg_setup import build_player, create_tokens, default_custom_stats, random_archetype
 from rg_tooltip import draw_location_tooltip
+from rg_turns import TurnManager, resolve_initiative
 from rg_ui import over_ui, ui_rects
 from rg_world import generate_world
 
@@ -47,6 +51,12 @@ def prepare_game(current_map, players):
     tiles = generate_world(current_map)
     tokens = create_tokens(players, tiles)
     return tiles, tokens
+
+
+def prepare_initiative(players):
+    initiative = resolve_initiative(players)
+    turn_manager = TurnManager(initiative["turn_order"])
+    return initiative, turn_manager
 
 
 def main():
@@ -72,6 +82,8 @@ def main():
     players = []
     tiles = generate_world(current_map)
     tokens = []
+    initiative = None
+    turn_manager = None
     active_player_index = 0
     selected_tile = None
     selected_token = None
@@ -86,6 +98,44 @@ def main():
     last_mouse = (0, 0)
     fullscreen = False
     running = True
+
+    def finish_player_configuration(player):
+        nonlocal config_player_index, player_name, selected_archetype, custom_stats
+        nonlocal players, tiles, tokens, initiative, turn_manager, active_player_index
+        nonlocal selected_token, selected_tile, state
+
+        players.append(player)
+        config_player_index += 1
+        player_name = ""
+        selected_archetype = None
+        custom_stats = default_custom_stats()
+
+        if config_player_index >= player_count:
+            tiles, tokens = prepare_game(current_map, players)
+            initiative, turn_manager = prepare_initiative(players)
+            active_player_index = turn_manager.active_player_index
+            selected_token = tokens[active_player_index]
+            selected_tile = None
+            state = STATE_INITIATIVE
+        else:
+            state = STATE_PLAYER_CONFIG
+
+    def advance_turn():
+        nonlocal active_player_index, selected_token, selected_tile
+        nonlocal current_city, selected_city_place, state
+
+        if not turn_manager or not tokens:
+            return
+        result = turn_manager.end_turn(tokens)
+        active_player_index = result["active_player_index"]
+        selected_token = tokens[active_player_index]
+        selected_tile = None
+        current_city = None
+        selected_city_place = None
+        if result["council_due"]:
+            state = STATE_COUNCIL
+        else:
+            camera.center_on_tile(selected_token.tile)
 
     while running:
         mouse = pygame.mouse.get_pos()
@@ -110,7 +160,11 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     if state == STATE_CITY:
                         state = STATE_GAME
-                    elif state in [STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MAP_SELECT, STATE_MULTIPLAYER]:
+                    elif state == STATE_COUNCIL:
+                        state = STATE_GAME
+                        if selected_token:
+                            camera.center_on_tile(selected_token.tile)
+                    elif state in [STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MAP_SELECT, STATE_MULTIPLAYER, STATE_INITIATIVE]:
                         state = STATE_MENU
                     else:
                         state = STATE_MENU
@@ -123,6 +177,8 @@ def main():
                         player_name += event.unicode
                 elif event.key == pygame.K_SPACE and state == STATE_GAME and selected_token:
                     camera.center_on_tile(selected_token.tile)
+                elif event.key in [pygame.K_TAB, pygame.K_n] and state == STATE_GAME:
+                    advance_turn()
                 elif event.key == pygame.K_F11:
                     fullscreen = not fullscreen
                     if fullscreen:
@@ -149,7 +205,16 @@ def main():
                 last_mouse = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 dragging = False
-                if state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER]:
+                if state in [
+                    STATE_MENU,
+                    STATE_MAP_SELECT,
+                    STATE_PLAYER_COUNT,
+                    STATE_PLAYER_CONFIG,
+                    STATE_CUSTOM_HERO,
+                    STATE_MULTIPLAYER,
+                    STATE_INITIATIVE,
+                    STATE_COUNCIL,
+                ]:
                     for button in buttons:
                         if not button.clicked(event.pos):
                             continue
@@ -198,17 +263,8 @@ def main():
                                 state = STATE_CUSTOM_HERO
                             elif action == "confirm_player" and selected_archetype:
                                 name = player_name.strip() or f"Gracz {config_player_index + 1}"
-                                players.append(build_player(selected_archetype, name, config_player_index))
-                                config_player_index += 1
-                                player_name = ""
-                                selected_archetype = None
-                                if config_player_index >= player_count:
-                                    tiles, tokens = prepare_game(current_map, players)
-                                    active_player_index = 0
-                                    selected_token = tokens[0]
-                                    selected_tile = None
-                                    camera.center_on_tile(selected_token.tile)
-                                    state = STATE_GAME
+                                player = build_player(selected_archetype, name, config_player_index)
+                                finish_player_configuration(player)
                         elif state == STATE_CUSTOM_HERO:
                             if action == "back":
                                 state = STATE_PLAYER_CONFIG
@@ -222,20 +278,19 @@ def main():
                                     custom_stats[stat] -= 1
                             elif action == "confirm_custom" and selected_archetype and sum(custom_stats.values()) == 12:
                                 name = player_name.strip() or f"Gracz {config_player_index + 1}"
-                                players.append(build_player(selected_archetype, name, config_player_index, custom_stats=dict(custom_stats)))
-                                config_player_index += 1
-                                player_name = ""
-                                selected_archetype = None
-                                custom_stats = default_custom_stats()
-                                if config_player_index >= player_count:
-                                    tiles, tokens = prepare_game(current_map, players)
-                                    active_player_index = 0
-                                    selected_token = tokens[0]
-                                    selected_tile = None
-                                    camera.center_on_tile(selected_token.tile)
-                                    state = STATE_GAME
-                                else:
-                                    state = STATE_PLAYER_CONFIG
+                                player = build_player(selected_archetype, name, config_player_index, custom_stats=dict(custom_stats))
+                                finish_player_configuration(player)
+                        elif state == STATE_INITIATIVE and action == "start_game":
+                            active_player_index = turn_manager.active_player_index
+                            selected_token = tokens[active_player_index]
+                            selected_token.reset_actions()
+                            selected_tile = None
+                            camera.center_on_tile(selected_token.tile)
+                            state = STATE_GAME
+                        elif state == STATE_COUNCIL and action == "close_council":
+                            state = STATE_GAME
+                            if selected_token:
+                                camera.center_on_tile(selected_token.tile)
                         elif state == STATE_MULTIPLAYER:
                             state = STATE_MENU
                         break
@@ -252,12 +307,8 @@ def main():
                     for button in game_buttons:
                         if button.clicked(event.pos):
                             clicked_button = True
-                            if button.action == "end_turn" and tokens:
-                                active_player_index = (active_player_index + 1) % len(tokens)
-                                selected_token = tokens[active_player_index]
-                                selected_token.reset_moves()
-                                selected_tile = None
-                                camera.center_on_tile(selected_token.tile)
+                            if button.action == "end_turn":
+                                advance_turn()
                             break
                     if not clicked_button and not drag_moved and not over_ui(event.pos, rects):
                         for tile in tiles:
@@ -269,8 +320,6 @@ def main():
                                     state = STATE_CITY
                                 elif selected_token and selected_token.can_move_to(tile):
                                     selected_token.move_to(tile)
-                                elif selected_token and tile == selected_token.tile:
-                                    pass
                                 break
 
         if state == STATE_MENU:
@@ -296,7 +345,7 @@ def main():
                 player_count,
                 player_name,
                 selected_archetype,
-                [player["archetype_name"] for player in players],
+                players,
             )
             game_buttons = []
             city_buttons = []
@@ -312,6 +361,15 @@ def main():
                 selected_archetype or HERO_ARCHETYPES[0],
                 custom_stats,
             )
+            game_buttons = []
+            city_buttons = []
+        elif state == STATE_INITIATIVE:
+            buttons = draw_initiative(screen, title_font, font, small_font, mouse, players, initiative or {})
+            game_buttons = []
+            city_buttons = []
+        elif state == STATE_COUNCIL:
+            round_number = turn_manager.round_number if turn_manager else 1
+            buttons = draw_council(screen, title_font, font, small_font, mouse, round_number)
             game_buttons = []
             city_buttons = []
         elif state == STATE_MULTIPLAYER:
@@ -330,10 +388,28 @@ def main():
             for tile in tiles:
                 valid = selected_token.can_move_to(tile) if selected_token else False
                 tile.draw(screen, textures, camera, token_font, hovered=(tile == hovered), selected=(tile == selected_tile), valid_move=valid)
-            for token in tokens:
-                token.draw(screen, camera, token_font, selected=(token == selected_token))
+            for index, token in enumerate(tokens):
+                token.draw(screen, camera, token_font, selected=(index == active_player_index))
+
+            active_player_index = turn_manager.active_player_index if turn_manager else 0
+            selected_token = tokens[active_player_index]
             active_hero = players[active_player_index]
-            game_buttons = draw_game_ui(screen, font, small_font, active_hero, selected_token, selected_tile, current_map, active_player_index + 1)
+            round_number = turn_manager.round_number if turn_manager else 1
+            council_cycle = turn_manager.council_cycle if turn_manager else 1
+            game_buttons = draw_game_ui(
+                screen,
+                font,
+                small_font,
+                active_hero,
+                selected_token,
+                selected_tile,
+                current_map,
+                active_player_index,
+                players,
+                tokens,
+                round_number,
+                council_cycle,
+            )
             draw_location_tooltip(screen, font, small_font, hovered, mouse)
 
         pygame.display.flip()
