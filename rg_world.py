@@ -4,11 +4,9 @@ from rg_data import TERRAINS
 from rg_map import Tile, generate_positions
 
 LOCATIONS = [
-    {"kind": "city", "type_name": "Miasto", "name": "Miasto", "symbol": "M", "count": 2, "color": (220, 180, 85)},
-    {"kind": "village", "type_name": "Wies", "name": "Wies", "symbol": "W", "count": 2, "color": (105, 190, 95)},
-    {"kind": "fort", "type_name": "Grod", "name": "Grod", "symbol": "G", "count": 1, "color": (165, 165, 175)},
-    {"kind": "ruins", "type_name": "Ruiny", "name": "Ruiny", "symbol": "R", "count": 2, "color": (145, 105, 180)},
-    {"kind": "special", "type_name": "Miejsce specjalne", "name": "Miejsce specjalne", "symbol": "S", "count": 1, "color": (75, 155, 120)},
+    {"kind": "city", "type_name": "Miasto", "name": "Miasto", "symbol": "M", "count": 3, "color": (220, 180, 85)},
+    {"kind": "village", "type_name": "Wies", "name": "Wies", "symbol": "W", "count": 3, "color": (105, 190, 95)},
+    {"kind": "castle", "type_name": "Zamek", "name": "Zamek", "symbol": "Z", "count": 3, "color": (165, 165, 175)},
 ]
 
 
@@ -26,7 +24,7 @@ def build_location_data(location, number):
     data = {
         "kind": location["kind"],
         "type_name": location["type_name"],
-        "name": location["name"],
+        "name": f"{location['name']} {number + 1}",
         "symbol": location["symbol"],
         "color": location["color"],
         "number": number + 1,
@@ -52,7 +50,7 @@ def assign_locations(tiles):
     return tiles
 
 
-def generate_world(map_key):
-    tiles = create_random_tiles(map_key)
+def generate_world(map_key="rosette9"):
+    tiles = create_random_tiles("rosette9")
     assign_locations(tiles)
     return tiles
