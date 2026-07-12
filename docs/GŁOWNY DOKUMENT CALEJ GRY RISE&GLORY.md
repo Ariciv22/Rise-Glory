@@ -1,5 +1,23 @@
 # GŁOWNY DOKUMENT CALEJ GRY RISE&GLORY
 
+## Przygotowanie rozgrywki
+W grze może uczestniczyć od 1 do 6 graczy. Na obecnym etapie używana jest mapa 9×9, a pozostałe warianty map pozostają wyłączone.
+
+Generator mapy rozmieszcza 3 wsie, 3 miasta i 3 zamki. Ruiny, miejsca specjalne i pozostałe encountery zostaną dodane później.
+
+Przepływ rozpoczęcia gry:
+1. Menu główne.
+2. Wybór mapy.
+3. Wybór gotowego bohatera albo użycie opcji „Stwórz bohatera”.
+4. Przy tworzeniu bohatera gracz samodzielnie rozdziela 12 punktów między sześć statystyk.
+5. Po przygotowaniu wszystkich bohaterów tworzona jest mapa i rozpoczyna się rozgrywka.
+
+Każdy gracz rozpoczyna z 5 monetami, 0 Ran, 0 Punktów Legendy, ekwipunkiem wynikającym z wybranego bohatera lub zestawu i bez pomocnika.
+
+Na obrzeżach mapy znajduje się 6 pól startowych ułożonych w 3 pary naprzeciw siebie. Przy pełnej grze sześcioosobowej każdy gracz zajmuje jedno pole startowe. Przy mniejszej liczbie graczy wybierane są pola rozstawione możliwie równomiernie i jak najdalej od siebie.
+
+Po przygotowaniu mapy i bohaterów wszyscy gracze rzucają k20. Najwyższy wynik wyznacza pierwszego gracza, a dalsza kolejność biegnie zgodnie z ruchem wskazówek zegara. Pierwsze Wydarzenie Świata rozpatruje się dopiero po pięciu turach każdego gracza.
+
 ## Talie
 W grze występuje 10 głównych talii:
 1. **Talia Wojenna** – polowania, potyczki i większe bitwy.
@@ -16,7 +34,7 @@ W grze występuje 10 głównych talii:
 ## Przygotowanie bohatera
 Bohater posiada statystyki: Walka, Handel, Intryga, Dyplomacja, Kultura i Nauka. Przed rozdaniem punktów każda wynosi 0. Gracz otrzymuje 12 punktów; podniesienie statystyki o 1 kosztuje 1 punkt, a pojedyncza statystyka może od razu osiągnąć maksymalnie 6. Zamiast samodzielnego podziału można wybrać gotowy zestaw.
 
-Bohater zaczyna z 5 monetami, ekwipunkiem zależnym od klasy lub zestawu i własną lokacją startową z karty postaci. Nie zaczyna z pomocnikiem. Maksymalna podstawowa wartość statystyki wynosi 6.
+Bohater zaczyna z 5 monetami, ekwipunkiem zależnym od klasy lub zestawu i bez pomocnika. Maksymalna podstawowa wartość statystyki wynosi 6.
 
 ### Zestawy startowe
 - **Wojownik:** Walka 5, Handel 2, Dyplomacja 2, Intryga 1, Nauka 1, Kultura 1. Ekwipunek: Prosty miecz, Skórzana zbroja.
@@ -27,7 +45,7 @@ Bohater zaczyna z 5 monetami, ekwipunkiem zależnym od klasy lub zestawu i włas
 - **Uczony:** Nauka 5, Kultura 2, Handel 2, Dyplomacja 1, Intryga 1, Walka 1. Ekwipunek: Torba badacza, Księga albo mapa ruin.
 
 ## Kolejność i tura
-Na początku każdy rzuca k20. Najwyższy wynik wyznacza pierwszego gracza, a dalsza kolejność biegnie zgodnie z ruchem wskazówek zegara i nie zmienia się. Gracz ma 4 akcje, może wykonywać je w dowolnej kolejności i powtarzać tę samą akcję, o ile jej zasady na to pozwalają. Niewykorzystane akcje przepadają.
+Na początku każdy rzuca k20. Najwyższy wynik wyznacza pierwszego gracza, a dalsza kolejność biegnie zgodnie z ruchem wskazówek zegara i nie zmienia się. Gracz ma 4 akcje. Może przeznaczać je na ruch albo inne czynności, takie jak wykonywanie questów, trening, walka i pozostałe działania dozwolone przez zasady. Akcje można wykonywać w dowolnej kolejności i powtarzać tę samą akcję, o ile jej zasady na to pozwalają. Niewykorzystane akcje przepadają.
 
 Po pięciu turach każdego gracza, przed kolejnymi ruchami bohaterów, odbywa się Rada Bohaterów.
 
@@ -86,9 +104,11 @@ Dostępność:
 - **Zamek:** Walka, Intryga, Nauka.
 
 ## Lokacje i ruch
+Na obecnym etapie rozgrywka wykorzystuje mapę 9×9 z 3 wsiami, 3 miastami i 3 zamkami. Pozostałe encountery i lokacje specjalne zostaną dodane później.
+
 Wejście na sąsiedni łatwy heks kosztuje 1 akcję, na trudny – 2. Wejście do wsi, miasta lub zamku nie kosztuje dodatkowej akcji ponad ruch na heks. Wielu bohaterów może przebywać w tej samej lokacji i nie można blokować wejścia. Na razie nie ma dróg.
 
-Trudne tereny: wzgórza, las, góry, ocean. Łatwe: wybrzeże, obszar zalewowy, pustynia, równiny, tundra. Wsie, miasta i zamki mają te same podstawowe usługi, ale różne treningi i pule odkrywanych treści.
+Trudne tereny: wzgórza, las, góry, ocean. Góry są przechodnie i kosztują 2 akcje ruchu. Łatwe tereny: wybrzeże, obszar zalewowy, pustynia, równiny i tundra. Wsie, miasta i zamki mają te same podstawowe usługi, ale różne treningi i pule odkrywanych treści.
 
 ## Ekwipunek
 Sloty założonego ekwipunku: 1 broń, 1 zbroja, 1 hełm, 1 para butów i 2 pierścienie. Założone przedmioty nie zajmują plecaka. Plecak ma 10 slotów, a każda karta przedmiotu zajmuje 1. Po zapełnieniu trzeba pozostawić przedmiot na aktualnym heksie, aby zabrać kolejny.
