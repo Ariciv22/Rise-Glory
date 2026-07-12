@@ -95,6 +95,18 @@ Sloty założonego ekwipunku: 1 broń, 1 zbroja, 1 hełm, 1 para butów i 2 pier
 
 Efekty kart mogą zwiększać statystyki, dodawać premie, zapewniać przerzuty albo łączyć efekty. Premie mogą przekraczać +1 i sumują się, chyba że karta mówi inaczej. Zmiana ekwipunku nie kosztuje akcji, ale może nastąpić tylko przed rozpoczęciem akcji, nigdy podczas walki, testu lub rozpatrywania akcji.
 
+Ekwipunek występuje w czterech jakościach: zwykłej, rzadkiej, epickiej i legendarnej.
+
+Zbroja określa pełną Klasę Pancerza bohatera, a nie premię dodawaną do wartości bazowej. Podstawowa skala jakości zbroi:
+- zwykła zbroja – 12 KP,
+- rzadka zbroja – 14 KP,
+- epicka zbroja – 16 KP,
+- legendarna zbroja – 18 KP.
+
+Pierścienie mogą zapewniać premie do statystyk, przerzuty, zwiększenie leczenia, dodatkowe monety, zniżki w sklepach, ochronę przed wybranymi efektami albo premie do questów z określonej talii. Bohater może mieć założone jednocześnie maksymalnie 2 pierścienie.
+
+Przedmiot jednorazowy można wykorzystać podczas własnej tury, wyłącznie przed rozpoczęciem akcji. Użycie nie kosztuje akcji. Nie można używać przedmiotów jednorazowych podczas walki, testu ani rozpatrywania rozpoczętej akcji. Po wykorzystaniu karta jest odrzucana.
+
 ## Kompania
 Bohater może mieć maksymalnie 5 pomocników. Zdobywa ich w questach lub tawernach przez zakup albo losowanie. Podczas pojedynczego testu lub walki można skorzystać tylko z jednego pomocnika. Dobrowolnie odrzucony lub utracony pomocnik wraca do Talii Kompanii.
 
@@ -117,7 +129,6 @@ Przeciwnik posiada bazową wartość HP określoną na swojej karcie. Wraz ze wz
 Bohater może uciec, przekupując przeciwnika za koszt zależny od poziomu świata albo wykonując pojedynczy test statystyki i progu wskazanych na karcie wroga. Po nieudanej próbie natychmiast następuje tura przeciwnika. Na razie nie ma walki między graczami. Nagrodę za zwycięstwo określa karta.
 
 ## Towary, sklepy i głód
-
 Każda wieś, miasto i zamek posiada własny sklep z 5 odkrytymi slotami. Oferta każdej lokacji jest osobna i pozostaje widoczna między turami graczy.
 
 Składy sklepów są stałe:
@@ -132,27 +143,43 @@ Na pięciu slotach jednego sklepu nie mogą znajdować się dwie identyczne kart
 Zakupy i sprzedaż w sklepie nie kosztują akcji. Gracz może podczas swojej wizyty kupić albo sprzedać dowolną liczbę kart, o ile posiada wystarczającą liczbę monet oraz miejsce na zabierane przedmioty.
 
 Ceny podstawowe:
-- towar zwykły: 3 monety,
-- towar luksusowy: 6 monet.
-
-Jedzenie posiada różne ceny i różne wartości leczenia. Cena oraz efekt każdego rodzaju jedzenia są podane bezpośrednio na jego karcie.
-
-Ceny ekwipunku zależą od jakości:
-- przedmiot zwykły: 6 monet,
-- przedmiot dobry: 10 monet,
-- przedmiot rzadki: 15 monet,
-- przedmiot legendarny: 20 monet.
+- towar zwykły – 3 monety,
+- towar luksusowy – 6 monet,
+- ekwipunek zwykły – 6 monet,
+- ekwipunek rzadki – 10 monet,
+- ekwipunek epicki – 15 monet,
+- ekwipunek legendarny – 20 monet.
 
 Dostępna jakość ekwipunku zależy od aktualnego poziomu świata:
-- poziom świata 1: przedmioty zwykłe,
-- poziom świata 2: przedmioty zwykłe i dobre,
-- poziom świata 3: przedmioty dobre i rzadkie,
-- poziom świata 4: przedmioty rzadkie i najmocniejsze przedmioty dopuszczone do zwykłych sklepów,
+- poziom świata 1 – przedmioty zwykłe,
+- poziom świata 2 – przedmioty zwykłe i rzadkie,
+- poziom świata 3 – przedmioty rzadkie i epickie,
+- poziom świata 4 – przedmioty epickie i najmocniejsze przedmioty dopuszczone do zwykłych sklepów,
 - ekwipunek legendarny jest związany przede wszystkim z Questami Legendarnymi i nie trafia do zwykłej oferty sklepu, chyba że karta lub inna zasada wyraźnie stanowi inaczej.
 
-Gracz może sprzedawać w odpowiednim sklepie towary, jedzenie, broń, zbroje i pierścienie. Sklep odkupuje kartę za połowę jej ceny zakupu, zaokrąglając wynik w dół. Minimalna cena odkupu wynosi 1 monetę.
+Jedzenie posiada różne ceny, wartości leczenia i wartości uzupełnienia Głodu. Wszystkie te informacje znajdują się bezpośrednio na karcie jedzenia. Jedzenie jest zużywane natychmiast po użyciu, można wykorzystać je podczas własnej tury przed rozpoczęciem akcji i nie można korzystać z niego podczas walki.
 
-Sprzedana karta trafia na spód odpowiedniej talii sklepu.
+### Towary podstawowe
+Towary podstawowe kosztują po 3 monety. Ich ustalone efekty:
+- **Bandaże** – leczą zgodnie z wartością podaną na karcie.
+- **Zioła lecznicze** – leczą zgodnie z wartością podaną na karcie.
+- **Lina** – zapewnia +1 do Kultury.
+- **Krzesiwo** – zapewnia +1 do Handlu.
+- **Pochodnia** – zapewnia +1 do Nauki.
+- **Mapa okolicy** – zapewnia +1 do ruchu na mapie.
+- **Wytrychy** – zapewniają +1 do Intrygi.
+- **Kamień do ostrzenia** – zapewnia +2 do Walki.
+- **Bukłak z wodą** – zwiększa o 1 liczbę leczonych Ran.
+
+Towary podstawowe z efektem aktywnym są przedmiotami jednorazowymi: używa się ich podczas własnej tury przed rozpoczęciem akcji, a następnie odrzuca.
+
+### Towary luksusowe
+Towary luksusowe służą do wykonywania questów, sprzedaży oraz handlu między graczami. Nie posiadają własnych efektów aktywnych, chyba że konkretna karta lub szczególna zasada wyraźnie stanowi inaczej.
+
+### Liczba kart i kopie
+Docelowo każda kategoria sklepowa ma zawierać około 10 różnych kart: jedzenia, towarów podstawowych, broni, zbroi, towarów luksusowych i pierścieni. Zwykłe produkty i przedmioty występują w większej liczbie kopii, a luksusy i najmocniejszy ekwipunek w mniejszej.
+
+Gracz może sprzedawać w odpowiednim sklepie towary, jedzenie, broń, zbroje i pierścienie. Sklep odkupuje kartę za połowę jej ceny zakupu, zaokrąglając wynik w dół. Minimalna cena odkupu wynosi 1 monetę. Sprzedana karta trafia na spód odpowiedniej talii sklepu.
 
 Po wzroście poziomu świata wszystkie sklepy są odświeżane. Dotychczasowe odkryte karty zostają usunięte z oferty, a każdy sklep wykłada 5 nowych kart zgodnych z nowym poziomem świata i swoim podziałem slotów.
 
@@ -160,17 +187,15 @@ Na obecnym etapie konkretne lokacje nie posiadają specjalizacji ani wyjątkowyc
 
 Jeżeli talia sklepu się wyczerpie, jej stos kart odrzuconych zostaje przetasowany i tworzy nową talię.
 
-Przykładowe towary zwykłe: suszone mięso, bandaże, zioła lecznicze, pochodnie, mapa, wytrych. Przykładowe towary luksusowe: wino, srebro, klejnoty, kryształowe kości do gry, futra, przyprawy.
-
-Jedzenie uzupełnia głód i może leczyć zgodnie z opisem karty. Towary można sprzedawać albo wykorzystywać w questach i nie mają limitu przechowywania. System głodu zostanie opracowany później.
+Towary można sprzedawać albo wykorzystywać w questach i nie mają limitu przechowywania. System głodu zostanie opracowany później.
 
 ## Poziom świata
 Poziom jest wspólny i zależy od Punktów Legendy lidera:
-- 0–9: poziom 1,
-- 10–19: poziom 2,
-- 20–29: poziom 3,
-- 30–34: poziom 4,
-- 35+: świat pozostaje na poziomie 4, a uprawniony gracz może podjąć Quest Legendarny.
+- 0–9 – poziom 1,
+- 10–19 – poziom 2,
+- 20–29 – poziom 3,
+- 30–34 – poziom 4,
+- 35+ – świat pozostaje na poziomie 4, a uprawniony gracz może podjąć Quest Legendarny.
 
 Wyższy poziom dodaje trudniejsze questy, przeciwników i testy, zmienia zależne ceny oraz odblokowuje nowy ekwipunek i pomocników. Pozostali gracze nie otrzymują automatycznego wyrównania.
 
