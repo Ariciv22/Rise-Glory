@@ -1,6 +1,6 @@
 import pygame
 
-from rg_data import GOLD, LEFT_PANEL_W, MUTED, PANEL, SCREEN_WIDTH, SIDE_MARGIN, TEXT, TOP_BAR_H
+from rg_data import GOLD, LEFT_PANEL_W, MUTED, PANEL, RIGHT_PANEL_W, SCREEN_WIDTH, SIDE_MARGIN, TEXT, TOP_BAR_H
 
 
 class Button:
@@ -60,6 +60,7 @@ def ui_rects(screen):
     return [
         pygame.Rect(0, 0, sw, TOP_BAR_H),
         pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
+        pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
     ]
 
 
