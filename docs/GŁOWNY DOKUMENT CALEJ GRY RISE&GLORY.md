@@ -34,6 +34,8 @@ W grze występuje 10 głównych talii:
 ## Przygotowanie bohatera
 Bohater posiada statystyki: Walka, Handel, Intryga, Dyplomacja, Kultura i Nauka. Przed rozdaniem punktów każda wynosi 0. Gracz otrzymuje 12 punktów; podniesienie statystyki o 1 kosztuje 1 punkt, a pojedyncza statystyka może od razu osiągnąć maksymalnie 6. Zamiast samodzielnego podziału można wybrać gotowy zestaw.
 
+Przy opcji „Stwórz bohatera” gracz wybiera jeden z sześciu archetypów jako bazę wyglądu i wyposażenia, a następnie samodzielnie rozdziela 12 punktów statystyk. Stworzony bohater zachowuje startowy zestaw ekwipunku wybranego archetypu; zmienia się wyłącznie rozkład jego statystyk.
+
 Bohater zaczyna z 5 monetami, ekwipunkiem zależnym od klasy lub zestawu i bez pomocnika. Maksymalna podstawowa wartość statystyki wynosi 6.
 
 ### Zestawy startowe
