@@ -1,7 +1,20 @@
 import pygame
 
-from rg_data import BG, GOLD, HERO_ARCHETYPES, MAP_OPTIONS, MUTED, PANEL, PLAYER_COLORS, SCREEN_HEIGHT, SCREEN_WIDTH, STAT_NAMES, TEXT
-from rg_ui import Button, centered_x, draw_panel, wrap
+from rg_data import (
+    BG,
+    COUNCIL_ROUNDS,
+    GOLD,
+    HERO_ARCHETYPES,
+    MAP_OPTIONS,
+    MUTED,
+    PANEL,
+    PLAYER_COLORS,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    STAT_NAMES,
+    TEXT,
+)
+from rg_ui import Button, centered_x, draw_lines, draw_panel, wrap
 
 
 def draw_title(screen, title_font, font, title, subtitle):
@@ -75,7 +88,7 @@ def draw_player_config(screen, title_font, font, small_font, mouse, player_index
     screen.blit(small_font.render("Kolor gracza", True, MUTED), (SCREEN_WIDTH / 2 + 342, 190))
 
     selected_id = selected_archetype["id"] if selected_archetype else None
-    used_ids = {hero["archetype_id"] for hero in used_archetypes} if used_archetypes and isinstance(used_archetypes[0], dict) else set()
+    used_ids = {hero["archetype_id"] for hero in used_archetypes} if used_archetypes else set()
 
     buttons = []
     card_w, card_h = 360, 142
@@ -112,9 +125,8 @@ def draw_player_config(screen, title_font, font, small_font, mouse, player_index
         button.draw(screen, font, mouse)
         buttons.append(button)
 
-    ready = bool(world_name.strip()) and selected_archetype is not None
-    if not ready:
-        screen.blit(small_font.render("Wpisz imie i wybierz archetyp.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 + 150, bottom_y - 28))
+    if selected_archetype is None:
+        screen.blit(small_font.render("Wybierz archetyp. Imie moze pozostac domyslne.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 + 55, bottom_y - 28))
     return buttons
 
 
@@ -123,7 +135,7 @@ def draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, 
     draw_title(screen, title_font, font, f"Stworz bohatera - Gracz {player_index + 1}", f"Wyglad i ekwipunek: {base_hero['name']}")
     remaining = 12 - sum(stats.values())
     screen.blit(font.render(f"Pozostale punkty: {remaining}", True, TEXT), (SCREEN_WIDTH / 2 - 120, 170))
-    screen.blit(small_font.render(f"Imie: {world_name or 'brak'}", True, MUTED), (SCREEN_WIDTH / 2 - 120, 208))
+    screen.blit(small_font.render(f"Imie: {world_name or 'domyslne'}", True, MUTED), (SCREEN_WIDTH / 2 - 120, 208))
 
     buttons = []
     start_y = 270
@@ -148,6 +160,69 @@ def draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, 
     if remaining != 0:
         screen.blit(small_font.render("Rozdziel dokladnie 12 punktow.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 - 115, 730))
     return buttons
+
+
+def draw_initiative(screen, title_font, font, small_font, mouse, players, initiative):
+    screen.fill(BG)
+    draw_title(screen, title_font, font, "Rzut na kolejnosc", "Najwyzszy wynik rozpoczyna, a dalsza kolejnosc biegnie zgodnie z ustawieniem graczy")
+
+    panel = pygame.Rect(SCREEN_WIDTH / 2 - 470, 185, 940, 610)
+    draw_panel(screen, panel, GOLD)
+    screen.blit(font.render("Wyniki k20", True, TEXT), (panel.x + 28, panel.y + 24))
+
+    rolls = initiative.get("initial_rolls", {})
+    y = panel.y + 72
+    for index, player in enumerate(players):
+        row = pygame.Rect(panel.x + 24, y, panel.width - 48, 58)
+        pygame.draw.rect(screen, (31, 30, 28), row, border_radius=9)
+        pygame.draw.rect(screen, player.get("player_color", GOLD), row, 2, border_radius=9)
+        pygame.draw.circle(screen, player.get("player_color", GOLD), (row.x + 20, row.centery), 9)
+        text = f"Gracz {player.get('player_number', index + 1)} - {player['name']} ({player.get('archetype_name', '-')})"
+        screen.blit(font.render(text, True, TEXT), (row.x + 40, row.y + 15))
+        roll_text = font.render(str(rolls.get(index, "-")), True, TEXT)
+        screen.blit(roll_text, (row.right - 54, row.y + 15))
+        y += 68
+
+    rerolls = initiative.get("reroll_rounds", [])
+    if rerolls:
+        y += 4
+        screen.blit(small_font.render("Dogrywki przy remisie:", True, TEXT), (panel.x + 28, y))
+        y += 26
+        for round_index, reroll in enumerate(rerolls, start=1):
+            parts = [f"{players[index]['name']}: {value}" for index, value in reroll.items()]
+            line = f"Dogrywka {round_index}: " + ", ".join(parts)
+            screen.blit(small_font.render(line, True, MUTED), (panel.x + 28, y))
+            y += 24
+
+    order_names = [players[index]["name"] for index in initiative.get("turn_order", [])]
+    order_text = " -> ".join(order_names)
+    order_y = panel.bottom - 74
+    screen.blit(font.render("Kolejnosc tur:", True, TEXT), (panel.x + 28, order_y))
+    draw_lines(screen, small_font, wrap(small_font, order_text, panel.width - 250), panel.x + 188, order_y + 3, MUTED, max_width=panel.width - 220)
+
+    start = Button("Rozpocznij gre", "start_game", (SCREEN_WIDTH / 2 - 190, 830, 380, 58))
+    start.draw(screen, font, mouse)
+    return [start]
+
+
+def draw_council(screen, title_font, font, small_font, mouse, round_number):
+    screen.fill(BG)
+    draw_title(screen, title_font, font, "Rada Bohaterow", f"Zakonczono {COUNCIL_ROUNDS} pelnych rund. Nastepna runda: {round_number}")
+
+    panel = pygame.Rect(SCREEN_WIDTH / 2 - 420, 220, 840, 470)
+    draw_panel(screen, panel, GOLD)
+    screen.blit(font.render("Porzadek Rady", True, TEXT), (panel.x + 32, panel.y + 28))
+    lines = [
+        "1. Rozpatrz Wydarzenie Swiata - w tej wersji ekran testowy.",
+        "2. Handel miedzy graczami zostanie podpiety w kolejnym etapie.",
+        "3. Po zakonczeniu Rady licznik cyklu wraca do 1/5.",
+        "4. Nastepna ture rozpoczyna gracz wynikajacy z ustalonej kolejnosci.",
+    ]
+    draw_lines(screen, font, lines, panel.x + 36, panel.y + 92, MUTED, line_h=54, max_width=panel.width - 72)
+
+    close = Button("Zakoncz Rade", "close_council", (SCREEN_WIDTH / 2 - 190, 740, 380, 58))
+    close.draw(screen, font, mouse)
+    return [close]
 
 
 def draw_multiplayer(screen, title_font, font, mouse):
