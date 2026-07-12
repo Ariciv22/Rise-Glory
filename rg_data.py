@@ -1,3 +1,5 @@
+import random
+
 SCREEN_WIDTH = 1600
 SCREEN_HEIGHT = 1000
 MIN_SCREEN_WIDTH = 1000
@@ -32,6 +34,9 @@ MOVE = (120, 210, 255)
 
 STATE_MENU = "menu"
 STATE_MAP_SELECT = "map_select"
+STATE_PLAYER_COUNT = "player_count"
+STATE_PLAYER_CONFIG = "player_config"
+STATE_CUSTOM_HERO = "custom_hero"
 STATE_HERO_SELECT = "hero_select"
 STATE_GAME = "game"
 STATE_CITY = "city"
@@ -39,9 +44,30 @@ STATE_MULTIPLAYER = "multiplayer"
 
 MAP_OPTIONS = [
     ("rosette9", "Rozeta 9x9"),
-    ("rosette8", "Rozeta 8x8"),
-    ("small", "Mala mapa testowa"),
-    ("pangea", "Pangea"),
+]
+
+STAT_NAMES = ["Walka", "Handel", "Intryga", "Dyplomacja", "Kultura", "Nauka"]
+
+PLAYER_COLORS = [
+    (215, 70, 55),
+    (70, 125, 220),
+    (65, 170, 85),
+    (225, 190, 55),
+    (165, 90, 210),
+    (235, 125, 45),
+]
+
+START_FOOD = "Bochenek chleba"
+BASIC_GOODS = [
+    "Bandaze",
+    "Ziola lecznicze",
+    "Lina",
+    "Krzesiwo",
+    "Pochodnia",
+    "Mapa okolicy",
+    "Wytrychy",
+    "Kamien do ostrzenia",
+    "Buklak z woda",
 ]
 
 HERO_ARCHETYPES = [
@@ -105,18 +131,28 @@ TERRAINS = {
     "plains": {"name": "Rowniny", "image": "rowniny.png", "fallback": (112, 156, 76), "weight": 30, "passable": True, "move": 1},
     "forest": {"name": "Las", "image": "las.png", "fallback": (49, 107, 62), "weight": 22, "passable": True, "move": 2},
     "hills": {"name": "Wzgorza", "image": "wzgorza.png", "fallback": (139, 116, 73), "weight": 18, "passable": True, "move": 2},
-    "mountain": {"name": "Gory", "image": "gory.png", "fallback": (116, 116, 112), "weight": 12, "passable": False, "move": 99},
+    "mountain": {"name": "Gory", "image": "gory.png", "fallback": (116, 116, 112), "weight": 12, "passable": True, "move": 2},
     "desert": {"name": "Pustynia", "image": "pustynia.png", "fallback": (194, 165, 92), "weight": 10, "passable": True, "move": 1},
     "tundra": {"name": "Tundra", "image": "tundra.png", "fallback": (145, 170, 154), "weight": 8, "passable": True, "move": 1},
 }
 
 
-def clone_hero(template):
+def clone_hero(template, world_name=None, player_index=0, stats=None):
     hero = dict(template)
-    hero["stats"] = dict(template["stats"])
-    hero["gold"] = 3
+    hero["archetype_id"] = template["id"]
+    hero["archetype_name"] = template["name"]
+    hero["archetype_color"] = template["color"]
+    hero["stats"] = dict(stats if stats is not None else template["stats"])
+    hero["name"] = (world_name or template["name"]).strip()
+    hero["player_number"] = player_index + 1
+    hero["player_color"] = PLAYER_COLORS[player_index % len(PLAYER_COLORS)]
+    hero["color"] = hero["player_color"]
+    hero["gold"] = 5
     hero["wounds"] = 0
     hero["legend"] = 0
+    hero["food"] = [START_FOOD]
+    hero["goods"] = [random.choice(BASIC_GOODS)]
+    hero["custom_stats"] = stats is not None
     return hero
 
 
