@@ -5,15 +5,16 @@ from pathlib import Path
 import pygame
 
 from rg_data import (
+    ACTIONS_PER_TURN,
     DEFAULT_ZOOM,
-    HERO_MOVES_PER_TURN,
     HOVER,
     HEX_SIZE,
     LEFT_PANEL_W,
     MAP_MARGIN,
-    MIN_ZOOM,
     MAX_ZOOM,
+    MIN_ZOOM,
     MOVE,
+    RIGHT_PANEL_W,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     SELECTED,
@@ -79,7 +80,7 @@ class Camera:
 
     def map_view_center(self):
         map_left = LEFT_PANEL_W + MAP_MARGIN
-        map_right = SCREEN_WIDTH - MAP_MARGIN
+        map_right = SCREEN_WIDTH - RIGHT_PANEL_W - MAP_MARGIN
         map_top = TOP_BAR_H + MAP_MARGIN
         map_bottom = SCREEN_HEIGHT - MAP_MARGIN
         return map_left + (map_right - map_left) / 2, map_top + (map_bottom - map_top) / 2
@@ -159,22 +160,33 @@ class HeroToken:
     def __init__(self, hero, tile):
         self.hero = hero
         self.tile = tile
-        self.moves = HERO_MOVES_PER_TURN
+        self.actions = ACTIONS_PER_TURN
+
+    @property
+    def moves(self):
+        return self.actions
+
+    @moves.setter
+    def moves(self, value):
+        self.actions = value
+
+    def reset_actions(self):
+        self.actions = ACTIONS_PER_TURN
 
     def reset_moves(self):
-        self.moves = HERO_MOVES_PER_TURN
+        self.reset_actions()
 
     def can_move_to(self, target):
         if not target or not target.terrain["passable"]:
             return False
         if not are_adjacent(self.tile, target):
             return False
-        return self.moves >= target.terrain["move"]
+        return self.actions >= target.terrain["move"]
 
     def move_to(self, target):
         if not self.can_move_to(target):
             return False
-        self.moves -= target.terrain["move"]
+        self.actions -= target.terrain["move"]
         self.tile = target
         return True
 
@@ -182,10 +194,11 @@ class HeroToken:
         sx, sy = self.tile.center(camera)
         center = (int(sx), int(sy - 30 * camera.zoom))
         radius = max(11, int(18 * camera.zoom))
-        pygame.draw.circle(screen, self.hero["color"], center, radius + 5)
+        player_color = self.hero.get("player_color", self.hero.get("color", (220, 220, 220)))
+        pygame.draw.circle(screen, player_color, center, radius + 5)
         pygame.draw.circle(screen, (238, 238, 220), center, radius)
         pygame.draw.circle(screen, (25, 25, 25), center, radius, max(2, int(3 * camera.zoom)))
-        label = font.render("B", True, (20, 20, 20))
+        label = font.render(str(self.hero.get("player_number", "B")), True, (20, 20, 20))
         screen.blit(label, label.get_rect(center=center))
         if selected:
             pygame.draw.circle(screen, SELECTED, center, radius + 10, max(2, int(4 * camera.zoom)))
