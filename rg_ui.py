@@ -57,10 +57,12 @@ def draw_panel(screen, rect, border=GOLD):
 
 def ui_rects(screen):
     sw, sh = screen.get_size()
+    bottom_info_w = sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4
     return [
         pygame.Rect(0, 0, sw, TOP_BAR_H),
         pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
         pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
+        pygame.Rect(LEFT_PANEL_W + SIDE_MARGIN * 2, sh - 66, max(0, bottom_info_w), 54),
     ]
 
 
