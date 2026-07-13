@@ -48,19 +48,19 @@ def create_window(fullscreen=False):
     return pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
 
-def prepare_game(current_map, players):
-    tiles = generate_world(current_map)
-    return tiles, create_tokens(players, tiles)
+def player_name_input_rect():
+    return pygame.Rect(SCREEN_WIDTH / 2 - 270, 170, 540, 58)
 
 
-def prepare_initiative(players):
-    initiative = resolve_initiative(players)
-    return initiative, TurnManager(initiative["turn_order"])
+def activate_text_input():
+    pygame.key.start_text_input()
+    pygame.key.set_text_input_rect(player_name_input_rect())
 
 
 def main():
     global SCREEN_WIDTH, SCREEN_HEIGHT
     pygame.init()
+    activate_text_input()
     screen = create_window(False)
     pygame.display.set_caption("Rise & Glory")
     clock = pygame.time.Clock()
@@ -76,6 +76,7 @@ def main():
     player_count = 1
     config_player_index = 0
     player_name = ""
+    name_input_active = False
     selected_archetype = None
     custom_stats = default_custom_stats()
     players = []
@@ -100,15 +101,17 @@ def main():
     running = True
 
     def finish_player_configuration(player):
-        nonlocal config_player_index, player_name, selected_archetype, custom_stats
+        nonlocal config_player_index, player_name, name_input_active, selected_archetype, custom_stats
         nonlocal players, tiles, tokens, initiative, turn_manager, active_player_index
         nonlocal selected_token, selected_tile, state
         players.append(player)
         config_player_index += 1
         player_name = ""
+        name_input_active = True
         selected_archetype = None
         custom_stats = default_custom_stats()
         if config_player_index >= player_count:
+            name_input_active = False
             tiles, tokens = prepare_game(current_map, players)
             initiative, turn_manager = prepare_initiative(players)
             active_player_index = turn_manager.active_player_index
@@ -116,6 +119,7 @@ def main():
             selected_tile = None
             state = STATE_INITIATIVE
         else:
+            activate_text_input()
             state = STATE_PLAYER_CONFIG
 
     def advance_turn():
@@ -152,6 +156,8 @@ def main():
                 SCREEN_WIDTH = max(MIN_SCREEN_WIDTH, event.w)
                 SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, event.h)
                 screen = create_window(False)
+                if state == STATE_PLAYER_CONFIG:
+                    activate_text_input()
                 if state == STATE_GAME and selected_token:
                     camera.center_on_tile(selected_token.tile)
             elif event.type == pygame.KEYDOWN:
@@ -166,11 +172,11 @@ def main():
                         state = STATE_MENU
                     else:
                         state = STATE_MENU
-                elif state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO]:
+                elif state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active:
                     if event.key == pygame.K_BACKSPACE:
                         player_name = player_name[:-1]
-                    elif event.unicode and event.unicode.isprintable() and len(player_name) < 24:
-                        player_name += event.unicode
+                    elif event.key == pygame.K_RETURN:
+                        name_input_active = False
                 elif event.key == pygame.K_SPACE and state == STATE_GAME and selected_token:
                     camera.center_on_tile(selected_token.tile)
                 elif event.key in [pygame.K_TAB, pygame.K_n] and state == STATE_GAME:
@@ -183,15 +189,25 @@ def main():
                     else:
                         SCREEN_WIDTH, SCREEN_HEIGHT = 1600, 1000
                         screen = create_window(False)
+                    if state == STATE_PLAYER_CONFIG:
+                        activate_text_input()
                     if state == STATE_GAME and selected_token:
                         camera.center_on_tile(selected_token.tile)
+            elif event.type == pygame.TEXTINPUT and state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active:
+                if event.text and len(player_name) < 24:
+                    player_name += event.text[: 24 - len(player_name)]
             elif event.type == pygame.MOUSEWHEEL and state == STATE_GAME and not over_ui(mouse, rects):
                 camera.zoom_at(mouse, ZOOM_STEP if event.y > 0 else 1 / ZOOM_STEP)
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and state == STATE_GAME and not over_ui(event.pos, rects):
-                dragging = True
-                drag_moved = False
-                drag_start = event.pos
-                last_mouse = event.pos
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if state == STATE_PLAYER_CONFIG:
+                    name_input_active = player_name_input_rect().collidepoint(event.pos)
+                    if name_input_active:
+                        activate_text_input()
+                elif state == STATE_GAME and not over_ui(event.pos, rects):
+                    dragging = True
+                    drag_moved = False
+                    drag_start = event.pos
+                    last_mouse = event.pos
             elif event.type == pygame.MOUSEMOTION and dragging and state == STATE_GAME:
                 dx = event.pos[0] - last_mouse[0]
                 dy = event.pos[1] - last_mouse[1]
@@ -225,6 +241,8 @@ def main():
                                 config_player_index = 0
                                 players = []
                                 player_name = ""
+                                name_input_active = True
+                                activate_text_input()
                                 selected_archetype = None
                                 custom_stats = default_custom_stats()
                                 state = STATE_PLAYER_CONFIG
@@ -236,6 +254,7 @@ def main():
                                 else:
                                     state = STATE_PLAYER_COUNT
                                 player_name = ""
+                                name_input_active = False
                                 selected_archetype = None
                             elif action.startswith("archetype_"):
                                 archetype_id = int(action.split("_")[1])
@@ -252,6 +271,8 @@ def main():
                         elif state == STATE_CUSTOM_HERO:
                             if action == "back":
                                 state = STATE_PLAYER_CONFIG
+                                name_input_active = True
+                                activate_text_input()
                             elif action.startswith("stat_plus_"):
                                 stat = action.removeprefix("stat_plus_")
                                 if stat in custom_stats and sum(custom_stats.values()) < 12 and custom_stats[stat] < 6:
