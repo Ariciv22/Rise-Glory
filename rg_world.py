@@ -1,6 +1,7 @@
 import random
 
 from rg_data import TERRAINS
+from rg_location_data import initialize_location
 from rg_map import Tile, generate_positions
 
 LOCATIONS = [
@@ -32,7 +33,7 @@ def build_location_data(location, number):
     if location["kind"] == "city" and number == 0:
         data["name"] = "Lirion"
         data["background"] = "lirion_miasto"
-    return data
+    return initialize_location(data)
 
 
 def assign_locations(tiles):
