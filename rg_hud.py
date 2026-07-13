@@ -28,36 +28,40 @@ def _draw_top_stat(screen, font, text, x, width):
 
 def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index):
     sw, sh = screen.get_size()
-    right = pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2)
+    row_h = 58
+    panel_h = min(sh - TOP_BAR_H - SIDE_MARGIN * 2, 92 + len(players) * row_h + 54)
+    right = pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, panel_h)
     draw_panel(screen, right)
-    screen.blit(font.render("Tabela graczy", True, TEXT), (right.x + 22, right.y + 22))
+    screen.blit(font.render("Tabela graczy", True, TEXT), (right.x + 22, right.y + 18))
 
-    row_h = 92
-    y = right.y + 64
+    y = right.y + 56
     for index, player in enumerate(players):
-        if y + row_h > right.bottom - 12:
+        if y + row_h > right.bottom - 52:
             break
         active = index == active_player_index
         border = player.get("player_color", GOLD) if active else GOLD
-        row = pygame.Rect(right.x + 14, y, right.width - 28, row_h - 8)
-        pygame.draw.rect(screen, PANEL_DARK, row, border_radius=10)
-        pygame.draw.rect(screen, border, row, 3 if active else 1, border_radius=10)
+        row = pygame.Rect(right.x + 12, y, right.width - 24, row_h - 8)
+        pygame.draw.rect(screen, PANEL_DARK, row, border_radius=9)
+        pygame.draw.rect(screen, border, row, 3 if active else 1, border_radius=9)
 
         color = player.get("player_color", GOLD)
-        pygame.draw.circle(screen, color, (row.x + 18, row.y + 20), 9)
+        pygame.draw.circle(screen, color, (row.x + 16, row.y + 15), 7)
         marker = "AKTYWNY" if active else f"Gracz {player.get('player_number', index + 1)}"
-        screen.blit(small_font.render(marker, True, TEXT if active else MUTED), (row.x + 34, row.y + 10))
-        screen.blit(font.render(player.get("name", "Bohater"), True, TEXT), (row.x + 14, row.y + 34))
-        hero_class = player.get("archetype_name", player.get("name", "Bohater"))
-        screen.blit(small_font.render(hero_class, True, MUTED), (row.x + 14, row.y + 60))
+        screen.blit(small_font.render(marker, True, TEXT if active else MUTED), (row.x + 30, row.y + 5))
+        name_text = player.get("name", "Bohater")
+        screen.blit(font.render(name_text, True, TEXT), (row.x + 12, row.y + 24))
 
         token = tokens[index] if index < len(tokens) else None
         actions = token.actions if token else 0
         helper_count = len(player.get("helpers", []))
         summary = f"L {player.get('legend', 0)} | Z {player.get('gold', 0)} | R {player.get('wounds', 0)}/{MAX_WOUNDS} | A {actions} | P {helper_count}"
-        summary_label = small_font.render(summary, True, TEXT)
-        screen.blit(summary_label, (row.right - summary_label.get_width() - 10, row.y + 60))
+        summary_label = small_font.render(summary, True, MUTED)
+        screen.blit(summary_label, (row.right - summary_label.get_width() - 10, row.y + 28))
         y += row_h
+
+    end_turn = Button("Koniec tury", "end_turn", (right.x + 86, right.bottom - 42, 128, 30))
+    end_turn.draw(screen, small_font, pygame.mouse.get_pos())
+    return end_turn
 
 
 def _format_stat_value(stat, base_value, bonuses):
@@ -85,6 +89,26 @@ def _draw_helpers(screen, font, small_font, hero, x, y, width):
     return y
 
 
+def _draw_bottom_tile_info(screen, font, small_font, selected_tile):
+    sw, sh = screen.get_size()
+    x = LEFT_PANEL_W + SIDE_MARGIN * 2
+    w = sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4
+    h = 54
+    y = sh - h - SIDE_MARGIN
+    if w <= 260:
+        return
+
+    rect = pygame.Rect(x, y, w, h)
+    draw_panel(screen, rect, GOLD)
+    if selected_tile:
+        location = selected_tile.location
+        location_name = location["name"] if location else "brak"
+        line = f"Heks: {selected_tile.terrain['name']}    |    Koszt akcji: {selected_tile.terrain['move']}    |    Lokacja: {location_name}"
+    else:
+        line = "Kliknij heks na mapie, aby zobaczyc teren, koszt akcji i lokacje."
+    screen.blit(font.render(line, True, TEXT), (rect.x + 20, rect.y + 16))
+
+
 def draw_game_ui(
     screen,
     font,
@@ -104,9 +128,6 @@ def draw_game_ui(
     draw_panel(screen, top, ORANGE)
     screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 22))
 
-    end_turn = Button("Koniec tury", "end_turn", (sw - 180, 77, 150, 36))
-    end_turn.draw(screen, small_font, pygame.mouse.get_pos())
-
     x = 36
     top_stats = [
         (f"Gracz: {hero.get('player_number', active_player_index + 1)}", 112),
@@ -116,12 +137,11 @@ def draw_game_ui(
         (f"Zloto: {hero.get('gold', 0)}", 108),
         (f"Rany: {hero.get('wounds', 0)}/{MAX_WOUNDS}", 112),
         (f"Akcje: {token.actions}/{ACTIONS_PER_TURN}", 126),
-        (f"Pomocnicy: {len(hero.get('helpers', []))}/5", 136),
         (f"Runda: {round_number}", 108),
         (f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 110),
     ]
     for text, width in top_stats:
-        if x + width > sw - 195:
+        if x + width > sw - 24:
             break
         x = _draw_top_stat(screen, small_font, text, x, width)
 
@@ -159,17 +179,6 @@ def draw_game_ui(
     y += 8
     _draw_helpers(screen, font, small_font, hero, left.x + 28, y, left.width - 56)
 
-    if selected_tile:
-        info_y = left.bottom - 112
-        pygame.draw.line(screen, GOLD, (left.x + 24, info_y - 12), (left.right - 24, info_y - 12), 1)
-        location = selected_tile.location
-        location_name = location["name"] if location else "brak"
-        lines = [
-            f"Heks: {selected_tile.terrain['name']}",
-            f"Koszt akcji: {selected_tile.terrain['move']}",
-            f"Lokacja: {location_name}",
-        ]
-        draw_lines(screen, small_font, lines, left.x + 28, info_y, TEXT, max_width=left.width - 56)
-
-    _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index)
+    end_turn = _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index)
+    _draw_bottom_tile_info(screen, font, small_font, selected_tile)
     return [end_turn]
