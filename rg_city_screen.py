@@ -3,7 +3,7 @@ from pathlib import Path
 import pygame
 
 from rg_data import GOLD, MUTED, PANEL_DARK, SCREEN_WIDTH, TEXT
-from rg_location_data import initialize_location
+from rg_location_data import helper_effect_text, initialize_location
 from rg_ui import Button, draw_lines, draw_panel, wrap
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -70,12 +70,29 @@ def _draw_offer_cards(screen, font, small_font, mouse_pos, cards, prefix, x, y, 
         price = card.get("price")
         meta = f"{price} monet" if price is not None else f"Talia: {card.get('deck', '-')}"
         screen.blit(small_font.render(meta, True, MUTED), (rect.x + 14, rect.y + 38))
-        lines = wrap(small_font, card.get("description", ""), width - 170)[:2]
+        description = helper_effect_text(card) if prefix == "hire" else card.get("description", "")
+        lines = wrap(small_font, description, width - 170)[:2]
         draw_lines(screen, small_font, lines, rect.x + 14, rect.y + 62, MUTED, line_h=18, max_width=width - 170)
         button = Button(button_text, f"{prefix}:{index}", (rect.right - 140, rect.y + 29, 122, 44))
         button.draw(screen, small_font, mouse_pos)
         buttons.append(button)
     return buttons
+
+
+def _draw_owned_helpers(screen, font, small_font, player, x, y, width):
+    helpers = player.get("helpers", [])
+    screen.blit(font.render(f"Twoi pomocnicy: {len(helpers)}/5", True, TEXT), (x, y))
+    y += 38
+    if not helpers:
+        draw_lines(screen, small_font, ["Nie zatrudniono jeszcze zadnego pomocnika."], x, y, MUTED, max_width=width)
+        return
+
+    for helper in helpers:
+        line = f"{helper['name']} - {helper_effect_text(helper)}"
+        for wrapped in wrap(small_font, line, width)[:2]:
+            screen.blit(small_font.render(wrapped, True, MUTED), (x, y))
+            y += 20
+        y += 6
 
 
 def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, player, selected_place=None, message=""):
@@ -125,7 +142,10 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
         buttons += _draw_offer_cards(screen, font, small_font, mouse_pos, location["shop_offers"], "buy", content.x + 22, start_y + 42, content.width - 44, "Kup")
     elif selected_place == "location_tavern":
         screen.blit(font.render("Karczma - 3 pomocnikow", True, TEXT), (content.x + 22, start_y))
-        buttons += _draw_offer_cards(screen, font, small_font, mouse_pos, location["helper_offers"], "hire", content.x + 22, start_y + 42, content.width - 44, "Zatrudnij")
+        offer_width = int((content.width - 66) * 0.62)
+        buttons += _draw_offer_cards(screen, font, small_font, mouse_pos, location["helper_offers"], "hire", content.x + 22, start_y + 42, offer_width, "Zatrudnij")
+        owned_x = content.x + 44 + offer_width
+        _draw_owned_helpers(screen, font, small_font, player, owned_x, start_y + 42, content.right - owned_x - 22)
     elif selected_place == "location_board":
         screen.blit(font.render("Tablica ogloszen - 3 questy", True, TEXT), (content.x + 22, start_y))
         buttons += _draw_offer_cards(screen, font, small_font, mouse_pos, location["quest_offers"], "quest", content.x + 22, start_y + 42, content.width - 44, "Pobierz")
