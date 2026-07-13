@@ -272,7 +272,8 @@ def main():
                             elif action == "random_hero":
                                 selected_archetype = random_archetype()
                             elif action == "custom_hero":
-                                selected_archetype = selected_archetype or HERO_ARCHETYPES[0]
+                                selected_archetype = None
+                                name_input_active = False
                                 custom_stats = default_custom_stats()
                                 state = STATE_CUSTOM_HERO
                             elif action == "confirm_player" and selected_archetype:
@@ -283,6 +284,9 @@ def main():
                                 state = STATE_PLAYER_CONFIG
                                 name_input_active = True
                                 activate_text_input()
+                            elif action.startswith("custom_set_"):
+                                set_id = int(action.removeprefix("custom_set_"))
+                                selected_archetype = next(item for item in HERO_ARCHETYPES if item["id"] == set_id)
                             elif action.startswith("stat_plus_"):
                                 stat = action.removeprefix("stat_plus_")
                                 if stat in custom_stats and sum(custom_stats.values()) < 12 and custom_stats[stat] < 6:
@@ -363,7 +367,7 @@ def main():
             game_buttons = []
             city_buttons = []
         elif state == STATE_CUSTOM_HERO:
-            buttons = draw_custom_hero(screen, title_font, font, small_font, mouse, config_player_index, player_name, selected_archetype or HERO_ARCHETYPES[0], custom_stats)
+            buttons = draw_custom_hero(screen, title_font, font, small_font, mouse, config_player_index, player_name, selected_archetype, custom_stats)
             game_buttons = []
             city_buttons = []
         elif state == STATE_INITIATIVE:
