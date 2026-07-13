@@ -80,7 +80,7 @@ def _draw_name_field(screen, font, small_font, world_name, active=True):
 
 def draw_player_config(screen, title_font, font, small_font, mouse, player_index, player_count, world_name, selected_archetype, used_archetypes):
     screen.fill(BG)
-    draw_title(screen, title_font, font, f"Gracz {player_index + 1} z {player_count}", "Wybierz archetyp, nadaj imie albo stworz wlasny rozklad statystyk")
+    draw_title(screen, title_font, font, f"Gracz {player_index + 1} z {player_count}", "Wybierz gotowego bohatera albo stworz wlasny rozklad statystyk")
     _draw_name_field(screen, font, small_font, world_name)
 
     player_color = PLAYER_COLORS[player_index]
@@ -126,22 +126,49 @@ def draw_player_config(screen, title_font, font, small_font, mouse, player_index
         buttons.append(button)
 
     if selected_archetype is None:
-        screen.blit(small_font.render("Wybierz archetyp. Imie moze pozostac domyslne.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 + 55, bottom_y - 28))
+        screen.blit(small_font.render("Wybierz gotowego bohatera albo kliknij Stworz bohatera.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 + 30, bottom_y - 28))
     return buttons
 
 
-def draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, world_name, base_hero, stats):
+def draw_start_set_panel(screen, font, small_font, mouse, selected_set):
+    buttons = []
+    panel = pygame.Rect(1030, 220, 390, 475)
+    draw_panel(screen, panel, GOLD)
+    screen.blit(font.render("Set startowy", True, TEXT), (panel.x + 24, panel.y + 22))
+    screen.blit(small_font.render("Wyglad i ekwipunek wybierasz tutaj.", True, MUTED), (panel.x + 24, panel.y + 52))
+
+    selected_id = selected_set["id"] if selected_set else None
+    y = panel.y + 92
+    for hero in HERO_ARCHETYPES:
+        rect = pygame.Rect(panel.x + 22, y, panel.width - 44, 52)
+        selected = hero["id"] == selected_id
+        hovered = rect.collidepoint(mouse)
+        pygame.draw.rect(screen, (48, 43, 35) if selected else ((38, 34, 28) if hovered else PANEL), rect, border_radius=10)
+        pygame.draw.rect(screen, hero["color"] if selected or hovered else GOLD, rect, 2, border_radius=10)
+        pygame.draw.circle(screen, hero["color"], (rect.x + 18, rect.centery), 8)
+        screen.blit(small_font.render(hero["name"], True, TEXT), (rect.x + 34, rect.y + 8))
+        item_text = f"{hero['basic_item']} + {hero['class_item']}"
+        screen.blit(small_font.render(item_text[:42], True, MUTED), (rect.x + 34, rect.y + 28))
+        buttons.append(Button("", f"custom_set_{hero['id']}", rect))
+        y += 61
+    return buttons
+
+
+def draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, world_name, selected_set, stats):
     screen.fill(BG)
-    draw_title(screen, title_font, font, f"Stworz bohatera - Gracz {player_index + 1}", f"Wyglad i ekwipunek: {base_hero['name']}")
+    subtitle = f"Set startowy: {selected_set['name']}" if selected_set else "Wybierz set startowy po prawej stronie"
+    draw_title(screen, title_font, font, f"Stworz bohatera - Gracz {player_index + 1}", subtitle)
     remaining = 12 - sum(stats.values())
-    screen.blit(font.render(f"Pozostale punkty: {remaining}", True, TEXT), (SCREEN_WIDTH / 2 - 120, 170))
-    screen.blit(small_font.render(f"Imie: {world_name or 'domyslne'}", True, MUTED), (SCREEN_WIDTH / 2 - 120, 208))
+    screen.blit(font.render(f"Pozostale punkty: {remaining}", True, TEXT), (SCREEN_WIDTH / 2 - 300, 170))
+    screen.blit(small_font.render(f"Imie: {world_name or 'domyslne'}", True, MUTED), (SCREEN_WIDTH / 2 - 300, 208))
 
     buttons = []
+    buttons.extend(draw_start_set_panel(screen, font, small_font, mouse, selected_set))
+
     start_y = 270
     for idx, stat in enumerate(STAT_NAMES):
         y = start_y + idx * 76
-        row = pygame.Rect(SCREEN_WIDTH / 2 - 340, y, 680, 58)
+        row = pygame.Rect(SCREEN_WIDTH / 2 - 500, y, 680, 58)
         draw_panel(screen, row, GOLD)
         screen.blit(font.render(stat, True, TEXT), (row.x + 24, row.y + 16))
         minus = Button("-", f"stat_minus_{stat}", (row.right - 210, row.y + 8, 52, 42))
@@ -152,13 +179,15 @@ def draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, 
         value_label = font.render(str(stats[stat]), True, TEXT)
         screen.blit(value_label, value_label.get_rect(center=(row.right - 120, row.centery)))
 
-    confirm = Button("Zatwierdz bohatera", "confirm_custom", (SCREEN_WIDTH / 2 - 190, 760, 380, 56))
-    back = Button("Powrot", "back", (SCREEN_WIDTH / 2 - 120, 840, 240, 48))
+    confirm = Button("Zatwierdz bohatera", "confirm_custom", (SCREEN_WIDTH / 2 - 350, 760, 380, 56))
+    back = Button("Powrot", "back", (SCREEN_WIDTH / 2 - 260, 840, 240, 48))
     confirm.draw(screen, font, mouse)
     back.draw(screen, font, mouse)
     buttons.extend([confirm, back])
     if remaining != 0:
-        screen.blit(small_font.render("Rozdziel dokladnie 12 punktow.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 - 115, 730))
+        screen.blit(small_font.render("Rozdziel dokladnie 12 punktow.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 - 285, 730))
+    if selected_set is None:
+        screen.blit(small_font.render("Wybierz set startowy po prawej stronie.", True, (235, 170, 95)), (SCREEN_WIDTH / 2 - 285, 708))
     return buttons
 
 
