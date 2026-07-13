@@ -15,6 +15,7 @@ from rg_data import (
     TOP_BAR_H,
     map_name,
 )
+from rg_location_data import helper_bonus_summary, helper_effect_text
 from rg_ui import Button, draw_lines, draw_panel, wrap
 
 
@@ -52,10 +53,36 @@ def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_in
 
         token = tokens[index] if index < len(tokens) else None
         actions = token.actions if token else 0
-        summary = f"L {player.get('legend', 0)} | Z {player.get('gold', 0)} | R {player.get('wounds', 0)}/{MAX_WOUNDS} | A {actions}"
+        helper_count = len(player.get("helpers", []))
+        summary = f"L {player.get('legend', 0)} | Z {player.get('gold', 0)} | R {player.get('wounds', 0)}/{MAX_WOUNDS} | A {actions} | P {helper_count}"
         summary_label = small_font.render(summary, True, TEXT)
         screen.blit(summary_label, (row.right - summary_label.get_width() - 10, row.y + 60))
         y += row_h
+
+
+def _format_stat_value(stat, base_value, bonuses):
+    bonus = bonuses.get(stat, 0)
+    if bonus <= 0:
+        return str(base_value)
+    return f"{base_value} +{bonus}"
+
+
+def _draw_helpers(screen, font, small_font, hero, x, y, width):
+    helpers = hero.get("helpers", [])
+    screen.blit(small_font.render(f"Pomocnicy: {len(helpers)}/5", True, TEXT), (x, y))
+    y += 22
+    if not helpers:
+        screen.blit(small_font.render("brak", True, MUTED), (x, y))
+        return y + 22
+
+    for helper in helpers[:5]:
+        line = f"- {helper['name']}: {helper_effect_text(helper)}"
+        wrapped = wrap(small_font, line, width)
+        for wrapped_line in wrapped[:2]:
+            screen.blit(small_font.render(wrapped_line, True, MUTED), (x, y))
+            y += 18
+        y += 3
+    return y
 
 
 def draw_game_ui(
@@ -89,6 +116,7 @@ def draw_game_ui(
         (f"Zloto: {hero.get('gold', 0)}", 108),
         (f"Rany: {hero.get('wounds', 0)}/{MAX_WOUNDS}", 112),
         (f"Akcje: {token.actions}/{ACTIONS_PER_TURN}", 126),
+        (f"Pomocnicy: {len(hero.get('helpers', []))}/5", 136),
         (f"Runda: {round_number}", 108),
         (f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 110),
     ]
@@ -109,12 +137,15 @@ def draw_game_ui(
     y += 14
     screen.blit(small_font.render("Statystyki", True, TEXT), (left.x + 28, y))
     y += 26
+
+    bonuses = helper_bonus_summary(hero)
     for stat, value in hero["stats"].items():
         row = pygame.Rect(left.x + 24, y - 4, left.width - 48, 25)
         pygame.draw.rect(screen, PANEL_DARK, row, border_radius=8)
         pygame.draw.rect(screen, GOLD, row, 1, border_radius=8)
         screen.blit(small_font.render(stat, True, TEXT), (row.x + 10, row.y + 4))
-        screen.blit(small_font.render(str(value), True, TEXT), (row.right - 30, row.y + 4))
+        stat_value = _format_stat_value(stat, value, bonuses)
+        screen.blit(small_font.render(stat_value, True, TEXT), (row.right - 58, row.y + 4))
         y += 29
 
     y += 8
@@ -124,7 +155,9 @@ def draw_game_ui(
         f"Jedzenie: {', '.join(hero.get('food', [])) or 'brak'}",
         f"Towar: {', '.join(hero.get('goods', [])) or 'brak'}",
     ]
-    draw_lines(screen, small_font, equipment, left.x + 28, y, MUTED, max_width=left.width - 56)
+    y = draw_lines(screen, small_font, equipment, left.x + 28, y, MUTED, max_width=left.width - 56)
+    y += 8
+    _draw_helpers(screen, font, small_font, hero, left.x + 28, y, left.width - 56)
 
     if selected_tile:
         info_y = left.bottom - 112
