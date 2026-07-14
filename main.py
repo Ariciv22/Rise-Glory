@@ -23,6 +23,7 @@ from rg_data import (
 )
 from rg_city_screen import draw_city_screen
 from rg_hud import draw_game_ui
+from rg_intro import draw_intro_screen, intro_count
 from rg_location_data import buy_shop_item, hire_helper, take_quest
 from rg_map import Camera, load_textures
 from rg_screens import (
@@ -40,6 +41,8 @@ from rg_tooltip import draw_location_tooltip
 from rg_turns import TurnManager, resolve_initiative
 from rg_ui import over_ui, ui_rects
 from rg_world import generate_world
+
+STATE_INTRO = "intro"
 
 
 def create_window(fullscreen=False):
@@ -100,6 +103,7 @@ def main():
     current_city = None
     selected_city_place = None
     location_message = ""
+    intro_index = 0
     buttons = []
     game_buttons = []
     city_buttons = []
@@ -113,7 +117,7 @@ def main():
     def finish_player_configuration(player):
         nonlocal config_player_index, player_name, name_input_active, selected_archetype, custom_stats
         nonlocal players, tiles, tokens, initiative, turn_manager, active_player_index
-        nonlocal selected_token, selected_tile, state
+        nonlocal selected_token, selected_tile, state, intro_index
         players.append(player)
         config_player_index += 1
         player_name = ""
@@ -127,7 +131,8 @@ def main():
             active_player_index = turn_manager.active_player_index
             selected_token = tokens[active_player_index]
             selected_tile = None
-            state = STATE_INITIATIVE
+            intro_index = 0
+            state = STATE_INTRO
         else:
             activate_text_input()
             state = STATE_PLAYER_CONFIG
@@ -148,6 +153,17 @@ def main():
             state = STATE_COUNCIL
         else:
             camera.center_on_tile(selected_token.tile)
+
+    def advance_intro():
+        nonlocal intro_index, state
+        if intro_index < intro_count() - 1:
+            intro_index += 1
+        else:
+            state = STATE_INITIATIVE
+
+    def skip_intro():
+        nonlocal state
+        state = STATE_INITIATIVE
 
     while running:
         mouse = pygame.mouse.get_pos()
@@ -178,10 +194,14 @@ def main():
                         state = STATE_GAME
                         if selected_token:
                             camera.center_on_tile(selected_token.tile)
+                    elif state == STATE_INTRO:
+                        state = STATE_INITIATIVE
                     elif state in [STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MAP_SELECT, STATE_MULTIPLAYER, STATE_INITIATIVE]:
                         state = STATE_MENU
                     else:
                         state = STATE_MENU
+                elif state == STATE_INTRO and event.key in [pygame.K_SPACE, pygame.K_RETURN]:
+                    advance_intro()
                 elif state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active:
                     if event.key == pygame.K_BACKSPACE:
                         player_name = player_name[:-1]
@@ -227,7 +247,7 @@ def main():
                 last_mouse = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 dragging = False
-                if state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL]:
+                if state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL, STATE_INTRO]:
                     for button in buttons:
                         if not button.clicked(event.pos):
                             continue
@@ -298,6 +318,11 @@ def main():
                             elif action == "confirm_custom" and selected_archetype and sum(custom_stats.values()) == 12:
                                 name = player_name.strip() or f"Gracz {config_player_index + 1}"
                                 finish_player_configuration(build_player(selected_archetype, name, config_player_index, custom_stats=dict(custom_stats)))
+                        elif state == STATE_INTRO:
+                            if action == "intro_next":
+                                advance_intro()
+                            elif action == "intro_skip":
+                                skip_intro()
                         elif state == STATE_INITIATIVE and action == "start_game":
                             active_player_index = turn_manager.active_player_index
                             selected_token = tokens[active_player_index]
@@ -368,6 +393,10 @@ def main():
             city_buttons = []
         elif state == STATE_CUSTOM_HERO:
             buttons = draw_custom_hero(screen, title_font, font, small_font, mouse, config_player_index, player_name, selected_archetype, custom_stats)
+            game_buttons = []
+            city_buttons = []
+        elif state == STATE_INTRO:
+            buttons = draw_intro_screen(screen, title_font, font, small_font, mouse, intro_index)
             game_buttons = []
             city_buttons = []
         elif state == STATE_INITIATIVE:
