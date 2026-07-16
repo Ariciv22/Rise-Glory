@@ -24,7 +24,7 @@ _MENU_BACKGROUND_CACHE = {"size": None, "surface": None}
 
 
 def is_compact():
-    return SCREEN_HEIGHT < 930
+    return SCREEN_HEIGHT < 1050
 
 
 def title_positions():
@@ -55,9 +55,6 @@ def _load_menu_background(size):
     scaled = pygame.transform.smoothscale(image, (int(iw * scale), int(ih * scale)))
     background = pygame.Surface(size, pygame.SRCALPHA)
     background.blit(scaled, ((sw - scaled.get_width()) // 2, (sh - scaled.get_height()) // 2))
-    overlay = pygame.Surface(size, pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 95))
-    background.blit(overlay, (0, 0))
     _MENU_BACKGROUND_CACHE["size"] = size
     _MENU_BACKGROUND_CACHE["surface"] = background
     return background
@@ -85,8 +82,8 @@ def draw_menu(screen, title_font, font, mouse):
         screen.blit(background, (0, 0))
     else:
         screen.fill(BG)
-    draw_title(screen, title_font, font, "Rise & Glory", "Prototyp v0.1 - lokalna rozgrywka hot-seat")
-    start_y = int(clamp(SCREEN_HEIGHT * 0.31, 230, 280))
+        draw_title(screen, title_font, font, "Rise & Glory", "Prototyp v0.1 - lokalna rozgrywka hot-seat")
+    start_y = int(clamp(SCREEN_HEIGHT * 0.33, 250, 320))
     buttons = vertical_buttons([("Nowa gra", "new"), ("Multiplayer", "multi"), ("Wyjscie", "exit")], start_y)
     for button in buttons:
         button.draw(screen, font, mouse)
@@ -155,11 +152,11 @@ def draw_player_config(screen, title_font, font, small_font, mouse, player_index
 
     buttons = []
     card_w = 360
-    card_h = 116 if compact else 142
+    card_h = 108 if compact else 142
     gap_x = 22
-    gap_y = 12 if compact else 18
+    gap_y = 10 if compact else 18
     start_x = SCREEN_WIDTH / 2 - (card_w * 2 + gap_x) / 2
-    start_y = 240 if compact else 265
+    start_y = 238 if compact else 265
     for idx, hero in enumerate(HERO_ARCHETYPES):
         col = idx % 2
         row = idx // 2
@@ -169,35 +166,35 @@ def draw_player_config(screen, title_font, font, small_font, mouse, player_index
         pygame.draw.rect(screen, (48, 43, 35) if selected else ((38, 34, 28) if hovered else PANEL), rect, border_radius=12)
         border = player_color if selected else (hero["color"] if hovered else GOLD)
         pygame.draw.rect(screen, border, rect, 3, border_radius=12)
-        pygame.draw.circle(screen, hero["color"], (rect.x + 24, rect.y + 26), 10)
-        screen.blit(font.render(hero["name"], True, TEXT), (rect.x + 44, rect.y + 14))
+        pygame.draw.circle(screen, hero["color"], (rect.x + 24, rect.y + 24), 10)
+        screen.blit(font.render(hero["name"], True, TEXT), (rect.x + 44, rect.y + 12))
         if hero["id"] in used_ids:
-            screen.blit(small_font.render("Klasa juz wybrana", True, (235, 170, 95)), (rect.right - 158, rect.y + 18))
+            screen.blit(small_font.render("Klasa juz wybrana", True, (235, 170, 95)), (rect.right - 158, rect.y + 16))
         stat_line = "  ".join(f"{name[:3]} {hero['stats'].get(name, 0)}" for name in STAT_NAMES)
-        screen.blit(small_font.render(stat_line, True, MUTED), (rect.x + 18, rect.y + 50))
-        y = rect.y + (74 if compact else 82)
+        screen.blit(small_font.render(stat_line, True, MUTED), (rect.x + 18, rect.y + 46))
+        y = rect.y + (70 if compact else 82)
         for line in wrap(small_font, f"Start: {hero['basic_item']} + {hero['class_item']}", card_w - 36)[:2]:
             if y + 18 < rect.bottom:
                 screen.blit(small_font.render(line, True, MUTED), (rect.x + 18, y))
-            y += 20
+            y += 18 if compact else 20
         buttons.append(Button("", f"archetype_{hero['id']}", rect))
 
     cards_bottom = start_y + 3 * card_h + 2 * gap_y
-    bottom_y = min(SCREEN_HEIGHT - 132, cards_bottom + (16 if compact else 28))
+    bottom_y = min(SCREEN_HEIGHT - 124, cards_bottom + (12 if compact else 28))
     group_w = 270 + 20 + 300 + 20 + 330
     group_x = SCREEN_WIDTH / 2 - group_w / 2
     random_button = Button("Losowy bohater", "random_hero", (group_x, bottom_y, 270, 54))
     custom_button = Button("Stworz bohatera", "custom_hero", (group_x + 290, bottom_y, 300, 54))
     next_button = Button("Zatwierdz gracza", "confirm_player", (group_x + 610, bottom_y, 330, 54))
-    back_y = min(SCREEN_HEIGHT - 58, bottom_y + 66)
+    back_y = min(SCREEN_HEIGHT - 56, bottom_y + 64)
     back = Button("Powrot", "back", (SCREEN_WIDTH / 2 - 120, back_y, 240, 48))
     for button in [random_button, custom_button, next_button, back]:
         button.draw(screen, font, mouse)
         buttons.append(button)
 
-    if selected_archetype is None:
+    if selected_archetype is None and bottom_y > cards_bottom + 6:
         hint_x = group_x + 610 if SCREEN_WIDTH >= 1100 else SCREEN_WIDTH / 2 - 250
-        screen.blit(small_font.render("Wybierz gotowego bohatera albo kliknij Stworz bohatera.", True, (235, 170, 95)), (hint_x, bottom_y - 26))
+        screen.blit(small_font.render("Wybierz gotowego bohatera albo kliknij Stworz bohatera.", True, (235, 170, 95)), (hint_x, bottom_y - 24))
     return buttons
 
 
