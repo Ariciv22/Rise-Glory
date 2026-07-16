@@ -17,7 +17,13 @@ from rg_screens import (
     draw_multiplayer, draw_player_config, draw_player_count,
 )
 from rg_setup import build_player, create_tokens, default_custom_stats, random_archetype
-from rg_start_intro import INTRO_SECONDS_PER_IMAGE, draw_start_intro, intro_count as start_intro_count, start_intro_music
+from rg_start_intro import (
+    INTRO_SECONDS_PER_IMAGE,
+    draw_start_intro,
+    intro_count as start_intro_count,
+    start_intro_music,
+    stop_intro_music,
+)
 from rg_tooltip import draw_location_tooltip
 from rg_turns import TurnManager, resolve_initiative
 from rg_ui import over_ui, ui_rects
@@ -337,6 +343,7 @@ def main():
                             elif action == "intro_skip":
                                 skip_intro()
                         elif state == STATE_INITIATIVE and action == "start_game":
+                            stop_intro_music()
                             active_player_index = turn_manager.active_player_index
                             selected_token = tokens[active_player_index]
                             selected_token.reset_actions()
@@ -420,6 +427,7 @@ def main():
             city = current_city or {"name": "Lokacja", "type_name": "Lokacja", "kind": "city"}
             city_buttons = draw_city_screen(screen, title_font, font, small_font, mouse, city, players[active_player_index], selected_city_place, location_message)
         elif state == STATE_GAME:
+            stop_intro_music()
             buttons, city_buttons = [], []
             screen.fill(BG)
             for tile in tiles:
