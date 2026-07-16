@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from rg_data import (
@@ -16,6 +18,38 @@ from rg_data import (
 )
 from rg_ui import Button, centered_x, draw_lines, draw_panel, wrap
 
+ROOT_DIR = Path(__file__).resolve().parent
+MENU_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "Tytulowy_ekran.png"
+_MENU_BACKGROUND_CACHE = {"size": None, "surface": None}
+
+
+def _load_menu_background(size):
+    if _MENU_BACKGROUND_CACHE["size"] == size:
+        return _MENU_BACKGROUND_CACHE["surface"]
+    if not MENU_BACKGROUND_PATH.exists():
+        _MENU_BACKGROUND_CACHE["size"] = size
+        _MENU_BACKGROUND_CACHE["surface"] = None
+        return None
+    try:
+        image = pygame.image.load(str(MENU_BACKGROUND_PATH)).convert_alpha()
+    except pygame.error:
+        _MENU_BACKGROUND_CACHE["size"] = size
+        _MENU_BACKGROUND_CACHE["surface"] = None
+        return None
+
+    iw, ih = image.get_size()
+    sw, sh = size
+    scale = max(sw / iw, sh / ih)
+    scaled = pygame.transform.smoothscale(image, (int(iw * scale), int(ih * scale)))
+    background = pygame.Surface(size, pygame.SRCALPHA)
+    background.blit(scaled, ((sw - scaled.get_width()) // 2, (sh - scaled.get_height()) // 2))
+    overlay = pygame.Surface(size, pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 95))
+    background.blit(overlay, (0, 0))
+    _MENU_BACKGROUND_CACHE["size"] = size
+    _MENU_BACKGROUND_CACHE["surface"] = background
+    return background
+
 
 def draw_title(screen, title_font, font, title, subtitle):
     title_label = title_font.render(title, True, TEXT)
@@ -33,7 +67,11 @@ def vertical_buttons(items, start_y, width=420, height=60, gap=16):
 
 
 def draw_menu(screen, title_font, font, mouse):
-    screen.fill(BG)
+    background = _load_menu_background(screen.get_size())
+    if background:
+        screen.blit(background, (0, 0))
+    else:
+        screen.fill(BG)
     draw_title(screen, title_font, font, "Rise & Glory", "Prototyp v0.1 - lokalna rozgrywka hot-seat")
     buttons = vertical_buttons([("Nowa gra", "new"), ("Multiplayer", "multi"), ("Wyjscie", "exit")], 280)
     for button in buttons:
