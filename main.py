@@ -1,33 +1,11 @@
 import pygame
 
-import rg_city_screen
-import rg_data
-import rg_hud
-import rg_intro
-import rg_map
-import rg_screens
-import rg_ui
-
+import rg_city_screen, rg_data, rg_hud, rg_intro, rg_map, rg_screens, rg_ui
 from rg_data import (
-    BG,
-    DRAG_THRESHOLD,
-    FPS,
-    HERO_ARCHETYPES,
-    MIN_SCREEN_HEIGHT,
-    MIN_SCREEN_WIDTH,
-    SCREEN_HEIGHT,
-    SCREEN_WIDTH,
-    STATE_CITY,
-    STATE_COUNCIL,
-    STATE_CUSTOM_HERO,
-    STATE_GAME,
-    STATE_INITIATIVE,
-    STATE_MAP_SELECT,
-    STATE_MENU,
-    STATE_MULTIPLAYER,
-    STATE_PLAYER_CONFIG,
-    STATE_PLAYER_COUNT,
-    ZOOM_STEP,
+    BG, DRAG_THRESHOLD, FPS, HERO_ARCHETYPES, MIN_SCREEN_HEIGHT, MIN_SCREEN_WIDTH,
+    SCREEN_HEIGHT, SCREEN_WIDTH, STATE_CITY, STATE_COUNCIL, STATE_CUSTOM_HERO,
+    STATE_GAME, STATE_INITIATIVE, STATE_MAP_SELECT, STATE_MENU, STATE_MULTIPLAYER,
+    STATE_PLAYER_CONFIG, STATE_PLAYER_COUNT, ZOOM_STEP,
 )
 from rg_city_screen import draw_city_screen
 from rg_hud import draw_game_ui
@@ -35,14 +13,8 @@ from rg_intro import draw_intro_screen, intro_count
 from rg_location_data import buy_shop_item, hire_helper, take_quest
 from rg_map import Camera, load_textures
 from rg_screens import (
-    draw_council,
-    draw_custom_hero,
-    draw_initiative,
-    draw_map_select,
-    draw_menu,
-    draw_multiplayer,
-    draw_player_config,
-    draw_player_count,
+    draw_council, draw_custom_hero, draw_initiative, draw_map_select, draw_menu,
+    draw_multiplayer, draw_player_config, draw_player_count,
 )
 from rg_setup import build_player, create_tokens, default_custom_stats, random_archetype
 from rg_start_intro import INTRO_SECONDS_PER_IMAGE, draw_start_intro, intro_count as start_intro_count, start_intro_music
@@ -53,30 +25,26 @@ from rg_world import generate_world
 
 STATE_START_INTRO = "start_intro"
 STATE_INTRO = "intro"
-
 _LAYOUT_MODULES = [rg_data, rg_ui, rg_map, rg_hud, rg_city_screen, rg_intro, rg_screens]
 
 
 def sync_screen_size(size):
     global SCREEN_WIDTH, SCREEN_HEIGHT
-    width = max(MIN_SCREEN_WIDTH, int(size[0]))
-    height = max(MIN_SCREEN_HEIGHT, int(size[1]))
-    SCREEN_WIDTH = width
-    SCREEN_HEIGHT = height
+    SCREEN_WIDTH = max(MIN_SCREEN_WIDTH, int(size[0]))
+    SCREEN_HEIGHT = max(MIN_SCREEN_HEIGHT, int(size[1]))
     for module in _LAYOUT_MODULES:
         if hasattr(module, "SCREEN_WIDTH"):
-            module.SCREEN_WIDTH = width
+            module.SCREEN_WIDTH = SCREEN_WIDTH
         if hasattr(module, "SCREEN_HEIGHT"):
-            module.SCREEN_HEIGHT = height
-    return width, height
+            module.SCREEN_HEIGHT = SCREEN_HEIGHT
+    return SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 def create_window(fullscreen=False):
     if fullscreen:
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        sync_screen_size(screen.get_size())
-        return screen
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+    else:
+        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
     sync_screen_size(screen.get_size())
     return screen
 
@@ -108,18 +76,20 @@ def main():
     activate_text_input()
     screen = create_window(False)
     pygame.display.set_caption("Rise & Glory")
+
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("arial", 20, bold=True)
     small_font = pygame.font.SysFont("arial", 17, bold=True)
     token_font = pygame.font.SysFont("arial", 17, bold=True)
     title_font = pygame.font.SysFont("arial", 42, bold=True)
-
     textures = load_textures()
     camera = Camera()
+
     state = STATE_START_INTRO if start_intro_count() > 0 else STATE_MENU
     start_intro_music()
     start_intro_index = 0
     start_intro_started_at = pygame.time.get_ticks()
+
     current_map = "rosette9"
     player_count = 1
     config_player_index = 0
@@ -139,22 +109,27 @@ def main():
     selected_city_place = None
     location_message = ""
     intro_index = 0
-    buttons = []
-    game_buttons = []
-    city_buttons = []
+    buttons, game_buttons, city_buttons = [], [], []
     dragging = False
     drag_moved = False
-    drag_start = (0, 0)
-    last_mouse = (0, 0)
+    drag_start = last_mouse = (0, 0)
     fullscreen = False
     running = True
 
     def refresh_layout_after_resize():
-        nonlocal screen
         if state == STATE_PLAYER_CONFIG:
             activate_text_input()
         if state == STATE_GAME and selected_token:
             camera.center_on_tile(selected_token.tile)
+
+    def advance_start_intro():
+        nonlocal start_intro_index, start_intro_started_at, state
+        count = start_intro_count()
+        if count <= 0 or start_intro_index >= count - 1:
+            state = STATE_MENU
+        else:
+            start_intro_index += 1
+            start_intro_started_at = pygame.time.get_ticks()
 
     def finish_player_configuration(player):
         nonlocal config_player_index, player_name, name_input_active, selected_archetype, custom_stats
@@ -180,8 +155,7 @@ def main():
             state = STATE_PLAYER_CONFIG
 
     def advance_turn():
-        nonlocal active_player_index, selected_token, selected_tile
-        nonlocal current_city, selected_city_place, location_message, state
+        nonlocal active_player_index, selected_token, selected_tile, current_city, selected_city_place, location_message, state
         if not turn_manager or not tokens:
             return
         result = turn_manager.end_turn(tokens)
@@ -195,15 +169,6 @@ def main():
             state = STATE_COUNCIL
         else:
             camera.center_on_tile(selected_token.tile)
-
-    def advance_start_intro():
-        nonlocal start_intro_index, start_intro_started_at, state
-        count = start_intro_count()
-        if count <= 0 or start_intro_index >= count - 1:
-            state = STATE_MENU
-            return
-        start_intro_index += 1
-        start_intro_started_at = pygame.time.get_ticks()
 
     def advance_intro():
         nonlocal intro_index, state
@@ -234,7 +199,9 @@ def main():
                 screen = create_window(False)
                 refresh_layout_after_resize()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if state == STATE_START_INTRO and event.key in [pygame.K_SPACE, pygame.K_RETURN]:
+                    advance_start_intro()
+                elif event.key == pygame.K_ESCAPE:
                     if state == STATE_START_INTRO:
                         state = STATE_MENU
                     elif state == STATE_CITY:
@@ -284,15 +251,16 @@ def main():
                     drag_start = event.pos
                     last_mouse = event.pos
             elif event.type == pygame.MOUSEMOTION and dragging and state == STATE_GAME:
-                dx = event.pos[0] - last_mouse[0]
-                dy = event.pos[1] - last_mouse[1]
+                dx, dy = event.pos[0] - last_mouse[0], event.pos[1] - last_mouse[1]
                 if abs(event.pos[0] - drag_start[0]) > DRAG_THRESHOLD or abs(event.pos[1] - drag_start[1]) > DRAG_THRESHOLD:
                     drag_moved = True
                 camera.move(dx, dy)
                 last_mouse = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 dragging = False
-                if state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL, STATE_INTRO]:
+                if state == STATE_START_INTRO:
+                    advance_start_intro()
+                elif state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL, STATE_INTRO]:
                     for button in buttons:
                         if not button.clicked(event.pos):
                             continue
@@ -427,55 +395,32 @@ def main():
                 advance_start_intro()
 
         if state == STATE_START_INTRO:
-            buttons = []
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = [], [], []
             draw_start_intro(screen, title_font, font, start_intro_index)
         elif state == STATE_MENU:
-            buttons = draw_menu(screen, title_font, font, mouse)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_menu(screen, title_font, font, mouse), [], []
         elif state == STATE_MAP_SELECT:
-            buttons = draw_map_select(screen, title_font, font, mouse)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_map_select(screen, title_font, font, mouse), [], []
         elif state == STATE_PLAYER_COUNT:
-            buttons = draw_player_count(screen, title_font, font, mouse)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_player_count(screen, title_font, font, mouse), [], []
         elif state == STATE_PLAYER_CONFIG:
-            buttons = draw_player_config(screen, title_font, font, small_font, mouse, config_player_index, player_count, player_name, selected_archetype, players)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_player_config(screen, title_font, font, small_font, mouse, config_player_index, player_count, player_name, selected_archetype, players), [], []
         elif state == STATE_CUSTOM_HERO:
-            buttons = draw_custom_hero(screen, title_font, font, small_font, mouse, config_player_index, player_name, selected_archetype, custom_stats)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_custom_hero(screen, title_font, font, small_font, mouse, config_player_index, player_name, selected_archetype, custom_stats), [], []
         elif state == STATE_INTRO:
-            buttons = draw_intro_screen(screen, title_font, font, small_font, mouse, intro_index)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_intro_screen(screen, title_font, font, small_font, mouse, intro_index), [], []
         elif state == STATE_INITIATIVE:
-            buttons = draw_initiative(screen, title_font, font, small_font, mouse, players, initiative or {})
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_initiative(screen, title_font, font, small_font, mouse, players, initiative or {}), [], []
         elif state == STATE_COUNCIL:
-            buttons = draw_council(screen, title_font, font, small_font, mouse, turn_manager.round_number if turn_manager else 1)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_council(screen, title_font, font, small_font, mouse, turn_manager.round_number if turn_manager else 1), [], []
         elif state == STATE_MULTIPLAYER:
-            buttons = draw_multiplayer(screen, title_font, font, mouse)
-            game_buttons = []
-            city_buttons = []
+            buttons, game_buttons, city_buttons = draw_multiplayer(screen, title_font, font, mouse), [], []
         elif state == STATE_CITY:
-            buttons = []
-            game_buttons = []
+            buttons, game_buttons = [], []
             city = current_city or {"name": "Lokacja", "type_name": "Lokacja", "kind": "city"}
-            active_hero = players[active_player_index]
-            city_buttons = draw_city_screen(screen, title_font, font, small_font, mouse, city, active_hero, selected_city_place, location_message)
+            city_buttons = draw_city_screen(screen, title_font, font, small_font, mouse, city, players[active_player_index], selected_city_place, location_message)
         elif state == STATE_GAME:
-            buttons = []
-            city_buttons = []
+            buttons, city_buttons = [], []
             screen.fill(BG)
             for tile in tiles:
                 valid = selected_token.can_move_to(tile) if selected_token else False
@@ -486,16 +431,8 @@ def main():
             selected_token = tokens[active_player_index]
             active_hero = players[active_player_index]
             game_buttons = draw_game_ui(
-                screen,
-                font,
-                small_font,
-                active_hero,
-                selected_token,
-                selected_tile,
-                current_map,
-                active_player_index,
-                players,
-                tokens,
+                screen, font, small_font, active_hero, selected_token, selected_tile,
+                current_map, active_player_index, players, tokens,
                 turn_manager.round_number if turn_manager else 1,
                 turn_manager.council_cycle if turn_manager else 1,
             )
