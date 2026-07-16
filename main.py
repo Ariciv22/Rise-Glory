@@ -37,11 +37,13 @@ from rg_screens import (
     draw_player_count,
 )
 from rg_setup import build_player, create_tokens, default_custom_stats, random_archetype
+from rg_start_intro import INTRO_SECONDS_PER_IMAGE, draw_start_intro, intro_count as start_intro_count, start_intro_music
 from rg_tooltip import draw_location_tooltip
 from rg_turns import TurnManager, resolve_initiative
 from rg_ui import over_ui, ui_rects
 from rg_world import generate_world
 
+STATE_START_INTRO = "start_intro"
 STATE_INTRO = "intro"
 
 
@@ -84,7 +86,10 @@ def main():
 
     textures = load_textures()
     camera = Camera()
-    state = STATE_MENU
+    state = STATE_START_INTRO if start_intro_count() > 0 else STATE_MENU
+    start_intro_music()
+    start_intro_index = 0
+    start_intro_started_at = pygame.time.get_ticks()
     current_map = "rosette9"
     player_count = 1
     config_player_index = 0
@@ -154,6 +159,15 @@ def main():
         else:
             camera.center_on_tile(selected_token.tile)
 
+    def advance_start_intro():
+        nonlocal start_intro_index, start_intro_started_at, state
+        count = start_intro_count()
+        if count <= 0 or start_intro_index >= count - 1:
+            state = STATE_MENU
+            return
+        start_intro_index += 1
+        start_intro_started_at = pygame.time.get_ticks()
+
     def advance_intro():
         nonlocal intro_index, state
         if intro_index < intro_count() - 1:
@@ -188,7 +202,9 @@ def main():
                     camera.center_on_tile(selected_token.tile)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if state == STATE_CITY:
+                    if state == STATE_START_INTRO:
+                        state = STATE_MENU
+                    elif state == STATE_CITY:
                         state = STATE_GAME
                     elif state == STATE_COUNCIL:
                         state = STATE_GAME
@@ -375,7 +391,18 @@ def main():
                                     selected_token.move_to(tile)
                                 break
 
-        if state == STATE_MENU:
+        if state == STATE_START_INTRO:
+            if start_intro_count() <= 0:
+                state = STATE_MENU
+            elif pygame.time.get_ticks() - start_intro_started_at >= INTRO_SECONDS_PER_IMAGE * 1000:
+                advance_start_intro()
+
+        if state == STATE_START_INTRO:
+            buttons = []
+            game_buttons = []
+            city_buttons = []
+            draw_start_intro(screen, title_font, font, start_intro_index)
+        elif state == STATE_MENU:
             buttons = draw_menu(screen, title_font, font, mouse)
             game_buttons = []
             city_buttons = []
