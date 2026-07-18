@@ -18,4 +18,7 @@ def _draw_title_background(screen, dim_alpha):
     if background:
         screen.blit(background, (0, 0))
     else:
-        screen.fill(_screens.B
+        screen.fill(_screens.BG)
+
+    if dim_alpha > 0:
+        shade = pygame.Surface((width, height), pygame.SRCALPHA
