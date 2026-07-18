@@ -1,0 +1,27 @@
+name: One-time fix ESC handling
+
+on:
+  push:
+    branches:
+      - glowny_main
+    paths:
+      - .github/workflows/one-time-fix-escape.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-escape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: glowny_main
+
+      - name: Remove ESC fallback to main menu
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("main.py
