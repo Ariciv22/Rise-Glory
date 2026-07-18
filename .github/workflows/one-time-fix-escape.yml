@@ -24,4 +24,55 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          path = Path("main.py
+          path = Path("main.py")
+          text = path.read_text(encoding="utf-8")
+          old = '''                elif event.key == pygame.K_ESCAPE:
+                    if state == STATE_START_INTRO:
+                        state = STATE_MENU
+                    elif state == STATE_CITY:
+                        state = STATE_GAME
+                    elif state == STATE_COUNCIL:
+                        state = STATE_GAME
+                        if selected_token:
+                            camera.center_on_tile(selected_token.tile)
+                    elif state == STATE_INTRO:
+                        state = STATE_INITIATIVE
+                    elif state in [STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MAP_SELECT, STATE_MULTIPLAYER, STATE_INITIATIVE]:
+                        state = STATE_MENU
+                    else:
+                        state = STATE_MENU
+'''
+          new = '''                elif event.key == pygame.K_ESCAPE:
+                    if state == STATE_START_INTRO:
+                        state = STATE_MENU
+                    elif state == STATE_CITY:
+                        state = STATE_GAME
+                    elif state == STATE_COUNCIL:
+                        state = STATE_GAME
+                        if selected_token:
+                            camera.center_on_tile(selected_token.tile)
+                    elif state == STATE_INTRO:
+                        state = STATE_INITIATIVE
+                    elif state == STATE_MAP_SELECT:
+                        state = STATE_MENU
+                    elif state == STATE_PLAYER_COUNT:
+                        state = STATE_MAP_SELECT
+                    elif state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO]:
+                        state = STATE_PLAYER_COUNT
+                    elif state == STATE_MULTIPLAYER:
+                        state = STATE_MENU
+'''
+          if old not in text:
+              raise SystemExit("Expected ESC block not found")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+      - name: Commit fix and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-time-fix-escape.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add main.py .github/workflows/one-time-fix-escape.yml
+          git commit -m "Usun wyjscie ESC do menu podczas gry"
+          git push
