@@ -43,3 +43,11 @@ def draw_start_intro(screen, title_font, font, intro_index):
         screen.blit(image, (0, 0))
     else:
         _base._draw_fallback(screen, title_font, font)
+
+
+try:
+    from rg_title_flow import install_into_main
+
+    install_into_main()
+except Exception:
+    pass
