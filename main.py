@@ -218,10 +218,17 @@ def main():
                             camera.center_on_tile(selected_token.tile)
                     elif state == STATE_INTRO:
                         state = STATE_INITIATIVE
-                    elif state in [STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MAP_SELECT, STATE_MULTIPLAYER, STATE_INITIATIVE]:
+                    elif state == STATE_MAP_SELECT:
                         state = STATE_MENU
-                    else:
+                    elif state == STATE_PLAYER_COUNT:
+                        state = STATE_MAP_SELECT
+                    elif state == STATE_PLAYER_CONFIG:
+                        state = STATE_PLAYER_COUNT
+                    elif state == STATE_CUSTOM_HERO:
+                        state = STATE_PLAYER_CONFIG
+                    elif state == STATE_MULTIPLAYER:
                         state = STATE_MENU
+                    # W STATE_GAME ESC obsluguje menu pauzy. W STATE_INITIATIVE niczego nie zamyka.
                 elif state == STATE_INTRO and event.key in [pygame.K_SPACE, pygame.K_RETURN]:
                     advance_intro()
                 elif state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active:
