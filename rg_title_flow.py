@@ -1,5 +1,7 @@
 import sys
+
 import pygame
+
 import rg_screens as s
 
 
@@ -74,9 +76,11 @@ def draw_player_count(screen, title_font, font, mouse):
     return buttons
 
 
-def draw_player_config(screen, title_font, font, small_font, mouse, player_index, player_count, world_name, selected_archetype, used_archetypes):
-    w, h = sync(screen)
-    background(screen, 0)
+def _draw_screen_over_background(screen, draw_function, args):
+    background(screen)
+    layer = pygame.Surface(screen.get_size())
+    layer.fill(s.BG)
+
     original_title = s.draw_title
     original_draw = s.Button.draw
 
@@ -86,35 +90,35 @@ def draw_player_config(screen, title_font, font, small_font, mouse, player_index
         else:
             original_draw(button, target, draw_font, mouse_pos, active)
 
-    s.draw_title = lambda *args, **kwargs: None
+    s.draw_title = lambda *unused_args, **unused_kwargs: None
     s.Button.draw = patched_draw
     try:
-        buttons = s.draw_player_config(screen, title_font, font, small_font, mouse, player_index, player_count, world_name, selected_archetype, used_archetypes)
+        buttons = draw_function(layer, *args)
     finally:
         s.draw_title = original_title
         s.Button.draw = original_draw
+
+    layer.set_colorkey(s.BG)
+    screen.blit(layer, (0, 0))
     return buttons
+
+
+def draw_player_config(screen, title_font, font, small_font, mouse, player_index, player_count, world_name, selected_archetype, used_archetypes):
+    sync(screen)
+    return _draw_screen_over_background(
+        screen,
+        s.draw_player_config,
+        (title_font, font, small_font, mouse, player_index, player_count, world_name, selected_archetype, used_archetypes),
+    )
 
 
 def draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, world_name, selected_set, stats):
-    background(screen, 0)
-    original_title = s.draw_title
-    original_draw = s.Button.draw
-
-    def patched_draw(button, target, draw_font, mouse_pos, active=False):
-        if button.text and button.text not in {"+", "-"} and button.rect.width >= 120:
-            themed_button(target, draw_font, mouse_pos, button)
-        else:
-            original_draw(button, target, draw_font, mouse_pos, active)
-
-    s.draw_title = lambda *args, **kwargs: None
-    s.Button.draw = patched_draw
-    try:
-        buttons = s.draw_custom_hero(screen, title_font, font, small_font, mouse, player_index, world_name, selected_set, stats)
-    finally:
-        s.draw_title = original_title
-        s.Button.draw = original_draw
-    return buttons
+    sync(screen)
+    return _draw_screen_over_background(
+        screen,
+        s.draw_custom_hero,
+        (title_font, font, small_font, mouse, player_index, world_name, selected_set, stats),
+    )
 
 
 def install_into_main():
