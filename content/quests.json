@@ -1,0 +1,14 @@
+[
+{"id":"war_wolves_road","name":"Wilki na trakcie","deck":"Wojenna","description":"Dotrzyj na wskazany trakt i rozpraw sie z wataha.","level":1},
+{"id":"war_missing_patrol","name":"Zaginiony patrol","deck":"Wojenna","description":"Odszukaj zolnierzy, ktorzy nie wrocili do zamku.","level":1},
+{"id":"economy_missing_cargo","name":"Brakujacy ladunek","deck":"Ekonomiczna","description":"Pomoz kupcowi odzyskac potrzebne towary.","level":1},
+{"id":"economy_well_dispute","name":"Spor o studnie","deck":"Ekonomiczna","description":"Rozwiaz konflikt o dostep do wody.","level":1},
+{"id":"intrigue_poisoned_stream","name":"Zatruty strumien","deck":"Intrygi","description":"Ustal, kto potajemnie zatruwa wode.","level":1},
+{"id":"intrigue_court_spy","name":"Szpieg na dworze","deck":"Intrygi","description":"Zdobadz dowody przeciw ukrytemu agentowi.","level":1},
+{"id":"diplomacy_neighbour_envoy","name":"Poselstwo do sasiadow","deck":"Dyplomacji","description":"Dostarcz warunki porozumienia i zakoncz spor.","level":1},
+{"id":"diplomacy_feuding_families","name":"Dwie sklocone rodziny","deck":"Dyplomacji","description":"Doprowadz do ugody miedzy rodami.","level":1},
+{"id":"culture_festival","name":"Festiwal bez artystow","deck":"Kultury","description":"Pomoz przygotowac wydarzenie dla mieszkancow.","level":1},
+{"id":"culture_lost_chronicle","name":"Zaginiona kronika","deck":"Kultury","description":"Odzyskaj cenna kronike miejscowego rodu.","level":1},
+{"id":"science_catacomb_curse","name":"Klątwa katakumb","deck":"Nauki","description":"Zbadaj zrodlo klatwy pod zamkiem.","level":1},
+{"id":"science_falling_stars","name":"Spadajace gwiazdy","deck":"Nauki","description":"Wyjasnij niepokojace zjawisko nad traktem.","level":1}
+]

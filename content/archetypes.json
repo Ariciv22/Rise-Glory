@@ -1,0 +1,8 @@
+[
+  {"id":1,"name":"Wojownik","color":[215,70,55],"stats":{"Walka":5,"Handel":2,"Dyplomacja":2,"Intryga":1,"Nauka":1,"Kultura":1},"basic_item":"Prosty miecz","class_item":"Skorzana zbroja","role":"Najlepszy do walki i eskorty."},
+  {"id":2,"name":"Handlarz","color":[220,170,55],"stats":{"Handel":5,"Dyplomacja":3,"Intryga":2,"Kultura":1,"Nauka":1,"Walka":0},"basic_item":"Sakwa kupca","class_item":"Pierscien kupiecki","role":"Najlepszy do wymiany, kontraktow i towarow."},
+  {"id":3,"name":"Dyplomata","color":[90,145,220],"stats":{"Dyplomacja":5,"Kultura":3,"Handel":2,"Nauka":1,"Intryga":1,"Walka":0},"basic_item":"Elegancki stroj","class_item":"Pieczec rodu / glejt","role":"Najlepszy do rozmow, lokacji i konfliktow spolecznych."},
+  {"id":4,"name":"Kulturowiec","color":[170,95,210],"stats":{"Kultura":5,"Dyplomacja":3,"Handel":1,"Nauka":1,"Intryga":1,"Walka":1},"basic_item":"Ozdobny stroj","class_item":"Instrument / kronika","role":"Najlepszy do wydarzen, tlumu i slawy."},
+  {"id":5,"name":"Intrygant","color":[70,170,85],"stats":{"Intryga":5,"Dyplomacja":2,"Handel":2,"Walka":1,"Nauka":1,"Kultura":1},"basic_item":"Sztylet","class_item":"Kaptur intryganta / pierscien sekretow","role":"Najlepszy do omijania, sabotazu i informacji."},
+  {"id":6,"name":"Uczony","color":[70,190,190],"stats":{"Nauka":5,"Kultura":2,"Handel":2,"Dyplomacja":1,"Intryga":1,"Walka":1},"basic_item":"Torba badacza","class_item":"Ksiega / mapa ruin","role":"Najlepszy do ruin, mechanizmow i odkrywania slabosci."}
+]
