@@ -1,6 +1,13 @@
+from pathlib import Path
+
 import pygame
 
 from rg_data import GOLD, LEFT_PANEL_W, MUTED, PANEL, RIGHT_PANEL_W, SCREEN_WIDTH, SIDE_MARGIN, TEXT, TOP_BAR_H
+
+
+ROOT_DIR = Path(__file__).resolve().parent
+_IMAGE_PANEL_CACHE = {}
+_IMAGE_PANEL_SCALED_CACHE = {}
 
 
 class Button:
@@ -20,6 +27,55 @@ class Button:
 
     def clicked(self, pos):
         return self.rect.collidepoint(pos)
+
+
+def _panel_image_paths(panel_number):
+    number = str(panel_number)
+    base = ROOT_DIR / "Grafiki" / "Grafiki UI"
+    return [
+        base / f"panel{number}.png",
+        base / f"panel {number}.png",
+        base / f"panel_{number}.png",
+    ]
+
+
+def _load_panel_image(panel_number):
+    panel_number = int(panel_number)
+    if panel_number in _IMAGE_PANEL_CACHE:
+        return _IMAGE_PANEL_CACHE[panel_number]
+
+    image = None
+    for path in _panel_image_paths(panel_number):
+        if not path.exists():
+            continue
+        try:
+            image = pygame.image.load(str(path)).convert_alpha()
+        except pygame.error:
+            image = None
+        break
+
+    _IMAGE_PANEL_CACHE[panel_number] = image
+    return image
+
+
+def draw_image_panel(screen, rect, panel_number, fallback_border=GOLD):
+    """Rysuje wskazany panel z katalogu Grafiki/Grafiki UI w podanym prostokacie."""
+    rect = pygame.Rect(rect)
+    pygame.draw.rect(screen, PANEL, rect, border_radius=12)
+
+    source = _load_panel_image(panel_number)
+    if source is None:
+        pygame.draw.rect(screen, fallback_border, rect, 2, border_radius=12)
+        return rect
+
+    cache_key = (int(panel_number), rect.size)
+    texture = _IMAGE_PANEL_SCALED_CACHE.get(cache_key)
+    if texture is None:
+        texture = pygame.transform.smoothscale(source, rect.size)
+        _IMAGE_PANEL_SCALED_CACHE[cache_key] = texture
+
+    screen.blit(texture, rect.topleft)
+    return rect
 
 
 def wrap(font, text, width):
