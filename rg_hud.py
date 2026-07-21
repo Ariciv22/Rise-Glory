@@ -16,7 +16,7 @@ from rg_data import (
     map_name,
 )
 from rg_location_data import helper_bonus_summary, helper_effect_text
-from rg_ui import Button, draw_lines, draw_panel, wrap
+from rg_ui import Button, draw_image_panel, draw_lines, draw_panel, wrap
 
 
 def _draw_top_stat(screen, font, text, x, width):
@@ -31,7 +31,7 @@ def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_in
     row_h = 58
     panel_h = min(sh - TOP_BAR_H - SIDE_MARGIN * 2, 92 + len(players) * row_h + 54)
     right = pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, panel_h)
-    draw_panel(screen, right)
+    draw_image_panel(screen, right, 1)
     screen.blit(font.render("Tabela graczy", True, TEXT), (right.x + 22, right.y + 18))
 
     y = right.y + 56
@@ -99,7 +99,7 @@ def _draw_bottom_tile_info(screen, font, small_font, selected_tile):
         return
 
     rect = pygame.Rect(x, y, w, h)
-    draw_panel(screen, rect, GOLD)
+    draw_image_panel(screen, rect, 2)
     if selected_tile:
         location = selected_tile.location
         location_name = location["name"] if location else "brak"
@@ -125,7 +125,7 @@ def draw_game_ui(
 ):
     sw, sh = screen.get_size()
     top = pygame.Rect(0, 0, sw, TOP_BAR_H)
-    draw_panel(screen, top, ORANGE)
+    draw_image_panel(screen, top, 2, ORANGE)
     screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 22))
 
     x = 36
@@ -146,7 +146,7 @@ def draw_game_ui(
         x = _draw_top_stat(screen, small_font, text, x, width)
 
     left = pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2)
-    draw_panel(screen, left)
+    draw_image_panel(screen, left, 5)
     screen.blit(font.render("Aktywny bohater", True, TEXT), (left.x + 28, left.y + 24))
     pygame.draw.circle(screen, hero.get("player_color", GOLD), (left.x + 34, left.y + 74), 12)
     screen.blit(font.render(hero["name"], True, TEXT), (left.x + 58, left.y + 62))
