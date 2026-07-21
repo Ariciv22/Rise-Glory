@@ -16,51 +16,71 @@ from rg_data import (
     map_name,
 )
 from rg_location_data import helper_bonus_summary, helper_effect_text
-from rg_ui import Button, draw_lines, draw_panel, wrap
+from rg_ui import (
+    Button,
+    draw_lines,
+    draw_textured_button,
+    draw_textured_frame,
+    draw_textured_panel,
+    wrap,
+)
 
 
 def _draw_top_stat(screen, font, text, x, width):
-    box = pygame.Rect(x, 78, width, 30)
-    draw_panel(screen, box)
-    screen.blit(font.render(text, True, TEXT), (box.x + 9, box.y + 6))
+    box = pygame.Rect(x, 76, width, 32)
+    draw_textured_panel(screen, box, style="control", fill_color=PANEL_DARK, fill_alpha=255)
+    label = font.render(text, True, TEXT)
+    screen.blit(label, label.get_rect(center=box.center))
     return box.right + 8
 
 
 def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index):
     sw, sh = screen.get_size()
-    row_h = 58
-    panel_h = min(sh - TOP_BAR_H - SIDE_MARGIN * 2, 92 + len(players) * row_h + 54)
+    row_h = 70
+    panel_h = min(sh - TOP_BAR_H - SIDE_MARGIN * 2, 94 + len(players) * row_h + 58)
     right = pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, panel_h)
-    draw_panel(screen, right)
-    screen.blit(font.render("Tabela graczy", True, TEXT), (right.x + 22, right.y + 18))
+    draw_textured_panel(screen, right, style="panel", fill_color=PANEL_DARK, fill_alpha=248)
+    screen.blit(font.render("Tabela graczy", True, TEXT), (right.x + 24, right.y + 20))
 
-    y = right.y + 56
+    separator_y = right.y + 50
+    pygame.draw.line(screen, GOLD, (right.x + 24, separator_y), (right.right - 24, separator_y), 1)
+
+    y = right.y + 62
     for index, player in enumerate(players):
-        if y + row_h > right.bottom - 52:
+        if y + row_h > right.bottom - 54:
             break
         active = index == active_player_index
-        border = player.get("player_color", GOLD) if active else GOLD
-        row = pygame.Rect(right.x + 12, y, right.width - 24, row_h - 8)
-        pygame.draw.rect(screen, PANEL_DARK, row, border_radius=9)
-        pygame.draw.rect(screen, border, row, 3 if active else 1, border_radius=9)
+        row = pygame.Rect(right.x + 14, y, right.width - 28, row_h - 8)
+        draw_textured_panel(
+            screen,
+            row,
+            style="control",
+            fill_color=(42, 35, 29) if active else PANEL_DARK,
+            fill_alpha=255,
+        )
 
         color = player.get("player_color", GOLD)
-        pygame.draw.circle(screen, color, (row.x + 16, row.y + 15), 7)
+        pygame.draw.circle(screen, color, (row.x + 18, row.y + 16), 7)
         marker = "AKTYWNY" if active else f"Gracz {player.get('player_number', index + 1)}"
-        screen.blit(small_font.render(marker, True, TEXT if active else MUTED), (row.x + 30, row.y + 5))
+        marker_color = (255, 226, 165) if active else MUTED
+        screen.blit(small_font.render(marker, True, marker_color), (row.x + 32, row.y + 6))
+
         name_text = player.get("name", "Bohater")
-        screen.blit(font.render(name_text, True, TEXT), (row.x + 12, row.y + 24))
+        screen.blit(font.render(name_text, True, TEXT), (row.x + 14, row.y + 27))
 
         token = tokens[index] if index < len(tokens) else None
         actions = token.actions if token else 0
         helper_count = len(player.get("helpers", []))
-        summary = f"L {player.get('legend', 0)} | Z {player.get('gold', 0)} | R {player.get('wounds', 0)}/{MAX_WOUNDS} | A {actions} | P {helper_count}"
+        summary = (
+            f"L {player.get('legend', 0)}  |  Z {player.get('gold', 0)}  |  "
+            f"R {player.get('wounds', 0)}/{MAX_WOUNDS}  |  A {actions}  |  P {helper_count}"
+        )
         summary_label = small_font.render(summary, True, MUTED)
-        screen.blit(summary_label, (row.right - summary_label.get_width() - 10, row.y + 28))
+        screen.blit(summary_label, (row.x + 14, row.bottom - summary_label.get_height() - 5))
         y += row_h
 
-    end_turn = Button("Koniec tury", "end_turn", (right.x + 86, right.bottom - 42, 128, 30))
-    end_turn.draw(screen, small_font, pygame.mouse.get_pos())
+    end_turn = Button("Koniec tury", "end_turn", (right.x + 66, right.bottom - 46, right.width - 132, 34))
+    draw_textured_button(screen, small_font, pygame.mouse.get_pos(), end_turn)
     return end_turn
 
 
@@ -93,20 +113,24 @@ def _draw_bottom_tile_info(screen, font, small_font, selected_tile):
     sw, sh = screen.get_size()
     x = LEFT_PANEL_W + SIDE_MARGIN * 2
     w = sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4
-    h = 54
+    h = 58
     y = sh - h - SIDE_MARGIN
     if w <= 260:
         return
 
     rect = pygame.Rect(x, y, w, h)
-    draw_panel(screen, rect, GOLD)
+    draw_textured_panel(screen, rect, style="panel", fill_color=PANEL_DARK, fill_alpha=250)
     if selected_tile:
         location = selected_tile.location
         location_name = location["name"] if location else "brak"
-        line = f"Heks: {selected_tile.terrain['name']}    |    Koszt akcji: {selected_tile.terrain['move']}    |    Lokacja: {location_name}"
+        line = (
+            f"Heks: {selected_tile.terrain['name']}    |    "
+            f"Koszt akcji: {selected_tile.terrain['move']}    |    Lokacja: {location_name}"
+        )
     else:
         line = "Kliknij heks na mapie, aby zobaczyc teren, koszt akcji i lokacje."
-    screen.blit(font.render(line, True, TEXT), (rect.x + 20, rect.y + 16))
+    label = font.render(line, True, TEXT)
+    screen.blit(label, (rect.x + 24, rect.centery - label.get_height() // 2))
 
 
 def draw_game_ui(
@@ -124,8 +148,18 @@ def draw_game_ui(
     council_cycle,
 ):
     sw, sh = screen.get_size()
+
+    map_frame = pygame.Rect(
+        LEFT_PANEL_W + SIDE_MARGIN * 2,
+        TOP_BAR_H + SIDE_MARGIN,
+        sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4,
+        sh - TOP_BAR_H - SIDE_MARGIN * 2,
+    )
+    if map_frame.width > 100 and map_frame.height > 100:
+        draw_textured_frame(screen, map_frame, style="panel", slice_size=30)
+
     top = pygame.Rect(0, 0, sw, TOP_BAR_H)
-    draw_panel(screen, top, ORANGE)
+    draw_textured_panel(screen, top, style="panel", fallback_border=ORANGE, fill_color=PANEL_DARK, fill_alpha=252)
     screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 22))
 
     x = 36
@@ -146,38 +180,50 @@ def draw_game_ui(
         x = _draw_top_stat(screen, small_font, text, x, width)
 
     left = pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2)
-    draw_panel(screen, left)
-    screen.blit(font.render("Aktywny bohater", True, TEXT), (left.x + 28, left.y + 24))
-    pygame.draw.circle(screen, hero.get("player_color", GOLD), (left.x + 34, left.y + 74), 12)
-    screen.blit(font.render(hero["name"], True, TEXT), (left.x + 58, left.y + 62))
-    y = left.y + 102
-    screen.blit(small_font.render(f"Klasa: {hero.get('archetype_name', '-')}", True, MUTED), (left.x + 28, y))
+    draw_textured_panel(screen, left, style="panel", fill_color=PANEL_DARK, fill_alpha=250)
+    screen.blit(font.render("Aktywny bohater", True, TEXT), (left.x + 30, left.y + 24))
+    pygame.draw.line(screen, GOLD, (left.x + 28, left.y + 52), (left.right - 28, left.y + 52), 1)
+
+    pygame.draw.circle(screen, hero.get("player_color", GOLD), (left.x + 36, left.y + 78), 12)
+    screen.blit(font.render(hero["name"], True, TEXT), (left.x + 60, left.y + 66))
+    y = left.y + 106
+    screen.blit(small_font.render(f"Klasa: {hero.get('archetype_name', '-')}", True, MUTED), (left.x + 30, y))
     y += 28
-    y = draw_lines(screen, small_font, wrap(small_font, hero.get("role", ""), left.width - 56), left.x + 28, y, MUTED, max_width=left.width - 56)
+    y = draw_lines(
+        screen,
+        small_font,
+        wrap(small_font, hero.get("role", ""), left.width - 60),
+        left.x + 30,
+        y,
+        MUTED,
+        max_width=left.width - 60,
+    )
     y += 14
-    screen.blit(small_font.render("Statystyki", True, TEXT), (left.x + 28, y))
-    y += 26
+    screen.blit(small_font.render("Statystyki", True, TEXT), (left.x + 30, y))
+    y += 28
 
     bonuses = helper_bonus_summary(hero)
     for stat, value in hero["stats"].items():
-        row = pygame.Rect(left.x + 24, y - 4, left.width - 48, 25)
-        pygame.draw.rect(screen, PANEL_DARK, row, border_radius=8)
-        pygame.draw.rect(screen, GOLD, row, 1, border_radius=8)
-        screen.blit(small_font.render(stat, True, TEXT), (row.x + 10, row.y + 4))
+        row = pygame.Rect(left.x + 24, y - 4, left.width - 48, 27)
+        draw_textured_panel(screen, row, style="control", fill_color=PANEL_DARK, fill_alpha=255)
+        screen.blit(small_font.render(stat, True, TEXT), (row.x + 12, row.y + 5))
         stat_value = _format_stat_value(stat, value, bonuses)
-        screen.blit(small_font.render(stat_value, True, TEXT), (row.right - 58, row.y + 4))
-        y += 29
+        value_label = small_font.render(stat_value, True, TEXT)
+        screen.blit(value_label, (row.right - value_label.get_width() - 12, row.y + 5))
+        y += 31
 
-    y += 8
+    y += 10
+    pygame.draw.line(screen, GOLD, (left.x + 28, y), (left.right - 28, y), 1)
+    y += 14
     equipment = [
         f"Item: {hero['basic_item']}",
         f"Klasowy: {hero['class_item']}",
         f"Jedzenie: {', '.join(hero.get('food', [])) or 'brak'}",
         f"Towar: {', '.join(hero.get('goods', [])) or 'brak'}",
     ]
-    y = draw_lines(screen, small_font, equipment, left.x + 28, y, MUTED, max_width=left.width - 56)
-    y += 8
-    _draw_helpers(screen, font, small_font, hero, left.x + 28, y, left.width - 56)
+    y = draw_lines(screen, small_font, equipment, left.x + 30, y, MUTED, max_width=left.width - 60)
+    y += 10
+    _draw_helpers(screen, font, small_font, hero, left.x + 30, y, left.width - 60)
 
     end_turn = _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index)
     _draw_bottom_tile_info(screen, font, small_font, selected_tile)
