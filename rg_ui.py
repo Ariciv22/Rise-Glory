@@ -39,6 +39,53 @@ def _panel_image_paths(panel_number):
     ]
 
 
+def _remove_light_canvas(image):
+    """Usuwa zapisana w PNG jasna szachownice i przycina puste marginesy."""
+    cleaned = image.copy().convert_alpha()
+
+    try:
+        rgb = pygame.surfarray.pixels3d(cleaned)
+        alpha = pygame.surfarray.pixels_alpha(cleaned)
+        channel_min = rgb.min(axis=2)
+        channel_max = rgb.max(axis=2)
+        light_neutral = (channel_min >= 150) & ((channel_max - channel_min) <= 24)
+        alpha[light_neutral] = 0
+        del alpha
+        del rgb
+    except (ImportError, ValueError, pygame.error):
+        pixels = pygame.PixelArray(cleaned)
+        width, height = cleaned.get_size()
+        for x in range(width):
+            for y in range(height):
+                color = cleaned.unmap_rgb(pixels[x, y])
+                low = min(color.r, color.g, color.b)
+                high = max(color.r, color.g, color.b)
+                if color.a > 0 and low >= 150 and high - low <= 24:
+                    pixels[x, y] = (0, 0, 0, 0)
+        del pixels
+
+    mask = pygame.mask.from_surface(cleaned, 8)
+    components = mask.get_bounding_rects()
+    if not components:
+        return image
+
+    max_area = max(rect.width * rect.height for rect in components)
+    meaningful = [
+        rect for rect in components
+        if rect.width * rect.height >= max(16, int(max_area * 0.01))
+    ]
+    if not meaningful:
+        meaningful = components
+
+    bounds = meaningful[0].copy()
+    for rect in meaningful[1:]:
+        bounds.union_ip(rect)
+
+    bounds.inflate_ip(4, 4)
+    bounds.clamp_ip(cleaned.get_rect())
+    return cleaned.subsurface(bounds).copy()
+
+
 def _load_panel_image(panel_number):
     panel_number = int(panel_number)
     if panel_number in _IMAGE_PANEL_CACHE:
@@ -49,7 +96,7 @@ def _load_panel_image(panel_number):
         if not path.exists():
             continue
         try:
-            image = pygame.image.load(str(path)).convert_alpha()
+            image = _remove_light_canvas(pygame.image.load(str(path)).convert_alpha())
         except pygame.error:
             image = None
         break
@@ -59,7 +106,7 @@ def _load_panel_image(panel_number):
 
 
 def draw_image_panel(screen, rect, panel_number, fallback_border=GOLD):
-    """Rysuje wskazany panel z katalogu Grafiki/Grafiki UI w podanym prostokacie."""
+    """Rysuje przycieta grafike panelu bez szachownicy i pustych marginesow."""
     rect = pygame.Rect(rect)
     pygame.draw.rect(screen, PANEL, rect, border_radius=12)
 
