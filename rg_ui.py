@@ -52,7 +52,7 @@ def _remove_light_canvas(image):
         alpha[light_neutral] = 0
         del alpha
         del rgb
-    except (ImportError, ValueError, pygame.error):
+    except (ImportError, NotImplementedError, ValueError, pygame.error):
         pixels = pygame.PixelArray(cleaned)
         width, height = cleaned.get_size()
         for x in range(width):
