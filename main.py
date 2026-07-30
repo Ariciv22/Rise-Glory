@@ -8,6 +8,7 @@ from rg_data import (
     STATE_PLAYER_CONFIG, STATE_PLAYER_COUNT, ZOOM_STEP,
 )
 from rg_city_screen import draw_city_screen
+from rg_gameplay import draw_victory_screen, has_won, heal_one_wound, resolve_quest, train_stat
 from rg_hud import draw_game_ui
 from rg_intro import draw_intro_screen, intro_count
 from rg_location_data import buy_shop_item, hire_helper, take_quest
@@ -31,6 +32,7 @@ from rg_world import generate_world
 
 STATE_START_INTRO = "start_intro"
 STATE_INTRO = "intro"
+STATE_VICTORY = "victory"
 _LAYOUT_MODULES = [rg_data, rg_ui, rg_map, rg_hud, rg_city_screen, rg_intro, rg_screens]
 
 
@@ -115,6 +117,7 @@ def main():
     selected_city_place = None
     location_message = ""
     intro_index = 0
+    winner = None
     buttons, game_buttons, city_buttons = [], [], []
     dragging = False
     drag_moved = False
@@ -127,6 +130,28 @@ def main():
             activate_text_input()
         if state == STATE_GAME and selected_token:
             camera.center_on_tile(selected_token.tile)
+
+    def reset_to_menu():
+        nonlocal state, players, tokens, initiative, turn_manager, active_player_index
+        nonlocal selected_tile, selected_token, current_city, selected_city_place, location_message, winner
+        players = []
+        tokens = []
+        initiative = None
+        turn_manager = None
+        active_player_index = 0
+        selected_tile = None
+        selected_token = None
+        current_city = None
+        selected_city_place = None
+        location_message = ""
+        winner = None
+        state = STATE_MENU
+
+    def check_victory(player):
+        nonlocal state, winner
+        if has_won(player):
+            winner = player
+            state = STATE_VICTORY
 
     def advance_start_intro():
         nonlocal start_intro_index, start_intro_started_at, state
@@ -228,7 +253,8 @@ def main():
                         state = STATE_PLAYER_CONFIG
                     elif state == STATE_MULTIPLAYER:
                         state = STATE_MENU
-                    # W STATE_GAME ESC obsluguje menu pauzy. W STATE_INITIATIVE niczego nie zamyka.
+                    elif state == STATE_VICTORY:
+                        reset_to_menu()
                 elif state == STATE_INTRO and event.key in [pygame.K_SPACE, pygame.K_RETURN]:
                     advance_intro()
                 elif state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active:
@@ -273,7 +299,7 @@ def main():
                 dragging = False
                 if state == STATE_START_INTRO:
                     advance_start_intro()
-                elif state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL, STATE_INTRO]:
+                elif state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL, STATE_INTRO, STATE_VICTORY]:
                     for button in buttons:
                         if not button.clicked(event.pos):
                             continue
@@ -361,6 +387,8 @@ def main():
                             camera.center_on_tile(selected_token.tile)
                         elif state == STATE_MULTIPLAYER:
                             state = STATE_MENU
+                        elif state == STATE_VICTORY and action == "victory_menu":
+                            reset_to_menu()
                         break
                 elif state == STATE_CITY:
                     active_hero = players[active_player_index]
@@ -377,6 +405,27 @@ def main():
                             _, location_message = hire_helper(current_city, active_hero, int(action.split(":")[1]))
                         elif action.startswith("quest:"):
                             _, location_message = take_quest(current_city, active_hero, int(action.split(":")[1]))
+                        elif action.startswith("resolve_quest:"):
+                            if selected_token.actions <= 0:
+                                location_message = "Nie masz juz akcji w tej turze."
+                            else:
+                                selected_token.actions -= 1
+                                _, location_message = resolve_quest(active_hero, int(action.split(":")[1]))
+                                check_victory(active_hero)
+                        elif action.startswith("train:"):
+                            if selected_token.actions <= 0:
+                                location_message = "Nie masz juz akcji w tej turze."
+                            else:
+                                success, location_message = train_stat(active_hero, action.split(":", 1)[1])
+                                if success:
+                                    selected_token.actions -= 1
+                        elif action == "heal_one":
+                            if selected_token.actions <= 0:
+                                location_message = "Nie masz juz akcji w tej turze."
+                            else:
+                                success, location_message = heal_one_wound(active_hero)
+                                if success:
+                                    selected_token.actions -= 1
                         else:
                             selected_city_place = action
                             location_message = ""
@@ -433,6 +482,9 @@ def main():
             buttons, game_buttons = [], []
             city = current_city or {"name": "Lokacja", "type_name": "Lokacja", "kind": "city"}
             city_buttons = draw_city_screen(screen, title_font, font, small_font, mouse, city, players[active_player_index], selected_city_place, location_message)
+        elif state == STATE_VICTORY:
+            game_buttons, city_buttons = [], []
+            buttons = draw_victory_screen(screen, title_font, font, small_font, mouse, winner or {})
         elif state == STATE_GAME:
             stop_intro_music()
             buttons, city_buttons = [], []
