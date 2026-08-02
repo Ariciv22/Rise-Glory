@@ -255,3 +255,10 @@ Można handlować questami, przedmiotami, pomocnikami i towarami zgodnie z limit
 
 ## Planszetki i elementy wspólne
 Układ statystyk, Ran, Punktów Legendy, questów, pomocników, ekwipunku i plecaka zostanie zaprojektowany na planszetce gracza. Poziom świata i tura będą zaznaczane na planszy Wydarzeń Świata. Dokładna liczba żetonów i komponentów zostanie określona później.
+
+
+
+pomysły:
+
+Heksy wzgórza i inne robią zasoby gdy ustanowi się tam kopalnie ?
+fajny pomysł na uzycie heksów jak kolwiek
