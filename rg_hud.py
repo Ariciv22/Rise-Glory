@@ -16,7 +16,24 @@ from rg_data import (
     map_name,
 )
 from rg_location_data import helper_bonus_summary, helper_effect_text
+from rg_player_board import (
+    close_player_board,
+    draw_player_board,
+    is_player_board_open,
+    open_player_board,
+)
 from rg_ui import Button, draw_image_panel, draw_lines, draw_panel, wrap
+
+
+class _PlayerBoardButton(Button):
+    def clicked(self, pos):
+        if not super().clicked(pos):
+            return False
+        if self.action == "open_player_board":
+            open_player_board()
+        elif self.action == "close_player_board":
+            close_player_board()
+        return True
 
 
 def _draw_top_stat(screen, font, text, x, width):
@@ -177,8 +194,24 @@ def draw_game_ui(
     ]
     y = draw_lines(screen, small_font, equipment, left.x + 28, y, MUTED, max_width=left.width - 56)
     y += 8
-    _draw_helpers(screen, font, small_font, hero, left.x + 28, y, left.width - 56)
+    y = _draw_helpers(screen, font, small_font, hero, left.x + 28, y, left.width - 56)
+
+    hero_button_y = min(left.bottom - 64, max(left.y + 420, y + 12))
+    hero_button = _PlayerBoardButton(
+        "Bohater",
+        "open_player_board",
+        (left.x + 24, hero_button_y, left.width - 48, 46),
+    )
+    hero_button.draw(screen, font, pygame.mouse.get_pos())
 
     end_turn = _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index)
     _draw_bottom_tile_info(screen, font, small_font, selected_tile)
-    return [end_turn]
+
+    if is_player_board_open():
+        close_rect = draw_player_board(screen, hero)
+        close_button = _PlayerBoardButton("Powrot do mapy", "close_player_board", close_rect)
+        close_button.draw(screen, small_font, pygame.mouse.get_pos())
+        blocker = Button("", "player_board_block", screen.get_rect())
+        return [close_button, blocker]
+
+    return [hero_button, end_turn]
