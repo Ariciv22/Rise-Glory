@@ -159,6 +159,14 @@ def draw_panel(screen, rect, border=GOLD):
 
 
 def ui_rects(screen):
+    try:
+        from rg_player_board import is_player_board_open
+
+        if is_player_board_open():
+            return [screen.get_rect()]
+    except (ImportError, AttributeError):
+        pass
+
     sw, sh = screen.get_size()
     bottom_info_w = sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4
     return [
