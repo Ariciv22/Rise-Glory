@@ -26,6 +26,35 @@ from rg_data import (
 
 ROOT_DIR = Path(__file__).resolve().parent
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
+LOCATION_MARKER_FILES = {
+    "city": "pionek_miasto.png",
+    "village": "pionek_wies.png",
+    "castle": "pionek_zamek.png",
+}
+_LOCATION_MARKER_IMAGES = {}
+
+
+def load_location_marker(kind):
+    if kind in _LOCATION_MARKER_IMAGES:
+        return _LOCATION_MARKER_IMAGES[kind]
+
+    filename = LOCATION_MARKER_FILES.get(kind)
+    if not filename:
+        _LOCATION_MARKER_IMAGES[kind] = None
+        return None
+
+    path = GRAPHICS_DIR / filename
+    if not path.exists():
+        _LOCATION_MARKER_IMAGES[kind] = None
+        return None
+
+    try:
+        marker = pygame.image.load(str(path)).convert_alpha()
+    except (OSError, pygame.error):
+        marker = None
+
+    _LOCATION_MARKER_IMAGES[kind] = marker
+    return marker
 
 
 def hex_corners(cx, cy, size):
@@ -130,7 +159,23 @@ class Tile:
     def draw_location_marker(self, screen, camera, font):
         if not self.location:
             return
+
         sx, sy = self.center(camera)
+        marker = load_location_marker(self.location.get("kind"))
+        if marker:
+            max_width = max(34, int(84 * camera.zoom))
+            max_height = max(38, int(96 * camera.zoom))
+            scale = min(max_width / marker.get_width(), max_height / marker.get_height())
+            marker_size = (
+                max(1, int(marker.get_width() * scale)),
+                max(1, int(marker.get_height() * scale)),
+            )
+            rendered_marker = pygame.transform.smoothscale(marker, marker_size)
+            marker_bottom = int(sy + 50 * camera.zoom)
+            marker_rect = rendered_marker.get_rect(midbottom=(int(sx), marker_bottom))
+            screen.blit(rendered_marker, marker_rect)
+            return
+
         radius = max(13, int(19 * camera.zoom))
         marker_y = int(sy + 30 * camera.zoom)
         color = self.location["color"]
