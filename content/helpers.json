@@ -1,0 +1,8 @@
+[
+{"id":"helper_scout","name":"Zwiadowca","price":4,"stat_bonus":{"Intryga":1},"effect_text":"+1 Intryga przy zwiadzie i omijaniu zagrozen.","description":"Pomaga podczas podrozy i obserwacji terenu."},
+{"id":"helper_mercenary","name":"Najemny miecz","price":5,"stat_bonus":{"Walka":1},"effect_text":"+1 Walka w testach bojowych.","description":"Pomocnik przeznaczony do walki."},
+{"id":"helper_medic","name":"Medyk polowy","price":5,"effect_text":"Leczenie Ran jest o 1 monete tansze.","description":"Pomocnik zwiazany z leczeniem Ran."},
+{"id":"helper_scribe","name":"Skryba","price":4,"stat_bonus":{"Nauka":1},"effect_text":"+1 Nauka przy dokumentach, ruinach i badaniach.","description":"Pomaga w testach Nauki i odczytywaniu dokumentow."},
+{"id":"helper_envoy","name":"Posel","price":4,"stat_bonus":{"Dyplomacja":1},"effect_text":"+1 Dyplomacja w rozmowach i negocjacjach.","description":"Pomaga w testach Dyplomacji."},
+{"id":"helper_guide","name":"Przewodnik","price":4,"effect_text":"Pierwszy trudny teren w turze ma koszt nizszy o 1 akcje po podpieciu ruchu pomocnikow.","description":"Pomaga w podrozy przez trudny teren."}
+]
