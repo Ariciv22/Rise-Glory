@@ -89,7 +89,7 @@ Podczas Rady gracz może porzucić dowolną liczbę aktywnych questów. Nie kosz
 Po osiągnięciu co najmniej 35 Punktów Legendy gracz może podjąć Quest Legendarny. Nie można go sprzedać ani wymienić z graczem. Można zmienić go na inny Quest Legendarny wyłącznie we wsi, mieście lub zamku, płacąc 1 Punkt Legendy. Odrzucony Quest Legendarny nie wraca do talii.
 
 ## Wykonywanie questów
-Quest trafia na planszetkę jako aktywny. Pierwszy etap można rozpocząć dopiero po dotarciu do wskazanej lokacji i spełnieniu warunków. Rozpoczęcie etapu, wykonanie kolejnego etapu albo ponowienie nieudanego testu kosztuje 2 akcje. Mając kolejne 2 akcje, gracz może wykonać następny etap tego samego lub innego dostępnego questa.
+Quest trafia na planszetkę jako aktywny. Pierwszy etap można rozpocząć dopiero po dotarciu do wskazanej lokacji i spełnieniu warunków. Wykonanie etapu albo ponowienie nieudanego testu kosztuje 1 akcję. Jeżeli gracz posiada kolejne akcje, może w tej samej turze wykonać następny dostępny etap tego samego lub innego questa.
 
 Quest może wymagać oddania monet, towaru, przedmiotu, pomocnika albo innego wskazanego elementu. Questy mają różną długość, a gracz nie zna z góry liczby rozwinięć. Rozwinięcie wskazane numerem wsuwa się pod kartę główną i nie zajmuje kolejnego slotu. Nagroda jest przyznawana dopiero po ostatnim etapie.
 
@@ -98,13 +98,13 @@ Wynik testu = k20 + wymagana statystyka + odpowiednie premie. Wynik równy lub w
 
 ### System czterech porażek
 Każdy nieudany test dodaje znacznik porażki na główną kartę questa:
-- 0 znaczników – pełna nagroda,
-- 1 znacznik – nagroda mniejsza o 1/4, gracz otrzymuje 3/4,
-- 2 znaczniki – nagroda mniejsza o 1/2, gracz otrzymuje 1/2,
-- 3 znaczniki – nagroda mniejsza o 3/4, gracz otrzymuje 1/4,
+- 0 znaczników – pełna nagroda w złocie,
+- 1 znacznik – nagroda w złocie mniejsza o 1/4, gracz otrzymuje 3/4,
+- 2 znaczniki – nagroda w złocie mniejsza o 1/2, gracz otrzymuje 1/2,
+- 3 znaczniki – nagroda w złocie mniejsza o 3/4, gracz otrzymuje 1/4,
 - czwarty nieudany test – quest przegrany bez nagrody.
 
-Zmniejsza się tylko nagrody liczbowe: monety, towary i Punkty Legendy. Wynik zaokrągla się w górę. Nie zmniejsza się ekwipunku, pomocników, podniesienia statystyki ani innych niepodzielnych efektów.
+Zmniejsza się wyłącznie nagroda w złocie. Wynik zaokrągla się w górę. Punkty Legendy, towary, materiały, jedzenie, ekwipunek, pomocnicy, podniesienia statystyk i wszystkie inne nagrody rzeczowe albo niepodzielne nie są pomniejszane, o ile quest zostanie ukończony.
 
 Naturalne 1 w teście nie jest automatyczną porażką: liczy się 1 + statystyka + premie. Niezależnie od wyniku podnosi próg następnego testu w tym samym queście o 2; utrudnienia się kumulują. Jeżeli ostatni test nie zostanie zaliczony, wyższy próg obowiązuje przy ponowieniu. Quest kończy się dopiero po zaliczeniu wymaganego testu albo po czwartej porażce. Zaliczona naturalna 1 na ostatnim teście kończy quest, a +2 nie ma już kolejnego testu, na który mogłoby zadziałać.
 
