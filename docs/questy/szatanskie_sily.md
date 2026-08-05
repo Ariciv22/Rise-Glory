@@ -37,7 +37,7 @@ Docierasz do Zamku Artium. Strażnicy nie zatrzymują cię, ponieważ widzą za 
 
 - Każdy nieudany test dodaje **1 znacznik porażki** do głównej karty questa.
 - Znaczniki porażki pomniejszają wyłącznie końcową nagrodę w złocie.
-- Krótki miecz i paczki suszonego mięsa nigdy nie są pomniejszane przez znaczniki porażki, o ile quest zostanie ukończony.
+- Krótki miecz, paczki suszonego mięsa i Punkty Legendy nigdy nie są pomniejszane przez znaczniki porażki, o ile quest zostanie ukończony.
 - Złoto po ukończeniu questa:
   - 0 znaczników: 8 złota,
   - 1 znacznik: 6 złota,
@@ -45,11 +45,12 @@ Docierasz do Zamku Artium. Strażnicy nie zatrzymują cię, ponieważ widzą za 
   - 3 znaczniki: 2 złota,
   - 4 znaczniki: quest przegrany, bez nagrody.
 - Naturalne 1 i 20 rozpatruje się według ogólnych zasad questów.
-- Finalna nagroda nie zawiera obecnie Punktów Legendy.
+- Ukończenie questa zapewnia zawsze **2 Punkty Legendy**, niezależnie od liczby znaczników porażki.
 
 ## Nagroda za ukończenie
 
 - **8 złota** przed pomniejszeniem za znaczniki porażki,
+- **2 Punkty Legendy**,
 - **Krótki miecz** zapewniający **+1 do Walki**,
 - **3 paczki suszonego mięsa**.
 
@@ -158,20 +159,18 @@ Gracz otrzymuje końcową nagrodę pomniejszoną wyłącznie w części złotej 
 
 - Dodaj 1 znacznik porażki za nieudany test.
 - Klątwa księgi pochłania jednego ze strażników. Strażnik wpada w amok i rzuca się na bohatera z zakrwawionymi rękami pradawnych ofiar.
-- Rozpoczyna się walka.
+- Rozpoczyna się walka z przeciwnikiem **Odkryty kultysta**.
 - Jeśli bohater wygra walkę, quest zostaje ukończony z wszystkimi zgromadzonymi znacznikami porażki.
 - Jeśli bohater przegra walkę, quest zostaje przegrany i nie przyznaje żadnej nagrody.
 
-## Przeciwnik finałowy — do ustalenia przed implementacją walki
+## Przeciwnik finałowy — Odkryty kultysta
 
-Do przygotowania pozostają:
+- **Nazwa:** Odkryty kultysta
+- **Bazowe HP:** 4
+- **Klasa Pancerza:** 11
+- **Premia do ataku:** +0
+- **Obrażenia:** 1 Rana po udanym trafieniu
+- **Ucieczka:** niedozwolona
+- **Osobna nagroda za walkę:** brak; zwycięstwo pozwala ukończyć quest
 
-- nazwa przeciwnika,
-- bazowe HP,
-- Klasa Pancerza,
-- premia do ataku,
-- liczba zadawanych Ran,
-- możliwość i zasady ucieczki,
-- ewentualna osobna nagroda za walkę.
-
-Dopóki moduł walki nie zostanie utworzony, finałowa porażka może być zapisana w danych questa, ale nie będzie jeszcze rozgrywana w grze.
+Statystyki przeciwnika są gotowe do wykorzystania po utworzeniu modułu walki. Do tego czasu finałowa porażka może być zapisana w danych questa, ale walka nie będzie jeszcze rozgrywana w grze.
