@@ -34,6 +34,63 @@ LOCATION_MARKER_FILES = {
 _LOCATION_MARKER_IMAGES = {}
 
 
+def remove_location_marker_background(surface):
+    cleaned = surface.copy().convert_alpha()
+    width, height = cleaned.get_size()
+    if width <= 0 or height <= 0:
+        return cleaned
+
+    visited = bytearray(width * height)
+    stack = []
+    border_depth = min(4, max(1, width // 2), max(1, height // 2))
+
+    for offset in range(border_depth):
+        top = offset
+        bottom = height - 1 - offset
+        left = offset
+        right = width - 1 - offset
+        for x in range(left, right + 1):
+            stack.append(top * width + x)
+            stack.append(bottom * width + x)
+        for y in range(top + 1, bottom):
+            stack.append(y * width + left)
+            stack.append(y * width + right)
+
+    while stack:
+        index = stack.pop()
+        if visited[index]:
+            continue
+        visited[index] = 1
+
+        x = index % width
+        y = index // width
+        color = cleaned.get_at((x, y))
+        rgb_min = min(color.r, color.g, color.b)
+        rgb_max = max(color.r, color.g, color.b)
+        is_light_neutral_background = rgb_min >= 195 and rgb_max - rgb_min <= 35
+        if color.a > 0 and not is_light_neutral_background:
+            continue
+
+        if color.a > 0:
+            cleaned.set_at((x, y), (color.r, color.g, color.b, 0))
+
+        if x > 0:
+            stack.append(index - 1)
+        if x + 1 < width:
+            stack.append(index + 1)
+        if y > 0:
+            stack.append(index - width)
+        if y + 1 < height:
+            stack.append(index + width)
+
+    visible = cleaned.get_bounding_rect(min_alpha=8)
+    if visible.width <= 0 or visible.height <= 0:
+        return cleaned
+
+    visible = visible.inflate(8, 8).clip(cleaned.get_rect())
+    return cleaned.subsurface(visible).copy()
+
+
 def load_location_marker(kind):
     if kind in _LOCATION_MARKER_IMAGES:
         return _LOCATION_MARKER_IMAGES[kind]
@@ -50,6 +107,7 @@ def load_location_marker(kind):
 
     try:
         marker = pygame.image.load(str(path)).convert_alpha()
+        marker = remove_location_marker_background(marker)
     except (OSError, pygame.error):
         marker = None
 
