@@ -1,6 +1,7 @@
 import math
 import random
 
+from rg_adventure import install_adventure_system
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_map import HeroToken
 
@@ -26,7 +27,12 @@ def _distance(tile):
 
 
 def find_start_tiles(tiles, player_count):
-    passable = [tile for tile in tiles if tile.terrain["passable"]]
+    passable = [
+        tile for tile in tiles
+        if tile.terrain["passable"] and not getattr(tile, "adventure", None)
+    ]
+    if not passable:
+        passable = [tile for tile in tiles if tile.terrain["passable"]]
     if not passable:
         return tiles[:player_count]
 
@@ -49,3 +55,6 @@ def find_start_tiles(tiles, player_count):
 def create_tokens(players, tiles):
     starts = find_start_tiles(tiles, len(players))
     return [HeroToken(player, start) for player, start in zip(players, starts)]
+
+
+install_adventure_system()
