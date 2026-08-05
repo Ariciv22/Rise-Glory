@@ -87,8 +87,7 @@ def remove_location_marker_background(surface):
     if visible.width <= 0 or visible.height <= 0:
         return cleaned
 
-    visible.inflate_ip(8, 8)
-    visible.clamp_ip(cleaned.get_rect())
+    visible = visible.inflate(8, 8).clip(cleaned.get_rect())
     return cleaned.subsurface(visible).copy()
 
 
