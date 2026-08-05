@@ -33,6 +33,8 @@ def build_location_data(location, number):
     if location["kind"] == "city" and number == 0:
         data["name"] = "Lirion"
         data["background"] = "lirion_miasto"
+    elif location["kind"] == "castle" and number == 0:
+        data["name"] = "Artium"
     return initialize_location(data)
 
 
