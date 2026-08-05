@@ -4,6 +4,7 @@ import random
 from rg_adventure import install_adventure_system
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_map import HeroToken
+from rg_premium_dice import install_premium_dice_animation
 
 
 def default_custom_stats():
@@ -58,3 +59,4 @@ def create_tokens(players, tiles):
 
 
 install_adventure_system()
+install_premium_dice_animation()
