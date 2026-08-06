@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import rg_engine.quests as quest_engine
 from rg_engine.models import QuestDefinition, QuestOption, QuestStage
 from rg_engine.quests import register_quest
 
@@ -128,9 +129,27 @@ SATANIC_FORCES = QuestDefinition(
 _REGISTERED = False
 
 
+def _auto_complete_exactly_one_following_test(player, quest, definition):
+    current = int(quest.get("stage_number", 1) or 1)
+    index = quest_engine._stage_index(definition, current)
+    stage = definition["stages"][index] if 0 <= index < len(definition["stages"]) else None
+    if not quest_engine._stage_is_immediate_ordinary_test(stage):
+        return ""
+    if index == len(definition["stages"]) - 1:
+        return quest_engine.complete_quest(
+            player,
+            quest,
+            "Naturalne 20 zalicza również kolejny dostępny test.",
+        )
+    quest_engine._advance_one_stage(quest, definition)
+    return "Naturalne 20 zalicza również kolejny dostępny test."
+
+
 def register_all_quests() -> None:
     global _REGISTERED
     if _REGISTERED:
         return
     register_quest(SATANIC_FORCES)
+    # Przejściowy adapter zachowuje stare API silnika, ale poprawia regułę naturalnego 20.
+    quest_engine._auto_complete_next_test = _auto_complete_exactly_one_following_test
     _REGISTERED = True
