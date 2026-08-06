@@ -2,9 +2,10 @@ from pathlib import Path
 
 import pygame
 
+from rg_combat import draw_combat_screen, is_combat_active
 from rg_data import GOLD, MUTED, PANEL_DARK, SCREEN_WIDTH, TEXT
 from rg_location_data import helper_effect_text, initialize_location
-from rg_satanic_forces import (
+from rg_satanic_combat import (
     QUEST_NAME,
     QUEST_PLACE_ACTION,
     draw_quest_panel,
@@ -110,6 +111,9 @@ def _draw_owned_helpers(screen, font, small_font, player, x, y, width):
 
 
 def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, player, selected_place=None, message=""):
+    if is_combat_active():
+        return draw_combat_screen(screen, title_font, font, small_font, mouse_pos)
+
     initialize_location(location)
     bg = load_city_background(location, screen.get_size())
     if bg:
