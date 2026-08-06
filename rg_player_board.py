@@ -12,6 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parent
 _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 _TARGET_NAME = "ostatecznywygladplanszetkigraczav1"
 _PLAYER_BOARD_OPEN = False
+_OPEN_QUEST_INDEX = None
 _BOARD_SOURCE = None
 _BOARD_PATH = None
 _BOARD_SEARCHED = False
@@ -24,12 +25,40 @@ def open_player_board():
 
 
 def close_player_board():
-    global _PLAYER_BOARD_OPEN
+    global _PLAYER_BOARD_OPEN, _OPEN_QUEST_INDEX
     _PLAYER_BOARD_OPEN = False
+    _OPEN_QUEST_INDEX = None
 
 
 def is_player_board_open():
     return _PLAYER_BOARD_OPEN
+
+
+def open_quest_details(index):
+    global _OPEN_QUEST_INDEX
+    try:
+        index = int(index)
+    except (TypeError, ValueError):
+        return False
+    if index < 0:
+        return False
+    _OPEN_QUEST_INDEX = index
+    return True
+
+
+def close_quest_details():
+    global _OPEN_QUEST_INDEX
+    was_open = _OPEN_QUEST_INDEX is not None
+    _OPEN_QUEST_INDEX = None
+    return was_open
+
+
+def get_open_quest_index():
+    return _OPEN_QUEST_INDEX
+
+
+def is_quest_details_open():
+    return _OPEN_QUEST_INDEX is not None
 
 
 def _normalize_name(value):
@@ -158,6 +187,23 @@ def _shorten(font, text, max_width):
     while len(value) > 4 and font.size(value + "...")[0] > max_width:
         value = value[:-1]
     return value.rstrip() + "..."
+
+
+def _wrap(font, text, max_width):
+    words = str(text).split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        if font.size(candidate)[0] <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines
 
 
 def _draw_identity(screen, board, hero):
@@ -378,11 +424,37 @@ def _draw_food(screen, board, hero):
             _draw_text(screen, font, f"x{amount}", _point(board, 0.968, y), (232, 201, 137), anchor="topright")
 
 
+def _quest_row_rects(board, hero):
+    quests = list(hero.get("active_quests", []) or [])[:3]
+    return [
+        _relative_rect(board, 0.276, 0.694 + index * 0.086, 0.706, 0.078)
+        for index in range(len(quests))
+    ]
+
+
 def _draw_quests(screen, board, hero):
     quests = list(hero.get("active_quests", []) or [])[:3]
+    rows = _quest_row_rects(board, hero)
     title_font = _font(board, 16, bold=True)
     description_font = _font(board, 12)
     y_positions = [0.716, 0.802, 0.888]
+    mouse_pos = pygame.mouse.get_pos()
+
+    if not is_quest_details_open():
+        for row in rows:
+            if not row.collidepoint(mouse_pos):
+                continue
+            overlay = pygame.Surface(row.size, pygame.SRCALPHA)
+            overlay.fill((196, 137, 48, 32))
+            screen.blit(overlay, row.topleft)
+            pygame.draw.rect(
+                screen,
+                (216, 157, 65),
+                row,
+                max(1, int(2 * board.height / 941)),
+                border_radius=max(2, int(5 * board.height / 941)),
+            )
+
     for index, quest in enumerate(quests):
         if isinstance(quest, dict):
             title = quest.get("name") or quest.get("title") or f"Quest {index + 1}"
@@ -399,10 +471,73 @@ def _draw_quests(screen, board, hero):
                 _point(board, 0.316, y_positions[index] + 0.031),
                 MUTED,
             )
+    return rows
+
+
+def _draw_quest_details(screen, board, quest):
+    board_shade = pygame.Surface(board.size, pygame.SRCALPHA)
+    board_shade.fill((0, 0, 0, 176))
+    screen.blit(board_shade, board.topleft)
+
+    panel = _relative_rect(board, 0.305, 0.205, 0.505, 0.500)
+    radius = max(8, int(14 * board.height / 941))
+    pygame.draw.rect(screen, (12, 11, 10), panel, border_radius=radius)
+    pygame.draw.rect(screen, (190, 134, 48), panel, max(2, int(3 * board.height / 941)), border_radius=radius)
+
+    if isinstance(quest, dict):
+        title = quest.get("name") or quest.get("title") or "Aktywny quest"
+        description = quest.get("objective") or quest.get("description") or "Brak opisu zadania."
+        deck = quest.get("deck") or quest.get("category") or "Nieznana talia"
+        stage = quest.get("stage") or quest.get("step") or quest.get("progress")
+    else:
+        title = str(quest)
+        description = "Brak opisu zadania."
+        deck = "Nieznana talia"
+        stage = None
+
+    title_font = _font(board, 25, bold=True)
+    subtitle_font = _font(board, 14, bold=True)
+    body_font = _font(board, 15)
+    _draw_text(screen, title_font, title, (panel.centerx, panel.y + int(panel.height * 0.10)), (235, 199, 126), anchor="center")
+    _draw_text(screen, subtitle_font, f"Talia: {deck}", (panel.centerx, panel.y + int(panel.height * 0.22)), MUTED, anchor="center")
+
+    if stage is not None:
+        _draw_text(screen, subtitle_font, f"Etap: {stage}", (panel.centerx, panel.y + int(panel.height * 0.29)), (211, 179, 113), anchor="center")
+        body_y = panel.y + int(panel.height * 0.38)
+    else:
+        body_y = panel.y + int(panel.height * 0.32)
+
+    max_width = int(panel.width * 0.82)
+    for line in _wrap(body_font, description, max_width)[:6]:
+        _draw_text(screen, body_font, line, (panel.centerx, body_y), TEXT, anchor="midtop")
+        body_y += body_font.get_height() + max(3, int(4 * board.height / 941))
+
+    status_font = _font(board, 13, bold=True)
+    _draw_text(
+        screen,
+        status_font,
+        "Status: aktywny",
+        (panel.centerx, panel.bottom - int(panel.height * 0.20)),
+        (216, 170, 83),
+        anchor="center",
+    )
+
+    close_rect = pygame.Rect(0, 0, int(panel.width * 0.34), max(34, int(panel.height * 0.11)))
+    close_rect.center = (panel.centerx, panel.bottom - int(panel.height * 0.085))
+    hovered = close_rect.collidepoint(pygame.mouse.get_pos())
+    button_color = (75, 62, 43) if hovered else (46, 38, 28)
+    pygame.draw.rect(screen, button_color, close_rect, border_radius=max(5, int(8 * board.height / 941)))
+    pygame.draw.rect(screen, (190, 134, 48), close_rect, max(1, int(2 * board.height / 941)), border_radius=max(5, int(8 * board.height / 941)))
+    close_font = _font(board, 15, bold=True)
+    _draw_text(screen, close_font, "Zamknij quest", close_rect.center, TEXT, anchor="center", shadow=False)
+    return close_rect
 
 
 def draw_player_board(screen, hero):
     board, source_found = _draw_board_background(screen)
+    quest_rows = []
+    quest_close_rect = None
+
     if not source_found:
         warning_font = _font(board, 24, bold=True)
         detail_font = _font(board, 16)
@@ -426,6 +561,19 @@ def draw_player_board(screen, hero):
         _draw_backpack(screen, board, hero)
         _draw_materials(screen, board, hero)
         _draw_food(screen, board, hero)
-        _draw_quests(screen, board, hero)
+        quest_rows = _draw_quests(screen, board, hero)
 
-    return _relative_rect(board, 0.840, 0.012, 0.145, 0.048)
+        selected_index = get_open_quest_index()
+        quests = list(hero.get("active_quests", []) or [])[:3]
+        if selected_index is not None:
+            if 0 <= selected_index < len(quests):
+                quest_close_rect = _draw_quest_details(screen, board, quests[selected_index])
+                quest_rows = []
+            else:
+                close_quest_details()
+
+    return {
+        "close_rect": _relative_rect(board, 0.840, 0.012, 0.145, 0.048),
+        "quest_rows": quest_rows,
+        "quest_close_rect": quest_close_rect,
+    }

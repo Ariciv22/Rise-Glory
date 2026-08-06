@@ -18,9 +18,11 @@ from rg_data import (
 from rg_location_data import helper_bonus_summary, helper_effect_text
 from rg_player_board import (
     close_player_board,
+    close_quest_details,
     draw_player_board,
     is_player_board_open,
     open_player_board,
+    open_quest_details,
 )
 from rg_ui import Button, draw_image_panel, draw_lines, draw_panel, wrap
 
@@ -33,6 +35,10 @@ class _PlayerBoardButton(Button):
             open_player_board()
         elif self.action == "close_player_board":
             close_player_board()
+        elif self.action == "close_active_quest":
+            close_quest_details()
+        elif str(self.action).startswith("open_active_quest:"):
+            open_quest_details(str(self.action).split(":", 1)[1])
         return True
 
 
@@ -208,10 +214,18 @@ def draw_game_ui(
     _draw_bottom_tile_info(screen, font, small_font, selected_tile)
 
     if is_player_board_open():
-        close_rect = draw_player_board(screen, hero)
-        close_button = _PlayerBoardButton("Powrot do mapy", "close_player_board", close_rect)
+        controls = draw_player_board(screen, hero)
+        close_button = _PlayerBoardButton("Powrot do mapy", "close_player_board", controls["close_rect"])
         close_button.draw(screen, small_font, pygame.mouse.get_pos())
+
+        board_buttons = []
+        if controls["quest_close_rect"] is not None:
+            board_buttons.append(_PlayerBoardButton("", "close_active_quest", controls["quest_close_rect"]))
+        else:
+            for index, rect in enumerate(controls["quest_rows"]):
+                board_buttons.append(_PlayerBoardButton("", f"open_active_quest:{index}", rect))
+
         blocker = Button("", "player_board_block", screen.get_rect())
-        return [close_button, blocker]
+        return [*board_buttons, close_button, blocker]
 
     return [hero_button, end_turn]
