@@ -144,6 +144,8 @@ TERRAINS = {
 
 
 def clone_hero(template, world_name=None, player_index=0, stats=None):
+    from rg_engine.heroes import ensure_hero_state
+
     hero = dict(template)
     hero["archetype_id"] = template["id"]
     hero["archetype_name"] = template["name"]
@@ -159,7 +161,7 @@ def clone_hero(template, world_name=None, player_index=0, stats=None):
     hero["food"] = [START_FOOD]
     hero["goods"] = [random.choice(BASIC_GOODS)]
     hero["custom_stats"] = stats is not None
-    return hero
+    return ensure_hero_state(hero)
 
 
 def map_name(key):
