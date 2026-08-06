@@ -4,9 +4,10 @@ import random
 from rg_adventure import install_adventure_system
 from rg_combat_image_fit import install_combat_image_fit
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
+from rg_engine.heroes import ensure_hero_state
+from rg_engine.world import register_players
 from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
-from rg_satanic_forces import register_players
 
 
 def default_custom_stats():
@@ -56,6 +57,8 @@ def find_start_tiles(tiles, player_count):
 
 
 def create_tokens(players, tiles):
+    for player in players:
+        ensure_hero_state(player)
     starts = find_start_tiles(tiles, len(players))
     tokens = [HeroToken(player, start) for player, start in zip(players, starts)]
     register_players(players)
