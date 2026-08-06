@@ -26,12 +26,14 @@ from rg_data import (
 
 ROOT_DIR = Path(__file__).resolve().parent
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
+CAMERA_ANGLE_DEGREES = 30.0
 LOCATION_MARKER_FILES = {
     "city": "pionek_miasto.png",
     "village": "pionek_wies.png",
     "castle": "pionek_zamek.png",
 }
 _LOCATION_MARKER_IMAGES = {}
+_ROTATED_TEXTURE_CACHE = {}
 
 
 def remove_location_marker_background(surface):
@@ -116,7 +118,13 @@ def load_location_marker(kind):
 
 
 def hex_corners(cx, cy, size):
-    return [(cx + size * math.cos(math.radians(60 * i - 30)), cy + size * math.sin(math.radians(60 * i - 30))) for i in range(6)]
+    return [
+        (
+            cx + size * math.cos(math.radians(60 * i - 30)),
+            cy + size * math.sin(math.radians(60 * i - 30)),
+        )
+        for i in range(6)
+    ]
 
 
 def point_in_polygon(point, polygon):
@@ -126,7 +134,9 @@ def point_in_polygon(point, polygon):
     for i in range(len(polygon)):
         xi, yi = polygon[i]
         xj, yj = polygon[j]
-        if ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / ((yj - yi) + 0.00001) + xi):
+        if ((yi > y) != (yj > y)) and (
+            x < (xj - xi) * (y - yi) / ((yj - yi) + 0.00001) + xi
+        ):
             inside = not inside
         j = i
     return inside
@@ -140,14 +150,54 @@ def are_adjacent(a, b):
     return math.hypot(a.x - b.x, a.y - b.y) <= HEX_SIZE * 1.85
 
 
+def rotated_texture(texture_key, texture, camera):
+    target_size = max(1, int(HEX_SIZE * 2 * camera.zoom))
+    cache_key = (texture_key, target_size, camera.angle_degrees)
+    rendered = _ROTATED_TEXTURE_CACHE.get(cache_key)
+    if rendered is None:
+        scale = target_size / max(1, texture.get_width())
+        rendered = pygame.transform.rotozoom(texture, -camera.angle_degrees, scale)
+        _ROTATED_TEXTURE_CACHE[cache_key] = rendered
+    return rendered
+
+
 class Camera:
     def __init__(self):
         self.x = SCREEN_WIDTH / 2
         self.y = SCREEN_HEIGHT / 2
         self.zoom = DEFAULT_ZOOM
+        self.angle_degrees = CAMERA_ANGLE_DEGREES
+        self._refresh_rotation()
+
+    def _refresh_rotation(self):
+        angle = math.radians(self.angle_degrees)
+        self._cos_angle = math.cos(angle)
+        self._sin_angle = math.sin(angle)
+
+    def rotate_world(self, x, y):
+        return (
+            x * self._cos_angle - y * self._sin_angle,
+            x * self._sin_angle + y * self._cos_angle,
+        )
+
+    def unrotate_world(self, x, y):
+        return (
+            x * self._cos_angle + y * self._sin_angle,
+            -x * self._sin_angle + y * self._cos_angle,
+        )
 
     def apply(self, x, y):
-        return x * self.zoom + self.x, y * self.zoom + self.y
+        rotated_x, rotated_y = self.rotate_world(x, y)
+        return (
+            rotated_x * self.zoom + self.x,
+            rotated_y * self.zoom + self.y,
+        )
+
+    def unapply(self, screen_x, screen_y):
+        zoom = max(0.0001, self.zoom)
+        rotated_x = (screen_x - self.x) / zoom
+        rotated_y = (screen_y - self.y) / zoom
+        return self.unrotate_world(rotated_x, rotated_y)
 
     def move(self, dx, dy):
         self.x += dx
@@ -158,27 +208,37 @@ class Camera:
         new_zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom * factor))
         if new_zoom == old_zoom:
             return
+
         mx, my = mouse_pos
-        wx = (mx - self.x) / old_zoom
-        wy = (my - self.y) / old_zoom
+        world_x, world_y = self.unapply(mx, my)
+        rotated_x, rotated_y = self.rotate_world(world_x, world_y)
         self.zoom = new_zoom
-        self.x = mx - wx * self.zoom
-        self.y = my - wy * self.zoom
+        self.x = mx - rotated_x * self.zoom
+        self.y = my - rotated_y * self.zoom
 
     def map_view_center(self):
         map_left = LEFT_PANEL_W + MAP_MARGIN
         map_right = SCREEN_WIDTH - RIGHT_PANEL_W - MAP_MARGIN
         map_top = TOP_BAR_H + MAP_MARGIN
         map_bottom = SCREEN_HEIGHT - MAP_MARGIN
-        return map_left + (map_right - map_left) / 2, map_top + (map_bottom - map_top) / 2
+        return (
+            map_left + (map_right - map_left) / 2,
+            map_top + (map_bottom - map_top) / 2,
+        )
 
     def center_on_tiles(self, tiles):
         if not tiles:
             return
-        min_x = min(tile.x for tile in tiles) - HEX_SIZE
-        max_x = max(tile.x for tile in tiles) + HEX_SIZE
-        min_y = min(tile.y for tile in tiles) - HEX_SIZE
-        max_y = max(tile.y for tile in tiles) + HEX_SIZE
+
+        rotated_points = []
+        for tile in tiles:
+            rotated_points.extend(self.rotate_world(x, y) for x, y in tile.points)
+
+        min_x = min(point[0] for point in rotated_points)
+        max_x = max(point[0] for point in rotated_points)
+        min_y = min(point[1] for point in rotated_points)
+        max_y = max(point[1] for point in rotated_points)
+
         self.zoom = DEFAULT_ZOOM
         cx, cy = self.map_view_center()
         self.x = cx - ((min_x + max_x) / 2) * self.zoom
@@ -189,8 +249,9 @@ class Camera:
             return
         self.zoom = DEFAULT_ZOOM
         cx, cy = self.map_view_center()
-        self.x = cx - tile.x * self.zoom
-        self.y = cy - tile.y * self.zoom
+        rotated_x, rotated_y = self.rotate_world(tile.x, tile.y)
+        self.x = cx - rotated_x * self.zoom
+        self.y = cy - rotated_y * self.zoom
 
 
 class Tile:
@@ -239,15 +300,26 @@ class Tile:
         color = self.location["color"]
         pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 4)
         pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
-        pygame.draw.circle(screen, (30, 24, 18), (int(sx), marker_y), radius, max(2, int(3 * camera.zoom)))
+        pygame.draw.circle(
+            screen,
+            (30, 24, 18),
+            (int(sx), marker_y),
+            radius,
+            max(2, int(3 * camera.zoom)),
+        )
         label = font.render(self.location["symbol"], True, TEXT)
         screen.blit(label, label.get_rect(center=(int(sx), marker_y)))
 
     def draw(self, screen, textures, camera, font, hovered=False, selected=False, valid_move=False):
         sx, sy = self.center(camera)
-        size = max(1, int(HEX_SIZE * 2 * camera.zoom))
-        texture = pygame.transform.smoothscale(textures[self.terrain_key], (size, size))
-        screen.blit(texture, (sx - size / 2, sy - size / 2))
+        texture = rotated_texture(
+            self.terrain_key,
+            textures[self.terrain_key],
+            camera,
+        )
+        texture_rect = texture.get_rect(center=(int(sx), int(sy)))
+        screen.blit(texture, texture_rect)
+
         pts = self.screen_points(camera)
         pygame.draw.polygon(screen, (24, 24, 24), pts, max(1, int(2 * camera.zoom)))
         if valid_move:
@@ -297,27 +369,60 @@ class HeroToken:
         sx, sy = self.tile.center(camera)
         center = (int(sx), int(sy - 30 * camera.zoom))
         radius = max(11, int(18 * camera.zoom))
-        player_color = self.hero.get("player_color", self.hero.get("color", (220, 220, 220)))
+        player_color = self.hero.get(
+            "player_color",
+            self.hero.get("color", (220, 220, 220)),
+        )
         pygame.draw.circle(screen, player_color, center, radius + 5)
         pygame.draw.circle(screen, (238, 238, 220), center, radius)
-        pygame.draw.circle(screen, (25, 25, 25), center, radius, max(2, int(3 * camera.zoom)))
-        label = font.render(str(self.hero.get("player_number", "B")), True, (20, 20, 20))
+        pygame.draw.circle(
+            screen,
+            (25, 25, 25),
+            center,
+            radius,
+            max(2, int(3 * camera.zoom)),
+        )
+        label = font.render(
+            str(self.hero.get("player_number", "B")),
+            True,
+            (20, 20, 20),
+        )
         screen.blit(label, label.get_rect(center=center))
         if selected:
-            pygame.draw.circle(screen, SELECTED, center, radius + 10, max(2, int(4 * camera.zoom)))
+            pygame.draw.circle(
+                screen,
+                SELECTED,
+                center,
+                radius + 10,
+                max(2, int(4 * camera.zoom)),
+            )
 
 
 def create_fallback_texture(color):
     surface = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
-    pygame.draw.polygon(surface, color, hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2))
+    pygame.draw.polygon(
+        surface,
+        color,
+        hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2),
+    )
     return surface
 
 
 def create_hex_texture(image):
     target = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
-    target.blit(pygame.transform.smoothscale(image, (TEXTURE_SIZE, TEXTURE_SIZE)), (0, 0))
+    target.blit(
+        pygame.transform.smoothscale(image, (TEXTURE_SIZE, TEXTURE_SIZE)),
+        (0, 0),
+    )
     mask = pygame.Surface((TEXTURE_SIZE, TEXTURE_SIZE), pygame.SRCALPHA)
-    points = [(int(x), int(y)) for x, y in hex_corners(TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2 - 2)]
+    points = [
+        (int(x), int(y))
+        for x, y in hex_corners(
+            TEXTURE_SIZE / 2,
+            TEXTURE_SIZE / 2,
+            TEXTURE_SIZE / 2 - 2,
+        )
+    ]
     pygame.draw.polygon(mask, (255, 255, 255, 255), points)
     target.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
     return target
@@ -325,10 +430,13 @@ def create_hex_texture(image):
 
 def load_textures():
     textures = {}
+    _ROTATED_TEXTURE_CACHE.clear()
     for key, terrain in TERRAINS.items():
         path = GRAPHICS_DIR / terrain["image"]
         if path.exists():
-            textures[key] = create_hex_texture(pygame.image.load(str(path)).convert_alpha())
+            textures[key] = create_hex_texture(
+                pygame.image.load(str(path)).convert_alpha()
+            )
         else:
             textures[key] = create_fallback_texture(terrain["fallback"])
     return textures
