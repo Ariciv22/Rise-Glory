@@ -428,3 +428,7 @@ def draw_multiplayer(screen, title_font, font, mouse):
     for button in buttons:
         button.draw(screen, font, mouse)
     return buttons
+
+# Ilustrowany ekran modułu Rada Bohaterów.
+from rg_council_background import draw_council as _draw_council_with_background
+draw_council = _draw_council_with_background
