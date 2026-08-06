@@ -4,6 +4,13 @@ import pygame
 
 from rg_data import GOLD, MUTED, PANEL_DARK, SCREEN_WIDTH, TEXT
 from rg_location_data import helper_effect_text, initialize_location
+from rg_satanic_forces import (
+    QUEST_NAME,
+    QUEST_PLACE_ACTION,
+    draw_quest_panel,
+    find_player_quest,
+    has_active_quest,
+)
 from rg_ui import Button, draw_lines, draw_panel, wrap
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -16,6 +23,13 @@ LOCATION_PLACES = [
     ("Trening", "location_training"),
     ("Leczenie", "location_healing"),
 ]
+
+
+def _location_places(location, player):
+    places = list(LOCATION_PLACES)
+    if location.get("name") == "Artium" and has_active_quest(player):
+        places.append((f"Quest: {QUEST_NAME}", QUEST_PLACE_ACTION))
+    return places
 
 
 def find_city_background(location):
@@ -112,7 +126,12 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
     draw_panel(screen, header, GOLD)
     title = f"{location.get('type_name', 'Lokacja')}: {location.get('name', 'Lokacja')}"
     screen.blit(title_font.render(title, True, TEXT), (header.x + 28, header.y + 18))
-    status = f"{player['name']} | Zloto: {player.get('gold', 0)} | Questy: {len(player.get('active_quests', []))}/3 | Pomocnicy: {len(player.get('helpers', []))}/5"
+    token = player.get("_token_ref")
+    actions = int(getattr(token, "actions", 0) or 0) if token is not None else 0
+    status = (
+        f"{player['name']} | Zloto: {player.get('gold', 0)} | Akcje: {actions} | "
+        f"Questy: {len(player.get('active_quests', []))}/3 | Pomocnicy: {len(player.get('helpers', []))}/5"
+    )
     screen.blit(small_font.render(status, True, MUTED), (header.x + 30, header.y + 78))
 
     left = pygame.Rect(42, 164, 300, sh - 206)
@@ -120,7 +139,7 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
     screen.blit(font.render("Miejsca", True, TEXT), (left.x + 22, left.y + 20))
     buttons = []
     y = left.y + 64
-    for label, action in LOCATION_PLACES:
+    for label, action in _location_places(location, player):
         button = Button(label, action, (left.x + 20, y, left.width - 40, 48))
         button.draw(screen, font, mouse_pos, active=(selected_place == action))
         buttons.append(button)
@@ -149,6 +168,8 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
     elif selected_place == "location_board":
         screen.blit(font.render("Tablica ogloszen - 3 questy", True, TEXT), (content.x + 22, start_y))
         buttons += _draw_offer_cards(screen, font, small_font, mouse_pos, location["quest_offers"], "quest", content.x + 22, start_y + 42, content.width - 44, "Pobierz")
+    elif selected_place == QUEST_PLACE_ACTION and location.get("name") == "Artium":
+        buttons += draw_quest_panel(screen, font, small_font, mouse_pos, content, player)
     elif selected_place == "location_training":
         screen.blit(font.render("Trening", True, TEXT), (content.x + 22, start_y))
         draw_lines(screen, font, ["Pelny system treningu zostanie podpiety w kolejnym etapie."], content.x + 22, start_y + 50, MUTED)
@@ -156,6 +177,8 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
         screen.blit(font.render("Leczenie", True, TEXT), (content.x + 22, start_y))
         draw_lines(screen, font, ["Leczenie kosztuje 2 monety za Rane i 1 akcje.", "Interakcja zostanie podpieta razem z pelnym systemem Ran."], content.x + 22, start_y + 50, MUTED, line_h=34)
     else:
-        screen.blit(font.render("Wybierz miejsce w lokacji", True, TEXT), (content.x + 22, start_y))
+        quest = find_player_quest(player, include_history=False)
+        prompt = "Wybierz zakladke questa po jego pobraniu." if location.get("name") == "Artium" and quest else "Wybierz miejsce w lokacji"
+        screen.blit(font.render(prompt, True, TEXT), (content.x + 22, start_y))
         draw_lines(screen, font, ["Sklep, karczma i tablica posiadaja osobne, trwale oferty.", "Kupiona lub pobrana karta jest natychmiast zastepowana nowa."], content.x + 22, start_y + 50, MUTED, line_h=32)
     return buttons
