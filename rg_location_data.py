@@ -1,4 +1,7 @@
+import copy
 import random
+
+from rg_satanic_forces import activate_quest, create_quest_offer, is_satanic_forces
 
 
 FOOD_CARDS = [
@@ -73,7 +76,6 @@ QUEST_CARDS = [
     {"name": "Dwie sklocone rodziny", "deck": "Dyplomacji", "description": "Doprowadz do ugody miedzy rodami."},
     {"name": "Festiwal bez artystow", "deck": "Kultury", "description": "Pomoz przygotowac wydarzenie dla mieszkancow."},
     {"name": "Zaginiona kronika", "deck": "Kultury", "description": "Odzyskaj cenna kronike miejscowego rodu."},
-    {"name": "Klątwa katakumb", "deck": "Nauki", "description": "Zbadaj zrodlo klatwy pod zamkiem."},
     {"name": "Spadajace gwiazdy", "deck": "Nauki", "description": "Wyjasnij niepokojace zjawisko nad traktem."},
 ]
 
@@ -94,7 +96,7 @@ def helper_bonus_summary(player):
 
 
 def _copy_card(card):
-    return dict(card)
+    return copy.deepcopy(card)
 
 
 def _draw_unique(pool, visible, rng):
@@ -124,7 +126,9 @@ def initialize_location(location, rng=None):
     for _ in range(3):
         helpers.append(_draw_unique(HELPER_CARDS, helpers, rng))
     quests = []
-    for _ in range(3):
+    if location.get("name") == "Artium" and not location.get("special_quest_claimed"):
+        quests.append(create_quest_offer())
+    while len(quests) < 3:
         quests.append(_draw_quest(quests, rng))
     location["shop_layout"] = layout
     location["shop_offers"] = shop
@@ -185,7 +189,14 @@ def take_quest(location, player, slot_index, rng=None):
     if len(player.setdefault("active_quests", [])) >= 3:
         return False, "Masz juz maksymalnie 3 aktywne questy."
     quest = offers[slot_index]
-    player["active_quests"].append(_copy_card(quest))
+    if is_satanic_forces(quest):
+        for key in ("active_quests", "completed_quests", "failed_quests"):
+            if any(is_satanic_forces(existing) for existing in player.get(key, []) or []):
+                return False, "Ten bohater ma juz zapisany quest Szatanskie sily."
+        player["active_quests"].append(activate_quest(quest))
+        location["special_quest_claimed"] = True
+    else:
+        player["active_quests"].append(_copy_card(quest))
     visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
     offers[slot_index] = _draw_quest(visible_without_slot, rng)
     return True, f"Pobrano quest: {quest['name']}."
