@@ -5,6 +5,7 @@ from rg_adventure import install_adventure_system
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
+from rg_satanic_forces import register_players
 
 
 def default_custom_stats():
@@ -55,7 +56,12 @@ def find_start_tiles(tiles, player_count):
 
 def create_tokens(players, tiles):
     starts = find_start_tiles(tiles, len(players))
-    return [HeroToken(player, start) for player, start in zip(players, starts)]
+    tokens = [HeroToken(player, start) for player, start in zip(players, starts)]
+    register_players(players)
+    for token in tokens:
+        token.start_tile = token.tile
+        token.hero["_token_ref"] = token
+    return tokens
 
 
 install_adventure_system()
