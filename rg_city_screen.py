@@ -7,7 +7,15 @@ from rg_data import GOLD, MUTED, PANEL_DARK, TEXT
 from rg_engine.heroes import training_cost
 from rg_engine.items import EQUIPMENT_SLOTS, ensure_equipment_state, item_display_name
 from rg_engine.locations import training_stats_for
-from rg_location_data import helper_effect_text, initialize_location
+from rg_location_data import (
+    equip_inventory_item,
+    heal_player,
+    helper_effect_text,
+    initialize_location,
+    sell_inventory_item,
+    train_player,
+    unequip_equipment_slot,
+)
 from rg_quest_ui import draw_quest_panel, location_quest_tabs, parse_quest_action, quest_action
 from rg_ui import Button, draw_lines, draw_panel, wrap
 
@@ -22,6 +30,29 @@ LOCATION_PLACES = [
     ("Leczenie", "location_healing"),
     ("Ekwipunek", "location_equipment"),
 ]
+
+
+class LocationActionButton(Button):
+    def __init__(self, text, action, rect, callback):
+        super().__init__(text, action, rect)
+        self.callback = callback
+
+    def clicked(self, pos):
+        if not self.rect.collidepoint(pos):
+            return False
+        success, message = self.callback()
+        self.last_success = success
+        self.last_message = message
+        return True
+
+
+def _remember_message(player, callback):
+    def run():
+        success, message = callback()
+        player["_location_message"] = message
+        return success, message
+    return run
+
 
 SLOT_LABELS = {
     "weapon": "Bron",
@@ -134,7 +165,12 @@ def _draw_training(screen, font, small_font, mouse_pos, content, location, playe
         screen.blit(font.render(f"{stat}: {current}/6", True, TEXT), (rect.x + 16, rect.y + 9))
         cost_text = "maksimum" if cost is None else f"koszt {cost} monet + 1 akcja"
         screen.blit(small_font.render(cost_text, True, MUTED), (rect.x + 16, rect.y + 37))
-        button = Button("Trenuj", f"train:{stat}", (rect.right - 138, rect.y + 10, 120, 44))
+        button = LocationActionButton(
+            "Trenuj",
+            "location_training",
+            (rect.right - 138, rect.y + 10, 120, 44),
+            _remember_message(player, lambda selected=stat: train_player(location, player, selected)),
+        )
         button.draw(screen, small_font, mouse_pos)
         buttons.append(button)
         y += 76
@@ -150,7 +186,12 @@ def _draw_healing(screen, font, small_font, mouse_pos, content, player, start_y)
         "Medyk polowy zmniejsza koszt kazdej leczonej Rany o 1 monete.",
     ]
     draw_lines(screen, small_font, lines, content.x + 22, start_y + 48, MUTED, line_h=30, max_width=content.width - 44)
-    button = Button("Wylecz Rany", "heal:all", (content.x + 22, start_y + 168, 260, 52))
+    button = LocationActionButton(
+        "Wylecz Rany",
+        "location_healing",
+        (content.x + 22, start_y + 168, 260, 52),
+        _remember_message(player, lambda: heal_player({}, player)),
+    )
     button.draw(screen, font, mouse_pos)
     return [button]
 
@@ -173,7 +214,12 @@ def _draw_equipment(screen, font, small_font, mouse_pos, content, player, start_
         label = f"{SLOT_LABELS.get(slot, slot)}: {item_display_name(item) if item else '-'}"
         screen.blit(small_font.render(label, True, TEXT if item else MUTED), (rect.x + 10, rect.y + 14))
         if item:
-            button = Button("Zdejmij", f"unequip:{slot}", (rect.right - 102, rect.y + 6, 90, 36))
+            button = LocationActionButton(
+                "Zdejmij",
+                "location_equipment",
+                (rect.right - 102, rect.y + 6, 90, 36),
+                _remember_message(player, lambda selected=slot: unequip_equipment_slot(player, selected)),
+            )
             button.draw(screen, small_font, mouse_pos)
             buttons.append(button)
         y += 56
@@ -190,8 +236,18 @@ def _draw_equipment(screen, font, small_font, mouse_pos, content, player, start_
         screen.blit(small_font.render(item_display_name(item), True, TEXT), (rect.x + 10, rect.y + 8))
         description = str(item.get("description", "")) if isinstance(item, dict) else ""
         screen.blit(small_font.render(description[:52], True, MUTED), (rect.x + 10, rect.y + 31))
-        equip = Button("Zaloz", f"equip:{index}", (rect.right - 196, rect.y + 10, 82, 38))
-        sell = Button("Sprzedaj", f"sell:{index}", (rect.right - 106, rect.y + 10, 94, 38))
+        equip = LocationActionButton(
+            "Zaloz",
+            "location_equipment",
+            (rect.right - 196, rect.y + 10, 82, 38),
+            _remember_message(player, lambda selected=index: equip_inventory_item(player, selected)),
+        )
+        sell = LocationActionButton(
+            "Sprzedaj",
+            "location_equipment",
+            (rect.right - 106, rect.y + 10, 94, 38),
+            _remember_message(player, lambda selected=index: sell_inventory_item(player, selected)),
+        )
         equip.draw(screen, small_font, mouse_pos)
         sell.draw(screen, small_font, mouse_pos)
         buttons.extend([equip, sell])
@@ -247,10 +303,11 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
 
     content = pygame.Rect(360, 164, sw - 402, sh - 206)
     draw_panel(screen, content, GOLD)
-    if message:
+    effective_message = message or player.get("_location_message", "")
+    if effective_message:
         message_box = pygame.Rect(content.x + 18, content.y + 14, content.width - 36, 42)
         pygame.draw.rect(screen, (45, 55, 48), message_box, border_radius=8)
-        screen.blit(small_font.render(message[:120], True, TEXT), (message_box.x + 12, message_box.y + 11))
+        screen.blit(small_font.render(effective_message[:120], True, TEXT), (message_box.x + 12, message_box.y + 11))
 
     start_y = content.y + 70
     if selected_place == "location_shop":
