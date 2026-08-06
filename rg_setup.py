@@ -10,6 +10,15 @@ from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
 
 
+class GameHeroToken(HeroToken):
+    """Pionek zachowujacy stary wyglad, ale korzystajacy z poprawnych kosztow akcji."""
+
+    def can_move_to(self, target):
+        if not super().can_move_to(target):
+            return False
+        return int(self.actions) >= int(target.terrain.get("move", 1) or 1)
+
+
 def default_custom_stats():
     return {name: 0 for name in STAT_NAMES}
 
@@ -60,7 +69,7 @@ def create_tokens(players, tiles):
     for player in players:
         ensure_hero_state(player)
     starts = find_start_tiles(tiles, len(players))
-    tokens = [HeroToken(player, start) for player, start in zip(players, starts)]
+    tokens = [GameHeroToken(player, start) for player, start in zip(players, starts)]
     register_players(players)
     for token in tokens:
         token.start_tile = token.tile
