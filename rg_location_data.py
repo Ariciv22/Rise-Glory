@@ -142,7 +142,9 @@ def initialize_location(location, rng=None):
         return location
     rng = rng or random
     layout = list(SHOP_LAYOUTS.get(location.get("kind"), SHOP_LAYOUTS["city"]))
-    shop = [_draw_unique(SHOP_POOLS[category], [], rng) for category in layout]
+    shop = []
+    for category in layout:
+        shop.append(_draw_unique(SHOP_POOLS[category], shop, rng))
     helpers = []
     for _ in range(3):
         helpers.append(_draw_unique(HELPER_CARDS, helpers, rng))
