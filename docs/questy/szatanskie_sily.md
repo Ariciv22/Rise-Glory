@@ -69,10 +69,10 @@ Docierasz do Zamku Artium. Strażnicy nie zatrzymują cię, ponieważ widzą za 
 
 - **8 złota** przed pomniejszeniem za znaczniki porażki,
 - **2 Punkty Legendy**,
-- **Krótki miecz** zapewniający obecnie zapisany bonus **+1 do Walki**,
+- **Krótki miecz** zapewniający po założeniu **+1 do rzutu na trafienie oraz +1 do obrażeń**,
 - **3 paczki suszonego mięsa**.
 
-Krótki miecz trafia do plecaka. Nie jest automatycznie zakładany i nie zastępuje obecnej broni bohatera.
+Krótki miecz trafia do plecaka. Nie jest automatycznie zakładany i nie zastępuje obecnej broni bohatera. Jego premie działają wyłącznie wtedy, gdy miecz znajduje się w slocie założonej broni.
 
 ---
 
@@ -210,7 +210,7 @@ Skalowanie całkowitego HP kultysty:
 ## Tymczasowe zasady walki dla pierwszej wersji
 
 - Bohater bez broni zadaje po trafieniu **1 obrażenie HP** przeciwnikowi.
-- Broń z premią **+1 do obrażeń** zwiększa obrażenia pojedynczego trafienia do **2 HP**.
+- Założony Krótki miecz dodaje **+1 do rzutu na trafienie** oraz **+1 do obrażeń**. Zwykłe trafienie Krótkim mieczem zadaje więc **2 HP** przeciwnikowi.
 - Naturalne 20 podczas ataku rozpatruje dwa trafienia zgodnie z ogólnymi zasadami walki.
 - Bohater bez zbroi ma KP 10.
 - Zwykła zbroja zapewnia pełne KP 12.
