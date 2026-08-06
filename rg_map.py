@@ -26,18 +26,12 @@ from rg_data import (
 
 ROOT_DIR = Path(__file__).resolve().parent
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
-
-# Spłaszczenie osi pionowej daje mapie widok izometryczny, ale nie pochyla
-# pionków ani interfejsu. Wartość 0.62 zachowuje czytelność heksów i terenu.
-ISOMETRIC_Y_SCALE = 0.62
-
 LOCATION_MARKER_FILES = {
     "city": "pionek_miasto.png",
     "village": "pionek_wies.png",
     "castle": "pionek_zamek.png",
 }
 _LOCATION_MARKER_IMAGES = {}
-_PROJECTED_TEXTURE_CACHE = {}
 
 
 def remove_location_marker_background(surface):
@@ -146,35 +140,14 @@ def are_adjacent(a, b):
     return math.hypot(a.x - b.x, a.y - b.y) <= HEX_SIZE * 1.85
 
 
-def projected_texture(texture_key, texture, width, height):
-    cache_key = (texture_key, int(width), int(height))
-    rendered = _PROJECTED_TEXTURE_CACHE.get(cache_key)
-    if rendered is None:
-        rendered = pygame.transform.smoothscale(texture, (max(1, int(width)), max(1, int(height))))
-        _PROJECTED_TEXTURE_CACHE[cache_key] = rendered
-    return rendered
-
-
 class Camera:
     def __init__(self):
         self.x = SCREEN_WIDTH / 2
         self.y = SCREEN_HEIGHT / 2
         self.zoom = DEFAULT_ZOOM
-        self.isometric_y_scale = ISOMETRIC_Y_SCALE
 
     def apply(self, x, y):
-        return (
-            x * self.zoom + self.x,
-            y * self.zoom * self.isometric_y_scale + self.y,
-        )
-
-    def unapply(self, screen_x, screen_y):
-        zoom = max(0.0001, self.zoom)
-        vertical_zoom = max(0.0001, self.zoom * self.isometric_y_scale)
-        return (
-            (screen_x - self.x) / zoom,
-            (screen_y - self.y) / vertical_zoom,
-        )
+        return x * self.zoom + self.x, y * self.zoom + self.y
 
     def move(self, dx, dy):
         self.x += dx
@@ -185,12 +158,12 @@ class Camera:
         new_zoom = max(MIN_ZOOM, min(MAX_ZOOM, self.zoom * factor))
         if new_zoom == old_zoom:
             return
-
         mx, my = mouse_pos
-        world_x, world_y = self.unapply(mx, my)
+        wx = (mx - self.x) / old_zoom
+        wy = (my - self.y) / old_zoom
         self.zoom = new_zoom
-        self.x = mx - world_x * self.zoom
-        self.y = my - world_y * self.zoom * self.isometric_y_scale
+        self.x = mx - wx * self.zoom
+        self.y = my - wy * self.zoom
 
     def map_view_center(self):
         map_left = LEFT_PANEL_W + MAP_MARGIN
@@ -209,7 +182,7 @@ class Camera:
         self.zoom = DEFAULT_ZOOM
         cx, cy = self.map_view_center()
         self.x = cx - ((min_x + max_x) / 2) * self.zoom
-        self.y = cy - ((min_y + max_y) / 2) * self.zoom * self.isometric_y_scale
+        self.y = cy - ((min_y + max_y) / 2) * self.zoom
 
     def center_on_tile(self, tile):
         if not tile:
@@ -217,7 +190,7 @@ class Camera:
         self.zoom = DEFAULT_ZOOM
         cx, cy = self.map_view_center()
         self.x = cx - tile.x * self.zoom
-        self.y = cy - tile.y * self.zoom * self.isometric_y_scale
+        self.y = cy - tile.y * self.zoom
 
 
 class Tile:
@@ -256,14 +229,13 @@ class Tile:
                 max(1, int(marker.get_height() * scale)),
             )
             rendered_marker = pygame.transform.smoothscale(marker, marker_size)
-            tile_half_height = HEX_SIZE * camera.zoom * camera.isometric_y_scale
-            marker_bottom = int(sy + tile_half_height * 0.78)
+            marker_bottom = int(sy + 50 * camera.zoom)
             marker_rect = rendered_marker.get_rect(midbottom=(int(sx), marker_bottom))
             screen.blit(rendered_marker, marker_rect)
             return
 
         radius = max(13, int(19 * camera.zoom))
-        marker_y = int(sy + 30 * camera.zoom * camera.isometric_y_scale)
+        marker_y = int(sy + 30 * camera.zoom)
         color = self.location["color"]
         pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 4)
         pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
@@ -273,10 +245,9 @@ class Tile:
 
     def draw(self, screen, textures, camera, font, hovered=False, selected=False, valid_move=False):
         sx, sy = self.center(camera)
-        width = max(1, int(HEX_SIZE * 2 * camera.zoom))
-        height = max(1, int(HEX_SIZE * 2 * camera.zoom * camera.isometric_y_scale))
-        texture = projected_texture(self.terrain_key, textures[self.terrain_key], width, height)
-        screen.blit(texture, (sx - width / 2, sy - height / 2))
+        size = max(1, int(HEX_SIZE * 2 * camera.zoom))
+        texture = pygame.transform.smoothscale(textures[self.terrain_key], (size, size))
+        screen.blit(texture, (sx - size / 2, sy - size / 2))
         pts = self.screen_points(camera)
         pygame.draw.polygon(screen, (24, 24, 24), pts, max(1, int(2 * camera.zoom)))
         if valid_move:
@@ -354,7 +325,6 @@ def create_hex_texture(image):
 
 def load_textures():
     textures = {}
-    _PROJECTED_TEXTURE_CACHE.clear()
     for key, terrain in TERRAINS.items():
         path = GRAPHICS_DIR / terrain["image"]
         if path.exists():
