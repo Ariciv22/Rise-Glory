@@ -54,6 +54,6 @@ def assign_locations(tiles):
 
 
 def generate_world(map_key="rosette9"):
-    tiles = create_random_tiles("rosette9")
+    tiles = create_random_tiles(map_key)
     assign_locations(tiles)
     return tiles
