@@ -54,9 +54,17 @@ def begin_cursed_soldier_combat(player, action_already_paid=False, reason=""):
     quest["combat"] = None
 
     def on_victory(combat_log):
+        try:
+            pygame.event.set_allowed(pygame.KEYDOWN)
+        except (AttributeError, pygame.error):
+            pass
         base._complete_quest(player, quest, f"{combat_log} Klątwa zostaje złamana.")
 
     def on_defeat(combat_log):
+        try:
+            pygame.event.set_allowed(pygame.KEYDOWN)
+        except (AttributeError, pygame.error):
+            pass
         player["wounds"] = 0
         if getattr(token, "start_tile", None) is not None:
             token.tile = token.start_tile
@@ -82,6 +90,10 @@ def begin_cursed_soldier_combat(player, action_already_paid=False, reason=""):
         if not action_already_paid:
             token.actions += 1
         return False, message
+    try:
+        pygame.event.set_blocked(pygame.KEYDOWN)
+    except (AttributeError, pygame.error):
+        pass
     quest["last_result"] = message
     return True, message
 
