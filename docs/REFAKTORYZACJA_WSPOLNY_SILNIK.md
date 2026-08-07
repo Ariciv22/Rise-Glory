@@ -19,6 +19,7 @@ Kod zasad niezależny od Pygame i wyglądu ekranów:
 - `quests.py` — etapy, testy, koszty, porażki, nagrody i stan questa,
 - `locations.py` — zakupy, pomocnicy, trening, leczenie i ekwipunek w lokacji,
 - `world.py` — poziom świata i skalowanie,
+- `world_events.py` — talia Wydarzeń Świata, dobieranie, efekty natychmiastowe i modyfikatory czasowe,
 - `council.py` — model transakcji podczas Rady,
 - `savegame.py` — wersjonowany format zapisu JSON.
 
@@ -29,16 +30,18 @@ Moduły w tym katalogu nie powinny rysować interfejsu ani wczytywać grafik.
 Dane konkretnej zawartości gry:
 
 - `enemies.py` — definicje przeciwników,
-- `quests.py` — definicje questów.
+- `quests.py` — definicje questów,
+- `world_events.py` — definicje kart Wydarzeń Świata.
 
-Nowy quest lub przeciwnik powinien być przede wszystkim nowym wpisem danych, a nie osobnym silnikiem.
+Nowy quest, przeciwnik albo Wydarzenie Świata powinien być przede wszystkim nowym wpisem danych, a nie osobnym silnikiem.
 
 ### Warstwa interfejsu
 
 - `rg_quest_ui.py` — jedna pozioma karta używana przez wszystkie questy,
 - `rg_quest_runtime.py` — łączy quest z ogólnym ekranem walki,
 - `rg_combat.py` — zachowany ekran walki, korzystający ze wspólnej logiki,
-- `rg_city_screen.py` — zachowany wygląd lokacji oraz wspólne zakładki usług i questów.
+- `rg_city_screen.py` — zachowany wygląd lokacji oraz wspólne zakładki usług i questów,
+- `rg_council_background.py` — ekran Rady, handel i prezentacja aktualnego Wydarzenia Świata.
 
 ### Warstwa zgodności
 
@@ -123,6 +126,12 @@ Wspólny format jest używany jednocześnie w:
 
 Startowe przedmioty zapisane dawniej jako tekst są automatycznie migrowane do wspólnego formatu przy tworzeniu bohatera.
 
+## Dodawanie Wydarzenia Świata
+
+Karty rejestruje się w `rg_content/world_events.py`. Silnik `rg_engine/world_events.py` obsługuje talię bez powtórzeń do wyczerpania, efekty natychmiastowe oraz modyfikatory obowiązujące do następnej Rady.
+
+Pierwszy zestaw pięciu kart opisuje `docs/WYDARZENIA_SWIATA_V1.md`.
+
 ## Aktualne zasady testów questów
 
 - wykonanie albo ponowienie etapu kosztuje 1 akcję,
@@ -149,17 +158,16 @@ Podłączone do wspólnego silnika:
 - poziom świata,
 - quest „Szatańskie siły”,
 - pozioma karta questa,
-- podstawowy model Rady i handlu,
+- pełny ekran Rady i handel,
+- Talia Wydarzeń Świata v1 z pięcioma kartami,
 - wersjonowany format zapisu.
 
 Nadal wymagają osobnego wdrożenia zawartości lub pełnego ekranu:
 
-- talia Wydarzeń Świata,
-- interfejs handlu podczas Rady,
 - automatyczne odświeżanie sklepów po zmianie poziomu świata,
 - pełne wczytywanie zapisu do obiektów Pygame,
 - Questy Legendarne i zakończenie gry,
-- kolejne questy, przygody, przeciwnicy i przedmioty.
+- kolejne questy, przygody, przeciwnicy, przedmioty i dalsze Wydarzenia Świata.
 
 ## Testy
 
