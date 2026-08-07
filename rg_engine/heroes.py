@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from rg_engine.devtools import dev_flag
 from rg_engine.items import ensure_equipment_state
 from rg_engine.world import defeat_gold_loss
 from rg_engine.world_events import healing_cost_with_world_event
@@ -46,6 +47,9 @@ def helper_bonus(hero: dict, stat: str) -> int:
 
 def apply_wounds(hero: dict, amount: int) -> tuple[int, bool]:
     ensure_hero_state(hero)
+    if dev_flag("no_wounds"):
+        hero["wounds"] = 0
+        return 0, False
     previous = int(hero.get("wounds", 0) or 0)
     hero["wounds"] = max(0, min(MAX_WOUNDS, previous + int(amount or 0)))
     return hero["wounds"] - previous, hero["wounds"] >= MAX_WOUNDS
