@@ -2,9 +2,9 @@
 
 ## Moment rozpoczęcia
 
-Rada Bohaterów rozpoczyna się po zakończeniu każdej piątej pełnej rundy. Najpierw przewidziane jest rozpatrzenie Wydarzenia Świata, następnie handel i pozostałe czynności Rady.
+Rada Bohaterów rozpoczyna się po zakończeniu każdej piątej pełnej rundy. Najpierw dobierane i rozpatrywane jest Wydarzenie Świata, następnie handel i pozostałe czynności Rady.
 
-W wersji v1 slot Wydarzenia Świata jest widoczny na ekranie, ale właściwa Talia Wydarzeń Świata zostanie podłączona jako osobny moduł.
+Pierwsze Wydarzenie Świata nie jest dobierane na początku gry. Pojawia się dopiero podczas pierwszej Rady. Aktualna talia v1 zawiera 5 kart opisanych w `docs/WYDARZENIA_SWIATA_V1.md`.
 
 ## Handel każdy z każdym
 
@@ -68,7 +68,7 @@ Podczas Rady gracz może porzucić dowolną liczbę aktywnych questów. Nie kosz
 
 ## Historia Rady
 
-Każda zakończona transakcja oraz każde porzucenie questa są zapisywane w historii bieżącej Rady. Historia pokazuje uczestników i elementy wymiany.
+Każde dobrane Wydarzenie Świata, każda zakończona transakcja oraz każde porzucenie questa są zapisywane w historii bieżącej Rady.
 
 ## Zakończenie Rady
 
