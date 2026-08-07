@@ -2,22 +2,31 @@ from pathlib import Path
 
 import pygame
 
-from rg_core.data import GOLD, MUTED, SCREEN_HEIGHT, SCREEN_WIDTH, TEXT
+from rg_core.data import GOLD, MUTED, PANEL, PANEL_DARK, SCREEN_HEIGHT, SCREEN_WIDTH, TEXT
 from rg_ui.common import Button, draw_lines, draw_panel, wrap
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-INTRO_DIRS = [ROOT_DIR / "Grafiki" / "intro", ROOT_DIR / "Grafiki" / "Intro", ROOT_DIR / "Grafiki", ROOT_DIR]
+INTRO_DIRS = [
+    ROOT_DIR / "Grafiki" / "intro",
+    ROOT_DIR / "Grafiki" / "Intro",
+    ROOT_DIR / "Grafiki",
+    ROOT_DIR,
+]
+
 INTRO_FILE_STEMS = [
     ["intro_1", "intro1", "intro 1", "Intro 1", "intro_01"],
     ["intro_2", "intro2", "intro 2", "Intro 2", "intro_02"],
     ["intro_3", "intro3", "intro 3", "Intro 3", "intro_03"],
 ]
+
 IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"]
+
 INTRO_TEXTS = [
-    "TODO: Wklej tutaj tekst do pierwszego obrazka intro.",
-    "TODO: Wklej tutaj tekst do drugiego obrazka intro.",
-    "TODO: Wklej tutaj tekst do trzeciego obrazka intro.",
+    "TODO: Wklej tutaj tekst do pierwszego obrazka intro. Opisz spokojny poczatek swiata i miejsce, z ktorego rusza opowiesc.",
+    "TODO: Wklej tutaj tekst do drugiego obrazka intro. Opisz narastajace zagrozenie, wojne, niepokoj albo chaos w krainie.",
+    "TODO: Wklej tutaj tekst do trzeciego obrazka intro. Opisz bohaterow, ktorzy wyruszaja po slawe, bogactwo i ratunek dla krainy.",
 ]
+
 _IMAGE_CACHE = {}
 
 
@@ -41,10 +50,12 @@ def load_cover_image(path, size):
     cache_key = (str(path), size)
     if cache_key in _IMAGE_CACHE:
         return _IMAGE_CACHE[cache_key]
+
     try:
         image = pygame.image.load(str(path)).convert_alpha()
     except pygame.error:
         return None
+
     iw, ih = image.get_size()
     sw, sh = size
     scale = max(sw / iw, sh / ih)
@@ -58,9 +69,14 @@ def load_cover_image(path, size):
 def draw_intro_fallback(screen, index, title_font, font):
     screen.fill((16, 18, 22))
     sw, sh = screen.get_size()
+    for step in range(18):
+        color = 22 + step * 4
+        rect = pygame.Rect(step * 38, step * 26, sw - step * 76, sh - step * 52)
+        if rect.width > 0 and rect.height > 0:
+            pygame.draw.rect(screen, (color, color - 2, max(12, color - 8)), rect, 1)
     title = title_font.render(f"Brak obrazka intro {index + 1}", True, TEXT)
     screen.blit(title, title.get_rect(center=(sw / 2, sh / 2 - 30)))
-    hint = font.render("Wrzuc plik intro do Grafiki/intro albo Grafiki.", True, MUTED)
+    hint = font.render("Wrzuc plik jako intro_1.png, intro_2.png, intro_3.png do Grafiki/intro albo Grafiki.", True, MUTED)
     screen.blit(hint, hint.get_rect(center=(sw / 2, sh / 2 + 24)))
 
 
@@ -76,10 +92,16 @@ def draw_intro_text_box(screen, title_font, font, small_font, index, text):
     panel_h = 210
     panel = pygame.Rect((sw - panel_w) // 2, sh - panel_h - 42, panel_w, panel_h)
     draw_panel(screen, panel, GOLD)
+
     title = f"Rise & Glory - Intro {index + 1}/{intro_count()}"
     screen.blit(font.render(title, True, TEXT), (panel.x + 28, panel.y + 22))
+
     text_area = pygame.Rect(panel.x + 28, panel.y + 60, panel.width - 56, 92)
-    draw_lines(screen, small_font, wrap(small_font, text, text_area.width)[:5], text_area.x, text_area.y, MUTED, line_h=22, max_width=text_area.width)
+    wrapped = []
+    for paragraph in text.split("\n"):
+        wrapped.extend(wrap(small_font, paragraph, text_area.width))
+    draw_lines(screen, small_font, wrapped[:5], text_area.x, text_area.y, MUTED, line_h=22, max_width=text_area.width)
+
     next_label = "Dalej" if index < intro_count() - 1 else "Przejdz do inicjatywy"
     next_button = Button(next_label, "intro_next", (panel.right - 250, panel.bottom - 56, 220, 38))
     skip_button = Button("Pomin intro", "intro_skip", (panel.x + 28, panel.bottom - 56, 170, 38))
@@ -99,5 +121,6 @@ def draw_intro_screen(screen, title_font, font, small_font, mouse_pos, intro_ind
             draw_intro_fallback(screen, index, title_font, font)
     else:
         draw_intro_fallback(screen, index, title_font, font)
+
     draw_dark_overlay(screen)
     return draw_intro_text_box(screen, title_font, font, small_font, index, INTRO_TEXTS[index])
