@@ -1,0 +1,112 @@
+QUEST Talia Naukowa
+
+ID:Klatwa_katakumb_0
+Nazwa:Szatańskie siły
+Talia:Naukowa
+Poziom świata:1
+Rodzaj questa:Zwykły w Naukowej Talii
+Dostępny w:Zamek
+Liczba kopii:1
+Można sprzedać:Tak
+Można wymienić:Tak
+Można porzucić:Tak
+Może być wspólny:Nie
+
+Krótki opis na tablicę: Śmiałka, który odegna światła i inne dziwy, hojnie zostanie wynagrodzony.
+Pełny tekst fabularny: Docierasz do zamku w Artium, strażnicy niezatrzymują cię, widzą za twoim pasem zwinięte ogłoszenie z tablicy.
+- "Mamy nadzieje że znajdziesz sposób by odegnać monstrum z kaplicy zamkowej. Wyję i mieni się z niej głeboko pod ziemią, spać nie daje a i nawet garnizon który tu stacjonuję źle walczy i nieszczęścia na nich spływają." Resztę usłyszysz od kapitana"
+
+
+Miejsce rozpoczęcia: Zamek Artium
+Warunki rozpoczęcia: Dotarcie do zamku i rozpoczęcie questa
+Koszt rozpoczęcia: 0
+
+Liczba etapów: 3 czyli 1,2,3.
+Quest prosty czy złozony: złozony
+
+Nagroda bazowa:
+- złoto: 4
+- Punkty Legendy: 2
+- przedmiot: Pierścien kapitana (+1 do siły)
+- pomocnik: brak
+- materiały: 3 drewna, 2 skóry
+- towary: 0
+- jedzenie: 0
+- statystyka: 0
+- inne: 0
+
+Efekt przegrania całego questa: (do uzgodnienia ale na razie to strata 2 monet)
+
+Grafika główna:uczony w katakumbach.png
+Ikona: brak
+Znacznik mapy: brak
+
+
+ROZWINIĘCIE 1
+
+ID:Klatwa_katakumb_1
+Nazwa:Szatańskie siły
+Tekst fabularny: Lampa oświetla doskonale drogę, przez zawiłe i długie korytarze gdzie cienie padają jak długie. Kroczysz niepewnie ale intuicja i mapa podpowiadają że to dobra droga. Po długiej wędrówce, przed tobą objawia się ołtarzyk z runami. Rozmyślasz nad kolejnym krokiem, szukając klucza do rozwiązania.
+Miejsce wykonania:Zamek Artium
+Koszt akcji: 1 
+Warunki: Bycie w zamku Artium
+Podstawowy test:- Rzut na nauke "Przeszukaj bezpiecznie biblioteki" (11)  lub Rzut na Intrygę "Dotykasz i kreślisz palcem po ołtarzu i tych czerwonych znakach" (14)
+Statystyka: Nauka/Intryga
+Alternatywny test: Rzut na Kulturę(13) + 2 skóry   "Wykonaj podstawowy obrzęd"
+Wymagany przedmiot lub zapłata: brak
+
+Sukces: Przejdź do kolejnego etapu Questa
+
+Porażka:
+Dodatkowa kara: + 1 do trudności kolejnego testu
+
+Czy można ponowić: tak
+
+Grafika:uczony w katakumbach.png
+
+
+ROZWINIĘCIE 2
+
+ID:Klatwa_katakumb_2
+Nazwa:Szatańskie siły
+Tekst fabularny: Po dłuższych oględzinach, odkurzeniu wielu ksiąg z pradawnej biblioteki, połączyłeś fakty. Dawniejszy kult zostawił po sobie miejsce rytualne na którym były dokonywane mordy na dzieciach. Czas rozproszyć panującą tu magię i oczyścić miejsce z grzechu.
+Miejsce wykonania: to samo miejsce
+Koszt akcji: 1
+Warunki: Bycie w zamku Artium
+Typ wyzwania:Rzut na nauke (13) Wypowiedz słowa rozdziału o końcu rytułału / Rzut na intrygę (15) zabierz księgę i przekonaj kapitana że klątwa została uciszona
+Statystyka:Nauka/Intryga
+Alternatywny test: Przeczytaj rozdział o mocach nadprzyrodzonych (14) 
+Wymagany przedmiot lub zapłata: 0
+
+Sukces:
+Następne rozwinięcie:
+
+Porażka:
+Dodatkowa kara:
+Czy można ponowić:Tak
+
+Grafika:uczony w katakumbach.png
+
+
+ROZWINIĘCIE 3
+
+ID:Klatwa_katakumb_3
+Nazwa:Szatańskie siły
+Tekst fabularny:Przeczytane wersy mienią się na książce, masz wrażenie że zaraz zostaną oderwane od stronic. Tak faktycznie się dzieję, słowa i litery przerodziły się w jedno zaklęcie, które uspokoiło demoniczny ołtarz ofiarny. Tylko co teraz powiesz Kapitanowi?
+Miejsce wykonania:to samo miejsce
+Koszt akcji: 1
+Warunki:Bycie w zamku Artium
+Typ wyzwania:Rzut na nauke (10) Zamknij księgę i zniszcz ją na dziedzińcu zamku przed kapitanem / Rzut na intrygę (13) Przekonaj kapitana że klątwa została uciszona a księga przepadła wraz z zamkniętym rytułałem.
+Statystyka:Nauka/Intryga
+
+
+Sukces: Tekst kapitana: "Niesłychane! Udało ci się opanować magię spod kaplicy zamkowej? Nie wierzyłem do końca w twoje możliwości ale przejechałem się na swojej intuicji. Masz tutaj trochę prowiantu, obiecane złoto i ten "scyzoryk" (krótki miecz) na drogę!"
+
+Czy kończy quest: TAK
+
+Porażka: Klątwa księgi pochłania jednego strażnika, który w amoku rzuca się z zakrwawionymi rękami pradawnych ofiar na Ciebie. Rozpoczyna się WALKA.
+Czy kończy quest: TAK
+
+NAGRODA ZA UKOŃCZONE ZADANIE: 8 złota, Krótki miecz, 3 Paczki suszonego mięsa.
+
+Grafika:uczony w katakumbach.png
