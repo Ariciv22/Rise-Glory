@@ -8,7 +8,7 @@ from rg_combat_image_fit import install_combat_image_fit
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
 from rg_engine.world import register_players
-from rg_engine.world_events import movement_cost_with_world_event
+from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
 from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
 
@@ -85,6 +85,7 @@ def find_start_tiles(tiles, player_count):
 
 
 def create_tokens(players, tiles):
+    reset_world_event_deck()
     for player in players:
         ensure_hero_state(player)
     starts = find_start_tiles(tiles, len(players))
