@@ -4,6 +4,7 @@ from typing import Iterable
 
 from rg_engine.items import ensure_equipment_state
 from rg_engine.world import defeat_gold_loss
+from rg_engine.world_events import healing_cost_with_world_event
 
 MAX_WOUNDS = 4
 MAX_STAT = 6
@@ -125,7 +126,8 @@ def heal_at_location(hero: dict, token, amount: int | None = None) -> tuple[bool
     if token is None or int(getattr(token, "actions", 0) or 0) < 1:
         return False, "Leczenie wymaga 1 akcji."
     requested = current if amount is None else min(current, max(1, int(amount)))
-    cost_per_wound = max(1, 2 - _healing_discount(hero))
+    base_cost = max(1, 2 - _healing_discount(hero))
+    cost_per_wound = healing_cost_with_world_event(base_cost)
     affordable = int(hero.get("gold", 0) or 0) // cost_per_wound
     healed = min(requested, affordable)
     if healed <= 0:
