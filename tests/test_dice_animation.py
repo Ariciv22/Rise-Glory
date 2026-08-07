@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from rg_dice_animation import (
+from rg_ui.dice_animation import (
     DICE_ROLL_DURATION_MS,
     DiceRollAnimation,
     visible_face_numbers,
