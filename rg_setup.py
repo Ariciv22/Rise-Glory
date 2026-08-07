@@ -1,6 +1,8 @@
 import math
 import random
+from pathlib import Path
 
+import rg_council_background
 from rg_adventure import install_adventure_system
 from rg_combat_image_fit import install_combat_image_fit
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
@@ -8,6 +10,9 @@ from rg_engine.heroes import ensure_hero_state
 from rg_engine.world import register_players
 from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
+
+ROOT_DIR = Path(__file__).resolve().parent
+COUNCIL_TRADE_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów_handel.png"
 
 
 class GameHeroToken(HeroToken):
@@ -77,6 +82,16 @@ def create_tokens(players, tiles):
     return tokens
 
 
+def install_council_trade_background():
+    """Rada handlowa uzywa dedykowanej grafiki zamiast starej ilustracji Rady."""
+    rg_council_background.COUNCIL_BACKGROUND_PATH = COUNCIL_TRADE_BACKGROUND_PATH
+    rg_council_background._SOURCE_CACHE["loaded"] = False
+    rg_council_background._SOURCE_CACHE["surface"] = None
+    rg_council_background._BACKGROUND_CACHE["size"] = None
+    rg_council_background._BACKGROUND_CACHE["surface"] = None
+
+
 install_adventure_system()
 install_premium_dice_animation()
 install_combat_image_fit()
+install_council_trade_background()
