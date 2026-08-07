@@ -15,6 +15,7 @@ from rg_data import (
     TOP_BAR_H,
     map_name,
 )
+from rg_engine.world_events import active_world_event, movement_cost_with_world_event
 from rg_location_data import helper_bonus_summary, helper_effect_text
 from rg_player_board import (
     close_player_board,
@@ -126,7 +127,10 @@ def _draw_bottom_tile_info(screen, font, small_font, selected_tile):
     if selected_tile:
         location = selected_tile.location
         location_name = location["name"] if location else "brak"
-        line = f"Heks: {selected_tile.terrain['name']}    |    Koszt akcji: {selected_tile.terrain['move']}    |    Lokacja: {location_name}"
+        base_cost = int(selected_tile.terrain["move"])
+        actual_cost = movement_cost_with_world_event(base_cost)
+        cost_text = str(actual_cost) if actual_cost == base_cost else f"{actual_cost} (bazowo {base_cost})"
+        line = f"Heks: {selected_tile.terrain['name']}    |    Koszt akcji: {cost_text}    |    Lokacja: {location_name}"
     else:
         line = "Kliknij heks na mapie, aby zobaczyc teren, koszt akcji i lokacje."
     screen.blit(font.render(line, True, TEXT), (rect.x + 20, rect.y + 16))
@@ -149,7 +153,13 @@ def draw_game_ui(
     sw, sh = screen.get_size()
     top = pygame.Rect(0, 0, sw, TOP_BAR_H)
     draw_image_panel(screen, top, 2, ORANGE)
-    screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 22))
+    screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 18))
+
+    world_event = active_world_event()
+    if world_event:
+        duration = "do następnej Rady" if world_event.get("duration") == "until_next_council" else "rozpatrzone"
+        event_text = f"Wydarzenie Świata: {world_event.get('name', 'Wydarzenie')} — {duration}"
+        screen.blit(small_font.render(event_text, True, GOLD), (36, 48))
 
     x = 36
     top_stats = [

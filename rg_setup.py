@@ -1,12 +1,41 @@
 import math
 import random
+from pathlib import Path
 
+import rg_council_background
 from rg_adventure import install_adventure_system
 from rg_combat_image_fit import install_combat_image_fit
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
+from rg_engine.heroes import ensure_hero_state
+from rg_engine.world import register_players
+from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
 from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
-from rg_satanic_forces import register_players
+
+ROOT_DIR = Path(__file__).resolve().parent
+COUNCIL_TRADE_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów_handel.png"
+
+
+class GameHeroToken(HeroToken):
+    """Pionek zachowujacy stary wyglad, ale korzystajacy ze wspolnych kosztow akcji."""
+
+    def movement_cost(self, target):
+        if not target:
+            return 0
+        base_cost = int(target.terrain.get("move", 1) or 1)
+        return movement_cost_with_world_event(base_cost)
+
+    def can_move_to(self, target):
+        if not super().can_move_to(target):
+            return False
+        return int(self.actions) >= self.movement_cost(target)
+
+    def move_to(self, target):
+        if not self.can_move_to(target):
+            return False
+        self.actions = max(0, int(self.actions) - self.movement_cost(target))
+        self.tile = target
+        return True
 
 
 def default_custom_stats():
@@ -56,8 +85,11 @@ def find_start_tiles(tiles, player_count):
 
 
 def create_tokens(players, tiles):
+    reset_world_event_deck()
+    for player in players:
+        ensure_hero_state(player)
     starts = find_start_tiles(tiles, len(players))
-    tokens = [HeroToken(player, start) for player, start in zip(players, starts)]
+    tokens = [GameHeroToken(player, start) for player, start in zip(players, starts)]
     register_players(players)
     for token in tokens:
         token.start_tile = token.tile
@@ -65,6 +97,16 @@ def create_tokens(players, tiles):
     return tokens
 
 
+def install_council_trade_background():
+    """Rada handlowa uzywa dedykowanej grafiki zamiast starej ilustracji Rady."""
+    rg_council_background.COUNCIL_BACKGROUND_PATH = COUNCIL_TRADE_BACKGROUND_PATH
+    rg_council_background._SOURCE_CACHE["loaded"] = False
+    rg_council_background._SOURCE_CACHE["surface"] = None
+    rg_council_background._BACKGROUND_CACHE["size"] = None
+    rg_council_background._BACKGROUND_CACHE["surface"] = None
+
+
 install_adventure_system()
 install_premium_dice_animation()
 install_combat_image_fit()
+install_council_trade_background()

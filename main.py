@@ -2,12 +2,15 @@ import pygame
 
 import rg_city_screen, rg_data, rg_hud, rg_intro, rg_map, rg_screens, rg_ui
 from rg_data import (
-    BG, DRAG_THRESHOLD, FPS, HERO_ARCHETYPES, MIN_SCREEN_HEIGHT, MIN_SCREEN_WIDTH,
-    SCREEN_HEIGHT, SCREEN_WIDTH, STATE_CITY, STATE_COUNCIL, STATE_CUSTOM_HERO,
-    STATE_GAME, STATE_INITIATIVE, STATE_MAP_SELECT, STATE_MENU, STATE_MULTIPLAYER,
-    STATE_PLAYER_CONFIG, STATE_PLAYER_COUNT, ZOOM_STEP,
+    ACTIONS_PER_TURN, BG, DRAG_THRESHOLD, FPS, HERO_ARCHETYPES, MIN_SCREEN_HEIGHT,
+    MIN_SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, STATE_CITY, STATE_COUNCIL,
+    STATE_CUSTOM_HERO, STATE_GAME, STATE_INITIATIVE, STATE_MAP_SELECT, STATE_MENU,
+    STATE_MULTIPLAYER, STATE_PLAYER_CONFIG, STATE_PLAYER_COUNT, ZOOM_STEP,
 )
 from rg_city_screen import draw_city_screen
+from rg_dev_menu import draw_dev_menu, handle_dev_action
+from rg_engine.devtools import apply_runtime_dev_flags, dev_flag, reset_devtools
+from rg_engine.world import clear_forced_world_level
 from rg_hud import draw_game_ui
 from rg_intro import draw_intro_screen, intro_count
 from rg_location_data import buy_shop_item, hire_helper, take_quest
@@ -66,6 +69,8 @@ def activate_text_input():
 
 
 def prepare_game(current_map, players):
+    reset_devtools()
+    clear_forced_world_level()
     tiles = generate_world(current_map)
     return tiles, create_tokens(players, tiles)
 
@@ -116,6 +121,9 @@ def main():
     location_message = ""
     intro_index = 0
     buttons, game_buttons, city_buttons = [], [], []
+    dev_buttons = []
+    dev_menu_open = False
+    dev_message = ""
     dragging = False
     drag_moved = False
     drag_start = last_mouse = (0, 0)
@@ -171,7 +179,8 @@ def main():
         current_city = None
         selected_city_place = None
         location_message = ""
-        if result["council_due"]:
+        developer_council = result["round_completed"] and dev_flag("council_every_round")
+        if result["council_due"] or developer_council:
             state = STATE_COUNCIL
         else:
             camera.center_on_tile(selected_token.tile)
@@ -190,8 +199,12 @@ def main():
     while running:
         mouse = pygame.mouse.get_pos()
         hovered = None
+
+        if players and 0 <= active_player_index < len(players):
+            apply_runtime_dev_flags(players[active_player_index], selected_token, ACTIONS_PER_TURN)
+
         rects = ui_rects(screen) if state == STATE_GAME else []
-        if state == STATE_GAME and not dragging and not over_ui(mouse, rects):
+        if state == STATE_GAME and not dev_menu_open and not dragging and not over_ui(mouse, rects):
             for tile in tiles:
                 if tile.contains(mouse, camera):
                     hovered = tile
@@ -205,6 +218,15 @@ def main():
                 screen = create_window(False)
                 refresh_layout_after_resize()
             elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F8 and state in [STATE_GAME, STATE_CITY]:
+                    dev_menu_open = not dev_menu_open
+                    dev_message = ""
+                    dragging = False
+                    continue
+                if dev_menu_open:
+                    if event.key == pygame.K_ESCAPE:
+                        dev_menu_open = False
+                    continue
                 if state == STATE_START_INTRO and event.key in [pygame.K_SPACE, pygame.K_RETURN]:
                     advance_start_intro()
                 elif event.key == pygame.K_ESCAPE:
@@ -248,12 +270,14 @@ def main():
                         sync_screen_size((1600, 1000))
                         screen = create_window(False)
                     refresh_layout_after_resize()
-            elif event.type == pygame.TEXTINPUT and state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active:
+            elif event.type == pygame.TEXTINPUT and state in [STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO] and name_input_active and not dev_menu_open:
                 if event.text and len(player_name) < 24:
                     player_name += event.text[: 24 - len(player_name)]
-            elif event.type == pygame.MOUSEWHEEL and state == STATE_GAME and not over_ui(mouse, rects):
+            elif event.type == pygame.MOUSEWHEEL and state == STATE_GAME and not dev_menu_open and not over_ui(mouse, rects):
                 camera.zoom_at(mouse, ZOOM_STEP if event.y > 0 else 1 / ZOOM_STEP)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if dev_menu_open:
+                    continue
                 if state == STATE_PLAYER_CONFIG:
                     name_input_active = player_name_input_rect().collidepoint(event.pos)
                     if name_input_active:
@@ -263,7 +287,7 @@ def main():
                     drag_moved = False
                     drag_start = event.pos
                     last_mouse = event.pos
-            elif event.type == pygame.MOUSEMOTION and dragging and state == STATE_GAME:
+            elif event.type == pygame.MOUSEMOTION and dragging and state == STATE_GAME and not dev_menu_open:
                 dx, dy = event.pos[0] - last_mouse[0], event.pos[1] - last_mouse[1]
                 if abs(event.pos[0] - drag_start[0]) > DRAG_THRESHOLD or abs(event.pos[1] - drag_start[1]) > DRAG_THRESHOLD:
                     drag_moved = True
@@ -271,6 +295,23 @@ def main():
                 last_mouse = event.pos
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 dragging = False
+                if dev_menu_open:
+                    if players and 0 <= active_player_index < len(players):
+                        active_hero = players[active_player_index]
+                        for button in dev_buttons:
+                            if not button.clicked(event.pos):
+                                continue
+                            dev_result = handle_dev_action(button.action, active_hero, selected_token, players)
+                            dev_message = dev_result.get("message", "")
+                            if dev_result.get("open_council"):
+                                current_city = None
+                                selected_city_place = None
+                                location_message = ""
+                                state = STATE_COUNCIL
+                            if dev_result.get("close"):
+                                dev_menu_open = False
+                            break
+                    continue
                 if state == STATE_START_INTRO:
                     advance_start_intro()
                 elif state in [STATE_MENU, STATE_MAP_SELECT, STATE_PLAYER_COUNT, STATE_PLAYER_CONFIG, STATE_CUSTOM_HERO, STATE_MULTIPLAYER, STATE_INITIATIVE, STATE_COUNCIL, STATE_INTRO]:
@@ -452,6 +493,16 @@ def main():
                 turn_manager.council_cycle if turn_manager else 1,
             )
             draw_location_tooltip(screen, font, small_font, hovered, mouse)
+
+        if dev_menu_open and state in [STATE_GAME, STATE_CITY] and players and selected_token:
+            active_hero = players[active_player_index]
+            dev_buttons = draw_dev_menu(
+                screen, title_font, font, small_font, mouse, active_hero, selected_token, players,
+                turn_manager.round_number if turn_manager else 1,
+                dev_message,
+            )
+        else:
+            dev_buttons = []
 
         pygame.display.flip()
         clock.tick(FPS)

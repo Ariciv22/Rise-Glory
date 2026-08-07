@@ -1,11 +1,23 @@
 import copy
 import random
 
-from rg_satanic_forces import activate_quest, create_quest_offer, is_satanic_forces
+from rg_content.quests import SATANIC_FORCES_ID, register_all_quests
+from rg_engine.locations import (
+    accept_quest_card,
+    equip_from_backpack,
+    heal_in_location,
+    hire_helper_card,
+    purchase_card,
+    sell_from_backpack,
+    train_in_location,
+    unequip_to_backpack,
+)
+from rg_engine.quests import create_offer
 
+register_all_quests()
 
 FOOD_CARDS = [
-    {"name": "Bochenek chleba", "category": "food", "price": 2, "description": "Proste jedzenie na droge. Efekt glodu zostanie dodany pozniej."},
+    {"name": "Bochenek chleba", "category": "food", "price": 2, "description": "Proste jedzenie na droge."},
     {"name": "Suszone mieso", "category": "food", "price": 3, "description": "Trwale zapasy na dluga podroz."},
     {"name": "Goraca zupa", "category": "food", "price": 2, "description": "Posilek dostepny w lokalnej gospodzie."},
     {"name": "Ser i jablka", "category": "food", "price": 3, "description": "Lekki prowiant dla podroznika."},
@@ -13,19 +25,19 @@ FOOD_CARDS = [
 ]
 
 BASIC_GOODS_CARDS = [
-    {"name": "Bandaze", "category": "basic_good", "price": 3, "description": "Towar jednorazowy. Leczenie zostanie podpiete w kolejnym etapie."},
-    {"name": "Ziola lecznicze", "category": "basic_good", "price": 3, "description": "Towar jednorazowy zwiazany z leczeniem."},
+    {"name": "Bandaze", "category": "basic_good", "price": 3, "description": "Jednorazowy towar leczniczy."},
+    {"name": "Ziola lecznicze", "category": "basic_good", "price": 3, "description": "Jednorazowy towar leczniczy."},
     {"name": "Lina", "category": "basic_good", "price": 3, "description": "+1 do Kultury w odpowiednim tescie."},
     {"name": "Krzesiwo", "category": "basic_good", "price": 3, "description": "+1 do Handlu w odpowiednim tescie."},
     {"name": "Pochodnia", "category": "basic_good", "price": 3, "description": "+1 do Nauki w odpowiednim tescie."},
     {"name": "Mapa okolicy", "category": "basic_good", "price": 3, "description": "+1 do ruchu na mapie po podpieciu efektow kart."},
     {"name": "Wytrychy", "category": "basic_good", "price": 3, "description": "+1 do Intrygi w odpowiednim tescie."},
     {"name": "Kamien do ostrzenia", "category": "basic_good", "price": 3, "description": "+2 do Walki w odpowiednim tescie."},
-    {"name": "Buklak z woda", "category": "basic_good", "price": 3, "description": "Zwieksza leczenie o 1 po podpieciu pelnego systemu."},
+    {"name": "Buklak z woda", "category": "basic_good", "price": 3, "description": "Zwieksza leczenie o 1."},
 ]
 
 LUXURY_CARDS = [
-    {"name": "Jedwab z poludnia", "category": "luxury", "price": 6, "description": "Towar luksusowy do questow, handlu i odsprzedazy."},
+    {"name": "Jedwab z poludnia", "category": "luxury", "price": 6, "description": "Towar luksusowy do questow i handlu."},
     {"name": "Srebrna zastawa", "category": "luxury", "price": 6, "description": "Towar luksusowy ceniony na dworach."},
     {"name": "Korzenne przyprawy", "category": "luxury", "price": 6, "description": "Rzadki ladunek kupiecki."},
     {"name": "Barwione sukno", "category": "luxury", "price": 6, "description": "Towar luksusowy dla bogatych odbiorcow."},
@@ -33,36 +45,36 @@ LUXURY_CARDS = [
 ]
 
 RING_CARDS = [
-    {"name": "Pierscien kupca", "category": "ring", "price": 6, "description": "Testowy pierscien wspierajacy Handel."},
-    {"name": "Pierscien uczonego", "category": "ring", "price": 6, "description": "Testowy pierscien wspierajacy Nauke."},
-    {"name": "Pierscien dyplomaty", "category": "ring", "price": 6, "description": "Testowy pierscien wspierajacy Dyplomacje."},
-    {"name": "Pierscien intryganta", "category": "ring", "price": 6, "description": "Testowy pierscien wspierajacy Intryge."},
-    {"name": "Pierscien opowiesci", "category": "ring", "price": 6, "description": "Testowy pierscien wspierajacy Kulture."},
+    {"name": "Pierscien kupiecki", "category": "ring", "price": 6, "stat_bonus": {"Handel": 1}, "description": "+1 do Handlu po zalozeniu."},
+    {"name": "Pierscien uczonego", "category": "ring", "price": 6, "stat_bonus": {"Nauka": 1}, "description": "+1 do Nauki po zalozeniu."},
+    {"name": "Pierscien dyplomaty", "category": "ring", "price": 6, "stat_bonus": {"Dyplomacja": 1}, "description": "+1 do Dyplomacji po zalozeniu."},
+    {"name": "Pierscien intryganta", "category": "ring", "price": 6, "stat_bonus": {"Intryga": 1}, "description": "+1 do Intrygi po zalozeniu."},
+    {"name": "Pierscien opowiesci", "category": "ring", "price": 6, "stat_bonus": {"Kultura": 1}, "description": "+1 do Kultury po zalozeniu."},
 ]
 
 WEAPON_CARDS = [
-    {"name": "Prosty miecz", "category": "weapon", "price": 6, "description": "Zwykla bron testowa."},
-    {"name": "Topor wojenny", "category": "weapon", "price": 6, "description": "Ciezka bron do walki wrecz."},
-    {"name": "Wlocznia straznika", "category": "weapon", "price": 6, "description": "Bron o duzym zasiegu."},
-    {"name": "Mlot bojowy", "category": "weapon", "price": 6, "description": "Bron przeznaczona przeciw pancerzom."},
-    {"name": "Krotki luk", "category": "weapon", "price": 6, "description": "Lekka bron dystansowa."},
+    {"name": "Prosty miecz", "category": "weapon", "price": 6, "hit_bonus": 0, "damage_bonus": 0, "description": "Podstawowa bron."},
+    {"name": "Topor wojenny", "category": "weapon", "price": 6, "hit_bonus": 0, "damage_bonus": 0, "description": "Ciezka bron do walki wrecz."},
+    {"name": "Wlocznia straznika", "category": "weapon", "price": 6, "hit_bonus": 0, "damage_bonus": 0, "description": "Bron o duzym zasiegu."},
+    {"name": "Mlot bojowy", "category": "weapon", "price": 6, "hit_bonus": 0, "damage_bonus": 0, "description": "Bron przeznaczona przeciw pancerzom."},
+    {"name": "Krotki luk", "category": "weapon", "price": 6, "hit_bonus": 0, "damage_bonus": 0, "description": "Lekka bron dystansowa."},
 ]
 
 ARMOR_CARDS = [
-    {"name": "Skorzana zbroja", "category": "armor", "price": 6, "description": "Zwykla zbroja testowa o docelowej wartosci 12 KP."},
-    {"name": "Przeszywanica", "category": "armor", "price": 6, "description": "Lekka ochrona dla podroznika."},
-    {"name": "Kolczuga", "category": "armor", "price": 6, "description": "Zbroja testowa do pozniejszego zbalansowania."},
-    {"name": "Pancerz straznika", "category": "armor", "price": 6, "description": "Ochrona uzywana przez zamkowa straz."},
-    {"name": "Skorzany kaftan", "category": "armor", "price": 6, "description": "Podstawowa ochrona bez ograniczenia ruchu."},
+    {"name": "Skorzana zbroja", "category": "armor", "price": 6, "armor_class": 12, "description": "Zwykla zbroja: 12 KP."},
+    {"name": "Przeszywanica", "category": "armor", "price": 6, "armor_class": 12, "description": "Zwykla zbroja: 12 KP."},
+    {"name": "Kolczuga", "category": "armor", "price": 10, "quality": "rzadka", "armor_class": 14, "description": "Rzadka zbroja: 14 KP."},
+    {"name": "Pancerz straznika", "category": "armor", "price": 6, "armor_class": 12, "description": "Zwykla zbroja: 12 KP."},
+    {"name": "Skorzany kaftan", "category": "armor", "price": 6, "armor_class": 12, "description": "Zwykla zbroja: 12 KP."},
 ]
 
 HELPER_CARDS = [
     {"name": "Zwiadowca", "price": 4, "stat_bonus": {"Intryga": 1}, "effect_text": "+1 Intryga przy zwiadzie i omijaniu zagrozen.", "description": "Pomaga podczas podrozy i obserwacji terenu."},
     {"name": "Najemny miecz", "price": 5, "stat_bonus": {"Walka": 1}, "effect_text": "+1 Walka w testach bojowych.", "description": "Pomocnik przeznaczony do walki."},
-    {"name": "Medyk polowy", "price": 5, "effect_text": "Leczenie Ran jest o 1 monete tansze.", "description": "Pomocnik zwiazany z leczeniem Ran."},
+    {"name": "Medyk polowy", "price": 5, "effect_text": "Leczenie kazdej Rany jest o 1 monete tansze.", "description": "Pomocnik zwiazany z leczeniem Ran."},
     {"name": "Skryba", "price": 4, "stat_bonus": {"Nauka": 1}, "effect_text": "+1 Nauka przy dokumentach, ruinach i badaniach.", "description": "Pomaga w testach Nauki i odczytywaniu dokumentow."},
     {"name": "Posel", "price": 4, "stat_bonus": {"Dyplomacja": 1}, "effect_text": "+1 Dyplomacja w rozmowach i negocjacjach.", "description": "Pomaga w testach Dyplomacji."},
-    {"name": "Przewodnik", "price": 4, "effect_text": "Pierwszy trudny teren w turze ma koszt nizszy o 1 akcje po podpieciu ruchu pomocnikow.", "description": "Pomaga w podrozy przez trudny teren."},
+    {"name": "Przewodnik", "price": 4, "effect_text": "Pierwszy trudny teren w turze moze miec koszt nizszy o 1.", "description": "Pomaga w podrozy przez trudny teren."},
 ]
 
 QUEST_CARDS = [
@@ -79,8 +91,19 @@ QUEST_CARDS = [
     {"name": "Spadajace gwiazdy", "deck": "Nauki", "description": "Wyjasnij niepokojace zjawisko nad traktem."},
 ]
 
-SHOP_POOLS = {"food": FOOD_CARDS, "basic_good": BASIC_GOODS_CARDS, "luxury": LUXURY_CARDS, "ring": RING_CARDS, "weapon": WEAPON_CARDS, "armor": ARMOR_CARDS}
-SHOP_LAYOUTS = {"village": ["food", "food", "basic_good", "basic_good", "basic_good"], "city": ["luxury", "luxury", "luxury", "ring", "ring"], "castle": ["weapon", "weapon", "weapon", "armor", "armor"]}
+SHOP_POOLS = {
+    "food": FOOD_CARDS,
+    "basic_good": BASIC_GOODS_CARDS,
+    "luxury": LUXURY_CARDS,
+    "ring": RING_CARDS,
+    "weapon": WEAPON_CARDS,
+    "armor": ARMOR_CARDS,
+}
+SHOP_LAYOUTS = {
+    "village": ["food", "food", "basic_good", "basic_good", "basic_good"],
+    "city": ["luxury", "luxury", "luxury", "ring", "ring"],
+    "castle": ["weapon", "weapon", "weapon", "armor", "armor"],
+}
 
 
 def helper_effect_text(helper):
@@ -127,7 +150,7 @@ def initialize_location(location, rng=None):
         helpers.append(_draw_unique(HELPER_CARDS, helpers, rng))
     quests = []
     if location.get("name") == "Artium" and not location.get("special_quest_claimed"):
-        quests.append(create_quest_offer())
+        quests.append(create_offer(SATANIC_FORCES_ID))
     while len(quests) < 3:
         quests.append(_draw_quest(quests, rng))
     location["shop_layout"] = layout
@@ -145,20 +168,13 @@ def buy_shop_item(location, player, slot_index, rng=None):
     if slot_index < 0 or slot_index >= len(offers):
         return False, "Nieprawidlowy slot sklepu."
     card = offers[slot_index]
-    price = card["price"]
-    if player.get("gold", 0) < price:
-        return False, "Nie masz wystarczajacej liczby monet."
-    player["gold"] -= price
+    success, message = purchase_card(player, card)
+    if not success:
+        return False, message
     category = card["category"]
-    if category == "food":
-        player.setdefault("food", []).append(card["name"])
-    elif category in {"basic_good", "luxury"}:
-        player.setdefault("goods", []).append(card["name"])
-    else:
-        player.setdefault("inventory", []).append(_copy_card(card))
     visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
     offers[slot_index] = _draw_unique(SHOP_POOLS[category], visible_without_slot, rng)
-    return True, f"Kupiono: {card['name']} za {price} monet."
+    return True, message
 
 
 def hire_helper(location, player, slot_index, rng=None):
@@ -167,17 +183,13 @@ def hire_helper(location, player, slot_index, rng=None):
     offers = location["helper_offers"]
     if slot_index < 0 or slot_index >= len(offers):
         return False, "Nieprawidlowy slot pomocnika."
-    if len(player.setdefault("helpers", [])) >= 5:
-        return False, "Masz juz maksymalnie 5 pomocnikow."
     helper = offers[slot_index]
-    price = helper["price"]
-    if player.get("gold", 0) < price:
-        return False, "Nie masz wystarczajacej liczby monet."
-    player["gold"] -= price
-    player["helpers"].append(_copy_card(helper))
+    success, message = hire_helper_card(player, helper)
+    if not success:
+        return False, message
     visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
     offers[slot_index] = _draw_unique(HELPER_CARDS, visible_without_slot, rng)
-    return True, f"Zatrudniono: {helper['name']} - {helper_effect_text(helper)}"
+    return True, message
 
 
 def take_quest(location, player, slot_index, rng=None):
@@ -186,17 +198,32 @@ def take_quest(location, player, slot_index, rng=None):
     offers = location["quest_offers"]
     if slot_index < 0 or slot_index >= len(offers):
         return False, "Nieprawidlowy slot questa."
-    if len(player.setdefault("active_quests", [])) >= 3:
-        return False, "Masz juz maksymalnie 3 aktywne questy."
     quest = offers[slot_index]
-    if is_satanic_forces(quest):
-        for key in ("active_quests", "completed_quests", "failed_quests"):
-            if any(is_satanic_forces(existing) for existing in player.get(key, []) or []):
-                return False, "Ten bohater ma juz zapisany quest Szatanskie sily."
-        player["active_quests"].append(activate_quest(quest))
+    success, message = accept_quest_card(player, quest)
+    if not success:
+        return False, message
+    if quest.get("id") == SATANIC_FORCES_ID:
         location["special_quest_claimed"] = True
-    else:
-        player["active_quests"].append(_copy_card(quest))
     visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
     offers[slot_index] = _draw_quest(visible_without_slot, rng)
-    return True, f"Pobrano quest: {quest['name']}."
+    return True, message
+
+
+def train_player(location, player, stat):
+    return train_in_location(player, player.get("_token_ref"), location, stat)
+
+
+def heal_player(location, player, amount=None):
+    return heal_in_location(player, player.get("_token_ref"), amount)
+
+
+def equip_inventory_item(player, inventory_index):
+    return equip_from_backpack(player, inventory_index)
+
+
+def unequip_equipment_slot(player, slot):
+    return unequip_to_backpack(player, slot)
+
+
+def sell_inventory_item(player, inventory_index):
+    return sell_from_backpack(player, inventory_index)

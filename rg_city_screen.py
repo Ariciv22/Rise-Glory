@@ -3,15 +3,21 @@ from pathlib import Path
 import pygame
 
 from rg_combat import draw_combat_screen, is_combat_active
-from rg_data import GOLD, MUTED, PANEL_DARK, SCREEN_WIDTH, TEXT
-from rg_location_data import helper_effect_text, initialize_location
-from rg_satanic_combat import (
-    QUEST_NAME,
-    QUEST_PLACE_ACTION,
-    draw_quest_panel,
-    find_player_quest,
-    has_active_quest,
+from rg_data import GOLD, MUTED, PANEL_DARK, TEXT
+from rg_engine.heroes import healing_cost_per_wound, training_cost
+from rg_engine.items import EQUIPMENT_SLOTS, ensure_equipment_state, item_display_name
+from rg_engine.locations import training_stats_for
+from rg_engine.world_events import price_with_world_event
+from rg_location_data import (
+    equip_inventory_item,
+    heal_player,
+    helper_effect_text,
+    initialize_location,
+    sell_inventory_item,
+    train_player,
+    unequip_equipment_slot,
 )
+from rg_quest_ui import draw_quest_panel, location_quest_tabs, parse_quest_action, quest_action
 from rg_ui import Button, draw_lines, draw_panel, wrap
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -23,13 +29,48 @@ LOCATION_PLACES = [
     ("Tablica ogloszen", "location_board"),
     ("Trening", "location_training"),
     ("Leczenie", "location_healing"),
+    ("Ekwipunek", "location_equipment"),
 ]
+
+
+class LocationActionButton(Button):
+    def __init__(self, text, action, rect, callback):
+        super().__init__(text, action, rect)
+        self.callback = callback
+
+    def clicked(self, pos):
+        if not self.rect.collidepoint(pos):
+            return False
+        success, message = self.callback()
+        self.last_success = success
+        self.last_message = message
+        return True
+
+
+def _remember_message(player, callback):
+    def run():
+        success, message = callback()
+        player["_location_message"] = message
+        return success, message
+    return run
+
+
+SLOT_LABELS = {
+    "weapon": "Bron",
+    "armor": "Zbroja",
+    "helmet": "Helm",
+    "boots": "Buty",
+    "gloves": "Rekawice",
+    "amulet": "Amulet",
+    "ring_1": "Pierscien 1",
+    "ring_2": "Pierscien 2",
+}
 
 
 def _location_places(location, player):
     places = list(LOCATION_PLACES)
-    if location.get("name") == "Artium" and has_active_quest(player):
-        places.append((f"Quest: {QUEST_NAME}", QUEST_PLACE_ACTION))
+    for quest in location_quest_tabs(player, location.get("name", "")):
+        places.append((f"Quest: {quest.get('name', 'Quest')}", quest_action(quest.get("id"))))
     return places
 
 
@@ -83,7 +124,14 @@ def _draw_offer_cards(screen, font, small_font, mouse_pos, cards, prefix, x, y, 
         pygame.draw.rect(screen, GOLD, rect, 1, border_radius=10)
         screen.blit(font.render(card["name"], True, TEXT), (rect.x + 14, rect.y + 10))
         price = card.get("price")
-        meta = f"{price} monet" if price is not None else f"Talia: {card.get('deck', '-')}"
+        if price is not None and prefix in {"buy", "hire"}:
+            effective_price = price_with_world_event(price)
+            if effective_price != int(price):
+                meta = f"{effective_price} monet (bylo {price})"
+            else:
+                meta = f"{effective_price} monet"
+        else:
+            meta = f"{price} monet" if price is not None else f"Talia: {card.get('deck', '-')}"
         screen.blit(small_font.render(meta, True, MUTED), (rect.x + 14, rect.y + 38))
         description = helper_effect_text(card) if prefix == "hire" else card.get("description", "")
         lines = wrap(small_font, description, width - 170)[:2]
@@ -108,6 +156,112 @@ def _draw_owned_helpers(screen, font, small_font, player, x, y, width):
             screen.blit(small_font.render(wrapped, True, MUTED), (x, y))
             y += 20
         y += 6
+
+
+def _draw_training(screen, font, small_font, mouse_pos, content, location, player, start_y):
+    buttons = []
+    stats = training_stats_for(location.get("kind", ""))
+    screen.blit(font.render("Trening statystyk", True, TEXT), (content.x + 22, start_y))
+    draw_lines(screen, small_font, ["Kazdy trening kosztuje 1 akcje oraz liczbe monet wynikajaca z obecnej wartosci statystyki."], content.x + 22, start_y + 38, MUTED, max_width=content.width - 44)
+    y = start_y + 92
+    for stat in stats:
+        current = int(player.get("stats", {}).get(stat, 0) or 0)
+        cost = training_cost(current)
+        rect = pygame.Rect(content.x + 22, y, content.width - 44, 64)
+        pygame.draw.rect(screen, PANEL_DARK, rect, border_radius=10)
+        pygame.draw.rect(screen, GOLD, rect, 1, border_radius=10)
+        screen.blit(font.render(f"{stat}: {current}/6", True, TEXT), (rect.x + 16, rect.y + 9))
+        cost_text = "maksimum" if cost is None else f"koszt {cost} monet + 1 akcja"
+        screen.blit(small_font.render(cost_text, True, MUTED), (rect.x + 16, rect.y + 37))
+        button = LocationActionButton(
+            "Trenuj",
+            "location_training",
+            (rect.right - 138, rect.y + 10, 120, 44),
+            _remember_message(player, lambda selected=stat: train_player(location, player, selected)),
+        )
+        button.draw(screen, small_font, mouse_pos)
+        buttons.append(button)
+        y += 76
+    return buttons
+
+
+def _draw_healing(screen, font, small_font, mouse_pos, content, player, start_y):
+    wounds = int(player.get("wounds", 0) or 0)
+    cost_per_wound = healing_cost_per_wound(player)
+    screen.blit(font.render("Leczenie Ran", True, TEXT), (content.x + 22, start_y))
+    lines = [
+        f"Aktualne Rany: {wounds}/4",
+        f"Leczenie wszystkich mozliwych Ran kosztuje 1 akcje i {cost_per_wound} monet za kazda Rane.",
+        "Medyk polowy i aktywne Wydarzenie Swiata moga obnizac koszt, ale nigdy ponizej 1 monety.",
+    ]
+    draw_lines(screen, small_font, lines, content.x + 22, start_y + 48, MUTED, line_h=30, max_width=content.width - 44)
+    button = LocationActionButton(
+        "Wylecz Rany",
+        "location_healing",
+        (content.x + 22, start_y + 168, 260, 52),
+        _remember_message(player, lambda: heal_player({}, player)),
+    )
+    button.draw(screen, font, mouse_pos)
+    return [button]
+
+
+def _draw_equipment(screen, font, small_font, mouse_pos, content, player, start_y):
+    ensure_equipment_state(player)
+    buttons = []
+    left_width = int((content.width - 66) * 0.44)
+    left_x = content.x + 22
+    right_x = left_x + left_width + 22
+    right_width = content.right - right_x - 22
+
+    screen.blit(font.render("Zalozony ekwipunek", True, TEXT), (left_x, start_y))
+    y = start_y + 42
+    for slot in EQUIPMENT_SLOTS:
+        item = player["equipment"].get(slot)
+        rect = pygame.Rect(left_x, y, left_width, 48)
+        pygame.draw.rect(screen, PANEL_DARK, rect, border_radius=8)
+        pygame.draw.rect(screen, GOLD, rect, 1, border_radius=8)
+        label = f"{SLOT_LABELS.get(slot, slot)}: {item_display_name(item) if item else '-'}"
+        screen.blit(small_font.render(label, True, TEXT if item else MUTED), (rect.x + 10, rect.y + 14))
+        if item:
+            button = LocationActionButton(
+                "Zdejmij",
+                "location_equipment",
+                (rect.right - 102, rect.y + 6, 90, 36),
+                _remember_message(player, lambda selected=slot: unequip_equipment_slot(player, selected)),
+            )
+            button.draw(screen, small_font, mouse_pos)
+            buttons.append(button)
+        y += 56
+
+    inventory = list(player.get("inventory", []))
+    screen.blit(font.render(f"Plecak: {len(inventory)}/{player.get('backpack_limit', 10)}", True, TEXT), (right_x, start_y))
+    y = start_y + 42
+    if not inventory:
+        screen.blit(small_font.render("Plecak jest pusty.", True, MUTED), (right_x, y))
+    for index, item in enumerate(inventory[:8]):
+        rect = pygame.Rect(right_x, y, right_width, 58)
+        pygame.draw.rect(screen, PANEL_DARK, rect, border_radius=8)
+        pygame.draw.rect(screen, GOLD, rect, 1, border_radius=8)
+        screen.blit(small_font.render(item_display_name(item), True, TEXT), (rect.x + 10, rect.y + 8))
+        description = str(item.get("description", "")) if isinstance(item, dict) else ""
+        screen.blit(small_font.render(description[:52], True, MUTED), (rect.x + 10, rect.y + 31))
+        equip = LocationActionButton(
+            "Zaloz",
+            "location_equipment",
+            (rect.right - 196, rect.y + 10, 82, 38),
+            _remember_message(player, lambda selected=index: equip_inventory_item(player, selected)),
+        )
+        sell = LocationActionButton(
+            "Sprzedaj",
+            "location_equipment",
+            (rect.right - 106, rect.y + 10, 94, 38),
+            _remember_message(player, lambda selected=index: sell_inventory_item(player, selected)),
+        )
+        equip.draw(screen, small_font, mouse_pos)
+        sell.draw(screen, small_font, mouse_pos)
+        buttons.extend([equip, sell])
+        y += 66
+    return buttons
 
 
 def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, player, selected_place=None, message=""):
@@ -143,21 +297,26 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
     screen.blit(font.render("Miejsca", True, TEXT), (left.x + 22, left.y + 20))
     buttons = []
     y = left.y + 64
-    for label, action in _location_places(location, player):
+    place_buttons = _location_places(location, player)
+    max_button_y = left.bottom - 126
+    for label, action in place_buttons:
+        if y > max_button_y:
+            break
         button = Button(label, action, (left.x + 20, y, left.width - 40, 48))
         button.draw(screen, font, mouse_pos, active=(selected_place == action))
         buttons.append(button)
-        y += 60
+        y += 58
     back = Button("Powrot na mape", "back_to_map", (left.x + 20, left.bottom - 64, left.width - 40, 46))
     back.draw(screen, font, mouse_pos)
     buttons.append(back)
 
     content = pygame.Rect(360, 164, sw - 402, sh - 206)
     draw_panel(screen, content, GOLD)
-    if message:
+    effective_message = message or player.get("_location_message", "")
+    if effective_message:
         message_box = pygame.Rect(content.x + 18, content.y + 14, content.width - 36, 42)
         pygame.draw.rect(screen, (45, 55, 48), message_box, border_radius=8)
-        screen.blit(small_font.render(message, True, TEXT), (message_box.x + 12, message_box.y + 11))
+        screen.blit(small_font.render(effective_message[:120], True, TEXT), (message_box.x + 12, message_box.y + 11))
 
     start_y = content.y + 70
     if selected_place == "location_shop":
@@ -172,17 +331,15 @@ def draw_city_screen(screen, title_font, font, small_font, mouse_pos, location, 
     elif selected_place == "location_board":
         screen.blit(font.render("Tablica ogloszen - 3 questy", True, TEXT), (content.x + 22, start_y))
         buttons += _draw_offer_cards(screen, font, small_font, mouse_pos, location["quest_offers"], "quest", content.x + 22, start_y + 42, content.width - 44, "Pobierz")
-    elif selected_place == QUEST_PLACE_ACTION and location.get("name") == "Artium":
-        buttons += draw_quest_panel(screen, font, small_font, mouse_pos, content, player)
+    elif parse_quest_action(selected_place):
+        buttons += draw_quest_panel(screen, font, small_font, mouse_pos, content, player, parse_quest_action(selected_place))
     elif selected_place == "location_training":
-        screen.blit(font.render("Trening", True, TEXT), (content.x + 22, start_y))
-        draw_lines(screen, font, ["Pelny system treningu zostanie podpiety w kolejnym etapie."], content.x + 22, start_y + 50, MUTED)
+        buttons += _draw_training(screen, font, small_font, mouse_pos, content, location, player, start_y)
     elif selected_place == "location_healing":
-        screen.blit(font.render("Leczenie", True, TEXT), (content.x + 22, start_y))
-        draw_lines(screen, font, ["Leczenie kosztuje 2 monety za Rane i 1 akcje.", "Interakcja zostanie podpieta razem z pelnym systemem Ran."], content.x + 22, start_y + 50, MUTED, line_h=34)
+        buttons += _draw_healing(screen, font, small_font, mouse_pos, content, player, start_y)
+    elif selected_place == "location_equipment":
+        buttons += _draw_equipment(screen, font, small_font, mouse_pos, content, player, start_y)
     else:
-        quest = find_player_quest(player, include_history=False)
-        prompt = "Wybierz zakladke questa po jego pobraniu." if location.get("name") == "Artium" and quest else "Wybierz miejsce w lokacji"
-        screen.blit(font.render(prompt, True, TEXT), (content.x + 22, start_y))
-        draw_lines(screen, font, ["Sklep, karczma i tablica posiadaja osobne, trwale oferty.", "Kupiona lub pobrana karta jest natychmiast zastepowana nowa."], content.x + 22, start_y + 50, MUTED, line_h=32)
+        screen.blit(font.render("Wybierz miejsce w lokacji", True, TEXT), (content.x + 22, start_y))
+        draw_lines(screen, font, ["Sklep, karczma i tablica posiadaja osobne, trwale oferty.", "Questy wymagajace tej lokacji pojawiaja sie jako dodatkowe zakladki."], content.x + 22, start_y + 50, MUTED, line_h=32)
     return buttons
