@@ -12,6 +12,7 @@ from rg_engine.items import (
     unequip_slot,
 )
 from rg_engine.quests import activate_quest, is_registered_quest
+from rg_engine.world_events import price_with_world_event
 
 TRAINING_STATS = {
     "city": ("Dyplomacja", "Nauka", "Handel"),
@@ -25,7 +26,8 @@ def training_stats_for(location_kind: str) -> tuple[str, ...]:
 
 
 def purchase_card(player: dict[str, Any], card: dict[str, Any]) -> tuple[bool, str]:
-    price = max(0, int(card.get("price", 0) or 0))
+    base_price = max(0, int(card.get("price", 0) or 0))
+    price = price_with_world_event(base_price)
     if int(player.get("gold", 0) or 0) < price:
         return False, "Nie masz wystarczajacej liczby monet."
     category = str(card.get("category", "misc"))
@@ -48,7 +50,8 @@ def hire_helper_card(player: dict[str, Any], helper: dict[str, Any], limit: int 
     helpers = player.setdefault("helpers", [])
     if len(helpers) >= limit:
         return False, f"Masz juz maksymalnie {limit} pomocnikow."
-    price = max(0, int(helper.get("price", 0) or 0))
+    base_price = max(0, int(helper.get("price", 0) or 0))
+    price = price_with_world_event(base_price)
     if int(player.get("gold", 0) or 0) < price:
         return False, "Nie masz wystarczajacej liczby monet."
     player["gold"] -= price
