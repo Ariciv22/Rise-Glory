@@ -8,6 +8,7 @@ from rg_combat_image_fit import install_combat_image_fit
 from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
 from rg_engine.world import register_players
+from rg_engine.world_events import movement_cost_with_world_event
 from rg_map import HeroToken
 from rg_premium_dice import install_premium_dice_animation
 
@@ -16,12 +17,25 @@ COUNCIL_TRADE_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów_handel.p
 
 
 class GameHeroToken(HeroToken):
-    """Pionek zachowujacy stary wyglad, ale korzystajacy z poprawnych kosztow akcji."""
+    """Pionek zachowujacy stary wyglad, ale korzystajacy ze wspolnych kosztow akcji."""
+
+    def movement_cost(self, target):
+        if not target:
+            return 0
+        base_cost = int(target.terrain.get("move", 1) or 1)
+        return movement_cost_with_world_event(base_cost)
 
     def can_move_to(self, target):
         if not super().can_move_to(target):
             return False
-        return int(self.actions) >= int(target.terrain.get("move", 1) or 1)
+        return int(self.actions) >= self.movement_cost(target)
+
+    def move_to(self, target):
+        if not self.can_move_to(target):
+            return False
+        self.actions = max(0, int(self.actions) - self.movement_cost(target))
+        self.tile = target
+        return True
 
 
 def default_custom_stats():
