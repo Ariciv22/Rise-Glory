@@ -5,6 +5,7 @@ from typing import Callable
 
 import pygame
 
+from rg_content import register_all_world_events
 from rg_data import BG, COUNCIL_ROUNDS, GOLD, MUTED, TEXT
 from rg_engine.council import (
     COUNCIL_LIMITS,
@@ -18,7 +19,10 @@ from rg_engine.council import (
     validate_trade,
 )
 from rg_engine.world import current_world_level, registered_players
+from rg_engine.world_events import draw_next_world_event
 from rg_ui import Button, draw_lines, wrap
+
+register_all_world_events()
 
 ROOT_DIR = Path(__file__).resolve().parent
 COUNCIL_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów.png"
@@ -53,13 +57,18 @@ class CouncilSession:
         self.round_number = int(round_number)
         self.world_level = current_world_level(players)
         self.usage = CouncilUsage.for_players(players)
+        self.world_event, self.world_event_message = draw_next_world_event(players)
+        if self.world_event:
+            event_name = self.world_event.get("name", "Wydarzenie Swiata")
+            event_effect = self.world_event.get("effect_text", self.world_event_message)
+            self.usage.history.append(f"Wydarzenie Swiata: {event_name} — {event_effect}")
         self.left_index = 0
         self.right_index = 1 if len(players) > 1 else 0
         self.offer = TradeOffer(self.left_index, self.right_index)
         self.mode = "trade"
         self.category = "quest"
         self.pages = {}
-        self.message = "Rada rozpoczęta. Każdy gracz może handlować z każdym."
+        self.message = self.world_event_message or "Rada rozpoczęta. Każdy gracz może handlować z każdym."
         self.finish_mode = False
         self.finish_position = 0
         self.finish_confirmed = []
@@ -411,6 +420,24 @@ def _draw_history(screen, font, small_font, session, content):
         y += 42
 
 
+def _draw_world_event(screen, font, small_font, session, rect):
+    _panel(screen, rect, alpha=224, border=(170, 126, 58))
+    event = session.world_event or {}
+    if not event:
+        screen.blit(font.render("Wydarzenie Świata", True, TEXT), (rect.x + 16, rect.y + 12))
+        screen.blit(small_font.render("Brak karty wydarzenia.", True, MUTED), (rect.x + 16, rect.y + 42))
+        return
+    duration = "do następnej Rady" if event.get("duration") == "until_next_council" else "natychmiastowe"
+    title = f"Wydarzenie Świata: {event.get('name', 'Wydarzenie')}"
+    screen.blit(font.render(_fit(font, title, rect.width - 180), True, TEXT), (rect.x + 16, rect.y + 9))
+    duration_label = small_font.render(duration, True, GOLD)
+    screen.blit(duration_label, (rect.right - duration_label.get_width() - 16, rect.y + 13))
+    description = event.get("description", "")
+    effect = event.get("effect_text", session.world_event_message)
+    screen.blit(small_font.render(_fit(small_font, description, rect.width - 32), True, MUTED), (rect.x + 16, rect.y + 36))
+    screen.blit(small_font.render(_fit(small_font, f"Efekt: {effect}", rect.width - 32), True, TEXT), (rect.x + 16, rect.y + 57))
+
+
 def _draw_finish_overlay(screen, font, small_font, mouse, buttons, session):
     shade = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
     shade.fill((0, 0, 0, 190))
@@ -441,30 +468,29 @@ def draw_council(screen, title_font, font, small_font, mouse, round_number):
     buttons = []
     council_number = max(1, (int(round_number) - 1) // COUNCIL_ROUNDS)
     title = title_font.render("Rada Bohaterów", True, TEXT)
-    screen.blit(title, title.get_rect(center=(sw // 2, 42)))
+    screen.blit(title, title.get_rect(center=(sw // 2, 38)))
     subtitle = f"Rada nr {council_number}  •  Poziom świata {session.world_level}  •  Następna runda: {round_number}"
-    screen.blit(small_font.render(subtitle, True, MUTED), small_font.render(subtitle, True, MUTED).get_rect(center=(sw // 2, 82)))
+    subtitle_surface = small_font.render(subtitle, True, MUTED)
+    screen.blit(subtitle_surface, subtitle_surface.get_rect(center=(sw // 2, 76)))
 
-    event_rect = pygame.Rect(max(24, sw // 2 - 430), 102, min(860, sw - 48), 48)
-    _panel(screen, event_rect, alpha=205)
-    event_text = "Wydarzenie Świata: slot przygotowany — talia zostanie podłączona w następnym module."
-    screen.blit(small_font.render(_fit(small_font, event_text, event_rect.width - 30), True, MUTED), (event_rect.x + 15, event_rect.y + 14))
+    event_rect = pygame.Rect(max(24, sw // 2 - 470), 94, min(940, sw - 48), 82)
+    _draw_world_event(screen, font, small_font, session, event_rect)
 
-    nav_y = 164
+    nav_y = 188
     nav_w = 170
     nav_gap = 10
     nav_x = sw // 2 - (nav_w * 3 + nav_gap * 2) // 2
     for index, (label, mode) in enumerate((("HANDEL", "trade"), ("PORZUĆ QUEST", "abandon"), ("HISTORIA", "history"))):
         _add_button(screen, small_font, mouse, buttons, label, (nav_x + index * (nav_w + nav_gap), nav_y, nav_w, 36), lambda m=mode: session.set_mode(m), active=session.mode == mode)
 
-    selector_y = 212
+    selector_y = 236
     selector_w = min(500, (sw - 90) // 2)
     _draw_player_selector(screen, font, small_font, mouse, buttons, session, "left", pygame.Rect(30, selector_y, selector_w, 52))
     if len(session.players) > 1:
         _draw_player_selector(screen, font, small_font, mouse, buttons, session, "right", pygame.Rect(sw - selector_w - 30, selector_y, selector_w, 52))
 
     if session.mode == "trade" and len(session.players) > 1:
-        tab_y = 278
+        tab_y = 302
         tab_w = 142
         tabs_total = tab_w * 4 + 10 * 3
         tab_x = sw // 2 - tabs_total // 2
@@ -473,10 +499,11 @@ def draw_council(screen, title_font, font, small_font, mouse, round_number):
             _add_button(screen, small_font, mouse, buttons, label, (tab_x + index * (tab_w + 10), tab_y, tab_w, 34), lambda c=category: session.set_category(c), active=session.category == category)
         price = quest_sale_price(session.world_level)
         price_text = f"Sprzedaż questa na tym poziomie: {price} złota. Wymiana: quest za quest."
-        screen.blit(small_font.render(price_text, True, MUTED), small_font.render(price_text, True, MUTED).get_rect(center=(sw // 2, tab_y + 50)))
+        price_surface = small_font.render(price_text, True, MUTED)
+        screen.blit(price_surface, price_surface.get_rect(center=(sw // 2, tab_y + 50)))
         content_top = tab_y + 72
     else:
-        content_top = 278
+        content_top = 302
 
     content = pygame.Rect(30, content_top, sw - 60, max(220, sh - content_top - 108))
     if session.mode == "trade":
