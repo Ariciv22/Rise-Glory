@@ -4,9 +4,10 @@ import pygame
 
 from rg_combat import draw_combat_screen, is_combat_active
 from rg_data import GOLD, MUTED, PANEL_DARK, TEXT
-from rg_engine.heroes import training_cost
+from rg_engine.heroes import healing_cost_per_wound, training_cost
 from rg_engine.items import EQUIPMENT_SLOTS, ensure_equipment_state, item_display_name
 from rg_engine.locations import training_stats_for
+from rg_engine.world_events import price_with_world_event
 from rg_location_data import (
     equip_inventory_item,
     heal_player,
@@ -123,7 +124,14 @@ def _draw_offer_cards(screen, font, small_font, mouse_pos, cards, prefix, x, y, 
         pygame.draw.rect(screen, GOLD, rect, 1, border_radius=10)
         screen.blit(font.render(card["name"], True, TEXT), (rect.x + 14, rect.y + 10))
         price = card.get("price")
-        meta = f"{price} monet" if price is not None else f"Talia: {card.get('deck', '-')}"
+        if price is not None and prefix in {"buy", "hire"}:
+            effective_price = price_with_world_event(price)
+            if effective_price != int(price):
+                meta = f"{effective_price} monet (bylo {price})"
+            else:
+                meta = f"{effective_price} monet"
+        else:
+            meta = f"{price} monet" if price is not None else f"Talia: {card.get('deck', '-')}"
         screen.blit(small_font.render(meta, True, MUTED), (rect.x + 14, rect.y + 38))
         description = helper_effect_text(card) if prefix == "hire" else card.get("description", "")
         lines = wrap(small_font, description, width - 170)[:2]
@@ -179,11 +187,12 @@ def _draw_training(screen, font, small_font, mouse_pos, content, location, playe
 
 def _draw_healing(screen, font, small_font, mouse_pos, content, player, start_y):
     wounds = int(player.get("wounds", 0) or 0)
+    cost_per_wound = healing_cost_per_wound(player)
     screen.blit(font.render("Leczenie Ran", True, TEXT), (content.x + 22, start_y))
     lines = [
         f"Aktualne Rany: {wounds}/4",
-        "Leczenie wszystkich mozliwych Ran kosztuje 1 akcje i 2 monety za kazda Rane.",
-        "Medyk polowy zmniejsza koszt kazdej leczonej Rany o 1 monete.",
+        f"Leczenie wszystkich mozliwych Ran kosztuje 1 akcje i {cost_per_wound} monet za kazda Rane.",
+        "Medyk polowy i aktywne Wydarzenie Swiata moga obnizac koszt, ale nigdy ponizej 1 monety.",
     ]
     draw_lines(screen, small_font, lines, content.x + 22, start_y + 48, MUTED, line_h=30, max_width=content.width - 44)
     button = LocationActionButton(
