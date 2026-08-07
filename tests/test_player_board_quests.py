@@ -2,7 +2,7 @@ import unittest
 
 import pygame
 
-from rg_player_board import (
+from rg_ui.player_board import (
     _quest_row_rects,
     close_player_board,
     close_quest_details,
