@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Iterable
 
 _REGISTERED_PLAYERS: list[dict] = []
+_FORCED_WORLD_LEVEL: int | None = None
 
 
 def register_players(players: Iterable[dict] | None) -> None:
@@ -14,6 +15,24 @@ def register_players(players: Iterable[dict] | None) -> None:
 def registered_players() -> list[dict]:
     """Zwraca graczy bieżącej rozgrywki z zachowaniem referencji do ich stanu."""
     return list(_REGISTERED_PLAYERS)
+
+
+def set_forced_world_level(level: int | None) -> int | None:
+    """Opcjonalny override poziomu świata używany przez narzędzia programisty."""
+    global _FORCED_WORLD_LEVEL
+    if level is None:
+        _FORCED_WORLD_LEVEL = None
+        return None
+    _FORCED_WORLD_LEVEL = max(1, min(4, int(level)))
+    return _FORCED_WORLD_LEVEL
+
+
+def clear_forced_world_level() -> None:
+    set_forced_world_level(None)
+
+
+def forced_world_level() -> int | None:
+    return _FORCED_WORLD_LEVEL
 
 
 def world_level_from_legend(legend: int) -> int:
@@ -28,6 +47,8 @@ def world_level_from_legend(legend: int) -> int:
 
 
 def current_world_level(players: Iterable[dict] | None = None) -> int:
+    if _FORCED_WORLD_LEVEL is not None:
+        return _FORCED_WORLD_LEVEL
     source = list(_REGISTERED_PLAYERS if players is None else players)
     leader_legend = max((int(player.get("legend", 0) or 0) for player in source), default=0)
     return world_level_from_legend(leader_legend)
@@ -52,5 +73,6 @@ class WorldState:
 
     @classmethod
     def from_players(cls, players: Iterable[dict]) -> "WorldState":
-        leader = max((int(player.get("legend", 0) or 0) for player in players), default=0)
-        return cls(level=world_level_from_legend(leader), leader_legend=leader)
+        source = list(players)
+        leader = max((int(player.get("legend", 0) or 0) for player in source), default=0)
+        return cls(level=current_world_level(source), leader_legend=leader)
