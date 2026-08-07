@@ -118,6 +118,12 @@ def _healing_discount(hero: dict) -> int:
     return 0
 
 
+def healing_cost_per_wound(hero: dict) -> int:
+    ensure_hero_state(hero)
+    base_cost = max(1, 2 - _healing_discount(hero))
+    return healing_cost_with_world_event(base_cost)
+
+
 def heal_at_location(hero: dict, token, amount: int | None = None) -> tuple[bool, str]:
     ensure_hero_state(hero)
     current = int(hero.get("wounds", 0) or 0)
@@ -126,8 +132,7 @@ def heal_at_location(hero: dict, token, amount: int | None = None) -> tuple[bool
     if token is None or int(getattr(token, "actions", 0) or 0) < 1:
         return False, "Leczenie wymaga 1 akcji."
     requested = current if amount is None else min(current, max(1, int(amount)))
-    base_cost = max(1, 2 - _healing_discount(hero))
-    cost_per_wound = healing_cost_with_world_event(base_cost)
+    cost_per_wound = healing_cost_per_wound(hero)
     affordable = int(hero.get("gold", 0) or 0) // cost_per_wound
     healed = min(requested, affordable)
     if healed <= 0:
