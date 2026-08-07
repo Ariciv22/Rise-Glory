@@ -2,13 +2,13 @@ from pathlib import Path
 
 import pygame
 
-from rg_combat import draw_combat_screen, is_combat_active
-from rg_data import GOLD, MUTED, PANEL_DARK, TEXT
+from rg_ui.combat import draw_combat_screen, is_combat_active
+from rg_core.data import GOLD, MUTED, PANEL_DARK, TEXT
 from rg_engine.heroes import healing_cost_per_wound, training_cost
 from rg_engine.items import EQUIPMENT_SLOTS, ensure_equipment_state, item_display_name
 from rg_engine.locations import training_stats_for
 from rg_engine.world_events import price_with_world_event
-from rg_location_data import (
+from rg_content.locations import (
     equip_inventory_item,
     heal_player,
     helper_effect_text,
@@ -17,10 +17,10 @@ from rg_location_data import (
     train_player,
     unequip_equipment_slot,
 )
-from rg_quest_ui import draw_quest_panel, location_quest_tabs, parse_quest_action, quest_action
-from rg_ui import Button, draw_lines, draw_panel, wrap
+from rg_ui.quest import draw_quest_panel, location_quest_tabs, parse_quest_action, quest_action
+from rg_ui.common import Button, draw_lines, draw_panel, wrap
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 CITY_GRAPHICS_DIRS = [ROOT_DIR / "Grafiki" / "grafiki_miast", ROOT_DIR / "grafiki_miast"]
 
 LOCATION_PLACES = [

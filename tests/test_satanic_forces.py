@@ -1,8 +1,8 @@
 import random
 import unittest
 
-from rg_location_data import initialize_location, take_quest
-from rg_satanic_forces import QUEST_ID, activate_quest, resolve_test
+from rg_content.locations import initialize_location, take_quest
+from rg_legacy.satanic_forces import QUEST_ID, activate_quest, resolve_test
 
 
 class FixedRng:

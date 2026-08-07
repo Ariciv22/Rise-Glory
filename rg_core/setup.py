@@ -2,17 +2,17 @@ import math
 import random
 from pathlib import Path
 
-import rg_council_background
-from rg_adventure import install_adventure_system
-from rg_combat_image_fit import install_combat_image_fit
-from rg_data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
+from rg_ui import council as rg_council_background
+from rg_world.adventure import install_adventure_system
+from rg_ui.combat_image_fit import install_combat_image_fit
+from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
 from rg_engine.world import register_players
 from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
-from rg_map import HeroToken
-from rg_premium_dice import install_premium_dice_animation
+from rg_world.map import HeroToken
+from rg_ui.premium_dice import install_premium_dice_animation
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 COUNCIL_TRADE_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów_handel.png"
 
 

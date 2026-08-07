@@ -1,8 +1,8 @@
 import unittest
 
-from rg_combat import clear_combat, get_active_combat, is_combat_active, resolve_combat_round
-from rg_satanic_combat import begin_cursed_soldier_combat, resolve_final_option
-from rg_satanic_forces import activate_quest
+from rg_ui.combat import clear_combat, get_active_combat, is_combat_active, resolve_combat_round
+from rg_legacy.satanic_combat import begin_cursed_soldier_combat, resolve_final_option
+from rg_legacy.satanic_forces import activate_quest
 
 
 class FixedRng:

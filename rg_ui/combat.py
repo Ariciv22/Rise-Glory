@@ -4,14 +4,14 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, MAX_WOUNDS, MUTED, PANEL, TEXT
+from rg_core.data import GOLD, MAX_WOUNDS, MUTED, PANEL, TEXT
 from rg_engine.combat import attempt_escape as engine_attempt_escape
 from rg_engine.combat import create_session, resolve_round as engine_resolve_round
 from rg_engine.items import armor_class as engine_armor_class
 from rg_engine.items import weapon_bonuses as engine_weapon_bonuses
-from rg_ui import Button, draw_lines, draw_panel, wrap
+from rg_ui.common import Button, draw_lines, draw_panel, wrap
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 _ACTIVE_COMBAT = None
 _IMAGE_CACHE = {}

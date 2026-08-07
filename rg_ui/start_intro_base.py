@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, MUTED, PANEL, TEXT
+from rg_core.data import GOLD, MUTED, PANEL, TEXT
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 INTRO_DIRS = [
     ROOT_DIR / "intro_final",
     ROOT_DIR / "Intro_final",

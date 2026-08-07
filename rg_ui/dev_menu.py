@@ -3,7 +3,7 @@ from __future__ import annotations
 import pygame
 
 from rg_content import register_all_world_events
-from rg_data import ACTIONS_PER_TURN, GOLD, MUTED, PANEL_DARK, TEXT
+from rg_core.data import ACTIONS_PER_TURN, GOLD, MUTED, PANEL_DARK, TEXT
 from rg_engine.devtools import (
     DEV_FLAGS,
     add_gold,
@@ -22,7 +22,7 @@ from rg_engine.world import (
     set_forced_world_level,
 )
 from rg_engine.world_events import active_world_event, draw_next_world_event
-from rg_ui import Button, draw_lines, draw_panel, wrap
+from rg_ui.common import Button, draw_lines, draw_panel, wrap
 
 register_all_world_events()
 

@@ -1,6 +1,6 @@
 import random
 
-from rg_data import COUNCIL_ROUNDS
+from rg_core.data import COUNCIL_ROUNDS
 
 
 def resolve_initiative(players, rng=None):

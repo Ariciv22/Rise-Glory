@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import (
+from rg_core.data import (
     BG,
     COUNCIL_ROUNDS,
     GOLD,
@@ -16,9 +16,9 @@ from rg_data import (
     STAT_NAMES,
     TEXT,
 )
-from rg_ui import Button, centered_x, draw_lines, draw_panel, wrap
+from rg_ui.common import Button, centered_x, draw_lines, draw_panel, wrap
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 MENU_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "Tytulowy_ekran.png"
 MENU_BUTTON_PATHS = [
     ROOT_DIR / "Grafiki" / "Grafiki UI" / "panel2.png",
@@ -430,5 +430,5 @@ def draw_multiplayer(screen, title_font, font, mouse):
     return buttons
 
 # Ilustrowany ekran modułu Rada Bohaterów.
-from rg_council_background import draw_council as _draw_council_with_background
+from rg_ui.council import draw_council as _draw_council_with_background
 draw_council = _draw_council_with_background

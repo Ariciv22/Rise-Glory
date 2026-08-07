@@ -1,6 +1,6 @@
 import unittest
 
-from rg_adventure import (
+from rg_world.adventure import (
     ADVENTURE_GOLD_REWARD,
     close_active_adventure,
     get_active_adventure,

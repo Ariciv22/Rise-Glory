@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, MAX_WOUNDS, MUTED, PANEL_DARK, TEXT
+from rg_core.data import GOLD, MAX_WOUNDS, MUTED, PANEL_DARK, TEXT
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 ADVENTURE_TOKEN_COUNT = 8
 ADVENTURE_GOLD_REWARD = 3
 
@@ -281,16 +281,16 @@ def install_adventure_system():
     if _INSTALL_DONE:
         return
 
-    import rg_hud
-    import rg_map
-    import rg_player_board
-    import rg_turns
-    import rg_world
+    import rg_world as rg_world_package
+    from rg_engine import turns as rg_turns
+    from rg_ui import hud as rg_hud
+    from rg_ui import player_board as rg_player_board
+    from rg_world import map as rg_map
 
     original_tile_init = rg_map.Tile.__init__
     original_tile_draw = rg_map.Tile.draw
     original_move_to = rg_map.HeroToken.move_to
-    original_generate_world = rg_world.generate_world
+    original_generate_world = rg_world_package.generate_world
     original_scoreboard = rg_hud._draw_scoreboard
     original_bottom_info = rg_hud._draw_bottom_tile_info
     original_player_board_clicked = rg_hud._PlayerBoardButton.clicked
@@ -346,7 +346,7 @@ def install_adventure_system():
     rg_map.Tile.__init__ = tile_init_with_adventure
     rg_map.Tile.draw = tile_draw_with_adventure
     rg_map.HeroToken.move_to = move_to_with_adventure
-    rg_world.generate_world = generate_world_with_adventures
+    rg_world_package.generate_world = generate_world_with_adventures
     rg_hud._draw_scoreboard = scoreboard_with_adventure_controller
     rg_hud._draw_bottom_tile_info = bottom_info_with_adventure_overlay
     rg_hud._PlayerBoardButton.clicked = player_board_clicked_without_event

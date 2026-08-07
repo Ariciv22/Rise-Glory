@@ -6,7 +6,7 @@ from typing import Callable
 import pygame
 
 from rg_content import register_all_world_events
-from rg_data import BG, COUNCIL_ROUNDS, GOLD, MUTED, TEXT
+from rg_core.data import BG, COUNCIL_ROUNDS, GOLD, MUTED, TEXT
 from rg_engine.council import (
     COUNCIL_LIMITS,
     AssetRef,
@@ -20,11 +20,11 @@ from rg_engine.council import (
 )
 from rg_engine.world import current_world_level, registered_players
 from rg_engine.world_events import draw_next_world_event
-from rg_ui import Button, draw_lines, wrap
+from rg_ui.common import Button, draw_lines, wrap
 
 register_all_world_events()
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 COUNCIL_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów.png"
 _BACKGROUND_CACHE = {"size": None, "surface": None}
 _SOURCE_CACHE = {"loaded": False, "surface": None}

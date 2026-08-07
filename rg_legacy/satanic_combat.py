@@ -2,8 +2,8 @@
 
 from rg_content.quests import SATANIC_FORCES_ID
 from rg_engine.quests import find_player_quest as engine_find_player_quest
-from rg_quest_runtime import resolve_quest_option, start_pending_quest_combat
-from rg_quest_ui import draw_quest_panel as generic_draw_quest_panel
+from rg_core.quest_runtime import resolve_quest_option, start_pending_quest_combat
+from rg_ui.quest import draw_quest_panel as generic_draw_quest_panel
 
 QUEST_ID = SATANIC_FORCES_ID
 QUEST_NAME = "Szatańskie siły"

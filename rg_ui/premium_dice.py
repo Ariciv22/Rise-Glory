@@ -2,12 +2,12 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, MUTED, PANEL_DARK, TEXT
-from rg_dice_animation import DiceRollAnimation, PremiumD20Renderer
+from rg_core.data import GOLD, MUTED, PANEL_DARK, TEXT
+from rg_ui.dice_animation import DiceRollAnimation, PremiumD20Renderer
 
 
 _INSTALLED = False
-_RENDERER = PremiumD20Renderer(Path(__file__).resolve().parent / "Grafiki" / "kostka_k20")
+_RENDERER = PremiumD20Renderer(Path(__file__).resolve().parents[1] / "Grafiki" / "kostka_k20")
 
 
 def _animation(event):
@@ -45,7 +45,7 @@ def _wrap(font, text, width):
 
 
 def _draw_premium_overlay(screen, font, small_font):
-    import rg_adventure as adventure
+    from rg_world import adventure
 
     event = adventure.get_active_adventure()
     if event is None:
@@ -133,7 +133,7 @@ def install_premium_dice_animation():
     if _INSTALLED:
         return
 
-    import rg_adventure as adventure
+    from rg_world import adventure
 
     original_init = adventure.AdventureEvent.__init__
     original_resolve = adventure.AdventureEvent.resolve

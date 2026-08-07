@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, MUTED, TEXT
+from rg_core.data import GOLD, MUTED, TEXT
 from rg_engine.quests import current_stage, find_player_quest, quest_definition, quest_tabs_for_location
-from rg_quest_runtime import resolve_quest_option
-from rg_ui import Button, draw_lines, wrap
+from rg_core.quest_runtime import resolve_quest_option
+from rg_ui.common import Button, draw_lines, wrap
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 _IMAGE_CACHE = {}
 _SCALED_CACHE = {}

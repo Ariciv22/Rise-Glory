@@ -1,7 +1,7 @@
 import pygame
 
-from rg_data import GOLD, MUTED, PANEL, PANEL_DARK, TEXT
-from rg_ui import draw_lines
+from rg_core.data import GOLD, MUTED, PANEL, PANEL_DARK, TEXT
+from rg_ui.common import draw_lines
 
 TOOLTIP_W = 250
 TOOLTIP_PADDING = 14

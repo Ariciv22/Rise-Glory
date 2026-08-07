@@ -13,7 +13,7 @@ from rg_engine.quests import (
     resolve_option,
 )
 from rg_engine.world import current_world_level, register_players
-from rg_quest_ui import QuestActionButton, _draw_image, _draw_result_box, _failure_text, draw_quest_panel as generic_draw_quest_panel
+from rg_ui.quest import QuestActionButton, _draw_image, _draw_result_box, _failure_text, draw_quest_panel as generic_draw_quest_panel
 
 register_all_quests()
 
@@ -76,7 +76,7 @@ def resolve_test(player, option_index, rng=None):
 
 
 def resolve_combat_round(player, rng=None):
-    from rg_combat import resolve_combat_round as resolve_active_combat
+    from rg_ui.combat import resolve_combat_round as resolve_active_combat
 
     return resolve_active_combat(rng=rng)
 

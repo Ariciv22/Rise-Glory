@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, MUTED, PANEL, PANEL_DARK, SCREEN_HEIGHT, SCREEN_WIDTH, TEXT
-from rg_ui import Button, draw_lines, draw_panel, wrap
+from rg_core.data import GOLD, MUTED, PANEL, PANEL_DARK, SCREEN_HEIGHT, SCREEN_WIDTH, TEXT
+from rg_ui.common import Button, draw_lines, draw_panel, wrap
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 INTRO_DIRS = [
     ROOT_DIR / "Grafiki" / "intro",
     ROOT_DIR / "Grafiki" / "Intro",

@@ -5,10 +5,10 @@ import unicodedata
 
 import pygame
 
-from rg_data import GOLD, MAX_WOUNDS, MUTED, TEXT
+from rg_core.data import GOLD, MAX_WOUNDS, MUTED, TEXT
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 _TARGET_NAME = "ostatecznywygladplanszetkigraczav1"
 _PLAYER_BOARD_OPEN = False

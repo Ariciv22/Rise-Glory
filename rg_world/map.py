@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import (
+from rg_core.data import (
     ACTIONS_PER_TURN,
     DEFAULT_ZOOM,
     HOVER,
@@ -24,7 +24,7 @@ from rg_data import (
     TOP_BAR_H,
 )
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 GRAPHICS_DIR = ROOT_DIR / "Grafiki"
 LOCATION_MARKER_FILES = {
     "city": "pionek_miasto.png",

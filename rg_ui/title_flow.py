@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-import rg_screens as s
+from rg_ui import screens as s
 
 
 def sync(screen):
@@ -125,8 +125,6 @@ def draw_player_config(
     background(screen)
 
     compact = h < 1050
-
-    # Logo zajmuje górną część grafiki. Formularz zaczyna się dopiero pod nim.
     field_y = 300 if compact else 330
     name_rect = s._draw_name_field(screen, font, small_font, world_name, y=field_y)
     _patch_name_input_rect(name_rect)

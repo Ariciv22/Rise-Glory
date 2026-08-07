@@ -1,6 +1,6 @@
 import pygame
 
-from rg_data import (
+from rg_core.data import (
     ACTIONS_PER_TURN,
     COUNCIL_ROUNDS,
     GOLD,
@@ -16,8 +16,8 @@ from rg_data import (
     map_name,
 )
 from rg_engine.world_events import active_world_event, movement_cost_with_world_event
-from rg_location_data import helper_bonus_summary, helper_effect_text
-from rg_player_board import (
+from rg_content.locations import helper_bonus_summary, helper_effect_text
+from rg_ui.player_board import (
     close_player_board,
     close_quest_details,
     draw_player_board,
@@ -25,7 +25,7 @@ from rg_player_board import (
     open_player_board,
     open_quest_details,
 )
-from rg_ui import Button, draw_image_panel, draw_lines, draw_panel, wrap
+from rg_ui.common import Button, draw_image_panel, draw_lines, draw_panel, wrap
 
 
 class _PlayerBoardButton(Button):

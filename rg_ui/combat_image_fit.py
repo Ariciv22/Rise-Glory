@@ -1,6 +1,6 @@
 import pygame
 
-import rg_combat
+from rg_ui import combat as rg_combat
 
 _ORIGINAL_DRAW_COVER = rg_combat._draw_cover
 _INSTALLED = False
@@ -18,7 +18,6 @@ def _draw_fitted_combat_image(screen, rect, image_name):
         composed = pygame.Surface(rect.size, pygame.SRCALPHA)
         iw, ih = image.get_size()
 
-        # Ciemne, powiększone tło wypełnia panel bez pustych pasów.
         background_scale = max(rect.width / iw, rect.height / ih)
         background_size = (
             max(1, int(iw * background_scale)),
@@ -36,7 +35,6 @@ def _draw_fitted_combat_image(screen, rect, image_name):
         darken.fill((0, 0, 0, 175))
         composed.blit(darken, (0, 0))
 
-        # Główna grafika używa trybu contain, więc nigdy nie jest przycinana.
         inset = 12
         available_width = max(1, rect.width - inset * 2)
         available_height = max(1, rect.height - inset * 2)

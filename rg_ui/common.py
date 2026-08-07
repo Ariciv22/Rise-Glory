@@ -2,10 +2,11 @@ from pathlib import Path
 
 import pygame
 
-from rg_data import GOLD, LEFT_PANEL_W, MUTED, PANEL, RIGHT_PANEL_W, SCREEN_WIDTH, SIDE_MARGIN, TEXT, TOP_BAR_H
+from rg_core import data as rg_data
+from rg_core.data import GOLD, LEFT_PANEL_W, MUTED, PANEL, RIGHT_PANEL_W, SIDE_MARGIN, TEXT, TOP_BAR_H
 
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parents[1]
 _IMAGE_PANEL_CACHE = {}
 _IMAGE_PANEL_SCALED_CACHE = {}
 
@@ -160,7 +161,7 @@ def draw_panel(screen, rect, border=GOLD):
 
 def ui_rects(screen):
     try:
-        from rg_player_board import is_player_board_open
+        from rg_ui.player_board import is_player_board_open
 
         if is_player_board_open():
             return [screen.get_rect()]
@@ -182,4 +183,4 @@ def over_ui(pos, rects):
 
 
 def centered_x(width):
-    return SCREEN_WIDTH / 2 - width / 2
+    return rg_data.SCREEN_WIDTH / 2 - width / 2

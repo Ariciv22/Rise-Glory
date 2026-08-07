@@ -1,7 +1,7 @@
 import pygame
 
-import rg_start_intro_base as _base
-from rg_start_intro_base import *
+from rg_ui import start_intro_base as _base
+from rg_ui.start_intro_base import *
 
 
 def _load_cover_image(path, size):
@@ -46,7 +46,7 @@ def draw_start_intro(screen, title_font, font, intro_index):
 
 
 try:
-    from rg_title_flow import install_into_main
+    from rg_ui.title_flow import install_into_main
 
     install_into_main()
 except Exception:

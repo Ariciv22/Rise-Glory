@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pygame
 
-from rg_combat import is_combat_active, start_combat
+from rg_ui.combat import is_combat_active, start_combat
 from rg_content import create_enemy, register_all_quests
 from rg_engine.heroes import defeat_hero
 from rg_engine.quests import complete_quest, fail_quest, resolve_option

@@ -1,8 +1,8 @@
 import random
 
-from rg_data import TERRAINS
-from rg_location_data import initialize_location
-from rg_map import Tile, generate_positions
+from rg_core.data import TERRAINS
+from rg_content.locations import initialize_location
+from rg_world.map import Tile, generate_positions
 
 LOCATIONS = [
     {"kind": "city", "type_name": "Miasto", "name": "Miasto", "symbol": "M", "count": 3, "color": (220, 180, 85)},
