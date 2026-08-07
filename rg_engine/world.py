@@ -11,6 +11,11 @@ def register_players(players: Iterable[dict] | None) -> None:
     _REGISTERED_PLAYERS = list(players or [])
 
 
+def registered_players() -> list[dict]:
+    """Zwraca graczy bieżącej rozgrywki z zachowaniem referencji do ich stanu."""
+    return list(_REGISTERED_PLAYERS)
+
+
 def world_level_from_legend(legend: int) -> int:
     value = max(0, int(legend or 0))
     if value >= 30:
