@@ -159,6 +159,27 @@ def draw_panel(screen, rect, border=GOLD):
     pygame.draw.rect(screen, border, rect, 2, border_radius=12)
 
 
+def game_layout_rects(screen):
+    """Zwraca spojny uklad HUD bez szczelin miedzy glownymi panelami."""
+    sw, sh = screen.get_size()
+    center_w = max(0, sw - LEFT_PANEL_W - RIGHT_PANEL_W)
+    side_h = max(0, sh - TOP_BAR_H)
+    bottom_h = min(54, side_h)
+
+    top = pygame.Rect(0, 0, sw, TOP_BAR_H)
+    left = pygame.Rect(0, TOP_BAR_H, LEFT_PANEL_W, side_h)
+    right = pygame.Rect(sw - RIGHT_PANEL_W, TOP_BAR_H, RIGHT_PANEL_W, side_h)
+    center = pygame.Rect(LEFT_PANEL_W, TOP_BAR_H, center_w, side_h)
+    bottom = pygame.Rect(LEFT_PANEL_W, sh - bottom_h, center_w, bottom_h)
+    return {
+        "top": top,
+        "left": left,
+        "right": right,
+        "center": center,
+        "bottom": bottom,
+    }
+
+
 def ui_rects(screen):
     try:
         from rg_ui.player_board import is_player_board_open
@@ -168,14 +189,8 @@ def ui_rects(screen):
     except (ImportError, AttributeError):
         pass
 
-    sw, sh = screen.get_size()
-    bottom_info_w = sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4
-    return [
-        pygame.Rect(0, 0, sw, TOP_BAR_H),
-        pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
-        pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2),
-        pygame.Rect(LEFT_PANEL_W + SIDE_MARGIN * 2, sh - 66, max(0, bottom_info_w), 54),
-    ]
+    layout = game_layout_rects(screen)
+    return [layout["top"], layout["left"], layout["right"], layout["bottom"]]
 
 
 def over_ui(pos, rects):
