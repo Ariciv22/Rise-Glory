@@ -1,9 +1,8 @@
 """Tlo graficzne pod plansza heksowa na glownej mapie.
 
-Aplikacja nadal wypelnia klatke kolorem ``BG`` przed rysowaniem heksow.
-Ten modul podpina sie pod pierwsze rysowanie heksa w klatce i zamienia
-jednolite tlo na grafike ``Grafiki/tlo_heksow.png`` zanim pojawia sie plansza.
-Dzieki temu nie trzeba mieszac logiki prezentacji z ``rg_core.app``.
+Grafika ``Grafiki/tlo_heksow.png`` wypelnia dokladnie caly obszar pomiedzy
+polaczonym lewym i prawym panelem oraz pod gornym HUD-em. Heksy sa rysowane
+na wierzchu, a panele HUD pozostaja poza obszarem tla.
 """
 
 from pathlib import Path
@@ -11,6 +10,7 @@ from pathlib import Path
 import pygame
 
 from rg_core.data import BG
+from rg_ui.common import game_layout_rects
 from rg_world.map import Tile
 
 
@@ -18,7 +18,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "tlo_heksow.png"
 
 _SOURCE = None
-_SCALED_SIZE = None
+_SCALED_KEY = None
 _SCALED_BACKGROUND = None
 
 
@@ -36,45 +36,54 @@ def _load_source():
 
 
 def _background_for_size(size):
-    global _SCALED_SIZE, _SCALED_BACKGROUND
-    if _SCALED_SIZE == size and _SCALED_BACKGROUND is not None:
+    global _SCALED_KEY, _SCALED_BACKGROUND
+    size = (max(1, int(size[0])), max(1, int(size[1])))
+    if _SCALED_KEY == size and _SCALED_BACKGROUND is not None:
         return _SCALED_BACKGROUND
 
     source = _load_source()
     if source is None:
         return None
 
-    sw, sh = size
+    target_w, target_h = size
     iw, ih = source.get_size()
-    scale = max(sw / max(1, iw), sh / max(1, ih))
+
+    # Tryb cover: zachowujemy proporcje grafiki, ale wypelniamy caly dostepny
+    # prostokat bez czarnych pasow. Nadmiar jest symetrycznie przycinany.
+    scale = max(target_w / max(1, iw), target_h / max(1, ih))
     scaled_size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
     scaled = pygame.transform.smoothscale(source, scaled_size)
 
+    crop_x = max(0, (scaled.get_width() - target_w) // 2)
+    crop_y = max(0, (scaled.get_height() - target_h) // 2)
+    crop = pygame.Rect(crop_x, crop_y, target_w, target_h)
+
     background = pygame.Surface(size)
     background.fill(BG)
-    background.blit(
-        scaled,
-        ((sw - scaled.get_width()) // 2, (sh - scaled.get_height()) // 2),
-    )
+    background.blit(scaled, (0, 0), crop)
 
     # Delikatne przyciemnienie utrzymuje czytelnosc heksow i znacznikow.
     shade = pygame.Surface(size, pygame.SRCALPHA)
     shade.fill((0, 0, 0, 22))
     background.blit(shade, (0, 0))
 
-    _SCALED_SIZE = size
+    _SCALED_KEY = size
     _SCALED_BACKGROUND = background
     return background
 
 
 def _draw_map_background(screen):
-    background = _background_for_size(screen.get_size())
+    center = game_layout_rects(screen)["center"]
+    if center.width <= 0 or center.height <= 0:
+        return
+
+    background = _background_for_size(center.size)
     if background is not None:
-        screen.blit(background, (0, 0))
+        screen.blit(background, center.topleft)
 
 
 def install_map_background():
-    """Rysuje ``tlo_heksow`` raz na klatke, tuz przed pierwszym heksem."""
+    """Rysuje tlo raz na klatke, bez kosztownego sprawdzania kazdego heksa."""
     if not BACKGROUND_PATH.exists():
         return
     if getattr(Tile.draw, "_rise_glory_map_background", False):
@@ -83,12 +92,11 @@ def install_map_background():
     original_draw = Tile.draw
 
     def draw_with_background(self, screen, textures, camera, font, *args, **kwargs):
-        try:
-            pixel = screen.get_at((0, 0))
-            if tuple(pixel[:3]) == tuple(BG[:3]):
-                _draw_map_background(screen)
-        except (IndexError, TypeError, pygame.error):
-            pass
+        # generate_world nadaje heksom identyfikatory od 1 i rysuje je w tej
+        # samej kolejnosci, wiec pierwszy heks jest bezpiecznym punktem do
+        # jednokrotnego narysowania tla przed cala plansza.
+        if self.id == 1:
+            _draw_map_background(screen)
         return original_draw(self, screen, textures, camera, font, *args, **kwargs)
 
     draw_with_background._rise_glory_map_background = True
