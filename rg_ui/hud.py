@@ -4,15 +4,11 @@ from rg_core.data import (
     ACTIONS_PER_TURN,
     COUNCIL_ROUNDS,
     GOLD,
-    LEFT_PANEL_W,
     MAX_WOUNDS,
     MUTED,
     ORANGE,
     PANEL_DARK,
-    RIGHT_PANEL_W,
-    SIDE_MARGIN,
     TEXT,
-    TOP_BAR_H,
     map_name,
 )
 from rg_engine.world_events import active_world_event, movement_cost_with_world_event
@@ -25,7 +21,7 @@ from rg_ui.player_board import (
     open_player_board,
     open_quest_details,
 )
-from rg_ui.common import Button, draw_image_panel, draw_lines, draw_panel, wrap
+from rg_ui.common import Button, draw_image_panel, draw_lines, draw_panel, game_layout_rects, wrap
 
 
 class _PlayerBoardButton(Button):
@@ -50,14 +46,12 @@ def _draw_top_stat(screen, font, text, x, width):
     return box.right + 8
 
 
-def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index):
-    sw, sh = screen.get_size()
-    row_h = 58
-    panel_h = min(sh - TOP_BAR_H - SIDE_MARGIN * 2, 92 + len(players) * row_h + 54)
-    right = pygame.Rect(sw - RIGHT_PANEL_W - SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, RIGHT_PANEL_W, panel_h)
-    draw_image_panel(screen, right, 1)
+def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index, right):
+    pygame.draw.rect(screen, PANEL_DARK, right)
+    draw_image_panel(screen, right, 5)
     screen.blit(font.render("Tabela graczy", True, TEXT), (right.x + 22, right.y + 18))
 
+    row_h = 58
     y = right.y + 56
     for index, player in enumerate(players):
         if y + row_h > right.bottom - 52:
@@ -83,7 +77,8 @@ def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_in
         screen.blit(summary_label, (row.right - summary_label.get_width() - 10, row.y + 28))
         y += row_h
 
-    end_turn = Button("Koniec tury", "end_turn", (right.x + 86, right.bottom - 42, 128, 30))
+    button_y = min(right.bottom - 42, y + 6)
+    end_turn = Button("Koniec tury", "end_turn", (right.centerx - 64, button_y, 128, 30))
     end_turn.draw(screen, small_font, pygame.mouse.get_pos())
     return end_turn
 
@@ -113,16 +108,11 @@ def _draw_helpers(screen, font, small_font, hero, x, y, width):
     return y
 
 
-def _draw_bottom_tile_info(screen, font, small_font, selected_tile):
-    sw, sh = screen.get_size()
-    x = LEFT_PANEL_W + SIDE_MARGIN * 2
-    w = sw - LEFT_PANEL_W - RIGHT_PANEL_W - SIDE_MARGIN * 4
-    h = 54
-    y = sh - h - SIDE_MARGIN
-    if w <= 260:
+def _draw_bottom_tile_info(screen, font, small_font, selected_tile, rect):
+    if rect.width <= 260 or rect.height <= 0:
         return
 
-    rect = pygame.Rect(x, y, w, h)
+    pygame.draw.rect(screen, PANEL_DARK, rect)
     draw_image_panel(screen, rect, 2)
     if selected_tile:
         location = selected_tile.location
@@ -133,7 +123,7 @@ def _draw_bottom_tile_info(screen, font, small_font, selected_tile):
         line = f"Heks: {selected_tile.terrain['name']}    |    Koszt akcji: {cost_text}    |    Lokacja: {location_name}"
     else:
         line = "Kliknij heks na mapie, aby zobaczyc teren, koszt akcji i lokacje."
-    screen.blit(font.render(line, True, TEXT), (rect.x + 20, rect.y + 16))
+    screen.blit(font.render(line, True, TEXT), (rect.x + 20, rect.y + max(0, (rect.height - font.get_height()) // 2)))
 
 
 def draw_game_ui(
@@ -151,7 +141,15 @@ def draw_game_ui(
     council_cycle,
 ):
     sw, sh = screen.get_size()
-    top = pygame.Rect(0, 0, sw, TOP_BAR_H)
+    layout = game_layout_rects(screen)
+    top = layout["top"]
+    left = layout["left"]
+    right = layout["right"]
+    bottom = layout["bottom"]
+
+    # Pelne prostokaty pod teksturami usuwaja przeswity na zaokraglonych rogach
+    # i lacza top, lewy oraz prawy panel w jedna rame wokol planszy.
+    pygame.draw.rect(screen, PANEL_DARK, top)
     draw_image_panel(screen, top, 2, ORANGE)
     screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 18))
 
@@ -178,7 +176,7 @@ def draw_game_ui(
             break
         x = _draw_top_stat(screen, small_font, text, x, width)
 
-    left = pygame.Rect(SIDE_MARGIN, TOP_BAR_H + SIDE_MARGIN, LEFT_PANEL_W, sh - TOP_BAR_H - SIDE_MARGIN * 2)
+    pygame.draw.rect(screen, PANEL_DARK, left)
     draw_image_panel(screen, left, 5)
     screen.blit(font.render("Aktywny bohater", True, TEXT), (left.x + 28, left.y + 24))
     pygame.draw.circle(screen, hero.get("player_color", GOLD), (left.x + 34, left.y + 74), 12)
@@ -220,8 +218,8 @@ def draw_game_ui(
     )
     hero_button.draw(screen, font, pygame.mouse.get_pos())
 
-    end_turn = _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index)
-    _draw_bottom_tile_info(screen, font, small_font, selected_tile)
+    end_turn = _draw_scoreboard(screen, font, small_font, players, tokens, active_player_index, right)
+    _draw_bottom_tile_info(screen, font, small_font, selected_tile, bottom)
 
     if is_player_board_open():
         controls = draw_player_board(screen, hero)
