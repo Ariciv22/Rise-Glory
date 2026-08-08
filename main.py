@@ -19,12 +19,13 @@ from rg_ui.title_flow import install_into_main
 # Usuwamy jasne tlo/ramke zapisana w grafice panel2.png przyciskow menu.
 install_menu_button_fix()
 
+# Najpierw instalujemy viewport planszy. Dzieki temu same heksy i pionki sa
+# przycinane do jasnego srodka pergaminu, ale tlo moze zostac narysowane na
+# calym centralnym obszarze.
+install_locked_map_camera()
+
 # Zamiast czarnego tla pod plansza rysujemy grafike Grafiki/tlo_heksow.png.
 install_map_background()
-
-# Plansza heksowa pozostaje stale wycentrowana w obszarze mapy. Gracz moze
-# tylko zmieniac zoom; przeciaganie i zmiana aktywnego bohatera jej nie przesuwa.
-install_locked_map_camera()
 
 # Zachowujemy zgodnosc z poprawkami ekranu tytulowego, ktore odwolują sie do
 # modulu "main". Faktyczna aplikacja jest teraz w rg_core.app.
