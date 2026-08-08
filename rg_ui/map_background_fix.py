@@ -1,15 +1,15 @@
 """Tlo graficzne pod plansza heksowa na glownej mapie.
 
-Grafika ``Grafiki/tlo_heksow.png`` wypelnia dokladnie caly obszar pomiedzy
-polaczonym lewym i prawym panelem oraz pod gornym HUD-em. Heksy sa rysowane
-na wierzchu, a panele HUD pozostaja poza obszarem tla.
+Grafika ``Grafiki/tlo_heksow.png`` jest skalowana dokladnie do calego obszaru
+pomiedzy bocznymi panelami i pod gornym HUD-em. Nie przycinamy jej trybem
+``cover`` - dzieki temu centralny pergamin zawsze pozostaje w tym samym miejscu
+wzgledem obszaru gry, niezaleznie od rozdzielczosci.
 """
 
 from pathlib import Path
 
 import pygame
 
-from rg_core.data import BG
 from rg_ui.common import game_layout_rects
 from rg_world.map import Tile
 
@@ -37,6 +37,7 @@ def _load_source():
 
 def _background_for_size(size):
     global _SCALED_KEY, _SCALED_BACKGROUND
+
     size = (max(1, int(size[0])), max(1, int(size[1])))
     if _SCALED_KEY == size and _SCALED_BACKGROUND is not None:
         return _SCALED_BACKGROUND
@@ -45,26 +46,14 @@ def _background_for_size(size):
     if source is None:
         return None
 
-    target_w, target_h = size
-    iw, ih = source.get_size()
+    # Skala dokladnie do dostepnego prostokata. To celowe: tlo jest elementem
+    # interfejsu, wiec wazniejsze jest stale polozenie pergaminu niz zachowanie
+    # fotograficznych proporcji obrazka.
+    background = pygame.transform.smoothscale(source, size)
 
-    # Tryb cover: zachowujemy proporcje grafiki, ale wypelniamy caly dostepny
-    # prostokat bez czarnych pasow. Nadmiar jest symetrycznie przycinany.
-    scale = max(target_w / max(1, iw), target_h / max(1, ih))
-    scaled_size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
-    scaled = pygame.transform.smoothscale(source, scaled_size)
-
-    crop_x = max(0, (scaled.get_width() - target_w) // 2)
-    crop_y = max(0, (scaled.get_height() - target_h) // 2)
-    crop = pygame.Rect(crop_x, crop_y, target_w, target_h)
-
-    background = pygame.Surface(size)
-    background.fill(BG)
-    background.blit(scaled, (0, 0), crop)
-
-    # Delikatne przyciemnienie utrzymuje czytelnosc heksow i znacznikow.
+    # Lekkie przyciemnienie poprawia czytelnosc heksow i znacznikow.
     shade = pygame.Surface(size, pygame.SRCALPHA)
-    shade.fill((0, 0, 0, 22))
+    shade.fill((0, 0, 0, 18))
     background.blit(shade, (0, 0))
 
     _SCALED_KEY = size
@@ -83,7 +72,7 @@ def _draw_map_background(screen):
 
 
 def install_map_background():
-    """Rysuje tlo raz na klatke, bez kosztownego sprawdzania kazdego heksa."""
+    """Rysuje tlo raz na klatke przed pierwszym heksem."""
     if not BACKGROUND_PATH.exists():
         return
     if getattr(Tile.draw, "_rise_glory_map_background", False):
@@ -92,9 +81,6 @@ def install_map_background():
     original_draw = Tile.draw
 
     def draw_with_background(self, screen, textures, camera, font, *args, **kwargs):
-        # generate_world nadaje heksom identyfikatory od 1 i rysuje je w tej
-        # samej kolejnosci, wiec pierwszy heks jest bezpiecznym punktem do
-        # jednokrotnego narysowania tla przed cala plansza.
         if self.id == 1:
             _draw_map_background(screen)
         return original_draw(self, screen, textures, camera, font, *args, **kwargs)
