@@ -6,7 +6,11 @@ from typing import Any
 
 import pygame
 
-from rg_engine.world_events import DURATION_UNTIL_RESOLVED, active_world_events
+from rg_engine.world_events import (
+    DURATION_UNTIL_RESOLVED,
+    active_world_events,
+    set_problem_placement_validator,
+)
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 THREAT_MARKER_PATH = ROOT_DIR / "Grafiki" / "zeton_zagrozen.png"
@@ -257,4 +261,5 @@ def install_world_event_markers():
     rg_map.Tile.draw = tile_draw_with_world_markers
     rg_map.Camera.__init__ = camera_init_with_world_marker_registry
     rg_world_package.generate_world = generate_world_with_world_markers
+    set_problem_placement_validator(lambda event: place_problem_marker(event) is not None)
     _INSTALL_DONE = True
