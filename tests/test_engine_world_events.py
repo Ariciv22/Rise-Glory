@@ -141,3 +141,30 @@ def test_unplaceable_problem_is_discarded_before_its_effect_and_next_card_is_dra
     assert event["id"] == "wydarzenie_awaryjne"
     assert player["gold"] == 5
     assert not active_world_events(DURATION_UNTIL_RESOLVED)
+
+
+def test_dev_prefixed_event_can_be_activated_but_never_enters_normal_deck():
+    register_world_event(
+        {
+            "id": "dev_problem_testowy",
+            "name": "[DEV] Problem testowy",
+            "world_level": 3,
+            "duration": DURATION_UNTIL_RESOLVED,
+        }
+    )
+    register_world_event(
+        {
+            "id": "normalne_wydarzenie_poziomu_3",
+            "name": "Normalne wydarzenie poziomu 3",
+            "world_level": 3,
+            "duration": "instant",
+        }
+    )
+
+    activated, _ = activate_world_event("dev_problem_testowy", [])
+    assert activated["dev_only"] is True
+    assert active_world_events(DURATION_UNTIL_RESOLVED)[-1]["id"] == "dev_problem_testowy"
+
+    reset_world_event_deck()
+    event, _message = draw_next_world_event([], random.Random(7), world_level=3)
+    assert event["id"] == "normalne_wydarzenie_poziomu_3"
