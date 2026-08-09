@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from rg_engine.world import update_world_level
+
 DEV_FLAGS = {
     "infinite_actions": False,
     "infinite_gold": False,
@@ -32,12 +34,18 @@ def toggle_dev_flag(name: str) -> bool:
 
 
 def change_legend(hero: dict[str, Any], amount: int) -> int:
-    hero["legend"] = max(0, int(hero.get("legend", 0) or 0) + int(amount or 0))
+    previous = int(hero.get("legend", 0) or 0)
+    hero["legend"] = max(0, previous + int(amount or 0))
+    if hero["legend"] != previous:
+        update_world_level()
     return hero["legend"]
 
 
 def set_legend(hero: dict[str, Any], value: int) -> int:
+    previous = int(hero.get("legend", 0) or 0)
     hero["legend"] = max(0, int(value or 0))
+    if hero["legend"] != previous:
+        update_world_level()
     return hero["legend"]
 
 
