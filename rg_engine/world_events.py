@@ -98,13 +98,6 @@ def _discard(event: dict[str, Any]) -> None:
         _DISCARD_PILES[level].append(event_id)
 
 
-def _remove_active_event(event_id: str) -> dict[str, Any] | None:
-    for index, event in enumerate(list(_ACTIVE_EVENTS)):
-        if str(event.get("id")) == str(event_id):
-            return _ACTIVE_EVENTS.pop(index)
-    return None
-
-
 def world_event_modifier(name: str, default: int = 0) -> int:
     total = int(default)
     for event in _ACTIVE_EVENTS:
@@ -218,13 +211,6 @@ def resolve_problem_event(event_id: str, resolved_by: str = "") -> dict[str, Any
     return None
 
 
-def _reject_unplaceable_problem(event: dict[str, Any]) -> None:
-    """Karta nie wchodzi do gry, ale trafia na odrzut zgodnie z zasadą talii."""
-    removed = _remove_active_event(str(event.get("id") or ""))
-    if removed is not None:
-        _discard(removed)
-
-
 def activate_world_event(event_id: str, players: Iterable[dict]) -> tuple[dict[str, Any], str]:
     if event_id not in _EVENT_REGISTRY:
         raise KeyError(f"Nieznane Wydarzenie Swiata: {event_id}")
@@ -260,7 +246,8 @@ def draw_next_world_event(
 
     Domyślnie wywołanie oznacza rozpoczęcie kolejnej Rady, dlatego najpierw
     wygaszane są efekty `until_next_council`. Problem bez możliwego miejsca na
-    znacznik jest odrzucany i dobierana jest kolejna karta z tej samej talii.
+    znacznik jest odrzucany przed uruchomieniem efektów i dobierana jest kolejna
+    karta z tej samej talii.
     """
     rng = rng or random
     if begin_council:
@@ -280,13 +267,12 @@ def draw_next_world_event(
             return None, f"Brak dostepnych kart Wydarzen Swiata poziomu {level}."
 
         event_id = _DRAW_PILES[level].pop()
-        event, message = activate_world_event(event_id, players)
-        if event.get("duration") != DURATION_UNTIL_RESOLVED:
-            return event, message
+        candidate = copy.deepcopy(_EVENT_REGISTRY[event_id])
+        if candidate.get("duration") == DURATION_UNTIL_RESOLVED and _PROBLEM_PLACEMENT_VALIDATOR is not None:
+            if not _PROBLEM_PLACEMENT_VALIDATOR(candidate):
+                _discard(candidate)
+                continue
 
-        if _PROBLEM_PLACEMENT_VALIDATOR is None or _PROBLEM_PLACEMENT_VALIDATOR(event):
-            return event, message
-
-        _reject_unplaceable_problem(event)
+        return activate_world_event(event_id, players)
 
     return None, "Nie udało się rozmieścić żadnego dostępnego Problemu na mapie."
