@@ -5,7 +5,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Any
 
-from rg_engine.heroes import ensure_hero_state, helper_bonus
+from rg_engine.heroes import apply_wounds, ensure_hero_state, heal_wounds, helper_bonus
 from rg_engine.items import add_item, equipment_stat_bonus, normalise_item
 from rg_engine.world import update_world_level
 from rg_engine.world_events import DURATION_UNTIL_RESOLVED, active_world_events, resolve_problem_event
@@ -69,15 +69,6 @@ def can_begin_problem_attempt(player: dict[str, Any], event: dict[str, Any]) -> 
     return True, ""
 
 
-def _material_count(player: dict[str, Any], name: str) -> int:
-    materials = player.get("materials", {})
-    if isinstance(materials, dict):
-        return int(materials.get(name, 0) or 0)
-    if isinstance(materials, list):
-        return sum(1 for item in materials if str(item) == str(name))
-    return 0
-
-
 def _remove_material(player: dict[str, Any], name: str, amount: int) -> int:
     amount = max(0, int(amount or 0))
     materials = player.get("materials", {})
@@ -127,9 +118,7 @@ def _apply_reward(player: dict[str, Any], reward: dict[str, Any]) -> dict[str, A
 
     heal = max(0, int(reward.get("heal", 0) or 0))
     if heal:
-        before = max(0, int(player.get("wounds", 0) or 0))
-        player["wounds"] = max(0, before - heal)
-        result["wounds_healed"] = before - player["wounds"]
+        result["wounds_healed"] = heal_wounds(player, heal)
 
     food = reward.get("food", []) or []
     if isinstance(food, dict):
@@ -188,8 +177,8 @@ def _apply_failure(player: dict[str, Any], consequence: dict[str, Any], event_id
 
     wounds = max(0, int(consequence.get("wounds", 0) or 0))
     if wounds:
-        player["wounds"] = int(player.get("wounds", 0) or 0) + wounds
-        result["wounds"] = wounds
+        applied, _defeated = apply_wounds(player, wounds)
+        result["wounds"] = applied
 
     gold = max(0, int(consequence.get("gold", 0) or 0))
     if gold:
