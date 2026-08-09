@@ -4,6 +4,8 @@ from pathlib import Path
 
 from rg_ui import council as rg_council_background
 from rg_world.adventure import install_adventure_system
+from rg_world.world_event_markers import install_world_event_markers
+from rg_ui.world_state import install_world_state_ui
 from rg_ui.combat_image_fit import install_combat_image_fit
 from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
@@ -108,6 +110,8 @@ def install_council_trade_background():
 
 
 install_adventure_system()
+install_world_event_markers()
+install_world_state_ui()
 install_premium_dice_animation()
 install_combat_image_fit()
 install_council_trade_background()
