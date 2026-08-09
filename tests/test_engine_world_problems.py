@@ -152,3 +152,22 @@ def test_failed_method_reveals_and_applies_its_own_consequence():
     assert not success
     assert player["gold"] == 3
     assert "-2 Złota" in message
+
+
+def test_problem_wounds_use_normal_hero_cap():
+    player = hero(stat=0)
+    player["wounds"] = 3
+    register_players([player])
+
+    definition = problem_event("problem_rany_limit")
+    definition["problem"]["methods"][0]["failure"] = {"wounds": 3}
+    register_world_event(definition)
+    activate_world_event(definition["id"], [player])
+    event = active_world_events(DURATION_UNTIL_RESOLVED)[-1]
+
+    session, _ = begin_problem_attempt(player, event)
+    success, message = resolve_problem_method(session, 0, FixedRng(1))
+
+    assert not success
+    assert player["wounds"] == 4
+    assert "+1 Ran" in message
