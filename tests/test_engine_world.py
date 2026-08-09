@@ -41,24 +41,30 @@ def test_world_cannot_reach_level_three_without_half_of_group_on_level_two():
     ]
     register_players(players)
     assert update_world_level() == 2
+    assert update_world_level() == 2
 
 
-def test_world_can_reach_level_three_when_half_of_group_are_level_two():
+def test_world_reaches_level_three_after_later_legend_change_makes_half_ready():
     players = [
-        {"legend": 20},
         {"legend": 10},
-        {"legend": 10},
+        {"legend": 0},
+        {"legend": 0},
         {"legend": 0},
         {"legend": 0},
         {"legend": 0},
     ]
     register_players(players)
+    assert update_world_level() == 2
+
+    players[0]["legend"] = 20
+    players[1]["legend"] = 10
+    players[2]["legend"] = 10
     assert update_world_level() == 3
 
 
-def test_world_cannot_reach_level_four_without_half_of_group_on_level_three():
+def test_world_reaches_level_four_only_after_half_group_reaches_level_three():
     players = [
-        {"legend": 30},
+        {"legend": 20},
         {"legend": 10},
         {"legend": 10},
         {"legend": 0},
@@ -66,20 +72,26 @@ def test_world_cannot_reach_level_four_without_half_of_group_on_level_three():
         {"legend": 0},
     ]
     register_players(players)
+    assert update_world_level() == 2
     assert update_world_level() == 3
 
-
-def test_world_can_continue_immediately_when_each_step_is_ready():
-    players = [
-        {"legend": 30},
-        {"legend": 20},
-        {"legend": 20},
-        {"legend": 0},
-        {"legend": 0},
-        {"legend": 0},
-    ]
-    register_players(players)
+    players[0]["legend"] = 30
+    players[1]["legend"] = 20
+    players[2]["legend"] = 20
     assert update_world_level() == 4
+
+
+def test_single_update_never_skips_a_world_level_even_if_later_requirements_are_already_met():
+    players = [
+        {"legend": 30},
+        {"legend": 20},
+        {"legend": 20},
+        {"legend": 0},
+        {"legend": 0},
+        {"legend": 0},
+    ]
+    register_players(players)
+    assert update_world_level() == 2
 
 
 def test_quest_difficulty_adds_two_for_each_level_ahead():
