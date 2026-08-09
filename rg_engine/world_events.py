@@ -37,6 +37,7 @@ def register_world_event(definition: dict[str, Any]) -> dict[str, Any]:
     event.setdefault("modifiers", {})
     event["world_level"] = _level(event.get("world_level", 1))
     event.setdefault("problem", None)
+    event.setdefault("dev_only", False)
     _EVENT_REGISTRY[event_id] = event
     return copy.deepcopy(event)
 
@@ -92,6 +93,8 @@ def _append_history(event: dict[str, Any], status: str, ending: str = "") -> Non
 
 
 def _discard(event: dict[str, Any]) -> None:
+    if event.get("dev_only"):
+        return
     level = _level(event.get("world_level", 1))
     event_id = str(event.get("id") or "")
     if event_id and event_id not in _DISCARD_PILES[level]:
@@ -158,7 +161,7 @@ def _eligible_ids(world_level: int) -> list[str]:
     return [
         event_id
         for event_id, event in _EVENT_REGISTRY.items()
-        if _level(event.get("world_level", 1)) == target
+        if _level(event.get("world_level", 1)) == target and not bool(event.get("dev_only"))
     ]
 
 
@@ -247,7 +250,8 @@ def draw_next_world_event(
     Domyślnie wywołanie oznacza rozpoczęcie kolejnej Rady, dlatego najpierw
     wygaszane są efekty `until_next_council`. Problem bez możliwego miejsca na
     znacznik jest odrzucany przed uruchomieniem efektów i dobierana jest kolejna
-    karta z tej samej talii.
+    karta z tej samej talii. Wydarzenia oznaczone `dev_only` nie trafiają do
+    żadnej normalnej talii i mogą być aktywowane wyłącznie bezpośrednio.
     """
     rng = rng or random
     if begin_council:
