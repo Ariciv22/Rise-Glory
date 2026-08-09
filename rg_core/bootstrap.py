@@ -31,7 +31,7 @@ MODULE_ALIASES = {
     "rg_player_board": "rg_ui.player_board",
     "rg_premium_dice": "rg_ui.premium_dice",
     "rg_quest_ui": "rg_ui.quest",
-    "rg_screens": "rg_ui.screens",
+    "rg_screens": "rg_ui.screens_bridge",
     "rg_start_intro": "rg_ui.start_intro",
     "rg_start_intro_base": "rg_ui.start_intro_base",
     "rg_title_flow": "rg_ui.title_flow",
