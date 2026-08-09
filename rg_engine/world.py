@@ -96,17 +96,18 @@ def can_advance_world_level(players: Iterable[dict] | None = None, level: int | 
 
 
 def update_world_level(players: Iterable[dict] | None = None) -> int:
-    """Natychmiast awansuje świat, gdy kolejne progi są spełnione.
+    """Sprawdza awans i może podnieść świat najwyżej o jeden poziom.
 
-    Każdy krok jest rozpatrywany osobno, więc świat nigdy nie pomija poziomu.
-    Przejście 2 -> 3 wymaga już gotowości połowy graczy na poziomie 2 itd.
+    Funkcję wywołujemy w momencie zmiany Punktów Legendy. Dzięki temu awans
+    następuje natychmiast po spełnieniu warunków, ale pojedyncze zdobycie
+    Legendy nigdy nie powoduje przeskoku np. z poziomu 1 od razu na 3.
     """
     global _WORLD_LEVEL
     if _FORCED_WORLD_LEVEL is not None:
         return _FORCED_WORLD_LEVEL
 
     source = list(_REGISTERED_PLAYERS if players is None else players)
-    while can_advance_world_level(source, _WORLD_LEVEL):
+    if can_advance_world_level(source, _WORLD_LEVEL):
         previous = _WORLD_LEVEL
         _WORLD_LEVEL += 1
         _WORLD_LEVEL_CHANGES.append((previous, _WORLD_LEVEL))
@@ -122,9 +123,10 @@ def consume_world_level_changes() -> list[tuple[int, int]]:
 
 
 def current_world_level(players: Iterable[dict] | None = None) -> int:
+    """Zwraca zapisany Poziom Świata bez ubocznego uruchamiania kolejnego awansu."""
     if _FORCED_WORLD_LEVEL is not None:
         return _FORCED_WORLD_LEVEL
-    return update_world_level(players)
+    return _WORLD_LEVEL
 
 
 def quest_difficulty_from_legend_gap(player: dict, world_level: int | None = None) -> int:
