@@ -16,5 +16,8 @@ from rg_ui.council_market_rules_bridge import draw_council as _draw_council_mark
 _legacy_council.draw_council = _draw_council_market
 
 from rg_ui.council_flow import draw_council  # noqa: E402
+from rg_ui.council_market_ui_fixes import install_council_market_ui_fixes  # noqa: E402
+
+install_council_market_ui_fixes()
 
 __all__ = [name for name in globals() if not name.startswith("_")]
