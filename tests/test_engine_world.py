@@ -17,24 +17,11 @@ def test_required_ready_players_is_half_rounded_up():
     assert [required_ready_players(value) for value in range(1, 7)] == [1, 1, 2, 2, 3, 3]
 
 
-def test_leader_cannot_advance_world_without_half_of_group_ready():
+def test_leader_alone_can_open_world_level_two():
     players = [
-        {"legend": 20},
-        {"legend": 9},
-        {"legend": 9},
-        {"legend": 9},
-        {"legend": 9},
-        {"legend": 9},
-    ]
-    register_players(players)
-    assert update_world_level() == 1
-
-
-def test_world_advances_when_leader_and_half_of_group_are_ready():
-    players = [
-        {"legend": 20},
         {"legend": 10},
-        {"legend": 10},
+        {"legend": 0},
+        {"legend": 0},
         {"legend": 0},
         {"legend": 0},
         {"legend": 0},
@@ -43,7 +30,33 @@ def test_world_advances_when_leader_and_half_of_group_are_ready():
     assert update_world_level() == 2
 
 
-def test_world_does_not_skip_a_level_without_readiness_for_next_step():
+def test_world_cannot_reach_level_three_without_half_of_group_on_level_two():
+    players = [
+        {"legend": 20},
+        {"legend": 9},
+        {"legend": 9},
+        {"legend": 9},
+        {"legend": 9},
+        {"legend": 9},
+    ]
+    register_players(players)
+    assert update_world_level() == 2
+
+
+def test_world_can_reach_level_three_when_half_of_group_are_level_two():
+    players = [
+        {"legend": 20},
+        {"legend": 10},
+        {"legend": 10},
+        {"legend": 0},
+        {"legend": 0},
+        {"legend": 0},
+    ]
+    register_players(players)
+    assert update_world_level() == 3
+
+
+def test_world_cannot_reach_level_four_without_half_of_group_on_level_three():
     players = [
         {"legend": 30},
         {"legend": 10},
@@ -53,7 +66,7 @@ def test_world_does_not_skip_a_level_without_readiness_for_next_step():
         {"legend": 0},
     ]
     register_players(players)
-    assert update_world_level() == 2
+    assert update_world_level() == 3
 
 
 def test_world_can_continue_immediately_when_each_step_is_ready():
@@ -66,7 +79,7 @@ def test_world_can_continue_immediately_when_each_step_is_ready():
         {"legend": 0},
     ]
     register_players(players)
-    assert update_world_level() == 3
+    assert update_world_level() == 4
 
 
 def test_quest_difficulty_adds_two_for_each_level_ahead():
