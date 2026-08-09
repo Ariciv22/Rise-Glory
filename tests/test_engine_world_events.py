@@ -3,6 +3,7 @@ import random
 from rg_content.world_events import WORLD_EVENTS, register_all_world_events
 from rg_engine.world_events import (
     DURATION_UNTIL_NEXT_COUNCIL,
+    DURATION_UNTIL_RESOLVED,
     activate_world_event,
     active_world_events,
     draw_next_world_event,
@@ -13,6 +14,7 @@ from rg_engine.world_events import (
     register_world_event,
     registered_world_events,
     reset_world_event_deck,
+    set_problem_placement_validator,
     world_event_history,
 )
 
@@ -20,6 +22,7 @@ from rg_engine.world_events import (
 def setup_function():
     register_all_world_events()
     reset_world_event_deck()
+    set_problem_placement_validator(None)
 
 
 def test_registered_world_event_deck_has_five_level_one_cards():
@@ -106,3 +109,35 @@ def test_until_next_council_events_expire_and_enter_history():
     history = world_event_history()
     assert history[-1]["id"] == "wielki_jarmark"
     assert history[-1]["history_status"] == "expired"
+
+
+def test_unplaceable_problem_is_discarded_before_its_effect_and_next_card_is_drawn():
+    register_world_event(
+        {
+            "id": "problem_bez_miejsca",
+            "name": "Problem bez miejsca",
+            "world_level": 4,
+            "duration": DURATION_UNTIL_RESOLVED,
+            "effects": [{"type": "gold", "amount": 99}],
+            "problem": {"placement": {"type": "tile_id", "tile_id": 999999}},
+        }
+    )
+    register_world_event(
+        {
+            "id": "wydarzenie_awaryjne",
+            "name": "Wydarzenie awaryjne",
+            "world_level": 4,
+            "duration": "instant",
+        }
+    )
+
+    class ProblemFirstRng:
+        def shuffle(self, values):
+            values.sort(key=lambda value: 1 if value == "problem_bez_miejsca" else 0)
+
+    set_problem_placement_validator(lambda event: event.get("id") != "problem_bez_miejsca")
+    player = {"gold": 5, "food": []}
+    event, _message = draw_next_world_event([player], ProblemFirstRng(), world_level=4)
+    assert event["id"] == "wydarzenie_awaryjne"
+    assert player["gold"] == 5
+    assert not active_world_events(DURATION_UNTIL_RESOLVED)
