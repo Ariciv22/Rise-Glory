@@ -7,7 +7,7 @@ prowadzi przez nowy przepływ: Wieści ze świata -> Wydarzenie -> gotowość gr
 
 from rg_ui.screens import *  # noqa: F401,F403
 from rg_ui import council as _legacy_council
-from rg_ui.council_market import draw_council as _draw_council_market
+from rg_ui.council_market_full import draw_council as _draw_council_market
 
 # ``council_flow`` korzysta z modułu ``rg_ui.council`` do samej sesji Wieści.
 # Po fazie gotowości deleguje wywołanie ``draw_council`` z tego modułu, dlatego
