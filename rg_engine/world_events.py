@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import random
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from rg_engine.world import current_world_level
 
@@ -12,6 +12,7 @@ _DISCARD_PILES: dict[int, list[str]] = {level: [] for level in range(1, 5)}
 _ACTIVE_EVENTS: list[dict[str, Any]] = []
 _HISTORY: list[dict[str, Any]] = []
 _LAST_EVENT_ID_BY_LEVEL: dict[int, str | None] = {level: None for level in range(1, 5)}
+_PROBLEM_PLACEMENT_VALIDATOR: Callable[[dict[str, Any]], bool] | None = None
 
 DURATION_INSTANT = "instant"
 DURATION_UNTIL_NEXT_COUNCIL = "until_next_council"
@@ -46,6 +47,12 @@ def registered_world_events(world_level: int | None = None) -> list[dict[str, An
         target = _level(world_level)
         events = [event for event in events if _level(event.get("world_level")) == target]
     return [copy.deepcopy(event) for event in events]
+
+
+def set_problem_placement_validator(validator: Callable[[dict[str, Any]], bool] | None) -> None:
+    """Podpina warstwę mapy bez uzależniania silnika od Pygame."""
+    global _PROBLEM_PLACEMENT_VALIDATOR
+    _PROBLEM_PLACEMENT_VALIDATOR = validator
 
 
 def reset_world_event_deck() -> None:
@@ -89,6 +96,13 @@ def _discard(event: dict[str, Any]) -> None:
     event_id = str(event.get("id") or "")
     if event_id and event_id not in _DISCARD_PILES[level]:
         _DISCARD_PILES[level].append(event_id)
+
+
+def _remove_active_event(event_id: str) -> dict[str, Any] | None:
+    for index, event in enumerate(list(_ACTIVE_EVENTS)):
+        if str(event.get("id")) == str(event_id):
+            return _ACTIVE_EVENTS.pop(index)
+    return None
 
 
 def world_event_modifier(name: str, default: int = 0) -> int:
@@ -161,7 +175,6 @@ def _refill_draw_pile(world_level: int, rng) -> None:
         ids = list(_DISCARD_PILES[level])
         _DISCARD_PILES[level] = []
     else:
-        # Pierwsze tasowanie danego poziomu bierze wszystkie jego karty.
         ids = _eligible_ids(level)
         active_ids = {str(event.get("id")) for event in _ACTIVE_EVENTS}
         ids = [event_id for event_id in ids if event_id not in active_ids]
@@ -205,6 +218,13 @@ def resolve_problem_event(event_id: str, resolved_by: str = "") -> dict[str, Any
     return None
 
 
+def _reject_unplaceable_problem(event: dict[str, Any]) -> None:
+    """Karta nie wchodzi do gry, ale trafia na odrzut zgodnie z zasadą talii."""
+    removed = _remove_active_event(str(event.get("id") or ""))
+    if removed is not None:
+        _discard(removed)
+
+
 def activate_world_event(event_id: str, players: Iterable[dict]) -> tuple[dict[str, Any], str]:
     if event_id not in _EVENT_REGISTRY:
         raise KeyError(f"Nieznane Wydarzenie Swiata: {event_id}")
@@ -239,20 +259,34 @@ def draw_next_world_event(
     """Dobiera losową kartę wyłącznie z talii aktualnego Poziomu Świata.
 
     Domyślnie wywołanie oznacza rozpoczęcie kolejnej Rady, dlatego najpierw
-    wygaszane są efekty `until_next_council`.
+    wygaszane są efekty `until_next_council`. Problem bez możliwego miejsca na
+    znacznik jest odrzucany i dobierana jest kolejna karta z tej samej talii.
     """
     rng = rng or random
     if begin_council:
         expire_until_next_council()
 
     level = _level(world_level if world_level is not None else current_world_level(players))
-    if not _eligible_ids(level):
+    eligible = _eligible_ids(level)
+    if not eligible:
         return None, f"Brak zarejestrowanych kart Wydarzen Swiata poziomu {level}."
 
-    if not _DRAW_PILES[level]:
-        _refill_draw_pile(level, rng)
-    if not _DRAW_PILES[level]:
-        return None, f"Brak dostepnych kart Wydarzen Swiata poziomu {level}."
+    attempts_left = max(1, len(eligible))
+    while attempts_left > 0:
+        attempts_left -= 1
+        if not _DRAW_PILES[level]:
+            _refill_draw_pile(level, rng)
+        if not _DRAW_PILES[level]:
+            return None, f"Brak dostepnych kart Wydarzen Swiata poziomu {level}."
 
-    event_id = _DRAW_PILES[level].pop()
-    return activate_world_event(event_id, players)
+        event_id = _DRAW_PILES[level].pop()
+        event, message = activate_world_event(event_id, players)
+        if event.get("duration") != DURATION_UNTIL_RESOLVED:
+            return event, message
+
+        if _PROBLEM_PLACEMENT_VALIDATOR is None or _PROBLEM_PLACEMENT_VALIDATOR(event):
+            return event, message
+
+        _reject_unplaceable_problem(event)
+
+    return None, "Nie udało się rozmieścić żadnego dostępnego Problemu na mapie."
