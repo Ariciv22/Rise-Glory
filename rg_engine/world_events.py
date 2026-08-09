@@ -37,7 +37,7 @@ def register_world_event(definition: dict[str, Any]) -> dict[str, Any]:
     event.setdefault("modifiers", {})
     event["world_level"] = _level(event.get("world_level", 1))
     event.setdefault("problem", None)
-    event.setdefault("dev_only", False)
+    event.setdefault("dev_only", event_id.startswith("dev_"))
     _EVENT_REGISTRY[event_id] = event
     return copy.deepcopy(event)
 
