@@ -6,7 +6,7 @@ import pygame
 
 from rg_core.data import GOLD, TEXT
 from rg_ui import council_market as market_ui
-from rg_ui.council_market_full import draw_council as _draw_full_council
+from rg_ui import council_market_full as market_full
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 TURN_BANNER_MS = 1450
@@ -21,6 +21,99 @@ _LAST_ACTIVE_PLAYER = None
 _BANNER_STARTED_AT = 0
 _BELL = None
 _BELL_LOADED = False
+
+# pygame.key.get_pressed() zwraca ScancodeWrapper, którego w nowszym Pygame
+# nie wolno iterować. Sprawdzamy wyłącznie konkretne klawisze używane przez Czat.
+_CHAT_KEYS = (
+    pygame.K_BACKSPACE,
+    pygame.K_RETURN,
+    pygame.K_KP_ENTER,
+    pygame.K_ESCAPE,
+    pygame.K_SPACE,
+    pygame.K_MINUS,
+    pygame.K_EQUALS,
+    pygame.K_COMMA,
+    pygame.K_PERIOD,
+    pygame.K_SLASH,
+    pygame.K_SEMICOLON,
+    pygame.K_QUOTE,
+    pygame.K_0,
+    pygame.K_1,
+    pygame.K_2,
+    pygame.K_3,
+    pygame.K_4,
+    pygame.K_5,
+    pygame.K_6,
+    pygame.K_7,
+    pygame.K_8,
+    pygame.K_9,
+    pygame.K_a,
+    pygame.K_b,
+    pygame.K_c,
+    pygame.K_d,
+    pygame.K_e,
+    pygame.K_f,
+    pygame.K_g,
+    pygame.K_h,
+    pygame.K_i,
+    pygame.K_j,
+    pygame.K_k,
+    pygame.K_l,
+    pygame.K_m,
+    pygame.K_n,
+    pygame.K_o,
+    pygame.K_p,
+    pygame.K_q,
+    pygame.K_r,
+    pygame.K_s,
+    pygame.K_t,
+    pygame.K_u,
+    pygame.K_v,
+    pygame.K_w,
+    pygame.K_x,
+    pygame.K_y,
+    pygame.K_z,
+)
+
+
+def _safe_poll_chat_keyboard(session):
+    pressed = pygame.key.get_pressed()
+    previous = market_full._PREVIOUS_KEYS
+    if not isinstance(previous, dict):
+        previous = {}
+
+    current = {key: bool(pressed[key]) for key in _CHAT_KEYS}
+    if not market_full._CHAT_FOCUSED or market_full._PANEL_TAB != "chat":
+        market_full._PREVIOUS_KEYS = current
+        return
+
+    mods = pygame.key.get_mods()
+    shift = bool(mods & pygame.KMOD_SHIFT)
+    for key in _CHAT_KEYS:
+        if not current.get(key) or previous.get(key, False):
+            continue
+        if key == pygame.K_BACKSPACE:
+            market_full._CHAT_BUFFER = market_full._CHAT_BUFFER[:-1]
+            continue
+        if key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+            market_full._send_chat(session)
+            continue
+        if key == pygame.K_ESCAPE:
+            market_full._CHAT_FOCUSED = False
+            continue
+        if len(market_full._CHAT_BUFFER) >= 300:
+            continue
+        char = market_full._key_to_character(key, shift)
+        if char:
+            market_full._CHAT_BUFFER += char
+
+    market_full._PREVIOUS_KEYS = current
+
+
+# Podmieniamy wadliwy polling w module pełnego ekranu Rady. Cała Rada nadal
+# działa na jednym lokalnym stanowisku: operator przeklikuje decyzje kolejnych
+# graczy, a zmiana aktywnego gracza nie oznacza przekazywania sterowania.
+market_full._poll_chat_keyboard = _safe_poll_chat_keyboard
 
 
 def _load_bell():
@@ -87,7 +180,7 @@ def _draw_turn_banner(screen, title_font, font, session):
     screen.blit(panel, rect.topleft)
 
     player = session.players[session.active_player_index]
-    title = title_font.render("Kolej Gracza", True, TEXT)
+    title = title_font.render("Tura Rady", True, TEXT)
     name = font.render(str(player.get("name", "Gracz")), True, GOLD)
     screen.blit(title, title.get_rect(center=(rect.centerx, rect.y + 62)))
     screen.blit(name, name.get_rect(center=(rect.centerx, rect.y + 122)))
@@ -96,6 +189,6 @@ def _draw_turn_banner(screen, title_font, font, session):
 def draw_council(screen, title_font, font, small_font, mouse, round_number):
     session = market_ui._session(round_number)
     _update_turn_banner(session)
-    buttons = _draw_full_council(screen, title_font, font, small_font, mouse, round_number)
+    buttons = market_full.draw_council(screen, title_font, font, small_font, mouse, round_number)
     _draw_turn_banner(screen, title_font, font, session)
     return buttons
