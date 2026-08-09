@@ -277,13 +277,26 @@ def _advance_timed_phase(flow):
         flow.change_phase("ready")
 
 
+def _cover_finished_instant_event(screen, font, small_font, flow):
+    if not flow.is_instant:
+        return
+    sw = screen.get_width()
+    rect = pygame.Rect(max(24, sw // 2 - 470), 94, min(940, sw - 48), 82)
+    _panel(screen, rect, alpha=232, border=(100, 110, 116))
+    screen.blit(font.render("Wydarzenie Świata rozpatrzone", True, TEXT), (rect.x + 16, rect.y + 14))
+    label = small_font.render("Karta natychmiastowa trafiła na stos odrzuconych.", True, MUTED)
+    screen.blit(label, (rect.x + 16, rect.y + 48))
+
+
 def draw_council(screen, title_font, font, small_font, mouse, round_number):
     """Frontowy przepływ Rady, a po potwierdzeniach delegacja do istniejącego ekranu handlu."""
     flow = _flow(round_number)
     _advance_timed_phase(flow)
 
     if flow.phase == "council":
-        return council_ui.draw_council(screen, title_font, font, small_font, mouse, round_number)
+        buttons = council_ui.draw_council(screen, title_font, font, small_font, mouse, round_number)
+        _cover_finished_instant_event(screen, font, small_font, flow)
+        return buttons
 
     _load_background(screen)
 
