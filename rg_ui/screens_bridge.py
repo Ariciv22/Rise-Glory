@@ -18,8 +18,10 @@ _legacy_council.draw_council = _draw_council_market
 from rg_ui.council_flow import draw_council  # noqa: E402
 from rg_ui.council_market_ui_fixes import install_council_market_ui_fixes  # noqa: E402
 from rg_ui.council_chat_position_fix import install_council_chat_position_fix  # noqa: E402
+from rg_ui.council_docked_layout import install_council_docked_layout  # noqa: E402
 
 install_council_market_ui_fixes()
 install_council_chat_position_fix()
+install_council_docked_layout()
 
 __all__ = [name for name in globals() if not name.startswith("_")]
