@@ -5,7 +5,7 @@ from typing import Any
 
 PROTOCOL_VERSION = 1
 DEFAULT_PORT = 27840
-MAX_MESSAGE_BYTES = 64 * 1024
+MAX_MESSAGE_BYTES = 512 * 1024
 
 
 def make_message(message_type: str, **payload: Any) -> dict[str, Any]:
