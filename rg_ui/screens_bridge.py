@@ -19,6 +19,7 @@ from rg_ui.council_flow import draw_council  # noqa: E402
 from rg_ui.council_market_ui_fixes import install_council_market_ui_fixes  # noqa: E402
 from rg_ui.council_chat_position_fix import install_council_chat_position_fix  # noqa: E402
 from rg_ui.council_docked_layout import install_council_docked_layout  # noqa: E402
+from rg_ui.lan_entry import draw_multiplayer  # noqa: E402,F401
 
 install_council_market_ui_fixes()
 install_council_chat_position_fix()
