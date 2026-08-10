@@ -45,6 +45,9 @@ class LanClient:
             self.close()
             raise ConnectionError("Utracono polaczenie z serwerem LAN.") from exc
 
+    def configure_hero(self, archetype_id: int) -> None:
+        self.send(make_message("configure_hero", archetype_id=int(archetype_id)))
+
     def set_ready(self, ready: bool) -> None:
         self.send(make_message("ready", ready=bool(ready)))
 
@@ -53,6 +56,15 @@ class LanClient:
 
     def start_game(self) -> None:
         self.send(make_message("start_game"))
+
+    def request_move(self, target_tile_id: int) -> None:
+        self.send(make_message("move_request", target_tile_id=int(target_tile_id)))
+
+    def end_turn(self) -> None:
+        self.send(make_message("end_turn_request"))
+
+    def request_game_state(self) -> None:
+        self.send(make_message("request_game_state"))
 
     def ping(self) -> None:
         self.send(make_message("ping", sent_at=time.time()))
@@ -116,7 +128,8 @@ def _print_event(event: dict[str, Any]) -> None:
         for player in event.get("players", []):
             host = " HOST" if player.get("is_host") else ""
             ready = "GOTOWY" if player.get("ready") else "czeka"
-            print(f"- {player.get('name')} [{ready}]{host}")
+            hero = player.get("archetype_id") or "-"
+            print(f"- {player.get('name')} [bohater {hero}] [{ready}]{host}")
         return
     if event_type == "chat":
         print(f"[{event.get('name')}] {event.get('text')}")
@@ -125,7 +138,14 @@ def _print_event(event: dict[str, Any]) -> None:
         print(f"Polaczono. ID={event.get('player_id')} host={event.get('is_host')}")
         return
     if event_type == "game_start":
-        print("\n*** SERWER ROZPOCZAL GRE LAN ***")
+        snapshot = event.get("snapshot", {})
+        active = snapshot.get("turn", {}).get("active_player_index", "-")
+        print(f"\n*** SERWER ROZPOCZAL GRE LAN | aktywny gracz index={active} ***")
+        return
+    if event_type == "game_state":
+        snapshot = event.get("snapshot", {})
+        turn = snapshot.get("turn", {})
+        print(f"Stan gry: runda {turn.get('round_number')} | aktywny index={turn.get('active_player_index')}")
         return
     if event_type in {"error", "rejected", "connection_lost"}:
         print(f"{event_type.upper()}: {event.get('reason', '-')}")
@@ -143,7 +163,7 @@ def main() -> None:
 
     client = LanClient()
     client.connect(args.host, args.name, args.port)
-    print("Komendy: ready, unready, start, say TEKST, ping, quit")
+    print("Komendy: hero 1-6, ready, unready, start, move ID, end, say TEKST, ping, quit")
     try:
         while client.connected:
             for event in client.poll():
@@ -152,12 +172,18 @@ def main() -> None:
                 command = input("> ").strip()
             except EOFError:
                 break
-            if command == "ready":
+            if command.startswith("hero "):
+                client.configure_hero(int(command.split(maxsplit=1)[1]))
+            elif command == "ready":
                 client.set_ready(True)
             elif command == "unready":
                 client.set_ready(False)
             elif command == "start":
                 client.start_game()
+            elif command.startswith("move "):
+                client.request_move(int(command.split(maxsplit=1)[1]))
+            elif command == "end":
+                client.end_turn()
             elif command.startswith("say "):
                 client.send_chat(command[4:])
             elif command == "ping":
