@@ -1,27 +1,33 @@
-"""Sterowanie plansza heksowa wewnatrz jasnego srodka pergaminu.
+"""Sterowanie plansza heksowa wewnatrz pergaminu.
 
-Cala rozeta jest widoczna przy starcie i dopasowana do jasnego pola mapy.
-Przy przyblizeniu gracz moze przeciagac plansze. Nie ukrywamy ani nie
-odrzucamy heksow na krawedziach - wszystkie sa zawsze normalnie rysowane.
-Zoom jest zakotwiczony w srodku aktualnego widoku, dzieki czemu plansza nie
-"ucieka" w strone kursora podczas przyblizania.
+Najwazniejsza zasada tego modulu: pelny obrys rozety ma zawsze pozostawac
+wewnatrz bezpiecznego pola pergaminu. Nie ukrywamy heksow i nie przycinamy ich
+maska. Zamiast tego ograniczamy zoom oraz drag tak, aby cala plansza zawsze
+byla widoczna na mapie.
 """
-
-import math
 
 import pygame
 
-from rg_core.data import HEX_SIZE, MAX_ZOOM, MIN_ZOOM
+from rg_core.data import HEX_SIZE, MAX_ZOOM
 from rg_ui.common import game_layout_rects
 from rg_world.map import Camera, Tile
 
 
-# Obszar odpowiada jasnemu, pustemu polu pergaminu wskazanemu na grafice.
-SAFE_LEFT_RATIO = 0.12
-SAFE_RIGHT_RATIO = 0.12
-SAFE_TOP_RATIO = 0.06
-SAFE_BOTTOM_RATIO = 0.08
-SAFE_PIXEL_PADDING = 10
+# Bezpieczny obszar wewnatrz grafiki pergaminu. Ratio odsuwa plansze od
+# postrzepionych krawedzi grafiki, a dodatkowy margines pikselowy chroni przed
+# dotykaniem ramki przez skrajne heksy.
+SAFE_LEFT_RATIO = 0.04
+SAFE_RIGHT_RATIO = 0.04
+SAFE_TOP_RATIO = 0.04
+SAFE_BOTTOM_RATIO = 0.05
+SAFE_EDGE_MARGIN = 24
+
+# Zakres zoomu jest celowo niewielki. Maksimum oznacza najwieksza plansze,
+# ktora nadal w calosci miesci sie na pergaminie. Minimum daje troche miejsca
+# na oddalenie oraz drag, ale nigdy nie pozwala wyjechac heksom poza mape.
+MIN_ZOOM_RATIO = 0.86
+START_ZOOM_RATIO = 0.93
+ABSOLUTE_MIN_ZOOM = 0.10
 
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
@@ -49,7 +55,8 @@ def _center_map_rect():
     layout = game_layout_rects(screen)
     rect = layout["center"].copy()
 
-    # Dolny pasek informacji nalezy do HUD-u, a nie do pola planszy.
+    # Dolny pasek informacji jest HUD-em, a nie czescia pergaminu dostepna dla
+    # planszy.
     bottom = layout.get("bottom")
     if bottom is not None and bottom.height > 0:
         rect.height = max(1, rect.height - bottom.height)
@@ -58,15 +65,15 @@ def _center_map_rect():
 
 
 def playfield_rect():
-    """Prostokat opisujacy jasny owal pergaminu."""
+    """Zwraca bezpieczny prostokat, w ktorym musi zmiescic sie cala rozeta."""
     rect = _center_map_rect()
     if rect is None:
         return None
 
-    left = int(rect.width * SAFE_LEFT_RATIO)
-    right = int(rect.width * SAFE_RIGHT_RATIO)
-    top = int(rect.height * SAFE_TOP_RATIO)
-    bottom = int(rect.height * SAFE_BOTTOM_RATIO)
+    left = int(rect.width * SAFE_LEFT_RATIO) + SAFE_EDGE_MARGIN
+    right = int(rect.width * SAFE_RIGHT_RATIO) + SAFE_EDGE_MARGIN
+    top = int(rect.height * SAFE_TOP_RATIO) + SAFE_EDGE_MARGIN
+    bottom = int(rect.height * SAFE_BOTTOM_RATIO) + SAFE_EDGE_MARGIN
 
     return pygame.Rect(
         rect.x + left,
@@ -77,15 +84,17 @@ def playfield_rect():
 
 
 def _expanded_world_bounds():
+    """Pelny obrys planszy razem ze skrajnymi ramkami heksow."""
     if _TILE_BOUNDS is None:
         return None
 
     min_x, max_x, min_y, max_y = _TILE_BOUNDS
+    padding = HEX_SIZE * 1.05
     return (
-        min_x - HEX_SIZE,
-        max_x + HEX_SIZE,
-        min_y - HEX_SIZE,
-        max_y + HEX_SIZE,
+        min_x - padding,
+        max_x + padding,
+        min_y - padding,
+        max_y + padding,
     )
 
 
@@ -105,21 +114,25 @@ def _world_size():
     return max(1.0, max_x - min_x), max(1.0, max_y - min_y)
 
 
-def _fit_zoom(rect):
-    """Dopasowuje cala rozete do jasnego owalnego pola przy starcie."""
+def _zoom_limits(rect):
+    """Wylicza zoom, przy ktorym cala plansza zawsze miesci sie na mapie."""
     if rect is None or _TILE_BOUNDS is None:
-        return MIN_ZOOM
+        return ABSOLUTE_MIN_ZOOM, ABSOLUTE_MIN_ZOOM
 
     world_w, world_h = _world_size()
 
-    ellipse_rx = max(1.0, rect.width / 2.0 - SAFE_PIXEL_PADDING)
-    ellipse_ry = max(1.0, rect.height / 2.0 - SAFE_PIXEL_PADDING)
-    x_term = world_w / (2.0 * ellipse_rx)
-    y_term = world_h / (2.0 * ellipse_ry)
-    denominator = math.sqrt(x_term * x_term + y_term * y_term)
-    fitted = 1.0 / max(0.0001, denominator)
+    # To jest twardy limit. Wiekszy zoom oznaczalby, ze przynajmniej jedna
+    # krawedz rozety musi wyjsc poza pergamin, czego teraz zabraniamy.
+    safe_max = min(
+        MAX_ZOOM,
+        rect.width / max(1.0, world_w),
+        rect.height / max(1.0, world_h),
+    )
+    safe_max = max(ABSOLUTE_MIN_ZOOM, safe_max)
 
-    return max(MIN_ZOOM, min(MAX_ZOOM, fitted))
+    safe_min = max(ABSOLUTE_MIN_ZOOM, safe_max * MIN_ZOOM_RATIO)
+    safe_min = min(safe_min, safe_max)
+    return safe_min, safe_max
 
 
 def _center_camera(camera):
@@ -133,50 +146,34 @@ def _center_camera(camera):
 
 
 def _clamp_camera(camera):
-    """Pozwala planszy jezdzic po owalu bez skokow i bez pustego odjazdu.
-
-    Przy zoomie startowym mapa jest idealnie wycentrowana. Im mocniej gracz
-    przybliza, tym wiekszy dostaje zakres przeciagania. Srodek planszy porusza
-    sie po elipsie, zamiast po prostokatnym pudelku.
-    """
+    """Pilnuje, aby pelny obrys rozety nigdy nie wyszedl poza pergamin."""
     rect = playfield_rect()
-    if rect is None or _TILE_BOUNDS is None:
+    bounds = _expanded_world_bounds()
+    if rect is None or bounds is None:
         return
 
-    fit_zoom = getattr(camera, "_rg_fit_zoom", _fit_zoom(rect))
-    world_w, world_h = _world_size()
-    world_cx, world_cy = _world_center()
+    min_x, max_x, min_y, max_y = bounds
 
-    map_center_x = camera.x + world_cx * camera.zoom
-    map_center_y = camera.y + world_cy * camera.zoom
-    dx = map_center_x - rect.centerx
-    dy = map_center_y - rect.centery
+    # Dopuszczalne przesuniecie kamery wynika bezposrednio z warunku:
+    # rect.left <= screen_min_x oraz screen_max_x <= rect.right.
+    min_camera_x = rect.left - min_x * camera.zoom
+    max_camera_x = rect.right - max_x * camera.zoom
+    min_camera_y = rect.top - min_y * camera.zoom
+    max_camera_y = rect.bottom - max_y * camera.zoom
 
-    # Zakres ruchu rosnie dokladnie o nadmiar rozmiaru powstaly po zoomie.
-    # Przy widoku calej mapy wynosi zero, wiec plansza pozostaje na srodku.
-    max_dx = max(0.0, world_w * (camera.zoom - fit_zoom) / 2.0)
-    max_dy = max(0.0, world_h * (camera.zoom - fit_zoom) / 2.0)
+    # Przy bezpiecznym zoomie dolna granica nie jest wieksza od gornej. Jesli
+    # przez zaokraglenia pikseli zdarzy sie odwrotnie, centrujemy dana os.
+    if min_camera_x <= max_camera_x:
+        camera.x = max(min_camera_x, min(max_camera_x, camera.x))
+    else:
+        world_cx, _ = _world_center()
+        camera.x = rect.centerx - world_cx * camera.zoom
 
-    if max_dx <= 0.5:
-        dx = 0.0
-    if max_dy <= 0.5:
-        dy = 0.0
-
-    if max_dx > 0.5 and max_dy > 0.5:
-        ellipse_value = (dx / max_dx) ** 2 + (dy / max_dy) ** 2
-        if ellipse_value > 1.0:
-            scale = 1.0 / math.sqrt(ellipse_value)
-            dx *= scale
-            dy *= scale
-    elif max_dx > 0.5:
-        dx = max(-max_dx, min(max_dx, dx))
-        dy = 0.0
-    elif max_dy > 0.5:
-        dx = 0.0
-        dy = max(-max_dy, min(max_dy, dy))
-
-    camera.x = rect.centerx + dx - world_cx * camera.zoom
-    camera.y = rect.centery + dy - world_cy * camera.zoom
+    if min_camera_y <= max_camera_y:
+        camera.y = max(min_camera_y, min(max_camera_y, camera.y))
+    else:
+        _, world_cy = _world_center()
+        camera.y = rect.centery - world_cy * camera.zoom
 
 
 def _sync_generation(camera, reset_zoom=False):
@@ -195,23 +192,23 @@ def _sync_generation(camera, reset_zoom=False):
         camera._rg_playfield_size = rect.size
         reset_zoom = True
 
-    fit_zoom = _fit_zoom(rect)
-    camera._rg_fit_zoom = fit_zoom
+    min_zoom, max_zoom = _zoom_limits(rect)
+    camera._rg_min_zoom = min_zoom
+    camera._rg_max_zoom = max_zoom
 
     if reset_zoom:
-        camera.zoom = fit_zoom
+        start_zoom = max(min_zoom, min(max_zoom, max_zoom * START_ZOOM_RATIO))
+        camera.zoom = start_zoom
         _center_camera(camera)
+        _clamp_camera(camera)
         return
 
-    if camera.zoom < fit_zoom:
-        camera.zoom = fit_zoom
-        _center_camera(camera)
-    else:
-        _clamp_camera(camera)
+    camera.zoom = max(min_zoom, min(max_zoom, camera.zoom))
+    _clamp_camera(camera)
 
 
 def install_locked_map_camera():
-    """Instaluje dopasowanie planszy, stabilny zoom i owalny zakres dragu."""
+    """Instaluje bezpieczny zoom i drag bez wychodzenia heksow poza mape."""
     if getattr(Camera, "_rise_glory_locked_map", False):
         return
 
@@ -226,7 +223,8 @@ def install_locked_map_camera():
         original_camera_init(self, *args, **kwargs)
         self._rg_map_generation = -1
         self._rg_playfield_size = None
-        self._rg_fit_zoom = MIN_ZOOM
+        self._rg_min_zoom = ABSOLUTE_MIN_ZOOM
+        self._rg_max_zoom = ABSOLUTE_MIN_ZOOM
 
     def map_view_center(self):
         rect = playfield_rect()
@@ -235,7 +233,7 @@ def install_locked_map_camera():
         return rect.centerx, rect.centery
 
     def center_on_tile(self, tile):
-        # Zmiana aktywnego bohatera nie przesuwa kamery na pionek.
+        # Zmiana aktywnego bohatera nie przesuwa planszy na pionek.
         _sync_generation(self)
 
     def center_on_tiles(self, tiles):
@@ -254,14 +252,14 @@ def install_locked_map_camera():
             return
 
         old_zoom = self.zoom
-        fit_zoom = getattr(self, "_rg_fit_zoom", _fit_zoom(rect))
-        new_zoom = max(fit_zoom, min(MAX_ZOOM, old_zoom * factor))
-        if new_zoom == old_zoom:
+        min_zoom = getattr(self, "_rg_min_zoom", ABSOLUTE_MIN_ZOOM)
+        max_zoom = getattr(self, "_rg_max_zoom", old_zoom)
+        new_zoom = max(min_zoom, min(max_zoom, old_zoom * factor))
+        if abs(new_zoom - old_zoom) < 0.000001:
             return
 
-        # Nie zoomujemy pod kursorem. To bylo powodem "uciekania" heksow:
-        # kazdy scroll zmienial jednoczesnie zoom oraz x/y kamery w kierunku
-        # myszy. Zachowujemy punkt swiata znajdujacy sie w srodku owalu.
+        # Zoom pozostaje stabilny wzgledem srodka pola gry, wiec plansza nie
+        # ucieka w strone kursora podczas krecenia kolkiem myszy.
         world_at_center_x = (rect.centerx - self.x) / old_zoom
         world_at_center_y = (rect.centery - self.y) / old_zoom
 
