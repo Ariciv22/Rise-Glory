@@ -8,6 +8,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
+from rg_network.game_state import NetworkGameSession
 from rg_network.protocol import DEFAULT_PORT, PROTOCOL_VERSION, MessageBuffer, encode_message, make_message
 
 MAX_PLAYERS = 6
@@ -43,6 +44,7 @@ class ConnectedPlayer:
     address: tuple[str, int]
     ready: bool = False
     is_host: bool = False
+    archetype_id: int | None = None
     send_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def public_state(self) -> dict[str, Any]:
@@ -51,11 +53,12 @@ class ConnectedPlayer:
             "name": self.name,
             "ready": self.ready,
             "is_host": self.is_host,
+            "archetype_id": self.archetype_id,
         }
 
 
 class LanLobbyServer:
-    """Lekki serwer lobby Rise & Glory przeznaczony do testow w zaufanej sieci LAN."""
+    """Serwer LAN lobby i pierwszego autorytatywnego vertical slice Rise & Glory."""
 
     def __init__(self, host: str = "0.0.0.0", port: int = DEFAULT_PORT, max_players: int = MAX_PLAYERS) -> None:
         self.host = host
@@ -67,6 +70,7 @@ class LanLobbyServer:
         self._running = threading.Event()
         self._accept_thread: threading.Thread | None = None
         self._started_at = time.time()
+        self._game: NetworkGameSession | None = None
 
     @property
     def running(self) -> bool:
@@ -76,6 +80,10 @@ class LanLobbyServer:
     def player_count(self) -> int:
         with self._lock:
             return len(self._players)
+
+    @property
+    def game_started(self) -> bool:
+        return self._game is not None
 
     def start(self, background: bool = True) -> None:
         if self.running:
@@ -105,6 +113,7 @@ class LanLobbyServer:
         with self._lock:
             players = list(self._players.values())
             self._players.clear()
+            self._game = None
         for player in players:
             try:
                 player.sock.shutdown(socket.SHUT_RDWR)
@@ -169,10 +178,16 @@ class LanLobbyServer:
             players=players,
             max_players=self.max_players,
             server_uptime=int(time.time() - self._started_at),
+            game_started=self.game_started,
         )
 
     def _broadcast_lobby(self) -> None:
         self._broadcast(self._lobby_state())
+
+    def _broadcast_game_state(self) -> None:
+        game = self._game
+        if game is not None:
+            self._broadcast(make_message("game_state", snapshot=game.snapshot()))
 
     def _remove_player(self, player_id: str) -> None:
         with self._lock:
@@ -196,6 +211,9 @@ class LanLobbyServer:
             return None
         name = str(hello.get("name", "")).strip()[:24] or "Gracz"
         with self._lock:
+            if self._game is not None:
+                self._send_socket(sock, make_message("rejected", reason="Partia juz sie rozpoczęla."))
+                return None
             if len(self._players) >= self.max_players:
                 self._send_socket(sock, make_message("rejected", reason="Lobby jest pelne."))
                 return None
@@ -222,39 +240,107 @@ class LanLobbyServer:
         self._broadcast_lobby()
         return player
 
+    def _start_game(self, player: ConnectedPlayer) -> None:
+        with self._lock:
+            players = list(self._players.values())
+        if not player.is_host:
+            self._send_player(player, make_message("error", reason="Tylko host moze rozpoczac gre."))
+            return
+        if len(players) < 2:
+            self._send_player(player, make_message("error", reason="Do gry LAN potrzeba co najmniej 2 graczy."))
+            return
+        if not all(entry.archetype_id for entry in players):
+            self._send_player(player, make_message("error", reason="Kazdy gracz musi wybrac bohatera."))
+            return
+        if not all(entry.ready for entry in players):
+            self._send_player(player, make_message("error", reason="Wszyscy gracze musza byc gotowi."))
+            return
+        try:
+            game = NetworkGameSession([entry.public_state() for entry in players])
+        except ValueError as exc:
+            self._send_player(player, make_message("error", reason=str(exc)))
+            return
+        with self._lock:
+            self._game = game
+        self._broadcast(
+            make_message(
+                "game_start",
+                snapshot=game.snapshot(),
+            )
+        )
+
     def _handle_message(self, player: ConnectedPlayer, message: dict[str, Any]) -> None:
         message_type = str(message.get("type", ""))
-        if message_type == "ready":
-            player.ready = bool(message.get("ready", False))
+
+        if message_type == "configure_hero":
+            if self._game is not None:
+                self._send_player(player, make_message("error", reason="Partia juz sie rozpoczela."))
+                return
+            archetype_id = int(message.get("archetype_id", 0) or 0)
+            if archetype_id not in range(1, 7):
+                self._send_player(player, make_message("error", reason="Nieprawidlowy archetyp bohatera."))
+                return
+            player.archetype_id = archetype_id
+            player.ready = False
             self._broadcast_lobby()
             return
+
+        if message_type == "ready":
+            if self._game is not None:
+                self._send_player(player, make_message("error", reason="Partia juz sie rozpoczela."))
+                return
+            wants_ready = bool(message.get("ready", False))
+            if wants_ready and not player.archetype_id:
+                self._send_player(player, make_message("error", reason="Najpierw wybierz bohatera."))
+                return
+            player.ready = wants_ready
+            self._broadcast_lobby()
+            return
+
         if message_type == "chat":
             text = str(message.get("text", "")).strip()[:240]
             if text:
                 self._broadcast(make_message("chat", player_id=player.player_id, name=player.name, text=text))
             return
+
         if message_type == "start_game":
-            with self._lock:
-                players = list(self._players.values())
-            if not player.is_host:
-                self._send_player(player, make_message("error", reason="Tylko host moze rozpoczac gre."))
-                return
-            if len(players) < 2:
-                self._send_player(player, make_message("error", reason="Do testu LAN potrzeba co najmniej 2 graczy."))
-                return
-            if not all(entry.ready for entry in players):
-                self._send_player(player, make_message("error", reason="Wszyscy gracze musza byc gotowi."))
-                return
-            self._broadcast(
-                make_message(
-                    "game_start",
-                    players=[entry.public_state() for entry in players],
-                )
-            )
+            self._start_game(player)
             return
+
+        if message_type == "move_request":
+            game = self._game
+            if game is None:
+                self._send_player(player, make_message("error", reason="Partia nie zostala jeszcze uruchomiona."))
+                return
+            success, reason = game.move(player.player_id, int(message.get("target_tile_id", 0) or 0))
+            if not success:
+                self._send_player(player, make_message("error", reason=reason))
+                return
+            self._broadcast_game_state()
+            return
+
+        if message_type == "end_turn_request":
+            game = self._game
+            if game is None:
+                self._send_player(player, make_message("error", reason="Partia nie zostala jeszcze uruchomiona."))
+                return
+            success, reason = game.end_turn(player.player_id)
+            if not success:
+                self._send_player(player, make_message("error", reason=reason))
+                return
+            self._broadcast_game_state()
+            return
+
+        if message_type == "request_game_state":
+            game = self._game
+            if game is not None:
+                self._send_player(player, make_message("game_state", snapshot=game.snapshot()))
+            return
+
         if message_type == "ping":
             self._send_player(player, make_message("pong", sent_at=message.get("sent_at")))
             return
+
         self._send_player(player, make_message("error", reason=f"Nieznany typ wiadomosci: {message_type or '-'}"))
 
     def _client_loop(self, sock: socket.socket, address: tuple[str, int]) -> None:
@@ -290,7 +376,7 @@ class LanLobbyServer:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Rise & Glory - serwer lobby LAN")
+    parser = argparse.ArgumentParser(description="Rise & Glory - serwer LAN")
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help=f"Port TCP, domyslnie {DEFAULT_PORT}")
     parser.add_argument("--max-players", type=int, default=MAX_PLAYERS, choices=range(2, MAX_PLAYERS + 1))
     args = parser.parse_args()
