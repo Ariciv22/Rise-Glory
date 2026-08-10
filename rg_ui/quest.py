@@ -7,6 +7,7 @@ import pygame
 
 from rg_core.data import GOLD, MUTED, TEXT
 from rg_engine.quests import current_stage, find_player_quest, quest_definition, quest_tabs_for_location
+from rg_engine.world import quest_difficulty_from_legend_gap
 from rg_core.quest_runtime import resolve_quest_option
 from rg_ui.common import Button, draw_lines, wrap
 
@@ -181,9 +182,19 @@ def draw_quest_panel(screen, font, small_font, mouse_pos, content, player, quest
     screen.blit(font.render(f"Etap {stage['number']}/{total_stages} — {stage['title']}", True, TEXT), (right.x, right.y + 82))
     draw_lines(screen, small_font, wrap(small_font, stage.get("text", ""), right.width)[:5], right.x, right.y + 118, MUTED, line_h=21)
 
-    modifier = int(quest.get("difficulty_modifier", 0) or 0)
-    if modifier:
-        screen.blit(small_font.render(f"Następny test: próg +{modifier}", True, (235, 154, 92)), (right.x, right.y + 226))
+    retry_modifier = int(quest.get("difficulty_modifier", 0) or 0)
+    legend_modifier = quest_difficulty_from_legend_gap(player)
+    effective_modifier = retry_modifier + legend_modifier
+
+    modifier_parts = []
+    if legend_modifier:
+        modifier_parts.append(f"przewaga Legendy +{legend_modifier}")
+    if retry_modifier:
+        modifier_parts.append(f"kara kolejnego testu +{retry_modifier}")
+    if modifier_parts:
+        modifier_text = "Próg zwiększony: " + " | ".join(modifier_parts)
+        screen.blit(small_font.render(modifier_text, True, (235, 154, 92)), (right.x, right.y + 226))
+
     token = player.get("_token_ref")
     actions = int(getattr(token, "actions", 0) or 0) if token is not None else 0
     screen.blit(small_font.render(f"Dostępne akcje: {actions} | Opcja kosztuje 1 akcję", True, TEXT), (right.x, right.y + 252))
@@ -195,7 +206,7 @@ def draw_quest_panel(screen, font, small_font, mouse_pos, content, player, quest
         rect = pygame.Rect(right.x, button_y + row * (button_h + 8), right.width, button_h)
         required_actions = int(option.get("action_cost", 1) or 0)
         button = QuestActionButton(
-            _option_label(option, modifier),
+            _option_label(option, effective_modifier),
             rect,
             lambda selected=row: resolve_quest_option(player, quest, selected),
             enabled=actions >= required_actions,

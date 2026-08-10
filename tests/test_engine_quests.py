@@ -1,7 +1,9 @@
 import unittest
 
 from rg_content.quests import SATANIC_FORCES_ID, register_all_quests
+from rg_core.quest_runtime import resolve_quest_option
 from rg_engine.quests import activate_quest, complete_quest, resolve_option, scaled_gold_reward
+from rg_engine.world import register_players, reset_world_progression
 
 
 class FixedRng:
@@ -46,6 +48,10 @@ class QuestEngineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         register_all_quests()
+
+    def setUp(self):
+        reset_world_progression(1)
+        register_players([])
 
     def test_gold_scaling_only_affects_gold(self):
         self.assertEqual([scaled_gold_reward(8, value) for value in range(4)], [8, 6, 4, 2])
@@ -100,6 +106,21 @@ class QuestEngineTests(unittest.TestCase):
         self.assertEqual(quest["status"], "active")
         self.assertEqual(quest["stage_number"], 3)
         self.assertEqual(hero["legend"], 0)
+
+    def test_runtime_adds_four_to_threshold_when_hero_is_two_levels_ahead(self):
+        hero = player()
+        hero["legend"] = 20
+        hero["stats"]["Nauka"] = 5
+        others = [{"legend": 0} for _ in range(5)]
+        register_players([hero, *others])
+        quest = activate_quest(SATANIC_FORCES_ID)
+        hero["active_quests"] = [quest]
+
+        success, _message = resolve_quest_option(hero, quest, 0, FixedRng(6))
+
+        self.assertFalse(success)
+        self.assertEqual(quest["history"][-1]["threshold"], 15)
+        self.assertEqual(quest["history"][-1]["total"], 11)
 
 
 if __name__ == "__main__":

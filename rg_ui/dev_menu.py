@@ -21,7 +21,14 @@ from rg_engine.world import (
     forced_world_level,
     set_forced_world_level,
 )
-from rg_engine.world_events import active_world_event, draw_next_world_event
+from rg_engine.world_events import (
+    DURATION_UNTIL_RESOLVED,
+    activate_world_event,
+    active_world_event,
+    active_world_events,
+    draw_next_world_event,
+    register_world_event,
+)
 from rg_ui.common import Button, draw_lines, draw_panel, wrap
 
 register_all_world_events()
@@ -33,6 +40,8 @@ FLAG_LABELS = {
     "council_every_round": "Rada po każdej rundzie",
 }
 
+DEV_PROBLEM_ID = "dev_rozbojnicy_na_trakcie"
+
 
 def _button(screen, font, mouse, buttons, text, action, rect, active=False):
     button = Button(text, action, rect)
@@ -43,6 +52,53 @@ def _button(screen, font, mouse, buttons, text, action, rect, active=False):
 
 def _section_title(screen, font, text, x, y):
     screen.blit(font.render(text, True, GOLD), (x, y))
+
+
+def _spawn_dev_problem(players):
+    existing = next((event for event in active_world_events(DURATION_UNTIL_RESOLVED) if event.get("id") == DEV_PROBLEM_ID), None)
+    if existing:
+        return existing, "Testowy Problem jest już aktywny na mapie."
+
+    event = {
+        "id": DEV_PROBLEM_ID,
+        "name": "[DEV] Rozbójnicy na trakcie",
+        "description": "Testowy Problem do sprawdzania znacznika, interakcji i panelu stanu świata.",
+        "effect_text": "[DEV] Na mapie pojawia się aktywny Problem wymagający interwencji bohatera.",
+        "world_level": current_world_level(players),
+        "duration": DURATION_UNTIL_RESOLVED,
+        "problem": {
+            "description": "Rozbójnicy rozbili obóz przy trakcie i zatrzymują podróżnych.",
+            "condition": "Dotrzyj do znacznika i zalicz jeden z dostępnych testów.",
+            "action_label": "Zajmij się rozbójnikami",
+            "reward_hint": "Wdzięczność kupców — dokładna nagroda pozostaje ukryta.",
+            "placement": {"type": "random_passable"},
+            "fallback": {"type": "random_passable"},
+            "reward": {"gold": 3, "legend": 1},
+            "methods": [
+                {
+                    "id": "atak",
+                    "label": "Zaatakuj obóz rozbójników",
+                    "stat": "Walka",
+                    "difficulty": 12,
+                    "success_text": "Obóz zostaje rozbity, a trakt ponownie jest bezpieczny.",
+                    "failure_text": "Rozbójnicy odpierają atak i zmuszają cię do odwrotu.",
+                    "failure": {"wounds": 1},
+                },
+                {
+                    "id": "podstep",
+                    "label": "Wkradnij się do obozu podstępem",
+                    "stat": "Intryga",
+                    "difficulty": 11,
+                    "success_text": "Podstęp rozbija bandę bez otwartej walki.",
+                    "failure_text": "Plan zostaje odkryty, a za ucieczkę trzeba słono zapłacić.",
+                    "failure": {"gold": 2},
+                },
+            ],
+        },
+    }
+    register_world_event(event)
+    activated, message = activate_world_event(DEV_PROBLEM_ID, players)
+    return activated, message or "Testowy Problem został aktywowany."
 
 
 def handle_dev_action(action, hero, token, players):
@@ -113,6 +169,12 @@ def handle_dev_action(action, hero, token, players):
             result["message"] = message
         return result
 
+    if action == "dev_spawn_problem":
+        event, message = _spawn_dev_problem(players)
+        result["message"] = f"{event.get('name', '[DEV] Problem')} — {message}"
+        result["close"] = True
+        return result
+
     if action == "dev_open_council":
         result["open_council"] = True
         result["close"] = True
@@ -181,6 +243,8 @@ def draw_dev_menu(screen, title_font, font, small_font, mouse, hero, token, play
     y += 50
     _button(screen, small_font, mouse, buttons, "Następne Wydarzenie Świata", "dev_next_event", (left_x, y, 252, 42))
     _button(screen, small_font, mouse, buttons, "Otwórz Radę teraz", "dev_open_council", (left_x + 262, y, 174, 42))
+    y += 50
+    _button(screen, small_font, mouse, buttons, "[DEV] Dodaj Problem na mapę", "dev_spawn_problem", (left_x, y, 252, 42))
 
     y2 = panel.y + 176
     _section_title(screen, font, "Przełączniki", right_x, y2)

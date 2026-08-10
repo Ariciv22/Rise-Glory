@@ -2,14 +2,25 @@ from __future__ import annotations
 
 import copy
 import random
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
+
+from rg_engine.world import current_world_level
 
 _EVENT_REGISTRY: dict[str, dict[str, Any]] = {}
-_DRAW_PILE: list[str] = []
-_DISCARD_PILE: list[str] = []
-_ACTIVE_EVENT: dict[str, Any] | None = None
+_DRAW_PILES: dict[int, list[str]] = {level: [] for level in range(1, 5)}
+_DISCARD_PILES: dict[int, list[str]] = {level: [] for level in range(1, 5)}
+_ACTIVE_EVENTS: list[dict[str, Any]] = []
 _HISTORY: list[dict[str, Any]] = []
-_LAST_EVENT_ID: str | None = None
+_LAST_EVENT_ID_BY_LEVEL: dict[int, str | None] = {level: None for level in range(1, 5)}
+_PROBLEM_PLACEMENT_VALIDATOR: Callable[[dict[str, Any]], bool] | None = None
+
+DURATION_INSTANT = "instant"
+DURATION_UNTIL_NEXT_COUNCIL = "until_next_council"
+DURATION_UNTIL_RESOLVED = "until_resolved"
+
+
+def _level(value: Any) -> int:
+    return max(1, min(4, int(value or 1)))
 
 
 def register_world_event(definition: dict[str, Any]) -> dict[str, Any]:
@@ -21,38 +32,80 @@ def register_world_event(definition: dict[str, Any]) -> dict[str, Any]:
     event.setdefault("name", event_id)
     event.setdefault("description", "")
     event.setdefault("effect_text", "")
-    event.setdefault("duration", "instant")
+    event.setdefault("duration", DURATION_INSTANT)
     event.setdefault("effects", [])
     event.setdefault("modifiers", {})
+    event["world_level"] = _level(event.get("world_level", 1))
+    event.setdefault("problem", None)
+    event.setdefault("dev_only", event_id.startswith("dev_"))
     _EVENT_REGISTRY[event_id] = event
     return copy.deepcopy(event)
 
 
-def registered_world_events() -> list[dict[str, Any]]:
-    return [copy.deepcopy(event) for event in _EVENT_REGISTRY.values()]
+def registered_world_events(world_level: int | None = None) -> list[dict[str, Any]]:
+    events = list(_EVENT_REGISTRY.values())
+    if world_level is not None:
+        target = _level(world_level)
+        events = [event for event in events if _level(event.get("world_level")) == target]
+    return [copy.deepcopy(event) for event in events]
+
+
+def set_problem_placement_validator(validator: Callable[[dict[str, Any]], bool] | None) -> None:
+    """Podpina warstwę mapy bez uzależniania silnika od Pygame."""
+    global _PROBLEM_PLACEMENT_VALIDATOR
+    _PROBLEM_PLACEMENT_VALIDATOR = validator
 
 
 def reset_world_event_deck() -> None:
-    global _DRAW_PILE, _DISCARD_PILE, _ACTIVE_EVENT, _HISTORY, _LAST_EVENT_ID
-    _DRAW_PILE = []
-    _DISCARD_PILE = []
-    _ACTIVE_EVENT = None
+    global _DRAW_PILES, _DISCARD_PILES, _ACTIVE_EVENTS, _HISTORY, _LAST_EVENT_ID_BY_LEVEL
+    _DRAW_PILES = {level: [] for level in range(1, 5)}
+    _DISCARD_PILES = {level: [] for level in range(1, 5)}
+    _ACTIVE_EVENTS = []
     _HISTORY = []
-    _LAST_EVENT_ID = None
+    _LAST_EVENT_ID_BY_LEVEL = {level: None for level in range(1, 5)}
+
+
+def active_world_events(duration: str | None = None) -> list[dict[str, Any]]:
+    events = _ACTIVE_EVENTS
+    if duration is not None:
+        events = [event for event in events if event.get("duration") == duration]
+    return copy.deepcopy(events)
 
 
 def active_world_event() -> dict[str, Any] | None:
-    return copy.deepcopy(_ACTIVE_EVENT) if _ACTIVE_EVENT else None
+    """Zgodność ze starszym API: zwraca ostatnie aktywne wydarzenie."""
+    return copy.deepcopy(_ACTIVE_EVENTS[-1]) if _ACTIVE_EVENTS else None
 
 
 def world_event_history() -> list[dict[str, Any]]:
     return copy.deepcopy(_HISTORY)
 
 
+def _history_entry(event: dict[str, Any], status: str, ending: str = "") -> dict[str, Any]:
+    entry = copy.deepcopy(event)
+    entry["history_status"] = status
+    entry["ending"] = ending
+    return entry
+
+
+def _append_history(event: dict[str, Any], status: str, ending: str = "") -> None:
+    _HISTORY.append(_history_entry(event, status, ending))
+
+
+def _discard(event: dict[str, Any]) -> None:
+    if event.get("dev_only"):
+        return
+    level = _level(event.get("world_level", 1))
+    event_id = str(event.get("id") or "")
+    if event_id and event_id not in _DISCARD_PILES[level]:
+        _DISCARD_PILES[level].append(event_id)
+
+
 def world_event_modifier(name: str, default: int = 0) -> int:
-    if not _ACTIVE_EVENT:
-        return int(default)
-    return int((_ACTIVE_EVENT.get("modifiers") or {}).get(name, default) or 0)
+    total = int(default)
+    for event in _ACTIVE_EVENTS:
+        total += int((event.get("modifiers") or {}).get(name, 0) or 0)
+    return total
 
 
 def price_with_world_event(base_price: int) -> int:
@@ -77,13 +130,11 @@ def healing_cost_with_world_event(base_cost: int) -> int:
 def _apply_instant_effect(effect: dict[str, Any], players: Iterable[dict]) -> str:
     effect_type = str(effect.get("type") or "")
     amount = int(effect.get("amount", 0) or 0)
-    affected = 0
 
     if effect_type == "gold":
         for player in players:
             current = max(0, int(player.get("gold", 0) or 0))
             player["gold"] = max(0, current + amount)
-            affected += 1
         if amount >= 0:
             return f"Kazdy bohater otrzymuje {amount} monet."
         return f"Kazdy bohater traci do {abs(amount)} monet."
@@ -98,7 +149,6 @@ def _apply_instant_effect(effect: dict[str, Any], players: Iterable[dict]) -> st
                 for _ in range(abs(amount)):
                     if item in food:
                         food.remove(item)
-            affected += 1
         if amount >= 0:
             return f"Kazdy bohater otrzymuje {amount}x {item}."
         return f"Kazdy bohater traci do {abs(amount)}x {item}."
@@ -106,22 +156,67 @@ def _apply_instant_effect(effect: dict[str, Any], players: Iterable[dict]) -> st
     return ""
 
 
-def _refill_draw_pile(rng) -> None:
-    global _DRAW_PILE
-    ids = list(_EVENT_REGISTRY.keys())
+def _eligible_ids(world_level: int) -> list[str]:
+    target = _level(world_level)
+    return [
+        event_id
+        for event_id, event in _EVENT_REGISTRY.items()
+        if _level(event.get("world_level", 1)) == target and not bool(event.get("dev_only"))
+    ]
+
+
+def _refill_draw_pile(world_level: int, rng) -> None:
+    level = _level(world_level)
+    if _DISCARD_PILES[level]:
+        ids = list(_DISCARD_PILES[level])
+        _DISCARD_PILES[level] = []
+    else:
+        ids = _eligible_ids(level)
+        active_ids = {str(event.get("id")) for event in _ACTIVE_EVENTS}
+        ids = [event_id for event_id in ids if event_id not in active_ids]
+
     rng.shuffle(ids)
-    if len(ids) > 1 and _LAST_EVENT_ID and ids[-1] == _LAST_EVENT_ID:
+    last_id = _LAST_EVENT_ID_BY_LEVEL.get(level)
+    if len(ids) > 1 and last_id and ids[-1] == last_id:
         ids[0], ids[-1] = ids[-1], ids[0]
-    _DRAW_PILE = ids
+    _DRAW_PILES[level] = ids
+
+
+def expire_until_next_council() -> list[dict[str, Any]]:
+    """Wygasza karty czasowe przed odsłonięciem kolejnych Wieści ze świata."""
+    expired = []
+    remaining = []
+    for event in _ACTIVE_EVENTS:
+        if event.get("duration") == DURATION_UNTIL_NEXT_COUNCIL:
+            expired.append(event)
+            _discard(event)
+            _append_history(event, "expired", "Wygasło przy rozpoczęciu kolejnej Rady.")
+        else:
+            remaining.append(event)
+    _ACTIVE_EVENTS[:] = remaining
+    return copy.deepcopy(expired)
+
+
+def resolve_problem_event(event_id: str, resolved_by: str = "") -> dict[str, Any] | None:
+    """Kończy aktywny problem; warstwa mapy odpowiada za test i nagrodę."""
+    for index, event in enumerate(list(_ACTIVE_EVENTS)):
+        if str(event.get("id")) != str(event_id):
+            continue
+        if event.get("duration") != DURATION_UNTIL_RESOLVED:
+            return None
+        resolved = _ACTIVE_EVENTS.pop(index)
+        _discard(resolved)
+        ending = "Problem rozwiązany."
+        if resolved_by:
+            ending = f"Rozwiązane przez {resolved_by}."
+        _append_history(resolved, "resolved", ending)
+        return copy.deepcopy(resolved)
+    return None
 
 
 def activate_world_event(event_id: str, players: Iterable[dict]) -> tuple[dict[str, Any], str]:
-    global _ACTIVE_EVENT, _LAST_EVENT_ID
     if event_id not in _EVENT_REGISTRY:
         raise KeyError(f"Nieznane Wydarzenie Swiata: {event_id}")
-
-    if _ACTIVE_EVENT:
-        _DISCARD_PILE.append(str(_ACTIVE_EVENT.get("id")))
 
     event = copy.deepcopy(_EVENT_REGISTRY[event_id])
     effect_messages = []
@@ -131,19 +226,57 @@ def activate_world_event(event_id: str, players: Iterable[dict]) -> tuple[dict[s
         if message:
             effect_messages.append(message)
 
-    _ACTIVE_EVENT = event
-    _LAST_EVENT_ID = event_id
-    _HISTORY.append(copy.deepcopy(event))
+    duration = str(event.get("duration") or DURATION_INSTANT)
+    if duration == DURATION_INSTANT:
+        _discard(event)
+        _append_history(event, "instant", "Rozpatrzone natychmiast.")
+    else:
+        _ACTIVE_EVENTS.append(event)
 
+    level = _level(event.get("world_level", 1))
+    _LAST_EVENT_ID_BY_LEVEL[level] = event_id
     message = event.get("effect_text") or " ".join(effect_messages)
     return copy.deepcopy(event), str(message).strip()
 
 
-def draw_next_world_event(players: Iterable[dict], rng=None) -> tuple[dict[str, Any] | None, str]:
-    if not _EVENT_REGISTRY:
-        return None, "Brak zarejestrowanych kart Wydarzen Swiata."
+def draw_next_world_event(
+    players: Iterable[dict],
+    rng=None,
+    world_level: int | None = None,
+    begin_council: bool = True,
+) -> tuple[dict[str, Any] | None, str]:
+    """Dobiera losową kartę wyłącznie z talii aktualnego Poziomu Świata.
+
+    Domyślnie wywołanie oznacza rozpoczęcie kolejnej Rady, dlatego najpierw
+    wygaszane są efekty `until_next_council`. Problem bez możliwego miejsca na
+    znacznik jest odrzucany przed uruchomieniem efektów i dobierana jest kolejna
+    karta z tej samej talii. Wydarzenia oznaczone `dev_only` nie trafiają do
+    żadnej normalnej talii i mogą być aktywowane wyłącznie bezpośrednio.
+    """
     rng = rng or random
-    if not _DRAW_PILE:
-        _refill_draw_pile(rng)
-    event_id = _DRAW_PILE.pop()
-    return activate_world_event(event_id, players)
+    if begin_council:
+        expire_until_next_council()
+
+    level = _level(world_level if world_level is not None else current_world_level(players))
+    eligible = _eligible_ids(level)
+    if not eligible:
+        return None, f"Brak zarejestrowanych kart Wydarzen Swiata poziomu {level}."
+
+    attempts_left = max(1, len(eligible))
+    while attempts_left > 0:
+        attempts_left -= 1
+        if not _DRAW_PILES[level]:
+            _refill_draw_pile(level, rng)
+        if not _DRAW_PILES[level]:
+            return None, f"Brak dostepnych kart Wydarzen Swiata poziomu {level}."
+
+        event_id = _DRAW_PILES[level].pop()
+        candidate = copy.deepcopy(_EVENT_REGISTRY[event_id])
+        if candidate.get("duration") == DURATION_UNTIL_RESOLVED and _PROBLEM_PLACEMENT_VALIDATOR is not None:
+            if not _PROBLEM_PLACEMENT_VALIDATOR(candidate):
+                _discard(candidate)
+                continue
+
+        return activate_world_event(event_id, players)
+
+    return None, "Nie udało się rozmieścić żadnego dostępnego Problemu na mapie."
