@@ -22,6 +22,9 @@ class LanClient:
 
     def connect(self, host: str, name: str, port: int = DEFAULT_PORT, timeout: float = 5.0) -> None:
         self.close()
+        self.player_id = None
+        self.is_host = False
+        self._events = queue.Queue()
         sock = socket.create_connection((host, int(port)), timeout=timeout)
         sock.settimeout(None)
         self.sock = sock
@@ -61,9 +64,17 @@ class LanClient:
                 event = self._events.get_nowait()
             except queue.Empty:
                 break
-            if event.get("type") == "welcome":
+            event_type = event.get("type")
+            if event_type == "welcome":
                 self.player_id = str(event.get("player_id"))
                 self.is_host = bool(event.get("is_host", False))
+            elif event_type == "lobby_state" and self.player_id:
+                own_state = next(
+                    (player for player in event.get("players", []) if player.get("player_id") == self.player_id),
+                    None,
+                )
+                if own_state is not None:
+                    self.is_host = bool(own_state.get("is_host", False))
             events.append(event)
         return events
 
