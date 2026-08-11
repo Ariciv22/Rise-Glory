@@ -1,0 +1,78 @@
+# 01 — Żywy Świat: Zagrożenia i problemy na mapie
+
+**Status Kanban:** W TRAKCIE
+
+## Cel
+
+Wydarzenia Świata mają rzeczywiście zmieniać planszę. Część wydarzeń tworzy fizyczne problemy na mapie, które pozostają aktywne do czasu rozwiązania przez bohatera.
+
+## Główny flow
+
+Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → zaczyna działać efekt → bohater dociera na heks → wybiera sposób rozwiązania → sukces albo porażka → po sukcesie problem znika → efekt przestaje działać → wydarzenie zostaje zakończone → Kronika zapisuje wydarzenie.
+
+## Punkty do działania
+
+- [x] Stworzyć jeden wspólny Znacznik Zagrożenia.
+- [x] Umieszczać Znacznik Zagrożenia na heksie.
+- [x] Pozwolić Wydarzeniu Świata tworzyć Zagrożenie.
+- [x] Każda karta może posiadać własną regułę rozmieszczenia.
+- [x] Obsłużyć regułę miejsca awaryjnego.
+- [x] Jeśli nie istnieje legalne miejsce podstawowe ani awaryjne — wydarzenie zostaje odrzucone.
+- [x] Kliknięcie znacznika pokazuje szczegóły.
+- [x] Pokazać nazwę problemu.
+- [x] Pokazać opis fabularny.
+- [x] Pokazać aktualny efekt.
+- [x] Pokazać warunek zakończenia.
+- [x] Pokazać dostępną akcję na heksie.
+- [x] Wejście na heks nie uruchamia interakcji automatycznie.
+- [x] Bohater świadomie wybiera akcję rozwiązania problemu.
+- [x] Obsłużyć kilka metod rozwiązania jednego problemu.
+- [x] Metody mogą korzystać z różnych statystyk.
+- [ ] Metody mogą prowadzić do walki.
+- [x] Metody mogą mieć różne konsekwencje.
+- [x] Sukces usuwa problem.
+- [x] Sukces usuwa znacznik.
+- [x] Sukces wyłącza efekt wydarzenia.
+- [x] Po sukcesie karta trafia na stos odrzuconych.
+- [x] Porażka pozostawia wydarzenie aktywne.
+- [x] Problem po porażce może zostać podjęty ponownie.
+- [x] Inny bohater może później podjąć próbę rozwiązania problemu.
+- [x] Obsłużyć kilka aktywnych Zagrożeń jednocześnie.
+- [ ] Nie wprowadzać limitu aktywnych Zagrożeń także w warstwie UI — usunąć ograniczenia wyświetlania, które mogłyby ukryć część problemów.
+- [x] Znacznik może znajdować się na heksie z innym obiektem.
+- [x] Znacznik może pojawić się na heksie zajętym przez bohatera.
+- [ ] Zapisywać sposób rozwiązania problemu.
+- [x] Dodać wpis do historii Wydarzeń Świata.
+- [ ] Przygotować punkt integracji z Kroniką Świata.
+- [ ] Stworzyć 3–5 testowych Zagrożeń.
+
+## Stan po audycie kodu — 2026-08-11
+
+Istnieją już trzy główne warstwy techniczne modułu:
+
+1. `rg_world/world_event_markers.py` — fizyczne znaczniki, reguły rozmieszczenia, fallback, podgląd i synchronizacja znacznika z aktywnym wydarzeniem.
+2. `rg_engine/world_problems.py` — rozpoczęcie próby, koszt Akcji, różne metody rozwiązania, test k20, nagrody, konsekwencje porażki i blokada ponownej próby do następnej tury.
+3. `rg_ui/world_state.py` — panel Wydarzeń Świata, lista Problemów, klikany znacznik, akcje na aktualnym heksie oraz ekran wyboru metody rozwiązania.
+
+### Najbliższe rzeczy do wykonania
+
+1. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała prawdziwą Walkę, zamiast zawsze być zwykłym testem statystyki.
+2. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
+3. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
+4. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
+5. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
+
+## Pierwszy problem testowy
+
+**Rozbójnicy na trakcie**
+
+Docelowe możliwe drogi:
+- Walka — zaatakuj obóz.
+- Intryga — zakradnij się i zniszcz zapasy.
+- Dyplomacja — spróbuj przekonać lub zmusić grupę do opuszczenia traktu.
+
+Obecna wersja DEV zawiera już drogę Walki jako test statystyki oraz drogę Intrygi. Docelowo droga „Walka” ma uruchamiać właściwy system walki, a karta otrzyma trzecią drogę opartą o Dyplomację.
+
+## Definition of Done
+
+W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks i rozwiązać go, a po sukcesie znacznik oraz efekt prawidłowo znikają.
