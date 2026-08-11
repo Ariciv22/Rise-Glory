@@ -24,8 +24,10 @@ Ten katalog jest roboczą roadmapą rozwoju gry. Każdy główny moduł ma osobn
 
 ## Kolejność prac
 
-### DO ZROBIENIA
+### W TRAKCIE
 1. [Żywy Świat — Zagrożenia i problemy na mapie](01_ZYWY_SWIAT_ZAGROZENIA.md)
+
+### DO ZROBIENIA
 2. [Questy i Testy — wspólny silnik](02_QUESTY_I_TESTY.md)
 3. [Walka V2](03_WALKA_V2.md)
 
