@@ -8,7 +8,7 @@ Wydarzenia Świata mają rzeczywiście zmieniać planszę. Część wydarzeń tw
 
 ## Główny flow
 
-Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → zaczyna działać efekt → bohater dociera na heks → wybiera „Zbadaj problem” → poznaje dostępne sposoby rozwiązania → wybiera sposób rozwiązania → sukces albo porażka → po sukcesie problem znika → efekt przestaje działać → wydarzenie zostaje zakończone → Kronika zapisuje wydarzenie.
+Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → zaczyna działać efekt → bohater dociera na heks → wybiera „Zbadaj problem” → płaci 1 Akcję → poznaje dostępne sposoby rozwiązania → wybiera sposób rozwiązania → sukces albo porażka → po sukcesie problem znika → efekt przestaje działać → wydarzenie zostaje zakończone → Kronika zapisuje wydarzenie.
 
 ## Zatwierdzone zasady projektowe
 
@@ -21,7 +21,8 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 7. **Pojedyncze Zagrożenie może bezpośrednio całkowicie zablokować konkretną mechanikę, obiekt lub miejsce.** Nie musi do tego dochodzić przez kumulowanie kilku modyfikatorów. Jeżeli wynika to z treści karty, Zagrożenie może np. zablokować wydobycie w kopalni, korzystanie z określonej funkcji lokacji albo przejście przez wskazany heks. Blokada trwa tak długo, jak określa karta, najczęściej do rozwiązania Zagrożenia.
 8. **Wszystkie aktywne Zagrożenia są jawne dla wszystkich graczy w zakresie ich istnienia, lokalizacji i aktywnego wpływu na świat.** Gracze widzą nazwę Zagrożenia, jego znacznik na mapie i działające efekty.
 9. **Sposoby rozwiązania Zagrożenia nie są jawne zdalnie.** Gracz nie może z drugiego końca mapy podejrzeć dostępnych metod rozwiązania problemu. Samo dotarcie na heks również nie ujawnia metod automatycznie.
-10. **Aby poznać sposoby rozwiązania Zagrożenia, bohater znajdujący się na jego heksie musi świadomie kliknąć akcję „Zbadaj problem”.** Dopiero wtedy gra ujawnia dostępne metody rozwiązania. Samo wejście na heks Zagrożenia nie uruchamia badania i nie pokazuje tych opcji automatycznie. Koszt oraz dalsze szczegóły akcji „Zbadaj problem” zostaną ustalone osobno.
+10. **Aby poznać sposoby rozwiązania Zagrożenia, bohater znajdujący się na jego heksie musi świadomie kliknąć akcję „Zbadaj problem”.** Dopiero wtedy gra ujawnia dostępne metody rozwiązania. Samo wejście na heks Zagrożenia nie uruchamia badania i nie pokazuje tych opcji automatycznie.
+11. **Akcja „Zbadaj problem” kosztuje 1 Akcję.** Koszt jest ponoszony w momencie rozpoczęcia badania i dopiero po jego opłaceniu gracz poznaje dostępne metody rozwiązania Zagrożenia.
 
 ## Punkty do działania
 
@@ -40,6 +41,7 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [x] Wejście na heks nie uruchamia interakcji automatycznie.
 - [x] Bohater świadomie wybiera akcję rozwiązania problemu.
 - [ ] Ujawnić metody rozwiązania dopiero po użyciu akcji „Zbadaj problem” na heksie Zagrożenia.
+- [ ] Pobrać 1 Akcję za użycie „Zbadaj problem”.
 - [x] Obsłużyć kilka metod rozwiązania jednego problemu.
 - [x] Metody mogą korzystać z różnych statystyk.
 - [ ] Metody mogą prowadzić do walki.
@@ -70,7 +72,7 @@ Istnieją już trzy główne warstwy techniczne modułu:
 
 ### Najbliższe rzeczy do wykonania
 
-1. Dodać osobny krok „Zbadaj problem”, który dopiero po świadomym użyciu na właściwym heksie ujawnia metody rozwiązania.
+1. Dodać osobny krok „Zbadaj problem”, kosztujący 1 Akcję i dopiero po świadomym użyciu na właściwym heksie ujawniający metody rozwiązania.
 2. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała prawdziwą Walkę, zamiast zawsze być zwykłym testem statystyki.
 3. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
 4. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
@@ -90,4 +92,4 @@ Obecna wersja DEV zawiera już drogę Walki jako test statystyki oraz drogę Int
 
 ## Definition of Done
 
-W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć akcji „Zbadaj problem”, poznać sposoby rozwiązania i rozwiązać problem, a po sukcesie znacznik oraz efekt prawidłowo znikają.
+W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, poznać sposoby rozwiązania i rozwiązać problem, a po sukcesie znacznik oraz efekt prawidłowo znikają.
