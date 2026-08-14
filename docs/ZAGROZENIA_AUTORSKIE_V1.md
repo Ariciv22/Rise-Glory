@@ -56,8 +56,9 @@ Każdy z trzech znaczników korzysta z tych samych trzech metod rozwiązania opi
 
 „Udało ci się zaradzić leśnemu problemowi i uratować zakażone drzewa.”
 
-Bohater otrzymuje **4 Drewna**. Dodatkowo **każde jego miejsce produkcji Drewna produkuje +1 Drewna do następnej Rady**.
+Po rozwiązaniu wszystkich trzech znaczników **każdy bohater, który skutecznie rozwiązał co najmniej jeden znacznik tego Zagrożenia, otrzymuje pełną nagrodę**:
 
-### Do doprecyzowania przed implementacją
+- **4 Drewna**;
+- do następnej Rady **każde jego miejsce produkcji Drewna produkuje +1 Drewna**.
 
-Jeżeli trzy znaczniki zostaną rozwiązane przez różnych bohaterów, trzeba jeszcze ustalić, który bohater otrzymuje końcową nagrodę za całkowite zakończenie Zagrożenia.
+Jeżeli kilka znaczników rozwiążą różni bohaterowie, każdy z tych bohaterów otrzymuje powyższą nagrodę po całkowitym zakończeniu Zagrożenia.
