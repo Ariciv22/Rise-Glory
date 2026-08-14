@@ -19,6 +19,7 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 5. **Efekty kilku aktywnych Zagrożeń mogą się kumulować.** Jeżeli dwa lub więcej Zagrożeń modyfikuje tę samą wartość lub zasadę, ich efekty sumują się, o ile konkretna karta wyraźnie nie stanowi inaczej. Przykład: dwa aktywne efekty `-1 Złoto` do sprzedaży Towarów dają łącznie `-2 Złoto`.
 6. **Skumulowane efekty Zagrożeń mogą całkowicie wyłączyć daną możliwość.** Nie stosujemy automatycznego minimum `1`, jeśli kilka negatywnych efektów sprowadzi daną wartość lub możliwość do zera. Jeżeli np. cena sprzedaży Towaru zostanie obniżona do `0 Złota`, sprzedaż tego Towaru jest niedostępna tak długo, jak długo utrzymuje się efekt powodujący ten stan.
 7. **Pojedyncze Zagrożenie może bezpośrednio całkowicie zablokować konkretną mechanikę, obiekt lub miejsce.** Nie musi do tego dochodzić przez kumulowanie kilku modyfikatorów. Jeżeli wynika to z treści karty, Zagrożenie może np. zablokować wydobycie w kopalni, korzystanie z określonej funkcji lokacji albo przejście przez wskazany heks. Blokada trwa tak długo, jak określa karta, najczęściej do rozwiązania Zagrożenia.
+8. **Wszystkie aktywne Zagrożenia są jawne dla wszystkich graczy.** Gracze zawsze widzą, jakie Zagrożenia są aktywne, gdzie znajdują się ich znaczniki oraz jakie aktywne efekty wywierają na świat. Karta może ukrywać wyłącznie wybrane szczegóły interakcji, np. dokładną nagrodę lub konsekwencję konkretnej metody rozwiązania, jeśli wynika to z jej projektu.
 
 ## Punkty do działania
 
