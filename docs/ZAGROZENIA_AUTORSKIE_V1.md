@@ -62,3 +62,44 @@ Po rozwiązaniu wszystkich trzech znaczników **każdy bohater, który skuteczni
 - do następnej Rady **każde jego miejsce produkcji Drewna produkuje +1 Drewna**.
 
 Jeżeli kilka znaczników rozwiążą różni bohaterowie, każdy z tych bohaterów otrzymuje powyższą nagrodę po całkowitym zakończeniu Zagrożenia.
+
+---
+
+## 2. Lawiny w górach — szkic
+
+**Status:** w projektowaniu  
+**Typ:** zagrożenie terenowe / zablokowane górskie szlaki
+
+### Opis fabularny
+
+Potężne lawiny zeszły na kilka górskich szlaków. Kamienie, śnieg i połamane drzewa zasypały przejścia, utrudniając podróż przez góry. Bohater może spróbować zorganizować ludzi do oczyszczenia szlaku albo samemu wspiąć się po niebezpiecznym zboczu i zabezpieczyć drogę.
+
+### Rozmieszczenie — ZATWIERDZONE
+
+**Liczba Znaczników Zagrożenia:** 5.  
+**Podstawowo:** pięć różnych heksów `GÓRY`.
+
+Wszystkie pięć znaczników należy do tej samej instancji Zagrożenia i powinno posiadać ten sam widoczny numer identyfikacyjny na żetonie.
+
+### Efekt — szkic
+
+Oznaczone górskie szlaki są zablokowane przez lawiny do czasu uprzątnięcia danego miejsca.
+
+### Metoda 1 — Znajdź ludzi do oczyszczenia szlaku — propozycja
+
+**Test:** Handel DC 12.  
+**Zużywa:** 4 Złota przy rozpoczęciu próby.  
+**Porażka:** robotnicy biorą zaliczkę, ale po zobaczeniu rozmiaru osuwiska odmawiają pracy. Wydane Złoto nie wraca, a znacznik pozostaje aktywny.
+
+### Metoda 2 — Wspinaj się po górach i zabezpiecz szlak — propozycja
+
+**Test:** Walka DC 13.  
+**Wymaga:** `Lina` — nie jest zużywana.  
+**Porażka:** kamień usuwa się spod nóg bohatera podczas wspinaczki. Bohater otrzymuje 1 Ranę, a znacznik pozostaje aktywny.
+
+### Do doprecyzowania
+
+- Poziom Świata.
+- Nagroda.
+- Czy każdy z pięciu znaczników musi zostać rozwiązany osobno, czy karta ma inną zasadę zakończenia.
+- Czy powyższe wartości DC, koszt 4 Złota, wymóg Liny i konsekwencje porażek pozostają w tej formie.
