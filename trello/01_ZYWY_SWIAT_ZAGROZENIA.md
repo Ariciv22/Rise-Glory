@@ -9,7 +9,7 @@ Wydarzenia Świata mają rzeczywiście zmieniać planszę. Część wydarzeń tw
 
 ## Główny flow
 
-Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → efekt zaczyna działać natychmiast → bohater dociera na heks → wybiera „Zbadaj problem” → płaci 1 Akcję → bez testu poznaje dostępne sposoby rozwiązania **dla swojego bohatera** → wybiera sposób rozwiązania → płaci 1 Akcję za całą próbę rozwiązania → sukces albo porażka → po sukcesie problem, znacznik, efekty i blokady znikają natychmiast → wydarzenie zostaje zakończone → historia zapisuje bohatera, metodę i nagrodę → Kronika Świata zapisuje krótki wpis fabularny.
+Wydarzenie Świata → pojawia się problem → jeden lub kilka Znaczników Zagrożenia trafia na mapę zgodnie z kartą → efekt zaczyna działać natychmiast → bohater dociera na odpowiedni heks → wybiera „Zbadaj problem” → płaci 1 Akcję → bez testu poznaje dostępne sposoby rozwiązania **dla swojego bohatera** → wybiera sposób rozwiązania → płaci 1 Akcję za całą próbę rozwiązania → sukces albo porażka → po sukcesie problem, jego znaczniki, efekty i blokady znikają zgodnie z kartą → wydarzenie zostaje zakończone → historia zapisuje bohatera, metodę i nagrodę → Kronika Świata zapisuje krótki wpis fabularny.
 
 ## Zatwierdzone zasady projektowe
 
@@ -54,8 +54,8 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 39. **Zagrożenie posiadające fizyczny Znacznik Zagrożenia pozostaje aktywne aż do rozwiązania.** Nie wygasa automatycznie przy następnej Radzie ani po określonej liczbie rund.
 40. **Zmiana Poziomu Świata nie usuwa aktywnych Zagrożeń z wcześniejszych poziomów.**
 41. **Aktywne Zagrożenie nie skaluje się dynamicznie po zmianie Poziomu Świata.** DC, przeciwnicy, nagroda i inne parametry pozostają takie, jakie zostały określone przy wejściu problemu do gry.
-42. **Jedno Wydarzenie Świata może utworzyć maksymalnie jeden Znacznik Zagrożenia.**
-43. **Jeżeli na jednym heksie znajduje się kilka Zagrożeń, każde posiada osobną akcję interakcji.**
+42. **Jedno Wydarzenie Świata może utworzyć jeden albo kilka Znaczników Zagrożenia, jeśli konkretna karta tak określa.** Wszystkie znaczniki należące do tej samej instancji Zagrożenia otrzymują ten sam widoczny numer identyfikacyjny na żetonie, np. trzy znaczniki z numerem `2`. Numer pozwala graczom od razu rozpoznać, że kilka znaczników na różnych heksach reprezentuje ten sam aktywny problem.
+43. **Jeżeli na jednym heksie znajduje się kilka różnych Zagrożeń, każde posiada osobną akcję interakcji.**
 44. **Pojawienie się Zagrożenia na heksie zajętym przez bohatera nie uruchamia automatycznie żadnej interakcji.**
 45. **Jeżeli Zagrożenie blokuje wejście lub przejście przez heks, bohater znajdujący się już na tym heksie może z niego wyjść.** Po opuszczeniu nie może ponownie wejść tak długo, jak trwa blokada.
 46. **Po rozwiązaniu Zagrożenia historia zapisuje bohatera, skuteczną metodę oraz otrzymaną nagrodę.**
@@ -127,6 +127,8 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [ ] Porażka nie może domyślnie osłabiać parametrów Zagrożenia.
 - [ ] Po porażce blokować temu samemu bohaterowi kolejną próbę do jego następnej tury, ale później pozwalać wybrać inną metodę.
 - [ ] Do czasu modułu wspólnej wyprawy/Towarzysza nie pozwalać innym bohaterom dokładać statystyk, przedmiotów ani premii do próby.
+- [ ] Obsłużyć jedno Zagrożenie posiadające wiele Znaczników Zagrożenia na różnych heksach.
+- [ ] Wszystkie znaczniki tej samej instancji Zagrożenia oznaczać tym samym widocznym numerem identyfikacyjnym na żetonie.
 - [ ] Zagwarantować pełną obsługę kilku różnych Zagrożeń na jednym heksie z osobną akcją dla każdego problemu.
 - [ ] Usunąć techniczne limity prezentacji aktywnych Zagrożeń w UI.
 - [ ] Dopilnować natychmiastowej aktywacji efektów po pojawieniu się problemu.
@@ -157,9 +159,10 @@ Obecny kod **nie realizuje jeszcze finalnego dwustopniowego modelu** `Zbadaj pro
 4. Metody testowe: wszystkie 6 statystyk, Pomocnik, kilka wymagań, `wymaga` vs `zużywa`, metody automatyczne.
 5. Integracja pełnej Walki.
 6. Efekty i blokady Zagrożeń oraz natychmiastowe ich usuwanie po sukcesie.
-7. UI bez limitów liczby Zagrożeń/metod, kilka Zagrożeń na jednym heksie i osobiste statusy „Niezbadane / Zbadane”.
-8. Historia rozwiązania i integracja z Kroniką Świata.
-9. Przeniesienie „Rozbójników na trakcie” do contentu i przygotowanie 3–5 Zagrożeń testowych.
+7. Obsługa wielu numerowanych znaczników należących do jednej instancji Zagrożenia.
+8. UI bez limitów liczby Zagrożeń/metod, kilka Zagrożeń na jednym heksie i osobiste statusy „Niezbadane / Zbadane”.
+9. Historia rozwiązania i integracja z Kroniką Świata.
+10. Przeniesienie „Rozbójników na trakcie” do contentu i przygotowanie 3–5 Zagrożeń testowych.
 
 ## Pierwszy problem testowy
 
@@ -174,4 +177,4 @@ Obecna wersja DEV zawiera drogę Walki jako zwykły test statystyki oraz drogę 
 
 ## Definition of Done
 
-W normalnej rozgrywce Wydarzenie Świata może utworzyć fizyczne Zagrożenie, którego efekt działa natychmiast i pozostaje aktywny aż do rozwiązania. Każdy bohater osobno może dotrzeć na właściwy heks i za 1 Akcję bez testu użyć „Zbadaj problem”. Tylko ten bohater uzyskuje status „Zbadane” i może później zdalnie podglądać metody, DC, wymagania oraz już poznane konsekwencje porażek. Następnie za kolejną 1 Akcję może podjąć pełną próbę rozwiązania — zwykły test, metodę automatyczną albo pełną Walkę. Sukces natychmiast usuwa problem, znacznik, efekty i blokady, przyznaje wspólną nagrodę rozwiązującemu bohaterowi, pozwala kontynuować turę i zapisuje rozwiązanie w historii oraz Kronice Świata. Porażka pozostawia Zagrożenie bez domyślnego osłabienia i nie trafia do głównej historii ani Kroniki.
+W normalnej rozgrywce Wydarzenie Świata może utworzyć fizyczne Zagrożenie z jednym lub kilkoma numerowanymi znacznikami, którego efekt działa natychmiast i pozostaje aktywny aż do rozwiązania. Wszystkie znaczniki należące do tej samej instancji problemu mają ten sam numer identyfikacyjny. Każdy bohater osobno może dotrzeć na właściwy heks i za 1 Akcję bez testu użyć „Zbadaj problem”. Tylko ten bohater uzyskuje status „Zbadane” i może później zdalnie podglądać metody, DC, wymagania oraz już poznane konsekwencje porażek. Następnie za kolejną 1 Akcję może podjąć pełną próbę rozwiązania — zwykły test, metodę automatyczną albo pełną Walkę. Sukces natychmiast usuwa problem oraz przypisane do niego znaczniki zgodnie z kartą, efekty i blokady, przyznaje wspólną nagrodę rozwiązującemu bohaterowi, pozwala kontynuować turę i zapisuje rozwiązanie w historii oraz Kronice Świata. Porażka pozostawia Zagrożenie bez domyślnego osłabienia i nie trafia do głównej historii ani Kroniki.
