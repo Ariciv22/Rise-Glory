@@ -81,9 +81,20 @@ Potężne lawiny zeszły na kilka górskich szlaków. Kamienie, śnieg i połama
 
 Wszystkie pięć znaczników należy do tej samej instancji Zagrożenia i powinno posiadać ten sam widoczny numer identyfikacyjny na żetonie.
 
-### Efekt — szkic
+### Efekt — ZATWIERDZONE
 
-Oznaczone górskie szlaki są zablokowane przez lawiny do czasu uprzątnięcia danego miejsca.
+Każdy z pięciu oznaczonych górskich szlaków jest zablokowany przez lawinę. Przez dany heks nie można przejść, dopóki jego znacznik nie zostanie skutecznie rozwiązany.
+
+### Rozwiązywanie znaczników — ZATWIERDZONE
+
+Każdy z pięciu znaczników musi zostać rozwiązany osobno. Sukces przy jednym znaczniku:
+
+- usuwa tylko tę konkretną lawinę;
+- natychmiast otwiera przejście przez ten heks dla **wszystkich bohaterów**;
+- nie usuwa pozostałych czterech lawin;
+- nie kończy całego Zagrożenia, dopóki na mapie pozostaje choć jeden jego znacznik.
+
+Ideą Zagrożenia jest stopniowe odnajdywanie i oczyszczanie przejść, aby kolejne drogi przez góry stawały się dostępne także dla innych graczy.
 
 ### Metoda 1 — Znajdź ludzi do oczyszczenia szlaku — propozycja
 
@@ -101,5 +112,4 @@ Oznaczone górskie szlaki są zablokowane przez lawiny do czasu uprzątnięcia d
 
 - Poziom Świata.
 - Nagroda.
-- Czy każdy z pięciu znaczników musi zostać rozwiązany osobno, czy karta ma inną zasadę zakończenia.
 - Czy powyższe wartości DC, koszt 4 Złota, wymóg Liny i konsekwencje porażek pozostają w tej formie.
