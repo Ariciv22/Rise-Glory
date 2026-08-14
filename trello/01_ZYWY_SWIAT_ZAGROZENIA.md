@@ -63,6 +63,11 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 49. **Po zbadaniu Zagrożenia bohater może opuścić jego heks bez utraty zdobytej wiedzy.** Odkryte informacje pozostają jawne dla wszystkich graczy aż do zakończenia Zagrożenia.
 50. **Koszt 1 Akcji za rozpoczęcie metody obejmuje całą pojedynczą próbę rozwiązania.** Po opłaceniu Akcji wykonywany jest wymagany test lub inny przebieg metody, rozpatrywany jest wynik oraz wszystkie wynikające z niego konsekwencje bez pobierania kolejnych Akcji za elementy tej samej próby.
 51. **Jeżeli wybraną metodą jest pełna Walka, jej koszt 1 Akcji obejmuje całą walkę aż do zwycięstwa albo porażki.** Liczba rund walki nie zwiększa kosztu Akcji Zagrożenia.
+52. **Po użyciu „Zbadaj problem” bohater może od razu w tej samej turze rozpocząć próbę rozwiązania, jeśli posiada jeszcze co najmniej 1 Akcję.** Badanie nie kończy tury ani nie wymusza odłożenia próby na później.
+53. **Po udanym rozwiązaniu Zagrożenia bohater zachowuje wszystkie niewykorzystane Akcje i normalnie kontynuuje swoją turę.** Sukces nie kończy automatycznie tury bohatera.
+54. **Bohater może w jednej turze wejść w interakcję z kilkoma Zagrożeniami znajdującymi się na tym samym heksie, o ile posiada wystarczającą liczbę Akcji i nie narusza innych zasad dotyczących ponawiania prób.** Każde badanie i każda próba rozwiązania rozliczane są osobno.
+55. **Blokada wynikająca z Zagrożenia dotyczy wyłącznie mechaniki, obiektu, miejsca lub funkcji wskazanej przez kartę.** Jeżeli Zagrożenie blokuje np. wydobycie w kopalni, nie blokuje automatycznie innych niezależnych interakcji znajdujących się na tym samym heksie, chyba że karta wyraźnie mówi inaczej.
+56. **Jeżeli bohater znajduje się już na heksie objętym blokadą wejścia lub przejścia, opuszczenie tego heksu kosztuje normalny koszt ruchu.** Zagrożenie nie nakłada dodatkowej kary za samo wyjście, chyba że konkretna karta wyraźnie określa dodatkowy koszt lub efekt.
 
 ## Punkty do działania
 
@@ -85,9 +90,11 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [ ] Ujawnić metody rozwiązania dopiero po użyciu akcji „Zbadaj problem” na heksie Zagrożenia.
 - [ ] Akcja „Zbadaj problem” ma zawsze działać bez testu i kosztować dokładnie 1 Akcję.
 - [ ] Pozwolić użyć „Zbadaj problem” jako ostatniej Akcji w turze bez wymuszania natychmiastowej próby rozwiązania.
+- [ ] Pozwolić po zbadaniu od razu rozpocząć próbę w tej samej turze, jeśli bohater posiada kolejną Akcję.
 - [ ] Zapamiętać stan zbadanego Zagrożenia i utrzymywać odkryte metody jawne do końca problemu, także po odejściu bohatera z heksu.
 - [ ] Po zbadaniu udostępnić odkryte metody wszystkim graczom.
 - [ ] Pobrać osobną 1 Akcję za rozpoczęcie wybranej metody rozwiązania i w ramach tej jednej Akcji rozpatrzyć całą próbę wraz z wynikiem i konsekwencjami.
+- [ ] Po sukcesie nie kończyć automatycznie tury i pozostawić bohaterowi niewykorzystane Akcje.
 - [ ] Nie wymagać ponownego badania po porażce ani od kolejnego bohatera.
 - [ ] Po zbadaniu pokazywać przy metodach statystykę, DC oraz dodatkowe wymagania.
 - [ ] Nie ujawniać przed próbą dokładnej konsekwencji porażki ani nagrody za sukces.
@@ -113,14 +120,15 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [ ] Przy kolejnej próbie pozwolić bohaterowi wybrać dowolną inną odkrytą metodę.
 - [x] Inny bohater może później podjąć próbę rozwiązania problemu.
 - [x] Obsłużyć kilka aktywnych Zagrożeń jednocześnie.
-- [ ] Zagwarantować pełną obsługę kilku różnych Zagrożeń na tym samym heksie także w UI, z osobną akcją dla każdego problemu.
+- [ ] Zagwarantować pełną obsługę kilku różnych Zagrożeń na tym samym heksie także w UI, z osobną akcją dla każdego problemu i możliwością interakcji z kilkoma w jednej turze przy wystarczającej liczbie Akcji.
 - [ ] Nie wprowadzać limitu aktywnych Zagrożeń także w warstwie UI — usunąć ograniczenia wyświetlania, które mogłyby ukryć część problemów.
 - [ ] Dopilnować, aby efekt Zagrożenia działał natychmiast po jego pojawieniu się, jeszcze przed zbadaniem.
 - [ ] Zagwarantować, że Zagrożenia ze znacznikiem nie wygasają przy kolejnej Radzie ani po zmianie Poziomu Świata.
 - [ ] Zachować stałe DC, przeciwników, nagrodę i pozostałe parametry już aktywnego Zagrożenia po zmianie Poziomu Świata.
 - [x] Znacznik może znajdować się na heksie z innym obiektem.
 - [x] Znacznik może pojawić się na heksie zajętym przez bohatera.
-- [ ] Przy blokadzie wejścia/przejścia pozwolić bohaterowi znajdującemu się już na zablokowanym heksie wyjść z niego, ale zablokować ponowne wejście do czasu usunięcia blokady.
+- [ ] Ograniczać blokadę do elementu wskazanego przez kartę, bez automatycznego wyłączania innych niezależnych interakcji na tym samym heksie.
+- [ ] Przy blokadzie wejścia/przejścia pozwolić bohaterowi znajdującemu się już na zablokowanym heksie wyjść z niego za normalny koszt ruchu, ale zablokować ponowne wejście do czasu usunięcia blokady.
 - [ ] Zapisywać po rozwiązaniu bohatera, skuteczną metodę oraz otrzymaną nagrodę.
 - [x] Dodać wpis do historii Wydarzeń Świata.
 - [ ] Przygotować punkt integracji z Kroniką Świata.
@@ -138,7 +146,7 @@ Istnieją już trzy główne warstwy techniczne modułu:
 
 1. Dodać osobny krok „Zbadaj problem”, który zawsze działa bez testu, kosztuje 1 Akcję i dopiero po świadomym użyciu na właściwym heksie ujawnia metody rozwiązania.
 2. Zapamiętywać, że Zagrożenie zostało zbadane, ujawniać jego metody wszystkim graczom i nie wymagać ponownego badania po porażce, po odejściu z heksu ani przez kolejnych bohaterów.
-3. Rozdzielić koszt badania i koszt próby rozwiązania: każda z tych czynności kosztuje po 1 Akcji; próba obejmuje pełne rozpatrzenie testu lub pełnej Walki wraz z wynikiem i konsekwencjami.
+3. Rozdzielić koszt badania i koszt próby rozwiązania: każda z tych czynności kosztuje po 1 Akcji; próba obejmuje pełne rozpatrzenie testu lub pełnej Walki wraz z wynikiem i konsekwencjami, a po sukcesie gracz zachowuje pozostałe Akcje.
 4. Po zbadaniu pokazywać statystykę, DC i jawne wymagania każdej metody, ale ukrywać dokładną konsekwencję porażki oraz nagrodę do czasu ich ujawnienia zgodnie z zasadami.
 5. Umożliwić bezkosztowy podgląd odkrytych metod.
 6. Wymagać co najmniej 2 metod na Zagrożenie, obsługiwać 3 lub więcej oraz dodatkowe wymagania metod.
@@ -146,10 +154,10 @@ Istnieją już trzy główne warstwy techniczne modułu:
 8. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała pełną Walkę, oraz po przegranej zachować Zagrożenie i zastosować standardowe konsekwencje walki.
 9. Po pierwszym niepowodzeniu danej metody ujawniać wszystkim graczom jej konsekwencję porażki.
 10. Zachować jedną wspólną nagrodę za rozwiązanie Zagrożenia niezależnie od wybranej skutecznej metody i przyznawać ją wyłącznie bohaterowi, który rozwiązał problem.
-11. Zagwarantować pełną obsługę kilku różnych Zagrożeń na jednym heksie, również w UI, z osobnymi akcjami dla każdego problemu.
+11. Zagwarantować pełną obsługę kilku różnych Zagrożeń na jednym heksie, również w UI, z osobnymi akcjami i możliwością obsłużenia kilku problemów w tej samej turze przy odpowiedniej liczbie Akcji.
 12. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
 13. Dopilnować natychmiastowej aktywacji efektów Zagrożeń oraz ich trwałości między Radami i zmianami Poziomu Świata bez dynamicznego skalowania już aktywnych problemów.
-14. Obsłużyć blokady heksów tak, aby bohater już znajdujący się na heksie mógł go opuścić, ale nie wrócić do czasu zakończenia blokady.
+14. Obsłużyć blokady precyzyjnie: wyłączać tylko wskazaną funkcję, a przy blokadzie wejścia/przejścia pozwalać bohaterowi już znajdującemu się na heksie wyjść za normalny koszt ruchu, bez dodatkowej kary, chyba że karta stanowi inaczej.
 15. Zapisywać w historii bohatera rozwiązującego problem, skuteczną metodę oraz otrzymaną nagrodę.
 16. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
 17. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
@@ -167,4 +175,4 @@ Obecna wersja DEV zawiera już drogę Walki jako test statystyki oraz drogę Int
 
 ## Definition of Done
 
-W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks i za 1 Akcję bez testu użyć „Zbadaj problem”. Wiedza może zostać zdobyta nawet ostatnią Akcją w turze, pozostaje jawna po odejściu z heksu i jest dostępna dla wszystkich graczy. Następnie bohater może za kolejną 1 Akcję podjąć wybraną próbę rozwiązania, a ta jedna Akcja obejmuje całe rozpatrzenie metody — również pełną Walkę aż do zwycięstwa albo porażki. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Podgląd odkrytych metod jest darmowy, wymagane zasoby są zużywane przy rozpoczęciu próby, a po pierwszym niepowodzeniu konkretnej metody jej konsekwencja staje się jawna. Nagroda za rozwiązanie jest wspólna dla Zagrożenia niezależnie od wybranej drogi i otrzymuje ją bohater, który faktycznie rozwiązał problem. Liczba aktywnych Zagrożeń nie ma limitu, jedno Wydarzenie tworzy maksymalnie jeden Znacznik Zagrożenia, a kilka różnych Zagrożeń może współistnieć na tym samym heksie z osobnymi akcjami. Ich efekty działają natychmiast, fizyczne problemy nie wygasają przy Radzie ani zmianie Poziomu Świata i nie skalują się dynamicznie po wejściu do gry. Po sukcesie znacznik oraz efekt prawidłowo znikają, a historia zapisuje rozwiązującego bohatera, skuteczną metodę i nagrodę.
+W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks i za 1 Akcję bez testu użyć „Zbadaj problem”. Wiedza może zostać zdobyta nawet ostatnią Akcją w turze, pozostaje jawna po odejściu z heksu i jest dostępna dla wszystkich graczy. Jeśli bohater ma jeszcze Akcję, może od razu w tej samej turze rozpocząć próbę rozwiązania. Jedna Akcja obejmuje całe rozpatrzenie metody — również pełną Walkę aż do zwycięstwa albo porażki — a po sukcesie bohater zachowuje pozostałe Akcje i kontynuuje turę. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Podgląd odkrytych metod jest darmowy, wymagane zasoby są zużywane przy rozpoczęciu próby, a po pierwszym niepowodzeniu konkretnej metody jej konsekwencja staje się jawna. Nagroda za rozwiązanie jest wspólna dla Zagrożenia niezależnie od wybranej drogi i otrzymuje ją bohater, który faktycznie rozwiązał problem. Liczba aktywnych Zagrożeń nie ma limitu, jedno Wydarzenie tworzy maksymalnie jeden Znacznik Zagrożenia, a kilka różnych Zagrożeń może współistnieć na tym samym heksie z osobnymi akcjami i być obsługiwanych w jednej turze, jeśli bohater ma wystarczająco Akcji. Ich efekty działają natychmiast, fizyczne problemy nie wygasają przy Radzie ani zmianie Poziomu Świata i nie skalują się dynamicznie po wejściu do gry. Blokady dotyczą wyłącznie elementów wskazanych przez kartę; bohater już stojący na zablokowanym heksie może go opuścić za normalny koszt ruchu. Po sukcesie znacznik oraz efekt prawidłowo znikają, a historia zapisuje rozwiązującego bohatera, skuteczną metodę i nagrodę.
