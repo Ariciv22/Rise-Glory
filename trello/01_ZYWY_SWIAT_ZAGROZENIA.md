@@ -10,6 +10,11 @@ Wydarzenia Świata mają rzeczywiście zmieniać planszę. Część wydarzeń tw
 
 Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → zaczyna działać efekt → bohater dociera na heks → wybiera sposób rozwiązania → sukces albo porażka → po sukcesie problem znika → efekt przestaje działać → wydarzenie zostaje zakończone → Kronika zapisuje wydarzenie.
 
+## Zatwierdzone zasady projektowe
+
+1. **Każde Zagrożenie zawsze posiada co najmniej 1 aktywny efekt.** Efekt działa tak długo, jak długo Zagrożenie pozostaje aktywne, chyba że sama karta wyraźnie określa dodatkową regułę.
+2. **Zasięg efektu jest definiowany indywidualnie przez każde Zagrożenie.** Efekt może być globalny, regionalny albo lokalny. Nie wszystkie Zagrożenia muszą oddziaływać na cały świat.
+
 ## Punkty do działania
 
 - [x] Stworzyć jeden wspólny Znacznik Zagrożenia.
