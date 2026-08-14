@@ -17,6 +17,7 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 3. **Jedno Zagrożenie może posiadać kilka aktywnych efektów jednocześnie.** Nie ma obowiązku stosowania więcej niż jednego efektu — minimum pozostaje 1. Liczba efektów wynika z projektu konkretnego Zagrożenia.
 4. **Zagrożenia nie eskalują automatycznie wraz z upływem czasu.** Efekty Zagrożenia pozostają niezmienne aż do jego rozwiązania lub innego zakończenia określonego przez kartę; samo pozostawienie problemu na mapie przez kolejne rundy lub Rady nie zwiększa jego siły ani nie dodaje nowych efektów.
 5. **Efekty kilku aktywnych Zagrożeń mogą się kumulować.** Jeżeli dwa lub więcej Zagrożeń modyfikuje tę samą wartość lub zasadę, ich efekty sumują się, o ile konkretna karta wyraźnie nie stanowi inaczej. Przykład: dwa aktywne efekty `-1 Złoto` do sprzedaży Towarów dają łącznie `-2 Złoto`.
+6. **Skumulowane efekty Zagrożeń mogą całkowicie wyłączyć daną możliwość.** Nie stosujemy automatycznego minimum `1`, jeśli kilka negatywnych efektów sprowadzi daną wartość lub możliwość do zera. Jeżeli np. cena sprzedaży Towaru zostanie obniżona do `0 Złota`, sprzedaż tego Towaru jest niedostępna tak długo, jak długo utrzymuje się efekt powodujący ten stan.
 
 ## Punkty do działania
 
