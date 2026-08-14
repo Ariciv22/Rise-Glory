@@ -12,9 +12,10 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 
 ## Zatwierdzone zasady projektowe
 
-1. **Każde Zagrożenie zawsze posiada co najmniej 1 aktywny efekt.** Efekt działa tak długo, jak długo Zagrożenie pozostaje aktywne, chyba że sama karta wyraźnie określa dodatkową regułę.
+1. **Każde Zagrożenie zawsze posiada co najmniej 1 aktywny negatywny efekt.** Efekt działa tak długo, jak długo Zagrożenie pozostaje aktywne, chyba że sama karta wyraźnie określa dodatkową regułę.
 2. **Zasięg efektu jest definiowany indywidualnie przez każde Zagrożenie.** Efekt może być globalny, regionalny albo lokalny. Nie wszystkie Zagrożenia muszą oddziaływać na cały świat.
 3. **Jedno Zagrożenie może posiadać kilka aktywnych efektów jednocześnie.** Nie ma obowiązku stosowania więcej niż jednego efektu — minimum pozostaje 1. Liczba efektów wynika z projektu konkretnego Zagrożenia.
+4. **Zagrożenia nie eskalują automatycznie wraz z upływem czasu.** Efekty Zagrożenia pozostają niezmienne aż do jego rozwiązania lub innego zakończenia określonego przez kartę; samo pozostawienie problemu na mapie przez kolejne rundy lub Rady nie zwiększa jego siły ani nie dodaje nowych efektów.
 
 ## Punkty do działania
 
