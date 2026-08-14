@@ -14,6 +14,7 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 
 1. **Każde Zagrożenie zawsze posiada co najmniej 1 aktywny efekt.** Efekt działa tak długo, jak długo Zagrożenie pozostaje aktywne, chyba że sama karta wyraźnie określa dodatkową regułę.
 2. **Zasięg efektu jest definiowany indywidualnie przez każde Zagrożenie.** Efekt może być globalny, regionalny albo lokalny. Nie wszystkie Zagrożenia muszą oddziaływać na cały świat.
+3. **Jedno Zagrożenie może posiadać kilka aktywnych efektów jednocześnie.** Nie ma obowiązku stosowania więcej niż jednego efektu — minimum pozostaje 1. Liczba efektów wynika z projektu konkretnego Zagrożenia.
 
 ## Punkty do działania
 
