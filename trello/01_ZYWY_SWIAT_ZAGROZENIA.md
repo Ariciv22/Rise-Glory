@@ -48,7 +48,7 @@ Wydarzenie Świata → pojawia się problem → jeden lub kilka Znaczników Zagr
 33. **Karta Zagrożenia może posiadać własną regułę miejsca awaryjnego.**
 34. **Jeśli nie da się spełnić ani podstawowej, ani awaryjnej reguły rozmieszczenia, Wydarzenie nie wchodzi do gry.** Karta trafia na stos odrzuconych, a gra dobiera kolejne Wydarzenie z tej samej talii i Poziomu Świata.
 35. **Kilka różnych Zagrożeń może jednocześnie znajdować się na tym samym heksie.**
-36. **Pełną nagrodę otrzymuje bohater, który faktycznie rozwiązał Zagrożenie.** Samo wcześniejsze zbadanie problemu nie daje udziału w nagrodzie.
+36. **Nagrodę otrzymuje bohater lub bohaterowie, którzy faktycznie rozwiązali Zagrożenie zgodnie z regułą nagrody zapisaną na karcie.** W zwykłym Zagrożeniu z jednym punktem rozwiązania pełna nagroda trafia do bohatera, który je zakończył. Samo wcześniejsze zbadanie problemu nie daje udziału w nagrodzie.
 37. **Nie ma limitu liczby aktywnych Zagrożeń.**
 38. **Efekt Zagrożenia zaczyna działać natychmiast po jego pojawieniu się na mapie.** Badanie nie aktywuje efektu, tylko ujawnia metody bohaterowi.
 39. **Zagrożenie posiadające fizyczny Znacznik Zagrożenia pozostaje aktywne aż do rozwiązania.** Nie wygasa automatycznie przy następnej Radzie ani po określonej liczbie rund.
@@ -84,6 +84,7 @@ Wydarzenie Świata → pojawia się problem → jeden lub kilka Znaczników Zagr
 69. **Nieudanych prób nie zapisujemy w głównej historii Wydarzeń ani w Kronice Świata.** Historia i Kronika zapisują przede wszystkim ostateczne rozwiązanie problemu; stan samego Zagrożenia może pamiętać techniczne informacje potrzebne do dalszej rozgrywki, np. ujawnioną konsekwencję porażki.
 70. **Status „Niezbadane / Zbadane” oraz zdalny podgląd metod są osobne dla każdego bohatera.** Tylko bohater, który sam użył „Zbadaj problem” na danym Zagrożeniu, może później zdalnie podejrzeć jego odkryte metody, DC, wymagania i poznane konsekwencje porażek. Dla pozostałych bohaterów problem nadal ma status „Niezbadane”, mimo że jego istnienie, lokalizacja i aktywne efekty są publiczne.
 71. **Każde ostatecznie rozwiązane Zagrożenie automatycznie trafia do Kroniki Świata.** Wpis jest krótki i fabularny: co się wydarzyło, kto rozwiązał problem i jaką metodą. Kronika nie pokazuje technicznych danych takich jak DC.
+72. **Wieloznacznikowe Zagrożenie może przyznawać pełną nagrodę wszystkim bohaterom, którzy skutecznie rozwiązali co najmniej jeden jego znacznik, jeśli karta tak określa.** Silnik musi pamiętać listę bohaterów uczestniczących w skutecznym usuwaniu znaczników i rozliczyć nagrodę dopiero wtedy, gdy zostanie spełniony warunek zakończenia całego Zagrożenia.
 
 ## Punkty do działania
 
@@ -129,6 +130,7 @@ Wydarzenie Świata → pojawia się problem → jeden lub kilka Znaczników Zagr
 - [ ] Do czasu modułu wspólnej wyprawy/Towarzysza nie pozwalać innym bohaterom dokładać statystyk, przedmiotów ani premii do próby.
 - [ ] Obsłużyć jedno Zagrożenie posiadające wiele Znaczników Zagrożenia na różnych heksach.
 - [ ] Wszystkie znaczniki tej samej instancji Zagrożenia oznaczać tym samym widocznym numerem identyfikacyjnym na żetonie.
+- [ ] Dla wieloznacznikowych Zagrożeń śledzić bohaterów, którzy skutecznie rozwiązali co najmniej jeden znacznik, i pozwolić karcie przyznać pełną nagrodę każdemu z nich po zakończeniu całego problemu.
 - [ ] Zagwarantować pełną obsługę kilku różnych Zagrożeń na jednym heksie z osobną akcją dla każdego problemu.
 - [ ] Usunąć techniczne limity prezentacji aktywnych Zagrożeń w UI.
 - [ ] Dopilnować natychmiastowej aktywacji efektów po pojawieniu się problemu.
@@ -159,7 +161,7 @@ Obecny kod **nie realizuje jeszcze finalnego dwustopniowego modelu** `Zbadaj pro
 4. Metody testowe: wszystkie 6 statystyk, Pomocnik, kilka wymagań, `wymaga` vs `zużywa`, metody automatyczne.
 5. Integracja pełnej Walki.
 6. Efekty i blokady Zagrożeń oraz natychmiastowe ich usuwanie po sukcesie.
-7. Obsługa wielu numerowanych znaczników należących do jednej instancji Zagrożenia.
+7. Obsługa wielu numerowanych znaczników należących do jednej instancji Zagrożenia oraz listy bohaterów, którzy rozwiązali co najmniej jeden znacznik.
 8. UI bez limitów liczby Zagrożeń/metod, kilka Zagrożeń na jednym heksie i osobiste statusy „Niezbadane / Zbadane”.
 9. Historia rozwiązania i integracja z Kroniką Świata.
 10. Przeniesienie „Rozbójników na trakcie” do contentu i przygotowanie 3–5 Zagrożeń testowych.
@@ -177,4 +179,4 @@ Obecna wersja DEV zawiera drogę Walki jako zwykły test statystyki oraz drogę 
 
 ## Definition of Done
 
-W normalnej rozgrywce Wydarzenie Świata może utworzyć fizyczne Zagrożenie z jednym lub kilkoma numerowanymi znacznikami, którego efekt działa natychmiast i pozostaje aktywny aż do rozwiązania. Wszystkie znaczniki należące do tej samej instancji problemu mają ten sam numer identyfikacyjny. Każdy bohater osobno może dotrzeć na właściwy heks i za 1 Akcję bez testu użyć „Zbadaj problem”. Tylko ten bohater uzyskuje status „Zbadane” i może później zdalnie podglądać metody, DC, wymagania oraz już poznane konsekwencje porażek. Następnie za kolejną 1 Akcję może podjąć pełną próbę rozwiązania — zwykły test, metodę automatyczną albo pełną Walkę. Sukces natychmiast usuwa problem oraz przypisane do niego znaczniki zgodnie z kartą, efekty i blokady, przyznaje wspólną nagrodę rozwiązującemu bohaterowi, pozwala kontynuować turę i zapisuje rozwiązanie w historii oraz Kronice Świata. Porażka pozostawia Zagrożenie bez domyślnego osłabienia i nie trafia do głównej historii ani Kroniki.
+W normalnej rozgrywce Wydarzenie Świata może utworzyć fizyczne Zagrożenie z jednym lub kilkoma numerowanymi znacznikami, którego efekt działa natychmiast i pozostaje aktywny aż do rozwiązania. Wszystkie znaczniki należące do tej samej instancji problemu mają ten sam numer identyfikacyjny. Każdy bohater osobno może dotrzeć na właściwy heks i za 1 Akcję bez testu użyć „Zbadaj problem”. Tylko ten bohater uzyskuje status „Zbadane” i może później zdalnie podglądać metody, DC, wymagania oraz już poznane konsekwencje porażek. Następnie za kolejną 1 Akcję może podjąć pełną próbę rozwiązania — zwykły test, metodę automatyczną albo pełną Walkę. Sukces natychmiast usuwa problem lub jego część zgodnie z kartą, a po spełnieniu warunku zakończenia całego Zagrożenia przyznawana jest nagroda bohaterowi albo wszystkim uprawnionym bohaterom zgodnie z regułą karty. Porażka pozostawia Zagrożenie bez domyślnego osłabienia i nie trafia do głównej historii ani Kroniki.
