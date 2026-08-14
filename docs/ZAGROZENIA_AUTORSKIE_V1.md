@@ -65,9 +65,9 @@ Jeżeli kilka znaczników rozwiążą różni bohaterowie, każdy z tych bohater
 
 ---
 
-## 2. Lawiny w górach — szkic
+## 2. Lawiny w górach
 
-**Status:** w projektowaniu  
+**Status:** zatwierdzone — poza techniczną integracją z przyszłą mechaniką Szlaków Handlowych  
 **Poziom Świata:** 1  
 **Typ:** zagrożenie terenowe / zablokowane górskie szlaki
 
@@ -75,18 +75,18 @@ Jeżeli kilka znaczników rozwiążą różni bohaterowie, każdy z tych bohater
 
 Potężne lawiny zeszły na kilka górskich szlaków. Kamienie, śnieg i połamane drzewa zasypały przejścia, utrudniając podróż przez góry. Bohater może spróbować znaleźć śmiałków, którzy oczyszczą drogę, albo samemu wspiąć się po niebezpiecznych górach i znaleźć bezpieczne przejście dla pozostałych.
 
-### Rozmieszczenie — ZATWIERDZONE
+### Rozmieszczenie
 
 **Liczba Znaczników Zagrożenia:** 5.  
 **Podstawowo:** pięć różnych heksów `GÓRY`.
 
 Wszystkie pięć znaczników należy do tej samej instancji Zagrożenia i powinno posiadać ten sam widoczny numer identyfikacyjny na żetonie.
 
-### Efekt — ZATWIERDZONE
+### Efekt
 
 Każdy z pięciu oznaczonych górskich szlaków jest zablokowany przez lawinę. Przez dany heks nie można przejść, dopóki jego znacznik nie zostanie skutecznie rozwiązany.
 
-### Rozwiązywanie znaczników — ZATWIERDZONE
+### Rozwiązywanie znaczników
 
 Każdy z pięciu znaczników musi zostać rozwiązany osobno. Sukces przy jednym znaczniku:
 
@@ -97,28 +97,24 @@ Każdy z pięciu znaczników musi zostać rozwiązany osobno. Sukces przy jednym
 
 Ideą Zagrożenia jest stopniowe odnajdywanie i oczyszczanie przejść, aby kolejne drogi przez góry stawały się dostępne także dla innych graczy.
 
-### Metoda 1 — Znajdź śmiałków do oczyszczenia szlaku — ZATWIERDZONE PARAMETRY
+### Metoda 1 — Znajdź śmiałków do oczyszczenia szlaku
 
 **Test:** Handel DC 16.  
-**Zużywa:** 12 Złota przy rozpoczęciu próby.
+**Zużywa:** 12 Złota przy rozpoczęciu próby.  
+**Porażka:** śmiałkowie przyjmują zapłatę lub zaliczkę, ale po zobaczeniu rozmiaru osuwiska rezygnują. Wydane 12 Złota nie wraca, a znacznik pozostaje aktywny.
 
-**Konsekwencja porażki — do zatwierdzenia:** śmiałkowie przyjmują zapłatę lub zaliczkę, ale po zobaczeniu rozmiaru osuwiska rezygnują. Wydane Złoto nie wraca, a znacznik pozostaje aktywny.
-
-### Metoda 2 — Samemu przejdź przez góry i znajdź bezpieczną drogę — ZATWIERDZONE PARAMETRY
+### Metoda 2 — Samemu przejdź przez góry i znajdź bezpieczną drogę
 
 **Test:** Walka DC 17 — test reprezentuje siłę fizyczną, sprawność i wytrzymałość podczas wspinaczki; gra nie posiada osobnej statystyki `Siła`.  
+**Wymaga:** `Lina` — nie jest zużywana.  
+**Porażka:** podczas wspinaczki bohater traci oparcie i zostaje ranny. Otrzymuje **1 Ranę**, a znacznik pozostaje aktywny.
 
-**Wymóg Liny — do zatwierdzenia.**  
-**Konsekwencja porażki — do zatwierdzenia:** bohater otrzymuje 1 Ranę, a znacznik pozostaje aktywny.
-
-### Nagroda — ZATWIERDZONY KIERUNEK
+### Nagroda
 
 Po całkowitym rozwiązaniu Zagrożenia, do następnej Rady **każdy Szlak Handlowy przechodzący przez góry daje +2 Złota więcej**.
 
 Dokładna mechanika Szlaków Handlowych nie jest jeszcze ustalona i musi zostać zaprojektowana w osobnym module. Przy implementacji tego Zagrożenia bonus należy potraktować jako zależność od przyszłego systemu Szlaków Handlowych, a nie wymyślać jego działania na potrzeby tej karty.
 
-### Do doprecyzowania
+### Zależność do późniejszego ustalenia
 
-- Czy przy metodzie wspinaczki nadal wymagana jest `Lina`.
-- Ostateczne konsekwencje porażki obu metod.
 - Dokładne techniczne działanie bonusu `+2 Złota` zostanie określone dopiero wraz z mechaniką Szlaków Handlowych.
