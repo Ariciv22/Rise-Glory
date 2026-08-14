@@ -8,7 +8,7 @@ Wydarzenia Świata mają rzeczywiście zmieniać planszę. Część wydarzeń tw
 
 ## Główny flow
 
-Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → zaczyna działać efekt → bohater dociera na heks → wybiera „Zbadaj problem” → płaci 1 Akcję → poznaje dostępne sposoby rozwiązania → wybiera sposób rozwiązania → sukces albo porażka → po sukcesie problem znika → efekt przestaje działać → wydarzenie zostaje zakończone → Kronika zapisuje wydarzenie.
+Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na mapę → zaczyna działać efekt → bohater dociera na heks → wybiera „Zbadaj problem” → płaci 1 Akcję → poznaje dostępne sposoby rozwiązania → metody stają się jawne dla wszystkich graczy → bohater wybiera sposób rozwiązania → płaci koszt podjęcia próby → sukces albo porażka → po sukcesie problem znika → efekt przestaje działać → wydarzenie zostaje zakończone → Kronika zapisuje wydarzenie.
 
 ## Zatwierdzone zasady projektowe
 
@@ -23,6 +23,11 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 9. **Sposoby rozwiązania Zagrożenia nie są jawne zdalnie.** Gracz nie może z drugiego końca mapy podejrzeć dostępnych metod rozwiązania problemu. Samo dotarcie na heks również nie ujawnia metod automatycznie.
 10. **Aby poznać sposoby rozwiązania Zagrożenia, bohater znajdujący się na jego heksie musi świadomie kliknąć akcję „Zbadaj problem”.** Dopiero wtedy gra ujawnia dostępne metody rozwiązania. Samo wejście na heks Zagrożenia nie uruchamia badania i nie pokazuje tych opcji automatycznie.
 11. **Akcja „Zbadaj problem” kosztuje 1 Akcję.** Koszt jest ponoszony w momencie rozpoczęcia badania i dopiero po jego opłaceniu gracz poznaje dostępne metody rozwiązania Zagrożenia.
+12. **Po zbadaniu Zagrożenia poznane metody rozwiązania pozostają odkryte na stałe, dopóki Zagrożenie pozostaje aktywne.** Nie trzeba ponownie badać tego samego problemu w kolejnych turach.
+13. **Po pierwszym zbadaniu Zagrożenia odkryte metody stają się jawne dla wszystkich graczy.** Wiedza o sposobach rozwiązania problemu jest wspólna dla całej drużyny rywalizujących bohaterów, a nie przypisana wyłącznie do bohatera, który wykonał badanie.
+14. **Po zbadaniu Zagrożenia podjęcie konkretnej próby rozwiązania kosztuje dodatkowo 1 Akcję.** Badanie i próba rozwiązania są dwiema osobnymi czynnościami: 1 Akcja za „Zbadaj problem” oraz 1 Akcja za rozpoczęcie wybranej metody rozwiązania.
+15. **Porażka próby rozwiązania nie powoduje ponownego ukrycia metod.** Raz odkryte sposoby rozwiązania pozostają jawne i nie wymagają ponownego użycia akcji „Zbadaj problem”.
+16. **Inny bohater może skorzystać z wcześniej odkrytych metod bez ponownego badania.** Po dotarciu na heks już zbadanego Zagrożenia może od razu wybrać jedną z jawnych metod i zapłacić wyłącznie koszt podjęcia próby rozwiązania.
 
 ## Punkty do działania
 
@@ -42,6 +47,10 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [x] Bohater świadomie wybiera akcję rozwiązania problemu.
 - [ ] Ujawnić metody rozwiązania dopiero po użyciu akcji „Zbadaj problem” na heksie Zagrożenia.
 - [ ] Pobrać 1 Akcję za użycie „Zbadaj problem”.
+- [ ] Zapamiętać stan zbadanego Zagrożenia i utrzymywać odkryte metody jawne do końca problemu.
+- [ ] Po zbadaniu udostępnić odkryte metody wszystkim graczom.
+- [ ] Pobrać osobną 1 Akcję za rozpoczęcie wybranej metody rozwiązania.
+- [ ] Nie wymagać ponownego badania po porażce ani od kolejnego bohatera.
 - [x] Obsłużyć kilka metod rozwiązania jednego problemu.
 - [x] Metody mogą korzystać z różnych statystyk.
 - [ ] Metody mogą prowadzić do walki.
@@ -73,11 +82,13 @@ Istnieją już trzy główne warstwy techniczne modułu:
 ### Najbliższe rzeczy do wykonania
 
 1. Dodać osobny krok „Zbadaj problem”, kosztujący 1 Akcję i dopiero po świadomym użyciu na właściwym heksie ujawniający metody rozwiązania.
-2. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała prawdziwą Walkę, zamiast zawsze być zwykłym testem statystyki.
-3. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
-4. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
-5. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
-6. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
+2. Zapamiętywać, że Zagrożenie zostało zbadane, ujawniać jego metody wszystkim graczom i nie wymagać ponownego badania po porażce ani przez kolejnych bohaterów.
+3. Rozdzielić koszt badania i koszt próby rozwiązania: każda z tych czynności kosztuje po 1 Akcji.
+4. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała prawdziwą Walkę, zamiast zawsze być zwykłym testem statystyki.
+5. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
+6. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
+7. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
+8. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
 
 ## Pierwszy problem testowy
 
@@ -92,4 +103,4 @@ Obecna wersja DEV zawiera już drogę Walki jako test statystyki oraz drogę Int
 
 ## Definition of Done
 
-W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, poznać sposoby rozwiązania i rozwiązać problem, a po sukcesie znacznik oraz efekt prawidłowo znikają.
+W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, ujawnić metody całej grupie, a następnie za kolejną 1 Akcję podjąć wybraną próbę rozwiązania. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Po sukcesie znacznik oraz efekt prawidłowo znikają.
