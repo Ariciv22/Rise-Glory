@@ -33,6 +33,11 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 19. **Dokładna nagroda za sukces nie jest pokazywana przed wybraniem metody.** Nagroda zostaje ujawniona dopiero po skutecznym rozwiązaniu problemu.
 20. **Każde Zagrożenie posiada co najmniej 2 różne metody rozwiązania i może posiadać 3 lub więcej metod.** Liczba metod wynika z projektu konkretnego problemu; trzy metody są jak najbardziej dopuszczalne.
 21. **Metoda rozwiązania może mieć dodatkowe wymagania poza statystyką.** Może wymagać np. określonej ilości Złota, Towaru, konkretnego Przedmiotu albo Pomocnika. Jeśli bohater nie spełnia wymogu, metoda jest dla niego niedostępna.
+22. **Po zbadaniu Zagrożenia dodatkowe wymagania każdej metody są jawne.** Gracz widzi przed wyborem, czy metoda wymaga np. Złota, Towaru, konkretnego Przedmiotu albo Pomocnika.
+23. **Metoda typu „Walka” uruchamia pełną walkę.** Nie jest zastępowana pojedynczym testem statystyki Walka. Rozwiązanie taką metodą przechodzi przez właściwy system walki z przeciwnikiem lub przeciwnikami przypisanymi do Zagrożenia.
+24. **Różne metody tego samego Zagrożenia mogą mieć różne konsekwencje porażki.** Ryzyko wynika z charakteru wybranej drogi i może być inne dla Walki, Intrygi, Dyplomacji lub innych metod.
+25. **Różne metody rozwiązania tego samego Zagrożenia nie zmieniają nagrody za sukces.** Zagrożenie posiada jedną wspólną nagrodę za rozwiązanie niezależnie od wybranej skutecznej metody.
+26. **Podgląd wcześniej odkrytych metod jest darmowy.** Gracz może bez kosztu Akcji ponownie sprawdzić znane metody, statystyki, DC i wymagania. 1 Akcja jest pobierana dopiero przy rozpoczęciu konkretnej próby rozwiązania.
 
 ## Punkty do działania
 
@@ -56,14 +61,16 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [ ] Po zbadaniu udostępnić odkryte metody wszystkim graczom.
 - [ ] Pobrać osobną 1 Akcję za rozpoczęcie wybranej metody rozwiązania.
 - [ ] Nie wymagać ponownego badania po porażce ani od kolejnego bohatera.
-- [ ] Po zbadaniu pokazywać przy metodach statystykę oraz DC.
+- [ ] Po zbadaniu pokazywać przy metodach statystykę, DC oraz dodatkowe wymagania.
 - [ ] Nie ujawniać przed próbą dokładnej konsekwencji porażki ani nagrody za sukces.
+- [ ] Umożliwić darmowy podgląd wcześniej odkrytych metod bez zużywania Akcji.
 - [x] Obsłużyć kilka metod rozwiązania jednego problemu.
 - [ ] Wymagać minimum 2 metod rozwiązania dla każdego Zagrożenia i obsłużyć również 3 lub więcej metod.
 - [x] Metody mogą korzystać z różnych statystyk.
 - [ ] Obsłużyć dodatkowe wymagania metod, np. Złoto, Towar, Przedmiot albo Pomocnika.
-- [ ] Metody mogą prowadzić do walki.
+- [ ] Metoda „Walka” uruchamia pełny system walki zamiast zwykłego testu statystyki.
 - [x] Metody mogą mieć różne konsekwencje.
+- [x] Nagroda za rozwiązanie jest wspólna dla Zagrożenia i niezależna od skutecznej metody.
 - [x] Sukces usuwa problem.
 - [x] Sukces usuwa znacznik.
 - [x] Sukces wyłącza efekt wydarzenia.
@@ -93,13 +100,15 @@ Istnieją już trzy główne warstwy techniczne modułu:
 1. Dodać osobny krok „Zbadaj problem”, kosztujący 1 Akcję i dopiero po świadomym użyciu na właściwym heksie ujawniający metody rozwiązania.
 2. Zapamiętywać, że Zagrożenie zostało zbadane, ujawniać jego metody wszystkim graczom i nie wymagać ponownego badania po porażce ani przez kolejnych bohaterów.
 3. Rozdzielić koszt badania i koszt próby rozwiązania: każda z tych czynności kosztuje po 1 Akcji.
-4. Po zbadaniu pokazywać statystykę i DC każdej metody, ale ukrywać dokładną konsekwencję porażki oraz nagrodę do czasu rozpatrzenia próby.
-5. Wymagać co najmniej 2 metod na Zagrożenie, obsługiwać 3 lub więcej oraz dodatkowe wymagania metod.
-6. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała prawdziwą Walkę, zamiast zawsze być zwykłym testem statystyki.
-7. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
-8. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
-9. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
-10. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
+4. Po zbadaniu pokazywać statystykę, DC i jawne wymagania każdej metody, ale ukrywać dokładną konsekwencję porażki oraz nagrodę do czasu rozpatrzenia próby.
+5. Umożliwić bezkosztowy podgląd odkrytych metod.
+6. Wymagać co najmniej 2 metod na Zagrożenie, obsługiwać 3 lub więcej oraz dodatkowe wymagania metod.
+7. Dodać możliwość, aby metoda rozwiązania Problemu uruchamiała pełną Walkę, zamiast zawsze być zwykłym testem statystyki.
+8. Zachować jedną wspólną nagrodę za rozwiązanie Zagrożenia niezależnie od wybranej skutecznej metody.
+9. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
+10. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
+11. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
+12. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
 
 ## Pierwszy problem testowy
 
@@ -114,4 +123,4 @@ Obecna wersja DEV zawiera już drogę Walki jako test statystyki oraz drogę Int
 
 ## Definition of Done
 
-W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, ujawnić metody całej grupie, a następnie za kolejną 1 Akcję podjąć wybraną próbę rozwiązania. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Po zbadaniu gracze widzą statystykę i DC każdej metody, ale nie znają dokładnej konsekwencji porażki ani nagrody. Każde Zagrożenie ma co najmniej 2 metody i może mieć 3 lub więcej, a wybrane metody mogą wymagać dodatkowych zasobów lub przedmiotów. Po sukcesie znacznik oraz efekt prawidłowo znikają.
+W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, ujawnić metody całej grupie, a następnie za kolejną 1 Akcję podjąć wybraną próbę rozwiązania. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Podgląd odkrytych metod jest darmowy, metoda Walki uruchamia pełny system walki, a nagroda za rozwiązanie jest wspólna dla Zagrożenia niezależnie od wybranej drogi. Po sukcesie znacznik oraz efekt prawidłowo znikają.
