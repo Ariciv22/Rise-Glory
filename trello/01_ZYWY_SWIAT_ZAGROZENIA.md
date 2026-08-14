@@ -48,6 +48,11 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 34. **Jeśli nie da się spełnić ani podstawowej, ani awaryjnej reguły rozmieszczenia, Wydarzenie nie wchodzi do gry.** Karta trafia na stos odrzuconych, a gra dobiera kolejne Wydarzenie z tej samej talii i tego samego Poziomu Świata.
 35. **Kilka różnych Zagrożeń może jednocześnie znajdować się na tym samym heksie.** Jeżeli reguły rozmieszczenia kilku aktywnych kart legalnie wskazują to samo miejsce, ich znaczniki i problemy współistnieją na jednym heksie.
 36. **Pełną nagrodę za rozwiązanie Zagrożenia otrzymuje bohater, który faktycznie je rozwiązał.** Nie ma znaczenia, który bohater wcześniej wykonał akcję „Zbadaj problem”; samo odkrycie metod nie daje udziału w późniejszej nagrodzie.
+37. **Nie ma limitu liczby aktywnych Zagrożeń.** Świat może posiadać dowolną liczbę nierozwiązanych problemów jednocześnie; kolejne Zagrożenia nie zastępują ani nie usuwają wcześniejszych tylko dlatego, że jest ich dużo.
+38. **Efekt Zagrożenia zaczyna działać natychmiast po jego pojawieniu się na mapie.** Nie trzeba najpierw użyć akcji „Zbadaj problem”. Badanie ujawnia metody rozwiązania, ale nie aktywuje samego wpływu Zagrożenia na świat.
+39. **Zagrożenie posiadające fizyczny Znacznik Zagrożenia pozostaje aktywne aż do rozwiązania.** Nie wygasa automatycznie przy następnej Radzie ani po określonej liczbie rund. Krótkotrwałe efekty wygasające z czasem mogą występować jako zwykłe Wydarzenia Świata bez fizycznego Zagrożenia na mapie.
+40. **Zmiana Poziomu Świata nie usuwa aktywnych Zagrożeń z wcześniejszych poziomów.** Problem powstały np. na Poziomie Świata 1 pozostaje na mapie po przejściu na Poziom Świata 2 i nadal działa aż do jego rozwiązania.
+41. **Aktywne Zagrożenie nie skaluje się dynamicznie po zmianie Poziomu Świata.** Jego DC, przypisani przeciwnicy, nagroda i pozostałe parametry pozostają takie, jakie zostały określone dla tego Zagrożenia w chwili jego wejścia do gry.
 
 ## Punkty do działania
 
@@ -97,6 +102,9 @@ Wydarzenie Świata → pojawia się problem → Znacznik Zagrożenia trafia na m
 - [x] Obsłużyć kilka aktywnych Zagrożeń jednocześnie.
 - [ ] Zagwarantować pełną obsługę kilku różnych Zagrożeń na tym samym heksie także w UI.
 - [ ] Nie wprowadzać limitu aktywnych Zagrożeń także w warstwie UI — usunąć ograniczenia wyświetlania, które mogłyby ukryć część problemów.
+- [ ] Dopilnować, aby efekt Zagrożenia działał natychmiast po jego pojawieniu się, jeszcze przed zbadaniem.
+- [ ] Zagwarantować, że Zagrożenia ze znacznikiem nie wygasają przy kolejnej Radzie ani po zmianie Poziomu Świata.
+- [ ] Zachować stałe DC, przeciwników, nagrodę i pozostałe parametry już aktywnego Zagrożenia po zmianie Poziomu Świata.
 - [x] Znacznik może znajdować się na heksie z innym obiektem.
 - [x] Znacznik może pojawić się na heksie zajętym przez bohatera.
 - [ ] Zapisywać sposób rozwiązania problemu.
@@ -126,9 +134,10 @@ Istnieją już trzy główne warstwy techniczne modułu:
 10. Zachować jedną wspólną nagrodę za rozwiązanie Zagrożenia niezależnie od wybranej skutecznej metody i przyznawać ją wyłącznie bohaterowi, który rozwiązał problem.
 11. Zagwarantować pełną obsługę kilku różnych Zagrożeń na jednym heksie, również w UI.
 12. Usunąć techniczne limity prezentacji aktywnych Problemów w UI tak, aby zasada „brak limitu aktywnych Zagrożeń” była prawdziwa również dla gracza.
-13. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
-14. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
-15. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
+13. Dopilnować natychmiastowej aktywacji efektów Zagrożeń oraz ich trwałości między Radami i zmianami Poziomu Świata bez dynamicznego skalowania już aktywnych problemów.
+14. Zapisywać w historii nie tylko bohatera, ale również konkretny sposób rozwiązania Problemu.
+15. Przygotować neutralny punkt integracji z przyszłą Kroniką Świata.
+16. Przenieść „Rozbójników na trakcie” z narzędzia DEV do prawdziwego contentu i przygotować łącznie 3–5 testowych Zagrożeń.
 
 ## Pierwszy problem testowy
 
@@ -143,4 +152,4 @@ Obecna wersja DEV zawiera już drogę Walki jako test statystyki oraz drogę Int
 
 ## Definition of Done
 
-W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, ujawnić metody całej grupie, a następnie za kolejną 1 Akcję podjąć wybraną próbę rozwiązania. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Podgląd odkrytych metod jest darmowy, metoda Walki uruchamia pełny system walki, wymagane zasoby są zużywane przy rozpoczęciu próby, a po pierwszym niepowodzeniu konkretnej metody jej konsekwencja staje się jawna. Nagroda za rozwiązanie jest wspólna dla Zagrożenia niezależnie od wybranej drogi i otrzymuje ją bohater, który faktycznie rozwiązał problem. Po sukcesie znacznik oraz efekt prawidłowo znikają.
+W trakcie normalnej rozgrywki pojawia się Wydarzenie Świata, tworzy fizyczny problem na planszy, problem wpływa na świat, bohater może dotrzeć na odpowiedni heks, świadomie użyć kosztującej 1 Akcję akcji „Zbadaj problem”, ujawnić metody całej grupie, a następnie za kolejną 1 Akcję podjąć wybraną próbę rozwiązania. Raz odkryte metody pozostają jawne do końca Zagrożenia, również po porażce i dla kolejnych bohaterów. Podgląd odkrytych metod jest darmowy, metoda Walki uruchamia pełny system walki, wymagane zasoby są zużywane przy rozpoczęciu próby, a po pierwszym niepowodzeniu konkretnej metody jej konsekwencja staje się jawna. Nagroda za rozwiązanie jest wspólna dla Zagrożenia niezależnie od wybranej drogi i otrzymuje ją bohater, który faktycznie rozwiązał problem. Liczba aktywnych Zagrożeń nie ma limitu, ich efekty działają natychmiast, fizyczne problemy nie wygasają przy Radzie ani zmianie Poziomu Świata i nie skalują się dynamicznie po wejściu do gry. Po sukcesie znacznik oraz efekt prawidłowo znikają.
