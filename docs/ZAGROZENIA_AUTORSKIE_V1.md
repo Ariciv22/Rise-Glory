@@ -21,7 +21,7 @@ Wszystkie trzy znaczniki należą do tej samej instancji Zagrożenia i otrzymuj�
 
 ### Efekt
 
-Na wszystkich trzech oznaczonych heksach wycinka i produkcja Drewna są całkowicie zablokowane do czasu rozwiązania problemu.
+Na wszystkich trzech oznaczonych heksach wycinka i produkcja Drewna są całkowicie zablokowane. Każdy z trzech znaczników musi zostać rozwiązany osobno. Po rozwiązaniu znacznika na konkretnym heksie blokada Drewna na tym heksie natychmiast znika, ale pozostałe znaczniki i ich blokady nadal działają. Całe Zagrożenie kończy się dopiero po rozwiązaniu wszystkich trzech znaczników.
 
 ### Metoda 1 — Wytrop ich i zwiąż trucicieli
 
@@ -33,13 +33,24 @@ Na wszystkich trzech oznaczonych heksach wycinka i produkcja Drewna są całkowi
 
 **Test:** Handel DC 11.  
 **Zużywa:** 6 Złota przy rozpoczęciu próby.  
-**Porażka:** „Płacisz i zapewniają cię, że odejdą. Po chwili zauważasz, że ferajna nadal zatruwa młode łodygi.” Bohater traci dodatkowo 1 Akcję, problem pozostaje aktywny, a wydane 6 Złota nie wraca.
+**Porażka:** „Płacisz i zapewniają cię, że odejdą. Po chwili zauważasz, że ferajna nadal zatruwa młode łodygi.” Bohater traci dodatkowo 1 Akcję, dany znacznik pozostaje aktywny, a wydane 6 Złota nie wraca.
 
 ### Metoda 3 — Daj im do zrozumienia, że nie tylko oni potrzebują drewna
 
 **Test:** Dyplomacja DC 15.  
 **Zużywa:** 3 Złota przy rozpoczęciu próby.  
-**Porażka:** rozmowa przeradza się w groźby. Bohater traci 1 Punkt Legendy, nie mniej niż do 0. Wydane 3 Złota nie wraca, a problem pozostaje aktywny.
+**Porażka:** rozmowa przeradza się w groźby. Bohater traci 1 Punkt Legendy, nie mniej niż do 0. Wydane 3 Złota nie wraca, a dany znacznik pozostaje aktywny.
+
+### Rozwiązywanie znaczników
+
+Każdy z trzech numerowanych znaczników reprezentuje osobny punkt tego samego Zagrożenia i musi zostać skutecznie rozwiązany. Sukces przy jednym znaczniku:
+
+- usuwa tylko ten konkretny znacznik;
+- odblokowuje wycinkę i produkcję Drewna tylko na tym heksie;
+- nie usuwa pozostałych dwóch znaczników;
+- nie kończy całego Wydarzenia, dopóki na mapie pozostaje choć jeden znacznik tego Zagrożenia.
+
+Każdy z trzech znaczników korzysta z tych samych trzech metod rozwiązania opisanych powyżej.
 
 ### Nagroda
 
@@ -49,4 +60,4 @@ Bohater otrzymuje **4 Drewna**. Dodatkowo **każde jego miejsce produkcji Drewna
 
 ### Do doprecyzowania przed implementacją
 
-Trzeba jeszcze ustalić zachowanie jednego Zagrożenia posiadającego trzy znaczniki: czy skuteczne rozwiązanie problemu przy dowolnym jednym z trzech znaczników kończy całe Zagrożenie i usuwa wszystkie trzy znaczniki, czy każdy znacznik wymaga osobnego rozpatrzenia.
+Jeżeli trzy znaczniki zostaną rozwiązane przez różnych bohaterów, trzeba jeszcze ustalić, który bohater otrzymuje końcową nagrodę za całkowite zakończenie Zagrożenia.
