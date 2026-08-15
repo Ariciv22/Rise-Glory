@@ -126,18 +126,18 @@ Dokładna mechanika Szlaków Handlowych nie jest jeszcze ustalona i musi zostać
 **Status:** w projektowaniu  
 **Typ:** zagrożenie terenowe / zablokowane przejścia
 
-### Opis fabularny — ZATWIERDZONY KIERUNEK
+### Opis fabularny
 
 Dwa mosty znajdujące się na wzgórzach zostały zniszczone. Przeprawy prowadzące przez mosty są niedostępne i bohaterowie nie mogą z nich korzystać, dopóki konstrukcje nie zostaną naprawione.
 
-### Rozmieszczenie — ZATWIERDZONE
+### Rozmieszczenie
 
 **Liczba Znaczników Zagrożenia:** 2.  
 **Podstawowo:** dwa różne miejsca przepraw na heksach `WZGÓRZA`.
 
 Oba znaczniki należą do tej samej instancji Zagrożenia i powinny posiadać ten sam widoczny numer identyfikacyjny na żetonie.
 
-### Efekt — ZATWIERDZONE
+### Efekt
 
 Każdy zniszczony most blokuje przejście wykorzystujące daną przeprawę. Każdy most jest rozwiązywany osobno. Po skutecznej naprawie konkretnego mostu:
 
@@ -146,16 +146,31 @@ Każdy zniszczony most blokuje przejście wykorzystujące daną przeprawę. Każ
 - drugi zniszczony most pozostaje zablokowany do czasu osobnej naprawy;
 - całe Zagrożenie kończy się dopiero po naprawieniu obu mostów.
 
-### Testy — ZATWIERDZONY ZAKRES
+### Metoda 1 — Napraw most samodzielnie
 
-Metody naprawy mostów mają korzystać z testów o **DC od 11 do 14**. Dokładne wartości zostaną przypisane do konkretnych metod po ich zatwierdzeniu.
+**Test:** Nauka DC 14.  
+**Zużywa:** 3 Drewna + 1 Żelazo przy rozpoczęciu próby.  
+**Porażka:** wykorzystane materiały przepadają, naprawa się nie udaje, a znacznik mostu pozostaje aktywny.
+
+### Metoda 2 — Zatrudnij cieśli
+
+**Test:** Handel DC 11.  
+**Zużywa:** 8 Złota przy rozpoczęciu próby.  
+**Porażka:** wydane 8 Złota przepada, ekipa rezygnuje z pracy, a znacznik mostu pozostaje aktywny.
+
+### Nagroda — ZATWIERDZONY KIERUNEK
+
+Po naprawieniu obu mostów nagroda obejmuje:
+
+- **Punkty Legendy — 1 albo 2 PL; dokładna wartość pozostaje do ustalenia**;
+- **+1 do ruchu na heksach `WZGÓRZA` do następnej Rady**.
+
+Techniczna interpretacja premii `+1 do ruchu na Wzgórzach` zostanie doprecyzowana przy finalizacji karty tak, aby była zgodna z systemem kosztu ruchu gry.
 
 ### Do doprecyzowania
 
 - Poziom Świata.
-- Sposoby naprawy mostu — minimum 2 metody zgodnie z zasadami systemu Zagrożeń.
-- Dokładne statystyki i wartości DC metod w zatwierdzonym zakresie `11–14`.
-- Wymagane lub zużywane materiały, przedmioty albo Złoto.
-- Konsekwencje porażek.
-- Nagroda.
+- Czy nagroda daje **1 czy 2 Punkty Legendy**.
+- Który bohater lub bohaterowie otrzymują nagrodę, jeśli dwa mosty naprawią różni gracze.
+- Dokładne techniczne działanie premii `+1 do ruchu na Wzgórzach`.
 - Techniczny sposób reprezentowania zablokowanej przeprawy/mostu na mapie zostanie ustalony przy implementacji, bez zmiany zatwierdzonego efektu fabularnego.
