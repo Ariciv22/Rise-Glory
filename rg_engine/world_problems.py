@@ -7,6 +7,7 @@ from typing import Any
 
 from rg_engine.heroes import apply_wounds, ensure_hero_state, heal_wounds, helper_bonus
 from rg_engine.items import add_item, equipment_stat_bonus, normalise_item
+from rg_engine.problem_knowledge import problem_investigated, problem_methods_for_player
 from rg_engine.world import update_world_level
 from rg_engine.world_events import DURATION_UNTIL_RESOLVED, active_world_events, resolve_problem_event
 
@@ -48,14 +49,22 @@ def problem_retry_blocked(player: dict[str, Any], event_id: str) -> bool:
 
 
 def available_problem_methods(event: dict[str, Any]) -> list[dict[str, Any]]:
+    """Surowa lista metod używana przez walidację/content.
+
+    UI gracza nie powinno używać tej funkcji do zdalnego ujawniania metod.
+    Do widoku bohatera służy problem_methods_for_player().
+    """
     methods = _problem(event).get("methods") or []
     return [copy.deepcopy(method) for method in methods if isinstance(method, dict)]
 
 
 def can_begin_problem_attempt(player: dict[str, Any], event: dict[str, Any]) -> tuple[bool, str]:
     event_id = _event_id(event)
-    if not event_id or _active_problem(event_id) is None:
+    current = _active_problem(event_id)
+    if not event_id or current is None:
         return False, "Ten problem nie jest już aktywny."
+    if not problem_investigated(player, current):
+        return False, "Najpierw zbadaj problem."
     if problem_retry_blocked(player, event_id):
         return False, "Ten bohater może ponowić próbę dopiero w swojej następnej turze."
 
@@ -63,7 +72,7 @@ def can_begin_problem_attempt(player: dict[str, Any], event: dict[str, Any]) -> 
     if token is None or int(getattr(token, "actions", 0) or 0) < PROBLEM_ACTION_COST:
         return False, "Potrzebujesz 1 akcji, aby podjąć próbę."
 
-    methods = available_problem_methods(event)
+    methods = problem_methods_for_player(player, current)
     if len(methods) < 2:
         return False, "Problem wymaga co najmniej dwóch sposobów rozwiązania."
     return True, ""
@@ -290,7 +299,7 @@ def begin_problem_attempt(player: dict[str, Any], event: dict[str, Any]) -> tupl
 
     token = player.get("_token_ref")
     token.actions = max(0, int(token.actions) - PROBLEM_ACTION_COST)
-    session = ProblemAttemptSession(player=player, event=current, methods=available_problem_methods(current))
+    session = ProblemAttemptSession(player=player, event=current, methods=problem_methods_for_player(player, current))
     return session, "Wybierz sposób rozwiązania problemu. Akcja została zużyta."
 
 
