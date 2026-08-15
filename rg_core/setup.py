@@ -8,6 +8,7 @@ from rg_world.world_event_markers import install_world_event_markers
 from rg_ui.world_state import install_world_state_ui
 from rg_ui.threats import install_threat_investigation_ui
 from rg_ui.threat_layout_fix import install_threat_layout_fix
+from rg_ui.threat_navigation_fix import install_threat_navigation_fix
 from rg_ui.dev_threat_fix import install_dev_threat_fix
 from rg_ui.combat_image_fit import install_combat_image_fit
 from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
@@ -119,6 +120,7 @@ install_world_event_markers()
 install_world_state_ui()
 install_threat_investigation_ui()
 install_threat_layout_fix()
+install_threat_navigation_fix()
 install_dev_threat_fix()
 install_premium_dice_animation()
 install_combat_image_fit()
