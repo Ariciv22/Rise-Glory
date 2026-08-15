@@ -10,6 +10,7 @@ from rg_ui.threats import install_threat_investigation_ui
 from rg_ui.combat_image_fit import install_combat_image_fit
 from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
+from rg_engine.threats import is_tile_entry_blocked, threat_modifier
 from rg_engine.world import register_players, reset_world_progression
 from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
 from rg_world.map import HeroToken
@@ -20,16 +21,21 @@ COUNCIL_TRADE_BACKGROUND_PATH = ROOT_DIR / "Grafiki" / "rada_bohaterów_handel.p
 
 
 class GameHeroToken(HeroToken):
-    """Pionek zachowujacy stary wyglad, ale korzystajacy ze wspolnych kosztow akcji."""
+    """Pionek korzystający ze wspólnych kosztów Akcji i blokad Zagrożeń."""
 
     def movement_cost(self, target):
         if not target:
             return 0
         base_cost = int(target.terrain.get("move", 1) or 1)
-        return movement_cost_with_world_event(base_cost)
+        cost = movement_cost_with_world_event(base_cost)
+        local_modifier = threat_modifier("movement_cost_modifier", tile_id=int(getattr(target, "id", 0) or 0))
+        return max(1, cost + local_modifier)
 
     def can_move_to(self, target):
         if not super().can_move_to(target):
+            return False
+        blocked, _reason = is_tile_entry_blocked(int(getattr(target, "id", 0) or 0))
+        if blocked:
             return False
         return int(self.actions) >= self.movement_cost(target)
 
@@ -62,21 +68,15 @@ def _distance(tile):
 
 
 def find_start_tiles(tiles, player_count):
-    passable = [
-        tile for tile in tiles
-        if tile.terrain["passable"] and not getattr(tile, "adventure", None)
-    ]
+    passable = [tile for tile in tiles if tile.terrain["passable"] and not getattr(tile, "adventure", None)]
     if not passable:
         passable = [tile for tile in tiles if tile.terrain["passable"]]
     if not passable:
         return tiles[:player_count]
-
     outer = sorted(passable, key=_distance, reverse=True)[: max(18, player_count * 4)]
     outer.sort(key=_angle)
-
     if player_count == 1:
         return [outer[0]]
-
     chosen = []
     step = len(outer) / player_count
     for idx in range(player_count):
@@ -102,7 +102,6 @@ def create_tokens(players, tiles):
 
 
 def install_council_trade_background():
-    """Rada handlowa uzywa dedykowanej grafiki zamiast starej ilustracji Rady."""
     rg_council_background.COUNCIL_BACKGROUND_PATH = COUNCIL_TRADE_BACKGROUND_PATH
     rg_council_background._SOURCE_CACHE["loaded"] = False
     rg_council_background._SOURCE_CACHE["surface"] = None
