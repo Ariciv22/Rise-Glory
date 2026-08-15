@@ -91,7 +91,11 @@ def test_no_action_message_depends_on_investigation_state():
     assert before["enabled"] is False
     assert before["reason"] == "Potrzebujesz 1 akcji, aby zbadać problem."
 
-    player["_investigated_problems"] = {event["id"]}
+    token.actions = 1
+    investigated, _ = investigate_problem(player, event)
+    assert investigated
+    assert token.actions == 0
+
     after = threat_hex_action_state(player, token, event["id"])
     assert after["enabled"] is False
     assert after["reason"] == "Potrzebujesz 1 akcji, aby podjąć próbę."
