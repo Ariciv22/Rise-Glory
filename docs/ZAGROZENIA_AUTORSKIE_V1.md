@@ -158,19 +158,19 @@ Każdy zniszczony most blokuje przejście wykorzystujące daną przeprawę. Każ
 **Zużywa:** 8 Złota przy rozpoczęciu próby.  
 **Porażka:** wydane 8 Złota przepada, ekipa rezygnuje z pracy, a znacznik mostu pozostaje aktywny.
 
-### Nagroda — ZATWIERDZONY KIERUNEK
+### Nagroda
 
-Po naprawieniu obu mostów nagroda obejmuje:
+Po naprawieniu obu mostów **każdy bohater, który skutecznie naprawił co najmniej jeden z dwóch mostów, otrzymuje pełną nagrodę**:
 
-- **Punkty Legendy — 1 albo 2 PL; dokładna wartość pozostaje do ustalenia**;
+- **2 Punkty Legendy**;
 - **+1 do ruchu na heksach `WZGÓRZA` do następnej Rady**.
+
+Jeżeli jeden bohater naprawi pierwszy most, a inny drugi, obaj otrzymują pełną powyższą nagrodę po całkowitym zakończeniu Zagrożenia. Bohater, który nie naprawił żadnego z mostów, nie otrzymuje tej nagrody.
 
 Techniczna interpretacja premii `+1 do ruchu na Wzgórzach` zostanie doprecyzowana przy finalizacji karty tak, aby była zgodna z systemem kosztu ruchu gry.
 
 ### Do doprecyzowania
 
 - Poziom Świata.
-- Czy nagroda daje **1 czy 2 Punkty Legendy**.
-- Który bohater lub bohaterowie otrzymują nagrodę, jeśli dwa mosty naprawią różni gracze.
 - Dokładne techniczne działanie premii `+1 do ruchu na Wzgórzach`.
 - Techniczny sposób reprezentowania zablokowanej przeprawy/mostu na mapie zostanie ustalony przy implementacji, bez zmiany zatwierdzonego efektu fabularnego.
