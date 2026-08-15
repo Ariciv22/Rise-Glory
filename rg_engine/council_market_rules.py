@@ -30,6 +30,12 @@ def missing_public_categories(session: CouncilMarketSession, player_index: int) 
 
 
 def _finalize_with_required_review(self, player_index: int, no_offer: bool = False):
+    # Gracz, który świadomie rezygnuje z publicznej oferty, nie musi otwierać
+    # żadnej kategorii. Wymóg przejrzenia kategorii dotyczy wyłącznie gracza,
+    # który faktycznie chce zatwierdzić przygotowaną ofertę.
+    if no_offer:
+        return _ORIGINAL_FINALIZE(self, player_index, no_offer=True)
+
     missing = missing_public_categories(self, player_index)
     if missing:
         labels = {
@@ -40,7 +46,7 @@ def _finalize_with_required_review(self, player_index: int, no_offer: bool = Fal
         }
         names = ", ".join(labels.get(category, category) for category in missing)
         return False, f"Najpierw przejrzyj wszystkie kategorie. Pozostało: {names}."
-    return _ORIGINAL_FINALIZE(self, player_index, no_offer=no_offer)
+    return _ORIGINAL_FINALIZE(self, player_index, no_offer=False)
 
 
 def _correct_negotiation_overflow(self: CouncilMarketSession, player_index: int) -> dict[str, int]:
