@@ -11,10 +11,15 @@ from rg_core.bootstrap import install_legacy_module_aliases
 install_legacy_module_aliases()
 
 from rg_core import app as _app
+from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.title_flow import install_into_main
+
+# DEV: kazde reczne otwarcie Rady rozpoczyna swieza sesje UI i dobiera kolejna
+# karte z biezacej talii. Nie resetujemy samej talii Wydarzen Swiata.
+install_dev_council_reset(_app)
 
 # Usuwamy jasne tlo/ramke zapisana w grafice panel2.png przyciskow menu.
 install_menu_button_fix()
