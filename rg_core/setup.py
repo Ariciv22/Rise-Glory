@@ -94,6 +94,9 @@ def create_tokens(players, tiles):
     reset_world_progression(1)
     for player in players:
         ensure_hero_state(player)
+        player["threat_knowledge"] = {}
+        player["threat_retry_blocks"] = []
+        player["threat_difficulty_penalties"] = {}
     starts = find_start_tiles(tiles, len(players))
     tokens = [GameHeroToken(player, start) for player, start in zip(players, starts)]
     register_players(players)
