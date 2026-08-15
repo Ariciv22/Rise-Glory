@@ -35,20 +35,32 @@ def review_all(session, player_index):
         mark_public_category_reviewed(session, player_index, category)
 
 
-def test_player_must_review_every_public_offer_category_even_when_offering_nothing():
+def test_player_can_skip_public_offer_without_reviewing_categories():
     session = CouncilMarketSession([player()])
-    mark_public_category_reviewed(session, 0, "quest")
-    ok, message = session.finalize_public_offer(0, no_offer=True)
-    assert not ok
-    assert "Przedmioty" in message
-    assert "Pomocnicy" in message
-    assert "Towary" in message
 
-    for category in ("item", "helper", "good"):
-        mark_public_category_reviewed(session, 0, category)
-    ok, _message = session.finalize_public_offer(0, no_offer=True)
+    ok, message = session.finalize_public_offer(0, no_offer=True)
+
     assert ok
+    assert "nie wystawia" in message.lower()
     assert session.public_offer(0).status == "none"
+    assert session.stage == "turns"
+
+
+def test_player_with_real_offer_still_reviews_every_public_category():
+    hero = player()
+    hero["goods"] = ["Lina"]
+    session = CouncilMarketSession([hero])
+    session.set_public_good_quantity(0, "Lina", 1)
+
+    ok, message = session.finalize_public_offer(0)
+
+    assert not ok
+    assert "Najpierw przejrzyj wszystkie kategorie" in message
+
+    review_all(session, 0)
+    ok, _message = session.finalize_public_offer(0)
+    assert ok
+    assert session.public_offer(0).status == "revealed"
 
 
 def test_item_given_away_in_same_loose_trade_frees_backpack_space_first():
@@ -64,8 +76,6 @@ def test_item_given_away_in_same_loose_trade_frees_backpack_space_first():
     ensure_equipment_state(second)
 
     session = CouncilMarketSession([first, second])
-    review_all(session, 0)
-    review_all(session, 1)
     session.finalize_public_offer(0, no_offer=True)
     session.finalize_public_offer(1, no_offer=True)
     session.skip_public_purchase(0)
