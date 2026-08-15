@@ -121,27 +121,34 @@ Dokładna mechanika Szlaków Handlowych nie jest jeszcze ustalona i musi zostać
 
 ---
 
-## 3. Zniszczony most na wzgórzach — szkic
+## 3. Zniszczone mosty na wzgórzach — szkic
 
 **Status:** w projektowaniu  
-**Typ:** zagrożenie terenowe / zablokowane przejście
+**Typ:** zagrożenie terenowe / zablokowane przejścia
 
 ### Opis fabularny — ZATWIERDZONY KIERUNEK
 
-Most znajdujący się na wzgórzach został zniszczony. Przejście prowadzące przez most jest niedostępne i bohaterowie nie mogą z niego korzystać, dopóki konstrukcja nie zostanie naprawiona.
+Dwa mosty znajdujące się na wzgórzach zostały zniszczone. Przeprawy prowadzące przez mosty są niedostępne i bohaterowie nie mogą z nich korzystać, dopóki konstrukcje nie zostaną naprawione.
+
+### Rozmieszczenie — ZATWIERDZONE
+
+**Liczba Znaczników Zagrożenia:** 2.  
+**Podstawowo:** dwa różne miejsca przepraw na heksach `WZGÓRZA`.
+
+Oba znaczniki należą do tej samej instancji Zagrożenia i powinny posiadać ten sam widoczny numer identyfikacyjny na żetonie.
 
 ### Efekt — ZATWIERDZONY KIERUNEK
 
-Zniszczony most blokuje przejście wykorzystujące tę przeprawę. Po skutecznej naprawie przejście zostaje ponownie otwarte dla wszystkich bohaterów.
+Każdy zniszczony most blokuje przejście wykorzystujące daną przeprawę. Po skutecznej naprawie konkretnego mostu jego przejście zostaje ponownie otwarte dla wszystkich bohaterów.
 
 ### Cel Zagrożenia — ZATWIERDZONE
 
-Aby zakończyć Zagrożenie, most trzeba naprawić.
+Aby całkowicie zakończyć Zagrożenie, oba mosty muszą zostać naprawione.
 
 ### Do doprecyzowania
 
 - Poziom Świata.
-- Dokładna reguła rozmieszczenia na mapie i liczba znaczników.
+- Czy każdy z dwóch mostów jest rozwiązywany osobno i czy naprawa jednego usuwa tylko jego znacznik.
 - Sposoby naprawy mostu — minimum 2 metody zgodnie z zasadami systemu Zagrożeń.
 - Statystyki i DC metod.
 - Wymagane lub zużywane materiały, przedmioty albo Złoto.
