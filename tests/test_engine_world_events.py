@@ -46,9 +46,10 @@ def test_draw_uses_only_requested_world_level():
             "duration": "instant",
         }
     )
+    level_two_ids = {event["id"] for event in registered_world_events(2)}
     rng = random.Random(2)
     event, _message = draw_next_world_event([], rng, world_level=2)
-    assert event["id"] == "test_poziom_2"
+    assert event["id"] in level_two_ids
     assert event["world_level"] == 2
 
 
