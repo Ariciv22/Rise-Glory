@@ -137,20 +137,24 @@ Dwa mosty znajdujące się na wzgórzach zostały zniszczone. Przeprawy prowadz�
 
 Oba znaczniki należą do tej samej instancji Zagrożenia i powinny posiadać ten sam widoczny numer identyfikacyjny na żetonie.
 
-### Efekt — ZATWIERDZONY KIERUNEK
+### Efekt — ZATWIERDZONE
 
-Każdy zniszczony most blokuje przejście wykorzystujące daną przeprawę. Po skutecznej naprawie konkretnego mostu jego przejście zostaje ponownie otwarte dla wszystkich bohaterów.
+Każdy zniszczony most blokuje przejście wykorzystujące daną przeprawę. Każdy most jest rozwiązywany osobno. Po skutecznej naprawie konkretnego mostu:
 
-### Cel Zagrożenia — ZATWIERDZONE
+- znika tylko jego znacznik;
+- jego przeprawa zostaje natychmiast otwarta dla wszystkich bohaterów;
+- drugi zniszczony most pozostaje zablokowany do czasu osobnej naprawy;
+- całe Zagrożenie kończy się dopiero po naprawieniu obu mostów.
 
-Aby całkowicie zakończyć Zagrożenie, oba mosty muszą zostać naprawione.
+### Testy — ZATWIERDZONY ZAKRES
+
+Metody naprawy mostów mają korzystać z testów o **DC od 11 do 14**. Dokładne wartości zostaną przypisane do konkretnych metod po ich zatwierdzeniu.
 
 ### Do doprecyzowania
 
 - Poziom Świata.
-- Czy każdy z dwóch mostów jest rozwiązywany osobno i czy naprawa jednego usuwa tylko jego znacznik.
 - Sposoby naprawy mostu — minimum 2 metody zgodnie z zasadami systemu Zagrożeń.
-- Statystyki i DC metod.
+- Dokładne statystyki i wartości DC metod w zatwierdzonym zakresie `11–14`.
 - Wymagane lub zużywane materiały, przedmioty albo Złoto.
 - Konsekwencje porażek.
 - Nagroda.
