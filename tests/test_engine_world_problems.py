@@ -1,3 +1,4 @@
+from rg_engine.problem_knowledge import investigate_problem
 from rg_engine.world import register_players, reset_world_progression
 from rg_engine.world_events import (
     DURATION_UNTIL_RESOLVED,
@@ -91,21 +92,42 @@ def activate(event_id="test_problem", players=None):
     return active_world_events(DURATION_UNTIL_RESOLVED)[-1]
 
 
-def test_starting_problem_attempt_immediately_costs_one_action():
+def test_cannot_start_problem_attempt_before_investigation():
     player = hero(actions=4)
     register_players([player])
     event = activate(players=[player])
+
     session, message = begin_problem_attempt(player, event)
+
+    assert session is None
+    assert player["_token_ref"].actions == 4
+    assert message == "Najpierw zbadaj problem."
+
+
+def test_investigation_and_attempt_are_two_separate_action_costs():
+    player = hero(actions=4)
+    register_players([player])
+    event = activate(players=[player])
+
+    investigated, _ = investigate_problem(player, event)
+    session, message = begin_problem_attempt(player, event)
+
+    assert investigated
     assert session is not None
-    assert player["_token_ref"].actions == 3
+    assert player["_token_ref"].actions == 2
     assert "Akcja została zużyta" in message
 
 
-def test_player_with_no_action_cannot_start_problem():
-    player = hero(actions=0)
+def test_player_with_no_action_after_investigation_cannot_start_problem():
+    player = hero(actions=1)
     register_players([player])
     event = activate(players=[player])
+    investigated, _ = investigate_problem(player, event)
+    assert investigated
+    assert player["_token_ref"].actions == 0
+
     session, message = begin_problem_attempt(player, event)
+
     assert session is None
     assert message == "Potrzebujesz 1 akcji, aby podjąć próbę."
 
@@ -115,6 +137,9 @@ def test_failure_blocks_only_that_hero_until_next_turn():
     second = hero("Drugi", stat=8)
     register_players([first, second])
     event = activate(players=[first, second])
+
+    investigate_problem(first, event)
+    investigate_problem(second, event)
 
     session, _ = begin_problem_attempt(first, event)
     success, _ = resolve_problem_method(session, 0, FixedRng(2))
@@ -133,8 +158,11 @@ def test_success_resolves_problem_globally_and_grants_same_problem_reward():
     player = hero(stat=10)
     register_players([player])
     event = activate(players=[player])
+    investigate_problem(player, event)
+
     session, _ = begin_problem_attempt(player, event)
     success, message = resolve_problem_method(session, 1, FixedRng(10))
+
     assert success
     assert player["gold"] == 8
     assert player["legend"] == 1
@@ -147,8 +175,11 @@ def test_failed_method_reveals_and_applies_its_own_consequence():
     player = hero(stat=0)
     register_players([player])
     event = activate(players=[player])
+    investigate_problem(player, event)
+
     session, _ = begin_problem_attempt(player, event)
     success, message = resolve_problem_method(session, 1, FixedRng(1))
+
     assert not success
     assert player["gold"] == 3
     assert "-2 Złota" in message
@@ -164,6 +195,7 @@ def test_problem_wounds_use_normal_hero_cap():
     register_world_event(definition)
     activate_world_event(definition["id"], [player])
     event = active_world_events(DURATION_UNTIL_RESOLVED)[-1]
+    investigate_problem(player, event)
 
     session, _ = begin_problem_attempt(player, event)
     success, message = resolve_problem_method(session, 0, FixedRng(1))
