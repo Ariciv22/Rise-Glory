@@ -118,3 +118,33 @@ Dokładna mechanika Szlaków Handlowych nie jest jeszcze ustalona i musi zostać
 ### Zależność do późniejszego ustalenia
 
 - Dokładne techniczne działanie bonusu `+2 Złota` zostanie określone dopiero wraz z mechaniką Szlaków Handlowych.
+
+---
+
+## 3. Zniszczony most na wzgórzach — szkic
+
+**Status:** w projektowaniu  
+**Typ:** zagrożenie terenowe / zablokowane przejście
+
+### Opis fabularny — ZATWIERDZONY KIERUNEK
+
+Most znajdujący się na wzgórzach został zniszczony. Przejście prowadzące przez most jest niedostępne i bohaterowie nie mogą z niego korzystać, dopóki konstrukcja nie zostanie naprawiona.
+
+### Efekt — ZATWIERDZONY KIERUNEK
+
+Zniszczony most blokuje przejście wykorzystujące tę przeprawę. Po skutecznej naprawie przejście zostaje ponownie otwarte dla wszystkich bohaterów.
+
+### Cel Zagrożenia — ZATWIERDZONE
+
+Aby zakończyć Zagrożenie, most trzeba naprawić.
+
+### Do doprecyzowania
+
+- Poziom Świata.
+- Dokładna reguła rozmieszczenia na mapie i liczba znaczników.
+- Sposoby naprawy mostu — minimum 2 metody zgodnie z zasadami systemu Zagrożeń.
+- Statystyki i DC metod.
+- Wymagane lub zużywane materiały, przedmioty albo Złoto.
+- Konsekwencje porażek.
+- Nagroda.
+- Techniczny sposób reprezentowania zablokowanej przeprawy/mostu na mapie zostanie ustalony przy implementacji, bez zmiany zatwierdzonego efektu fabularnego.
