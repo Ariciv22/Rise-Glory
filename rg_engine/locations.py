@@ -11,7 +11,7 @@ from rg_engine.items import (
     sell_inventory_item,
     unequip_slot,
 )
-from rg_engine.quests import activate_quest, is_registered_quest
+from rg_engine.quests import activate_quest, can_accept_quest, is_registered_quest, quest_definition
 from rg_engine.world_events import price_with_world_event
 
 TRAINING_STATS = {
@@ -59,21 +59,42 @@ def hire_helper_card(player: dict[str, Any], helper: dict[str, Any], limit: int 
     return True, f"Zatrudniono: {helper.get('name', 'Pomocnik')} za {price} monet."
 
 
+def _quest_seen(player: dict[str, Any], quest_id: str, collections: tuple[str, ...]) -> bool:
+    for key in collections:
+        for item in player.get(key, []) or []:
+            if isinstance(item, dict) and str(item.get("id")) == str(quest_id):
+                return True
+    return False
+
+
 def accept_quest_card(player: dict[str, Any], quest_card: dict[str, Any]) -> tuple[bool, str]:
+    allowed, reason = can_accept_quest(player)
+    if not allowed:
+        return False, reason
     active = player.setdefault("active_quests", [])
-    if len(active) >= 3:
-        return False, "Masz juz maksymalnie 3 aktywne questy."
     if is_registered_quest(quest_card):
         quest_id = str(quest_card.get("id"))
-        for key in ("active_quests", "completed_quests", "failed_quests"):
-            if any(isinstance(item, dict) and item.get("id") == quest_id for item in player.get(key, []) or []):
-                return False, "Ten bohater ma juz zapisany ten unikalny quest."
+        definition = quest_definition(quest_id) or {}
+        if _quest_seen(player, quest_id, ("active_quests",)):
+            return False, "Ten bohater ma juz aktywny ten Quest."
+        if definition.get("unique", False) and _quest_seen(
+            player,
+            quest_id,
+            ("completed_quests", "failed_quests", "abandoned_quests"),
+        ):
+            return False, "Ten unikalny Quest zostal juz rozstrzygniety przez tego bohatera."
         runtime = activate_quest(quest_card)
     else:
         runtime = copy.deepcopy(quest_card)
+        runtime.setdefault("deck", "Questy")
         runtime.setdefault("status", "active")
+        runtime.setdefault("started", False)
+        runtime.setdefault("failures", 0)
+        runtime.setdefault("preparation_used", False)
+        runtime.setdefault("discovered_expansions", [])
+        runtime.setdefault("markers", [])
     active.append(runtime)
-    return True, f"Pobrano quest: {runtime.get('name', 'Quest')}."
+    return True, f"Pobrano Quest: {runtime.get('name', 'Quest')}."
 
 
 def train_in_location(player: dict[str, Any], token, location: dict[str, Any], stat: str) -> tuple[bool, str]:
