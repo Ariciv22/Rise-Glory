@@ -16,9 +16,9 @@ def install_quest_effect_bridge() -> None:
     def check_requirements_v2(player, quest, option):
         option = option or {}
 
-        # Wymagana lokacja jest regula silnika, nie tylko filtrem UI.
-        # Bez tego dalo sie otworzyc Quest z planszetki bohatera i wykonac
-        # etap przeznaczony np. dla Artium stojac na pustkowiu.
+        # Wymagana lokacja jest regułą silnika, nie tylko filtrem UI.
+        # Bez tego dało się otworzyć Quest z planszetki bohatera i wykonać
+        # etap przeznaczony np. dla Artium stojąc na pustkowiu.
         stage = quest_engine.current_stage(quest) or {}
         definition = quest_engine.quest_definition(str(quest.get("id") or "")) or {}
         required_location = stage.get("required_location") or definition.get("required_location")
@@ -28,7 +28,7 @@ def install_quest_effect_bridge() -> None:
             location = getattr(tile, "location", None)
             current_location = location.get("name") if isinstance(location, dict) else None
             if quest_engine._normalize(required_location) != quest_engine._normalize(current_location):
-                return False, f"Ten etap Questa mozna wykonac tylko w lokacji: {required_location}."
+                return False, f"Ten etap Questa można wykonać tylko w lokacji: {required_location}."
 
         requires = option.get("requires") or {}
         effects = [*(option.get("success_effects") or []), *(option.get("failure_effects") or [])]
@@ -38,7 +38,7 @@ def install_quest_effect_bridge() -> None:
         if needs_marker:
             marker_id = str(quest.get("current_marker_id") or "")
             if not marker_id:
-                return False, "Te opcje mozna wykonac tylko na wlasciwym Znaczniku Questa."
+                return False, "Tę opcję można wykonać tylko na właściwym Znaczniku Questa."
             try:
                 from rg_world.quest_markers import marker_tile
 
@@ -50,7 +50,7 @@ def install_quest_effect_bridge() -> None:
             if target_tile is None or current_tile is None:
                 return False, "Nie odnaleziono aktywnego Znacznika Questa na mapie."
             if int(getattr(target_tile, "id", -1)) != int(getattr(current_tile, "id", -2)):
-                return False, "Musisz znajdowac sie na heksie wlasciwego Znacznika Questa."
+                return False, "Musisz znajdować się na heksie właściwego Znacznika Questa."
         return original_check_requirements(player, quest, option)
 
     def apply_effect_v2(player, quest, effect):
@@ -62,7 +62,7 @@ def install_quest_effect_bridge() -> None:
             if quest_engine.resolve_quest_marker(quest, marker_id):
                 if str(quest.get("current_marker_id") or "") == marker_id:
                     quest["current_marker_id"] = None
-                return f"Rozwiazano Znacznik Questa {marker_id}."
+                return f"Rozwiązano Znacznik Questa {marker_id}."
             return f"Nie znaleziono aktywnego Znacznika Questa {marker_id}."
         return original_apply_effect(player, quest, effect)
 
