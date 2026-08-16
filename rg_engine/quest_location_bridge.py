@@ -24,11 +24,14 @@ def install_quest_location_bridge() -> None:
 
     def initialize_location_v2(location, rng=None):
         rng = rng or random
+        # Stary initializer nadal odpowiada za sklep i Pomocników. Jego stare
+        # Questy-kategorie są tylko tymczasowo tworzone i zaraz zastępowane;
+        # nie podmieniamy jego prywatnego _draw_quest, żeby nie rezerwować kart
+        # nowej talii dwa razy.
         original_initialize(location, rng)
         if location.get("quest_v2_ready"):
             return location
 
-        # Stare placeholdery kategorii nie są częścią nowej Talii Questów.
         offers = []
         for _ in range(3):
             offer = _draw_offer(offers, rng)
@@ -61,7 +64,6 @@ def install_quest_location_bridge() -> None:
 
     locations.initialize_location = initialize_location_v2
     locations.take_quest = take_quest_v2
-    locations._draw_quest = _draw_offer
 
     # Te moduły wcześniej zaimportowały funkcje przez `from ... import`.
     try:
