@@ -16,11 +16,15 @@ class FixedRng:
         return self.rolls.pop(0)
 
 
+class LocationTile:
+    location = {"name": "Artium"}
+
+
 class TokenStub:
     def __init__(self, actions=4):
         self.actions = actions
-        self.tile = None
-        self.start_tile = None
+        self.tile = LocationTile()
+        self.start_tile = self.tile
 
 
 def make_player():
