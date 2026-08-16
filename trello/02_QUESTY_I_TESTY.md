@@ -1,10 +1,10 @@
 # 02 — Questy i Testy: wspólny silnik
 
-**Status Kanban:** W TRAKCIE PROJEKTOWANIA
+**Status Kanban:** GOTOWE DO IMPLEMENTACJI
 
 ## Cel
 
-Stworzyć jeden wspólny system Questów. Każdy przyszły Quest powinien być przede wszystkim zestawem danych, etapów, opcji, warunków i konsekwencji, a nie osobno programowaną mechaniką.
+Stworzyć jeden wspólny system Questów. Nowy Quest ma być przede wszystkim zestawem danych, etapów, opcji, warunków, akapitów i konsekwencji, a nie osobno programowaną mechaniką.
 
 Podstawowy test:
 
@@ -12,255 +12,227 @@ Podstawowy test:
 
 Statystyki: Walka, Handel, Intryga, Dyplomacja, Kultura, Nauka.
 
-## Punkty do działania
+## Finalne zasady projektowe — 2026-08-16
 
-- [ ] Stworzyć jeden wspólny model Questa.
-- [ ] Obsłużyć Quest składający się z wielu etapów.
-- [ ] Każdy etap może mieć kilka dostępnych opcji.
-- [ ] Opcje mogą wykorzystywać różne statystyki.
-- [ ] Opcje mogą posiadać różne poziomy trudności.
-- [ ] Opcja może kosztować Złoto.
-- [ ] Opcja może wymagać Towaru.
-- [ ] Opcja może wymagać Przedmiotu.
-- [ ] Opcja może wymagać Pomocnika lub konkretnego typu Pomocnika.
-- [ ] Opcja może zużywać Towar, Przedmiot, Złoto lub wyjątkowo Pomocnika.
-- [ ] Opcja może prowadzić do walki.
-- [ ] Opcja może prowadzić do następnego etapu.
-- [ ] Opcja może prowadzić do alternatywnego etapu lub jednego z kilku finałów.
-- [ ] Różne wybory mogą prowadzić do różnych konsekwencji.
-- [ ] Obsłużyć sukces.
-- [ ] Obsłużyć porażkę.
-- [ ] Obsłużyć Nat 1.
-- [ ] Obsłużyć Nat 20.
-- [ ] Obsłużyć maksymalnie 5 porażek Questa.
-- [ ] Obsłużyć ponowną próbę.
-- [ ] Obsłużyć mechanikę „Przygotuj się”.
-- [ ] Zapisywać historię przebiegu Questa.
-- [ ] Obsłużyć Złoto jako nagrodę.
-- [ ] Obsłużyć Punkty Legendy jako nagrodę.
-- [ ] Obsłużyć Towary jako nagrodę.
-- [ ] Obsłużyć Przedmioty jako nagrodę.
-- [ ] Obsłużyć małe nagrody i efekty w trakcie Questa.
-- [ ] Obsłużyć przedmioty/informacje questowe istniejące tylko w ramach danego Questa.
-- [ ] Obsłużyć utratę Questa.
-- [ ] Obsłużyć porzucenie Questa.
-- [ ] Quest może wymagać konkretnej lokacji.
-- [ ] Quest może wymagać konkretnego heksu.
-- [ ] Quest może tworzyć jeden lub wiele celów na mapie.
-- [ ] Quest może zawierać walkę.
-- [ ] Quest może mieć kilka różnych metod ukończenia.
-- [ ] Quest może posiadać limit czasu.
-- [ ] Quest może mieć punkt bez powrotu.
-- [ ] Quest może odblokowywać lub blokować opcje na podstawie wcześniejszych decyzji.
-- [ ] Quest może wpływać na przyszłe Questy i świat przez flagi historii.
-- [ ] Quest może zmieniać świat po ukończeniu lub porażce.
-- [ ] Obsłużyć jedną wspólną Talię Questów.
-- [ ] Obsłużyć Questy Poziomu Świata I–IV.
-- [ ] Obsłużyć stały numer przypisany do konkretnego Questa.
-- [ ] Obsłużyć Znaczniki Questów z numerem odpowiadającym karcie Questa.
-- [ ] Obsłużyć karty rozwinięcia/finału należące do głównego Questa.
-- [ ] Przebudować „Szatańskie siły” na wzorcowy Quest wspólnego systemu.
-- [ ] Przygotować kilka prostych Questów testowych.
-- [ ] Przygotować punkt integracji z Kroniką Świata.
+### 1. Jedna Talia Questów
 
-## Ustalenia projektowe — 2026-08-15
+- W grze istnieje jedna główna **Talia Questów**. Nie dzielimy Questów na talie Nauki, Intrygi, Handlu itd.
+- Każdy Quest ma Poziom Świata I, II, III lub IV.
+- Przy aktualnym Poziomie Świata dobierane są wyłącznie Questy tego poziomu.
+- Quest niższego poziomu już posiadany przez bohatera pozostaje aktywny po awansie świata i można go dokończyć.
+- Ten sam Quest nie może być równocześnie posiadany przez dwóch bohaterów.
+- Quest może być oznaczony jako unikalny dla rozgrywki.
 
-### 1. Koszt Akcji i podstawowy przebieg testu
+### 2. Stały numer Questa
 
-- Sam podgląd Questa, etapu i dostępnych metod kosztuje 0 Akcji.
-- Wybranie metody i podjęcie próby kosztuje domyślnie 1 Akcję.
-- Ponowna próba po porażce również kosztuje 1 Akcję.
-- Bohater może ponawiać próby w tej samej turze, jeżeli posiada jeszcze Akcje.
-- Konkretna karta może nadpisywać domyślne zasady, jeżeli wymaga tego fabuła lub mechanika.
+- Każdy Quest ma stały numer przypisany do jego treści we wszystkich rozgrywkach.
+- Przykład: „Spór o studnie” może zawsze mieć numer `13`, a inny Quest zawsze `16`.
+- Numer nie jest przydzielany dynamicznie i nie jest recyklingowany między różnymi Questami.
+- Ten sam numer służy do identyfikacji Znaczników Questa i jego kart rozwinięcia.
 
-### 2. Porażki
+### 3. Limit Questów
 
-- Limit wynosi 5 żetonów porażki na cały Quest.
-- Piąta porażka domyślnie oznacza przegranie Questa.
-- Zwykła porażka powoduje, że następny test w tym Queście ma próg trudności wyższy o 1.
-- Naturalne 1 powoduje automatyczną porażkę niezależnie od bonusów i sprawia, że następny test ma próg trudności wyższy o 2.
-- Karta Questa może posiadać własne konsekwencje porażki i może nadpisywać regułę domyślną, np. natychmiast zakończyć Quest po przegranej określonej walce.
-- Wpływ liczby porażek na końcową ilość Złota pozostaje do ponownego przemyślenia podczas dalszego projektowania/balansu.
+- Bohater może posiadać maksymalnie **3 główne Questy** jednocześnie.
+- Nierozpoczęty Quest także zajmuje miejsce w limicie.
+- Karty rozwinięcia należą do swojego głównego Questa i nie zajmują dodatkowych miejsc.
+- Przy limicie 3/3 gracz nie dobiera czwartego Questa do prywatnego podglądu.
+- Podczas Rady może widzieć Quest będący elementem jawnej oferty, mimo że sam ma już 3/3, ponieważ samo oglądanie cudzej oferty nie oznacza dobrania Questa.
 
-### 3. Naturalne 20 i Naturalne 1
+### 4. Kiedy Quest jest rozpoczęty
 
-- Naturalne 20 automatycznie zalicza wyłącznie test, na którym zostało wyrzucone.
-- Naturalne 20 nie zalicza automatycznie następnego etapu ani kolejnego testu.
-- Naturalne 1 jest automatyczną porażką.
-- Konkretna opcja może dodatkowo posiadać specjalny efekt Nat 20 lub Nat 1, np. dodatkowy loot, alarm, walkę albo inną konsekwencję.
+- Samo dobranie, posiadanie i czytanie karty nie rozpoczyna Questa.
+- Quest staje się rozpoczęty dopiero po wykonaniu pierwszej właściwej akcji: testu, walki, interakcji ze Znacznikiem Questa lub innej akcji opisanej przez Quest.
+- Nierozpoczęty Quest może być handlowany podczas Rady.
+- Rozpoczęty Quest nie może być sprzedany ani przekazany innemu bohaterowi.
 
-### 4. „Przygotuj się”
+### 5. Porzucenie i powrót do talii
 
-- Każdy Quest pozwala domyślnie użyć mechaniki „Przygotuj się” maksymalnie 1 raz podczas całego Questa.
-- „Przygotuj się” wybiera się bezpośrednio przed podjęciem konkretnego testu.
-- Koszt przygotowania: 1 Akcja.
-- Efekt: +2 do jednego najbliższego wybranego testu.
-- Po wykorzystaniu Quest otrzymuje trwałe oznaczenie „Przygotowanie wykorzystane”.
-- Bonusu nie można kumulować ani użyć ponownie w tym samym Queście.
+- Nierozpoczęty Quest można odrzucić/oddać; może wrócić do odpowiedniej Talii Questów i zostać potasowany, nawet jeśli gracz przeczytał kartę.
+- Rozpoczęty, porzucony Quest nie wraca normalnie do talii. Trafia do historii jako `Porzucony`.
+- Rozpoczęty unikalny Quest po porzuceniu lub przegraniu nie wraca już do puli w tej rozgrywce.
+- Wszystkie jego aktywne Znaczniki Questów znikają z mapy i wracają do kieszonki/puli żetonów.
 
-### 5. Wymaga i Zużywa
+### 6. Koszt Akcji
 
-Questy używają wspólnego standardu znanego z Zagrożeń:
+- Podgląd Questa, etapu i metod: **0 Akcji**.
+- Wybranie metody i rozpoczęcie próby: domyślnie **1 Akcja**.
+- Ponowna próba: domyślnie **1 Akcja**.
+- Bohater może ponawiać test w tej samej turze, jeśli ma Akcje.
+- Konkretna karta może nadpisywać koszt.
 
-- `Wymaga` — bohater musi posiadać wskazany element, ale go nie traci.
-- `Zużywa` — wskazany element zostaje wydany po świadomym wybraniu metody i przepada również wtedy, gdy próba zakończy się porażką.
+### 7. Porażki
 
-Opcje mogą wymagać lub zużywać m.in. Złoto, Towary, Przedmioty i Pomocników. Zużycie Pomocnika ma być rozwiązaniem wyjątkowym, używanym tylko wtedy, gdy karta wyraźnie tego wymaga.
+- Quest ma maksymalnie **5 żetonów porażki na cały Quest**.
+- Piąta porażka domyślnie przegrywa Quest.
+- Zwykła porażka: następny test w tym Queście ma `+1` do progu trudności.
+- Naturalne 1: automatyczna porażka i następny test ma `+2` do progu trudności.
+- Modyfikator dotyczy najbliższego testu i nie kumuluje się bez końca.
+- Karta może mieć własną konsekwencję porażki i może np. natychmiast zakończyć Quest.
 
-### 6. Opcje bez rzutu
+### 8. Nat 1 i Nat 20
 
-- Nie każda metoda musi wymagać testu k20.
-- Jeżeli opcja polega np. na zapłaceniu określonej kwoty, pokazaniu wymaganego przedmiotu lub zużyciu konkretnego zasobu, może zakończyć się automatycznie po spełnieniu warunków.
-- Jedna opcja może uruchomić kilka efektów jednocześnie, np. przejście do finału, nagrodę, zmianę flagi historii, usunięcie znacznika i wpis do Kroniki.
+- Nat 20 = automatyczny sukces **tylko aktualnego testu**.
+- Nat 20 nie zalicza kolejnego etapu ani kolejnego testu.
+- Nat 1 = automatyczna porażka.
+- Domyślnie Nat 20 używa zwykłej ścieżki sukcesu, a Nat 1 zwykłej ścieżki porażki.
+- Konkretna karta może jednak posiadać osobny akapit/efekt dla Nat 20 lub Nat 1.
 
-### 7. Rozgałęzienia i zakończenia
+### 9. Przygotuj się
 
-- Quest może rozgałęziać się na różne ścieżki zależnie od wyborów i wyników.
-- Różne ścieżki nie powinny być fałszywym wyborem; muszą różnić się ryzykiem, kosztem, konsekwencją, nagrodą albo dalszą historią.
-- Ostatnia część Questa może rozdzielić się np. na trzy zupełnie różne zakończenia.
-- Poszczególne zakończenia mogą mieć inne konsekwencje dla świata i inne nagrody.
-- Przyszłe etapy i przyszłe zakończenia są ukryte przed graczem do czasu ich odkrycia.
+- Mechanikę `Przygotuj się` można wykorzystać maksymalnie **1 raz na cały Quest**.
+- Używa się jej bezpośrednio przed konkretnym testem.
+- Koszt: **1 Akcja**.
+- Bonus: **+2 do tego jednego testu**.
+- Po użyciu Quest otrzymuje trwałe oznaczenie `Przygotowanie wykorzystane`.
 
-### 8. Blokowanie i odblokowywanie opcji
+### 10. Wymaga i Zużywa
 
-- Wcześniejsze decyzje, sukcesy, porażki, przedmioty questowe i flagi historii mogą odblokowywać nowe metody.
-- Mogą również trwale blokować wcześniej dostępne możliwości.
-- Znana wcześniej, ale utracona opcja pozostaje widoczna jako wyszarzona z krótkim powodem niedostępności.
-- Nowa opcja może pojawić się dopiero po spełnieniu określonego warunku.
-- Nie każdy Quest musi korzystać z tej mechaniki.
+Wspólny standard z Zagrożeniami:
 
-### 9. Przedmioty i informacje questowe
+- `Wymaga` — element trzeba posiadać, ale nie jest tracony.
+- `Zużywa` — element jest wydawany w chwili świadomego wyboru metody i przepada także po porażce.
+- System może obsługiwać Złoto, Towary, Przedmioty i Pomocników.
+- Zużywanie Pomocnika jest rozwiązaniem wyjątkowym i musi być jawnie opisane na karcie.
 
-- Quest może nadawać tymczasowe elementy fabularne, np. „Klucz do krypty”, „Zapiski alchemika”, „Hasło strażników”.
-- Elementy questowe nie muszą zajmować normalnego ekwipunku ani być przedmiotami handlowymi.
+### 11. Opcje bez rzutu
+
+- Nie każda metoda wymaga k20.
+- Zapłata, pokazanie wymaganego przedmiotu, zużycie zasobu albo czysta decyzja fabularna mogą działać automatycznie.
+- Jedna opcja może uruchomić wiele efektów jednocześnie: zmianę etapu, nagrodę, flagę historii, usunięcie znacznika, walkę lub wpis do Kroniki.
+
+### 12. Rozgałęzienia i zakończenia
+
+- Quest może mieć alternatywne ścieżki i kilka różnych zakończeń.
+- Ostatnia część historii może np. rozbić się na trzy różne finały.
+- Różne drogi muszą różnić się co najmniej jednym z elementów: ryzykiem, kosztem, konsekwencją, nagrodą albo historią.
+- Przyszłe etapy i alternatywne finały są ukryte do czasu odkrycia.
+- Porażka może cofnąć gracza do wcześniejszego etapu, jeśli karta tak mówi.
+- Quest może zostać formalnie ukończony bez nagrody lub z negatywną konsekwencją dla świata.
+- Historia zapisuje dokładnie osiągnięte zakończenie, nie tylko status `ukończony`.
+
+### 13. Blokowanie i odblokowywanie metod
+
+- Wybory, sukcesy, porażki, przedmioty questowe i flagi historii mogą odblokować nowe opcje.
+- Mogą też zablokować wcześniej znane opcje.
+- Znana, lecz utracona opcja pozostaje wyszarzona z krótkim powodem niedostępności.
+- Nie każdy Quest musi używać tej mechaniki.
+
+### 14. Flagi historii
+
+- Quest może zapisywać trwałe flagi decyzji i skutków, np. uratowanie konkretnej postaci, sojusz lub zdradę.
+- Przyszłe Questy mogą opcjonalnie sprawdzać te flagi.
+- Nie projektujemy wszystkich powiązań z góry; system ma jedynie zapewnić przyszłościowy punkt integracji.
+
+### 15. Przedmioty i informacje questowe
+
+- Quest może nadawać elementy istniejące tylko w ramach historii, np. `Klucz do krypty`, `Zapiski alchemika`, `Hasło strażników`.
+- Nie muszą zajmować normalnego ekwipunku i nie muszą być handlowalne.
 - Domyślnie znikają wraz z zakończeniem Questa, chyba że karta mówi inaczej.
 
-### 10. Lokacje, podróż i Znaczniki Questów
+### 16. Znaczniki Questów
 
-- Quest może prowadzić gracza przez kilka różnych miejsc na mapie.
-- Ukończenie etapu może zmienić cel i wymusić fizyczną podróż do kolejnej lokacji lub heksu.
-- Quest może tworzyć jeden albo wiele Znaczników Questów.
-- Wszystkie znaczniki należące do tego samego Questa mają ten sam numer Questa.
-- Przykład: jeżeli „Spór o studnie” ma numer 13 i tworzy trzy cele, na mapie pojawiają się trzy oddzielne znaczniki z numerem `13`.
-- Znaczniki nie mają koloru właściciela.
-- Numer Questa jest stały i przypisany do konkretnej treści w każdej rozgrywce. Przykładowo Quest nr 13 zawsze pozostaje Questem nr 13, a Quest nr 16 zawsze Questem nr 16.
-- Numer nie jest nadawany dynamicznie podczas partii i nie jest recyklingowany między różnymi Questami.
-- Karta Questa wskazuje numer odpowiadającego jej znacznika.
-- Jeżeli Quest ma kilka równoległych znaczników, domyślnie można rozpatrywać je w dowolnej kolejności, chyba że karta mówi inaczej.
-- Zakończenie etapu może natychmiast tworzyć kolejne znaczniki tego samego Questa.
-- Znacznik może pojawić się na heksie, na którym już stoi bohater.
-- Samo wejście na heks Znacznika Questa nie uruchamia interakcji automatycznie.
-- Bohater świadomie wybiera odpowiednią akcję po prawej stronie interfejsu.
-- Inny bohater może wejść na heks znacznika, ale nie może rozwiązywać cudzego Questa.
+- Quest może utworzyć jeden albo wiele Znaczników Questów na mapie.
+- Wszystkie znaczniki tego samego Questa mają ten sam stały numer, np. trzy osobne żetony `13`.
+- Znaczniki nie mają koloru gracza.
+- Karta mówi, którego numeru szuka bohater.
+- Kilka znaczników można domyślnie rozpatrywać w dowolnej kolejności, chyba że karta mówi inaczej.
+- Znacznik może pojawić się na heksie zajętym już przez bohatera lub inny obiekt.
+- Wejście na heks nie uruchamia Questa automatycznie; gracz świadomie wybiera akcję.
+- Obcy bohater może wejść na heks, ale nie może rozwiązać cudzego Questa.
+- Po zakończeniu/porzuceniu/przegraniu Questa jego znaczniki znikają i wracają do kieszonki żetonów.
 
-### 11. Walki w Questach
+### 17. Podróż
 
-- Cała walka uruchomiona jako część opcji Questa korzysta ze wspólnego systemu Walki.
-- Po standardowej przegranej walce bohater ponosi zwykłe konsekwencje porażki w Walce oraz otrzymuje 1 żeton porażki Questa.
-- Domyślnie Quest pozostaje aktywny i można wrócić do próby później, o ile nie była to piąta porażka.
-- Konkretna karta może wyraźnie określić surowszy skutek, np. natychmiastowe zakończenie Questa po przegranej walce.
-- Etap może posiadać „punkt bez powrotu”, po którym nie można porzucić Questa lub opuścić trwającej sekwencji, dopóki nie zostanie rozstrzygnięta.
+- Kolejne etapy mogą wymagać różnych lokacji i heksów.
+- Zakończenie etapu może wskazać nowy cel podróży albo utworzyć nowe Znaczniki Questa.
 
-### 12. Historia, świat i konsekwencje przyszłościowe
+### 18. Walka w Queście
 
-- Quest może trwale zmieniać świat.
-- Różne finały mogą np. usuwać obiekt, tworzyć nowego handlarza, uruchamiać Zagrożenie albo zmieniać przyszłe możliwości.
-- Ważne wybory i zakończenia trafiają do Kroniki Świata jako krótka opowieść o tym, kto, gdzie i co zrobił.
-- Nie zapisujemy każdego rzutu ani każdej drobnej próby do Kroniki.
-- System może przechowywać proste flagi historii, np. informację o uratowaniu postaci, sojuszu albo zdradzie.
-- Przyszłe Questy mogą opcjonalnie sprawdzać takie flagi i zmieniać tekst, dostępne opcje lub konsekwencje.
-- Projektując takie zależności trzeba zachować przyszłościowość, ale nie każdy Quest musi być powiązany z innymi.
-- Quest może dawać niewielkie nagrody lub loot również w trakcie historii, a nie wyłącznie na końcu.
+- Walka używa wspólnego systemu Walki i cała sekwencja pozostaje częścią opłaconej Akcji Questa.
+- Domyślna przegrana walki powoduje standardowe konsekwencje Walki oraz **1 żeton porażki Questa**.
+- Quest pozostaje aktywny, chyba że była to piąta porażka.
+- Karta może jawnie nadpisać regułę i np. zakończyć Quest natychmiast po przegranej walce.
+- Etap może mieć punkt bez powrotu blokujący porzucenie lub opuszczenie trwającej sekwencji.
 
-### 13. Długość i poziom Questa
+### 19. Limity czasu
 
-- Gracz widzi oznaczenie długości: `Krótki`, `Średni` albo `Długi`.
-- Nie pokazujemy osobnej etykiety typu „Łatwy / Trudny”.
-- Trudność i poziom zawartości wynikają przede wszystkim z Poziomu Świata Questa.
-- Questy posiadają Poziom Świata I, II, III lub IV.
-- Przy aktualnym Poziomie Świata dobierane są Questy odpowiadające temu poziomowi.
-- Po przejściu świata na wyższy poziom Questy niższego poziomu nie są już normalnie dobierane.
-- Już posiadany Quest niższego poziomu nie znika i może zostać normalnie dokończony.
+- Quest może posiadać opcjonalny limit czasu.
+- Jeśli limit istnieje, gracz widzi go od początku.
+- Możliwe typy: liczba rund, własnych tur, `do następnej Rady` lub inny jawnie zapisany termin.
+- Przekroczenie czasu może oznaczać przegraną, alternatywne zakończenie albo inny efekt karty.
 
-### 14. Jedna Talia Questów
+### 20. Nagrody
 
-- Rezygnujemy z osobnych talii Nauki, Intrygi, Handlu itd.
-- W grze istnieje jedna wspólna Talia Questów.
-- Polecenie „Dobierz Quest” losuje kartę odpowiednią dla aktualnego Poziomu Świata.
-- Po dobraniu gracz może zobaczyć nazwę, opis wprowadzający, długość, wskazówkę dotyczącą możliwej nagrody, ewentualny limit czasu oraz pierwszy cel.
-- Następnie świadomie przyjmuje albo odrzuca Quest.
-- Jeżeli odrzuca nierozpoczęty Quest, karta może wrócić do odpowiedniej talii/puli i zostać potasowana.
-- Ten sam nieunikalny Quest nie może być jednocześnie posiadany przez dwóch bohaterów.
-- Quest może być oznaczony jako unikalny dla danej rozgrywki.
-- Unikalny Quest po definitywnym ukończeniu/przegraniu nie wraca do zwykłego obiegu.
-- Po wyczerpaniu puli danego Poziomu Świata można ponownie tasować dozwolone nieunikalne karty ze stosu odrzuconych.
+- Karta początkowa pokazuje **wskazówkę**, czego można spodziewać się jako nagrody, a nie pełną matematyczną listę.
+- Quest może dawać małe nagrody także w trakcie historii.
+- Finały mogą mieć różne nagrody.
+- **Usuwamy globalną redukcję Złota za liczbę porażek.** Porażki nie obcinają automatycznie końcowej wypłaty.
+- Jeśli konkretny Quest ma zmniejszać nagrodę za błędy, musi to wynikać z jego własnych zasad.
 
-### 15. Limit posiadanych Questów
+### 21. Długość Questa
 
-- Bohater może posiadać maksymalnie 3 główne Questy jednocześnie.
-- Limit obejmuje zarówno Questy rozpoczęte, jak i nierozpoczęte.
-- Normalnie przy stanie 3/3 bohater nie dobiera czwartego Questa nawet tylko do podglądu.
-- Rada jest wyjątkiem prezentacyjnym: Questy występujące w handlu/ofertach mogą być widoczne nawet graczowi z limitem 3/3, ponieważ i tak są publicznie prezentowane w Radzie.
-- Karty rozwinięcia/finału należące do już posiadanego Questa nie są liczone jako kolejne Questy i nie zajmują dodatkowych miejsc w limicie.
+- Gracz widzi tylko długość i Poziom Świata, bez osobnej etykiety trudności.
+- `Krótki` = 1 karta rozwinięcia.
+- `Średni` = 2 karty rozwinięcia.
+- `Długi` = 3 karty rozwinięcia.
+- Jest to standard konstrukcyjny dla głównej ścieżki historii.
 
-### 16. Kiedy Quest jest rozpoczęty
+### 22. Osobna Talia Rozwinięć Questów
 
-- Samo dobranie, przyjęcie i przeczytanie Questa nie oznacza jeszcze rozpoczęcia jego historii.
-- Quest staje się „rozpoczęty” dopiero po wykonaniu pierwszej właściwej akcji tego Questa: testu, walki, interakcji ze znacznikiem lub innej akcji określonej przez kartę.
-- Nierozpoczęty Quest może zostać sprzedany/przekazany podczas Rady.
-- Po rozpoczęciu Quest staje się osobistą historią bohatera i nie może być normalnie sprzedawany ani przekazywany.
+- Karty rozwinięcia **nie są częścią głównej Talii Questów**.
+- Istnieje osobna **Talia/Pula Rozwinięć Questów**.
+- Rozwinięcie wyciąga się tylko wtedy, gdy aktualna karta lub Księga Questów wskazuje konkretny identyfikator, np. `13A` albo `13C`.
+- Nie wykładamy kilku alternatywnych rozwinięć na zapas.
+- Rozwinięcie pojawia się dopiero wtedy, gdy historia realnie idzie do przodu.
+- Odkryte rozwinięcia pozostają wsunięte poziomo pod kartą główną do końca Questa, tworząc widoczną historię.
+- Po zakończeniu Questa rozwinięcia wracają do swojej puli/przegródki.
+- Fizycznie rozwinięcia mogą być przechowywane w kasetkach zakresami, np. `0–20`, `21–40`, `41–60`, itd., a wewnątrz uporządkowane po numerach.
 
-### 17. Porzucenie i przegranie Questa
+### 23. Księga Questów
 
-- Gracz może świadomie porzucić Quest, o ile nie znajduje się za punktem bez powrotu lub karta nie zabrania porzucenia.
-- Porzucenie domyślnie nie kosztuje Akcji.
-- Wszystkie aktywne Znaczniki Questów tego zadania znikają.
-- Rozpoczęty i porzucony Quest trafia do historii jako `Porzucony`, a nie jako zwykła porażka.
-- Nierozpoczęty Quest może zostać oddany do odpowiedniej talii/puli i ponownie potasowany nawet wtedy, gdy właściciel przeczytał jego treść.
-- Przegrany rozpoczęty Quest trafia do historii jako niepowodzenie wraz z informacją, na jakim etapie historia się zakończyła.
-- Karta może określać dodatkową konsekwencję przegrania Questa dla świata.
+- Gra posiada osobną **Księgę Questów** z numerowanymi akapitami.
+- Gracz czyta wyłącznie akapit wskazany przez aktualną kartę/wynik.
+- Numer akapitu i numer karty rozwinięcia to dwa osobne systemy.
+- Przykład: wynik może powiedzieć `Sukces → przeczytaj 54A`; akapit `54A` może następnie nakazać `dobierz rozwinięcie 13C`.
+- Porażka może wskazywać inny akapit, np. `54Z`.
+- Nat 1/Nat 20 używają domyślnego sukcesu/porażki, chyba że karta jawnie wskazuje osobny akapit krytyczny.
+- Akapit może zawierać czysty wybór fabularny bez rzutu.
 
-### 18. Limity czasu
+### 24. Kronika i historia Questa
 
-- Silnik Questów ma obsługiwać opcjonalne limity czasu.
-- Limit czasu jest widoczny graczowi od początku, jeśli dany Quest go posiada.
-- Karta może używać różnych typów terminów, np. liczby rund, własnych tur albo terminu „do następnej Rady”.
-- Przekroczenie czasu może oznaczać przegraną, alternatywne zakończenie lub inną konsekwencję określoną przez kartę.
+- Odkryte karty/akapity można później przeglądać jako przebytą ścieżkę.
+- Nie pokazujemy alternatywnych, nieodkrytych ścieżek.
+- Ważne decyzje i finały trafiają do Kroniki Świata jako krótka opowieść: kto, gdzie i co zrobił.
+- Nie zapisujemy do Kroniki każdego rzutu k20.
 
-### 19. Nagrody
+## Wymagania implementacyjne Modułu 2
 
-- Karta początkowa nie musi podawać dokładnej matematycznej nagrody.
-- Gracz otrzymuje wskazówkę, czego może spodziewać się po Queście.
-- Różne zakończenia mogą posiadać różne rzeczywiste nagrody.
-- Quest może przyznawać Złoto, Punkty Legendy, Towary, Przedmioty i inne efekty.
-- Dokładna zasada zmniejszania Złota w zależności od liczby porażek pozostaje otwarta i wymaga osobnej decyzji/balansu.
-
-### 20. Karty rozwinięcia i finału
-
-- Jeden główny Quest może posiadać dodatkowe karty rozwinięcia/finału.
-- Wszystkie należą mechanicznie do jednego Questa i nie zwiększają limitu 3 Questów.
-- Karty rozwinięcia mogą być oznaczane np. jako `13A`, `13B`, `13C`, przy zachowaniu dużego, wspólnego numeru `13` identyfikującego całą historię.
-- Główna karta może wskazać dokładnie, którą kartę rozwinięcia należy dobrać w wyniku danego wyboru.
-- Nieodkryte alternatywne rozwinięcia/finały pozostają ukryte, dzięki czemu nie spoilerują innych ścieżek.
-- Rozwinięcie nie tworzy kolejnego poziomu rozwinięć. Nie budujemy struktury `13 -> 13B -> 13B2`.
-- Wizualnie zdobyte karty jednego Questa są układane poziomo, jedna przy/za drugą, aby tworzyły czytelną rozwijającą się historię.
-- Kliknięcie odkrytej części pozwala wrócić do przeczytanej wcześniej treści.
-
-## Punkty otwarte na kolejną sesję
-
-- Ostateczna zasada wpływu liczby porażek na wysokość nagrody w Złocie.
-- Dokładna techniczna obsługa kart rozwinięcia w jednej Talii Questów: w jaki sposób pozostają w talii, ale nie mogą zostać wylosowane jako samodzielny główny Quest.
-- Czy jeden główny Quest może mieć kilka kart rozwinięcia aktywnych jednocześnie.
-- Jak obsłużyć sytuację techniczną, w której wskazana karta rozwinięcia jest niedostępna lub brakuje jej w talii/puli.
-- Ostateczne szczegóły wizualnego oznaczenia kart głównych i kart rozwinięcia.
-- Dokończyć pozostałe pytania projektowe Modułu 2 przed rozpoczęciem pełnej przebudowy silnika.
+- [ ] Wspólny model QuestDefinition / QuestStage / QuestOption.
+- [ ] Stały numer Questa, poziom świata, długość i wskazówka nagrody.
+- [ ] Limit 3 głównych Questów.
+- [ ] Stan `nierozpoczęty / rozpoczęty / ukończony / przegrany / porzucony`.
+- [ ] Handel wyłącznie nierozpoczętymi Questami.
+- [ ] 5 żetonów porażki.
+- [ ] Nat 1/Nat 20 według nowych zasad.
+- [ ] `Przygotuj się` 1× na Quest.
+- [ ] `Wymaga` / `Zużywa`.
+- [ ] Opcje testowe, beztestowe i walki.
+- [ ] Alternatywne etapy i zakończenia.
+- [ ] Flagi historii i questowe elementy tymczasowe.
+- [ ] Punkt bez powrotu i limity czasu.
+- [ ] Osobny rejestr kart rozwinięcia.
+- [ ] Polecenia akapitów Księgi Questów.
+- [ ] Znaczniki Questów i ich sprzątanie.
+- [ ] Pełna nagroda Złota niezależnie od liczby porażek, chyba że karta mówi inaczej.
+- [ ] Standardowa przegrana walki = 1 porażka Questa, nie automatyczna utrata Questa.
+- [ ] Przebudować „Szatańskie siły” jako wzorcowy Quest systemu.
+- [ ] Dodać testy jednostkowe nowych reguł.
+- [ ] Punkt integracji z Kroniką Świata.
 
 ## Ważna zasada projektowa
 
-Nie tworzyć fałszywego wyboru, np. `Nauka 12` albo `Intryga 14`, jeżeli obie opcje prowadzą dokładnie do tego samego rezultatu.
-
-Różne drogi powinny różnić się przynajmniej jednym elementem: ryzykiem, kosztem, konsekwencją, nagrodą albo dalszym przebiegiem historii.
+Nie tworzyć fałszywego wyboru, np. `Nauka 12` albo `Intryga 14`, jeżeli obie opcje prowadzą dokładnie do tego samego rezultatu. Różne drogi powinny różnić się przynajmniej jednym elementem: ryzykiem, kosztem, konsekwencją, nagrodą albo dalszym przebiegiem historii.
 
 ## Definition of Done
 
-Można stworzyć nowy wieloetapowy Quest z testami, alternatywnymi drogami, walką, Znacznikami Questów, rozwinięciami/finałami, historią decyzji i nagrodami bez pisania osobnej mechaniki tylko dla tego Questa.
+Można stworzyć nowy Quest z testami, decyzjami bez rzutu, walką, podróżą, Znacznikami Questów, osobnymi kartami rozwinięcia, Księgą Questów, różnymi finałami, historią decyzji i nagrodami bez pisania osobnej mechaniki wyłącznie dla tej jednej karty.
