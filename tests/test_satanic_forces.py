@@ -1,11 +1,11 @@
 import random
 import unittest
 
-from rg_content.locations import initialize_location, take_quest
+import rg_content.locations as locations
 from rg_engine.quest_location_bridge import install_quest_location_bridge
 from rg_engine.quests import reset_quest_deck
 from rg_engine.world import register_players
-from rg_legacy.satanic_forces import QUEST_ID, activate_quest, resolve_test
+from rg_legacy.satanic_forces import activate_quest, resolve_test
 
 
 class FixedRng:
@@ -56,7 +56,7 @@ class SatanicForcesTests(unittest.TestCase):
 
     def test_location_board_uses_one_quest_deck(self):
         location = {"name": "Artium", "kind": "castle"}
-        initialize_location(location, random.Random(4))
+        locations.initialize_location(location, random.Random(4))
         self.assertTrue(location["quest_offers"])
         self.assertTrue(all(card["deck"] == "Questy" for card in location["quest_offers"]))
 
@@ -64,9 +64,9 @@ class SatanicForcesTests(unittest.TestCase):
         location = {"name": "Artium", "kind": "castle"}
         player = make_player()
         register_players([player])
-        initialize_location(location, random.Random(4))
+        locations.initialize_location(location, random.Random(4))
         expected_id = location["quest_offers"][0]["id"]
-        success, _message = take_quest(location, player, 0, random.Random(4))
+        success, _message = locations.take_quest(location, player, 0, random.Random(4))
         self.assertTrue(success)
         self.assertEqual(player["active_quests"][0]["id"], expected_id)
         self.assertEqual(player["active_quests"][0]["status"], "active")
