@@ -14,8 +14,13 @@ def install_quest_effect_bridge() -> None:
     original_check_requirements = quest_engine._check_requirements
 
     def check_requirements_v2(player, quest, option):
-        requires = (option or {}).get("requires") or {}
-        if requires.get("quest_marker") or requires.get("current_marker"):
+        option = option or {}
+        requires = option.get("requires") or {}
+        effects = [*(option.get("success_effects") or []), *(option.get("failure_effects") or [])]
+        needs_marker = bool(requires.get("quest_marker") or requires.get("current_marker")) or any(
+            str((effect or {}).get("type") or "") == "resolve_marker" for effect in effects
+        )
+        if needs_marker:
             marker_id = str(quest.get("current_marker_id") or "")
             if not marker_id:
                 return False, "Tę opcję można wykonać tylko na właściwym Znaczniku Questa."
