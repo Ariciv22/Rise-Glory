@@ -1,14 +1,21 @@
+import random
 import unittest
 
-from rg_content.quests import SATANIC_FORCES_ID, register_all_quests
+from rg_content.quest_book import quest_paragraph
+from rg_content.quests import SATANIC_FORCES_ID, SPOR_O_STUDNIE_ID, register_all_quests
 from rg_core.quest_runtime import resolve_quest_option
+from rg_engine.quest_effect_bridge import install_quest_effect_bridge
 from rg_engine.quests import (
     abandon_quest,
     activate_quest,
     can_trade_quest,
     complete_quest,
+    draw_quest_id,
     prepare_quest_test,
+    quest_definition,
+    reset_quest_deck,
     resolve_option,
+    return_quest_id_to_deck,
     scaled_gold_reward,
 )
 from rg_engine.world import register_players, reset_world_progression
@@ -57,9 +64,11 @@ class QuestEngineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         register_all_quests()
+        install_quest_effect_bridge()
 
     def setUp(self):
         reset_world_progression(1)
+        reset_quest_deck()
         register_players([])
 
     def test_failures_do_not_reduce_gold_reward(self):
@@ -211,6 +220,32 @@ class QuestEngineTests(unittest.TestCase):
         self.assertFalse(success)
         self.assertEqual(quest["history"][-1]["threshold"], 15)
         self.assertEqual(quest["history"][-1]["total"], 11)
+
+    def test_main_deck_reserves_each_visible_offer_only_once(self):
+        rng = random.Random(7)
+        drawn = [draw_quest_id(1, rng=rng) for _ in range(4)]
+        self.assertEqual(len(set(drawn)), 4)
+        self.assertNotIn(None, drawn)
+        self.assertIsNone(draw_quest_id(1, rng=rng))
+
+    def test_returned_unstarted_offer_can_enter_draw_pile_again(self):
+        rng = random.Random(11)
+        first = draw_quest_id(1, rng=rng)
+        return_quest_id_to_deck(first, rng=rng)
+        drawn = [draw_quest_id(1, rng=rng) for _ in range(4)]
+        self.assertIn(first, drawn)
+
+    def test_spor_o_studnie_has_fixed_number_13(self):
+        definition = quest_definition(SPOR_O_STUDNIE_ID)
+        self.assertIsNotNone(definition)
+        self.assertEqual(definition["quest_number"], 13)
+        self.assertEqual(definition["deck"], "Questy")
+
+    def test_quest_book_uses_independent_paragraph_numbers(self):
+        paragraph = quest_paragraph("130A")
+        self.assertIsNotNone(paragraph)
+        self.assertEqual(paragraph["quest_id"], SPOR_O_STUDNIE_ID)
+        self.assertTrue(paragraph["text"])
 
 
 if __name__ == "__main__":
