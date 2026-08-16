@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-import rg_engine.quests as quest_engine
-from rg_engine.models import QuestDefinition, QuestOption, QuestStage
-from rg_engine.quests import register_quest
+from rg_engine.models import QuestDefinition, QuestExpansionDefinition, QuestOption, QuestStage
+from rg_engine.quests import register_quest, register_quest_expansion
 
 SATANIC_FORCES_ID = "klatwa_katakumb_0"
+SATANIC_FORCES_NUMBER = 1
 
 SATANIC_FORCES = QuestDefinition(
     quest_id=SATANIC_FORCES_ID,
+    quest_number=SATANIC_FORCES_NUMBER,
     name="Szatańskie siły",
-    deck="Nauki",
+    deck="Questy",
     description=(
         "Po przybyciu do Zamku Artium strażnicy wskazują ogłoszenie dotyczące "
         "dziwnych świateł, szeptów i klątwy w kaplicy oraz katakumbach."
@@ -18,6 +19,9 @@ SATANIC_FORCES = QuestDefinition(
     objective="Dotrzyj do Zamku Artium i zbadaj katakumby.",
     required_location="Artium",
     world_level_min=1,
+    world_level=1,
+    length="Średni",
+    reward_hint="Złoto, Punkty Legendy i możliwy przedmiot.",
     image="uczony w katakumbach",
     unique=True,
     shared=False,
@@ -36,19 +40,31 @@ SATANIC_FORCES = QuestDefinition(
                     label="Przeszukaj bezpiecznie biblioteki",
                     stat="Nauka",
                     threshold=11,
+                    success_effects=(
+                        {"type": "set_flag", "key": "znaleziono_notatki", "value": True},
+                        {"type": "expansion", "id": "1A"},
+                    ),
                 ),
                 QuestOption(
                     option_id="klatwa_katakumb_1_intryga",
                     label="Dotknij i prześledź czerwone znaki",
                     stat="Intryga",
                     threshold=14,
+                    success_effects=(
+                        {"type": "set_flag", "key": "poznano_runy", "value": True},
+                        {"type": "expansion", "id": "1A"},
+                    ),
                 ),
                 QuestOption(
                     option_id="klatwa_katakumb_1_kultura",
                     label="Wykonaj podstawowy obrzęd",
                     stat="Kultura",
                     threshold=13,
-                    materials={"Skóra": 2},
+                    consumes={"materials": {"Skóra": 2}},
+                    success_effects=(
+                        {"type": "set_flag", "key": "wykonano_obrzed", "value": True},
+                        {"type": "expansion", "id": "1A"},
+                    ),
                 ),
             ),
         ),
@@ -66,18 +82,31 @@ SATANIC_FORCES = QuestDefinition(
                     label="Wypowiedz słowa rozdziału o końcu rytuału",
                     stat="Nauka",
                     threshold=13,
+                    success_effects=(
+                        {"type": "quest_item", "item": "Formuła zakończenia rytuału"},
+                        {"type": "expansion", "id": "1B"},
+                    ),
                 ),
                 QuestOption(
                     option_id="klatwa_katakumb_2_intryga",
                     label="Zabierz księgę i ukryj prawdę przed kapitanem",
                     stat="Intryga",
                     threshold=15,
+                    success_effects=(
+                        {"type": "quest_item", "item": "Księga kultu"},
+                        {"type": "set_flag", "key": "ukryto_prawde", "value": True},
+                        {"type": "expansion", "id": "1B"},
+                    ),
                 ),
                 QuestOption(
                     option_id="klatwa_katakumb_2_kultura",
                     label="Przeczytaj rozdział o mocach nadprzyrodzonych",
                     stat="Kultura",
                     threshold=14,
+                    success_effects=(
+                        {"type": "quest_item", "item": "Wiedza o klątwie"},
+                        {"type": "expansion", "id": "1B"},
+                    ),
                 ),
             ),
         ),
@@ -89,14 +118,15 @@ SATANIC_FORCES = QuestDefinition(
                 "żołnierz, ostatni strażnik dawnego kultu."
             ),
             required_location="Artium",
+            point_of_no_return=True,
             options=(
                 QuestOption(
                     option_id="klatwa_katakumb_3_nauka",
                     label="Zniszcz księgę na dziedzińcu",
                     stat="Nauka",
                     threshold=10,
-                    on_success="complete",
-                    on_failure="combat",
+                    on_success="complete:klatwa_zlamana",
+                    on_failure="combat:przeklety_zolnierz",
                     failure_enemy_id="przeklety_zolnierz",
                 ),
                 QuestOption(
@@ -104,8 +134,8 @@ SATANIC_FORCES = QuestDefinition(
                     label="Przekonaj kapitana, że księga przepadła",
                     stat="Intryga",
                     threshold=13,
-                    on_success="complete",
-                    on_failure="combat",
+                    on_success="complete:prawda_ukryta",
+                    on_failure="combat:przeklety_zolnierz",
                     failure_enemy_id="przeklety_zolnierz",
                 ),
                 QuestOption(
@@ -113,6 +143,8 @@ SATANIC_FORCES = QuestDefinition(
                     label="Stań do walki z Przeklętym żołnierzem",
                     option_type="combat",
                     enemy_id="przeklety_zolnierz",
+                    on_success="complete:straznik_pokonany",
+                    combat_defeat="quest_failure",
                     text="Z ołtarza podnosi się Przeklęty żołnierz. Ucieczka jest niemożliwa.",
                 ),
             ),
@@ -126,23 +158,30 @@ SATANIC_FORCES = QuestDefinition(
     },
 )
 
+SATANIC_FORCES_EXPANSIONS = (
+    QuestExpansionDefinition(
+        expansion_id="1A",
+        quest_id=SATANIC_FORCES_ID,
+        title="Ślady dawnego kultu",
+        text=(
+            "Odkryte ślady prowadzą głębiej pod kaplicę. Między regałami i kamiennymi "
+            "niszami zachowały się zapiski ludzi, którzy próbowali zakończyć rytuał."
+        ),
+        image="ślady dawnego kultu",
+    ),
+    QuestExpansionDefinition(
+        expansion_id="1B",
+        quest_id=SATANIC_FORCES_ID,
+        title="Ostatni strażnik",
+        text=(
+            "Wiedza zdobyta w katakumbach prowadzi do finału. Zanim klątwa zgaśnie, "
+            "bohater musi zmierzyć się z ostatnią wolą dawnego kultu."
+        ),
+        image="przeklęty żołnierz w katakumbach",
+    ),
+)
+
 _REGISTERED = False
-
-
-def _auto_complete_exactly_one_following_test(player, quest, definition):
-    current = int(quest.get("stage_number", 1) or 1)
-    index = quest_engine._stage_index(definition, current)
-    stage = definition["stages"][index] if 0 <= index < len(definition["stages"]) else None
-    if not quest_engine._stage_is_immediate_ordinary_test(stage):
-        return ""
-    if index == len(definition["stages"]) - 1:
-        return quest_engine.complete_quest(
-            player,
-            quest,
-            "Naturalne 20 zalicza również kolejny dostępny test.",
-        )
-    quest_engine._advance_one_stage(quest, definition)
-    return "Naturalne 20 zalicza również kolejny dostępny test."
 
 
 def register_all_quests() -> None:
@@ -150,6 +189,6 @@ def register_all_quests() -> None:
     if _REGISTERED:
         return
     register_quest(SATANIC_FORCES)
-    # Przejściowy adapter zachowuje stare API silnika, ale poprawia regułę naturalnego 20.
-    quest_engine._auto_complete_next_test = _auto_complete_exactly_one_following_test
+    for expansion in SATANIC_FORCES_EXPANSIONS:
+        register_quest_expansion(expansion)
     _REGISTERED = True
