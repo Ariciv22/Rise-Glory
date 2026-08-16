@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import math
+import sys
 from typing import Any
 
 import pygame
@@ -276,4 +277,9 @@ def install_quest_history_ui() -> None:
     hud.draw_player_board = draw_player_board_with_history
     hud._PlayerBoardButton.clicked = button_clicked_with_history
     hud.draw_game_ui = draw_game_ui_with_history
+
+    app = sys.modules.get("rg_core.app")
+    if app is not None and getattr(app, "draw_game_ui", None) is original_draw_game_ui:
+        app.draw_game_ui = draw_game_ui_with_history
+
     _INSTALLED = True
