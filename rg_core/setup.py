@@ -22,7 +22,7 @@ from rg_engine.quest_council_bridge import install_quest_council_bridge
 from rg_engine.quest_effect_bridge import install_quest_effect_bridge
 from rg_engine.quest_location_bridge import install_quest_location_bridge
 from rg_engine.quest_time_bridge import install_quest_time_bridge
-from rg_engine.quests import reset_quest_deck
+from rg_engine.quest_world_bridge import install_quest_world_bridge
 from rg_engine.threats import is_tile_entry_blocked, threat_modifier
 from rg_engine.world import register_players, reset_world_progression
 from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
@@ -102,7 +102,6 @@ def find_start_tiles(tiles, player_count):
 
 def create_tokens(players, tiles):
     reset_world_event_deck()
-    reset_quest_deck()
     reset_world_progression(1)
     for player in players:
         ensure_hero_state(player)
@@ -131,6 +130,7 @@ install_world_event_markers()
 install_quest_markers()
 install_quest_effect_bridge()
 install_quest_location_bridge()
+install_quest_world_bridge()
 install_quest_time_bridge()
 install_world_state_ui()
 install_threat_investigation_ui()
