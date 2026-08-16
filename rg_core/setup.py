@@ -19,6 +19,7 @@ from rg_engine.heroes import ensure_hero_state
 from rg_engine.quest_chronicle_bridge import install_quest_chronicle_bridge
 from rg_engine.quest_council_bridge import install_quest_council_bridge
 from rg_engine.quest_effect_bridge import install_quest_effect_bridge
+from rg_engine.quest_location_bridge import install_quest_location_bridge
 from rg_engine.quest_time_bridge import install_quest_time_bridge
 from rg_engine.quests import reset_quest_deck
 from rg_engine.threats import is_tile_entry_blocked, threat_modifier
@@ -128,6 +129,7 @@ install_adventure_system()
 install_world_event_markers()
 install_quest_markers()
 install_quest_effect_bridge()
+install_quest_location_bridge()
 install_quest_time_bridge()
 install_world_state_ui()
 install_threat_investigation_ui()
