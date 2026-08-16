@@ -13,6 +13,7 @@ from rg_engine.quests import (
     draw_quest_id,
     prepare_quest_test,
     quest_definition,
+    quest_ids_for_world_level,
     reset_quest_deck,
     resolve_option,
     return_quest_id_to_deck,
@@ -223,16 +224,18 @@ class QuestEngineTests(unittest.TestCase):
 
     def test_main_deck_reserves_each_visible_offer_only_once(self):
         rng = random.Random(7)
-        drawn = [draw_quest_id(1, rng=rng) for _ in range(4)]
-        self.assertEqual(len(set(drawn)), 4)
+        total = len(quest_ids_for_world_level(1))
+        drawn = [draw_quest_id(1, rng=rng) for _ in range(total)]
+        self.assertEqual(len(set(drawn)), total)
         self.assertNotIn(None, drawn)
         self.assertIsNone(draw_quest_id(1, rng=rng))
 
     def test_returned_unstarted_offer_can_enter_draw_pile_again(self):
         rng = random.Random(11)
+        total = len(quest_ids_for_world_level(1))
         first = draw_quest_id(1, rng=rng)
         return_quest_id_to_deck(first, rng=rng)
-        drawn = [draw_quest_id(1, rng=rng) for _ in range(4)]
+        drawn = [draw_quest_id(1, rng=rng) for _ in range(total)]
         self.assertIn(first, drawn)
 
     def test_spor_o_studnie_has_fixed_number_13(self):
