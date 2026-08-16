@@ -58,6 +58,19 @@ class QuestOption:
     failure_enemy_id: str | None = None
     action_cost: int = 1
     text: str = ""
+    requires: dict[str, Any] = field(default_factory=dict)
+    consumes: dict[str, Any] = field(default_factory=dict)
+    visible_if: dict[str, Any] = field(default_factory=dict)
+    disabled_if: dict[str, Any] = field(default_factory=dict)
+    disabled_reason: str = ""
+    success_effects: tuple[dict[str, Any], ...] = ()
+    failure_effects: tuple[dict[str, Any], ...] = ()
+    success_paragraph: str | None = None
+    failure_paragraph: str | None = None
+    nat20_paragraph: str | None = None
+    nat1_paragraph: str | None = None
+    combat_defeat: str = "quest_failure"
+    combat_victory: str = "success"
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
@@ -73,6 +86,8 @@ class QuestStage:
     options: tuple[QuestOption, ...]
     required_location: str | None = None
     image: str | None = None
+    required_hex: str | None = None
+    point_of_no_return: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -81,8 +96,24 @@ class QuestStage:
             "text": self.text,
             "options": [option.to_dict() for option in self.options],
             "required_location": self.required_location,
+            "required_hex": self.required_hex,
             "image": self.image,
+            "point_of_no_return": self.point_of_no_return,
         }
+
+
+@dataclass(frozen=True)
+class QuestExpansionDefinition:
+    expansion_id: str
+    quest_id: str
+    title: str
+    text: str
+    paragraph: str | None = None
+    image: str = ""
+    ending_id: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(frozen=True)
@@ -103,16 +134,30 @@ class QuestDefinition:
     sellable: bool = True
     tradeable: bool = True
     abandonable: bool = True
+    quest_number: int = 0
+    world_level: int | None = None
+    length: str = "Krótki"
+    reward_hint: str = ""
+    time_limit: dict[str, Any] = field(default_factory=dict)
+    markers: tuple[dict[str, Any], ...] = ()
+    flags_on_complete: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.quest_id,
             "name": self.name,
-            "deck": self.deck,
+            "deck": self.deck or "Questy",
             "description": self.description,
             "objective": self.objective,
             "required_location": self.required_location,
             "world_level_min": self.world_level_min,
+            "world_level": self.world_level if self.world_level is not None else self.world_level_min,
+            "quest_number": self.quest_number,
+            "length": self.length,
+            "reward_hint": self.reward_hint,
+            "time_limit": dict(self.time_limit),
+            "markers": [dict(marker) for marker in self.markers],
+            "flags_on_complete": dict(self.flags_on_complete),
             "stages": [stage.to_dict() for stage in self.stages],
             "reward": dict(self.reward),
             "image": self.image,
