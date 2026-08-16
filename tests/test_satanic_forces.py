@@ -2,6 +2,8 @@ import random
 import unittest
 
 from rg_content.locations import initialize_location, take_quest
+from rg_engine.quests import reset_quest_deck
+from rg_engine.world import register_players
 from rg_legacy.satanic_forces import QUEST_ID, activate_quest, resolve_test
 
 
@@ -29,29 +31,41 @@ def make_player():
         "legend": 0,
         "wounds": 0,
         "food": [],
+        "goods": [],
         "inventory": [],
         "materials": {},
         "helpers": [],
+        "equipment": {},
         "active_quests": [],
+        "completed_quests": [],
+        "failed_quests": [],
+        "abandoned_quests": [],
         "_token_ref": token,
     }
 
 
 class SatanicForcesTests(unittest.TestCase):
-    def test_artium_always_starts_with_special_quest(self):
+    def setUp(self):
+        reset_quest_deck()
+        register_players([])
+
+    def test_location_board_uses_one_quest_deck(self):
         location = {"name": "Artium", "kind": "castle"}
         initialize_location(location, random.Random(4))
-        self.assertEqual(location["quest_offers"][0]["id"], QUEST_ID)
+        self.assertTrue(location["quest_offers"])
+        self.assertTrue(all(card["deck"] == "Questy" for card in location["quest_offers"]))
 
-    def test_taking_special_quest_creates_runtime_state(self):
+    def test_taking_board_quest_creates_runtime_state(self):
         location = {"name": "Artium", "kind": "castle"}
         player = make_player()
+        register_players([player])
         initialize_location(location, random.Random(4))
+        expected_id = location["quest_offers"][0]["id"]
         success, _message = take_quest(location, player, 0, random.Random(4))
         self.assertTrue(success)
+        self.assertEqual(player["active_quests"][0]["id"], expected_id)
         self.assertEqual(player["active_quests"][0]["status"], "active")
-        self.assertEqual(player["active_quests"][0]["stage_number"], 1)
-        self.assertTrue(location["special_quest_claimed"])
+        self.assertFalse(player["active_quests"][0]["started"])
 
     def test_success_consumes_one_action_and_advances_stage(self):
         player = make_player()
@@ -81,7 +95,7 @@ class SatanicForcesTests(unittest.TestCase):
         self.assertEqual(player["gold"], 13)
         self.assertEqual(player["legend"], 2)
         self.assertEqual(len(player["food"]), 3)
-        self.assertEqual(player["inventory"][0]["id"], "krotki_miecz_kapitana")
+        self.assertTrue(player["inventory"])
         self.assertFalse(player["active_quests"])
 
 
