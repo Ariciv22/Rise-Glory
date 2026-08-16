@@ -207,6 +207,19 @@ class QuestEngineTests(unittest.TestCase):
         self.assertNotIn(quest, hero["active_quests"])
         self.assertNotIn(quest, hero["abandoned_quests"])
 
+    def test_required_location_cannot_be_bypassed_from_wilderness(self):
+        hero = player()
+        hero["_token_ref"].tile = object()
+        quest = activate_quest(SATANIC_FORCES_ID)
+        hero["active_quests"] = [quest]
+
+        success, message = resolve_option(hero, quest, 0, FixedRng(20))
+
+        self.assertFalse(success)
+        self.assertIn("Artium", message)
+        self.assertFalse(quest["started"])
+        self.assertEqual(hero["_token_ref"].actions, 10)
+
     def test_runtime_adds_four_to_threshold_when_hero_is_two_levels_ahead(self):
         hero = player()
         hero["legend"] = 20
