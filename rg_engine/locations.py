@@ -12,6 +12,7 @@ from rg_engine.items import (
     unequip_slot,
 )
 from rg_engine.quests import activate_quest, can_accept_quest, is_registered_quest, quest_definition
+from rg_engine.world import registered_players
 from rg_engine.world_events import price_with_world_event
 
 TRAINING_STATS = {
@@ -67,6 +68,15 @@ def _quest_seen(player: dict[str, Any], quest_id: str, collections: tuple[str, .
     return False
 
 
+def _quest_active_in_world(quest_id: str, owner: dict[str, Any]) -> bool:
+    for other in registered_players():
+        if other is owner:
+            continue
+        if _quest_seen(other, quest_id, ("active_quests",)):
+            return True
+    return False
+
+
 def accept_quest_card(player: dict[str, Any], quest_card: dict[str, Any]) -> tuple[bool, str]:
     allowed, reason = can_accept_quest(player)
     if not allowed:
@@ -75,8 +85,8 @@ def accept_quest_card(player: dict[str, Any], quest_card: dict[str, Any]) -> tup
     if is_registered_quest(quest_card):
         quest_id = str(quest_card.get("id"))
         definition = quest_definition(quest_id) or {}
-        if _quest_seen(player, quest_id, ("active_quests",)):
-            return False, "Ten bohater ma juz aktywny ten Quest."
+        if _quest_seen(player, quest_id, ("active_quests",)) or _quest_active_in_world(quest_id, player):
+            return False, "Ten Quest jest juz w posiadaniu innego bohatera."
         if definition.get("unique", False) and _quest_seen(
             player,
             quest_id,
