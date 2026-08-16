@@ -13,11 +13,15 @@ class FixedRng:
         return self.rolls.pop(0)
 
 
+class LocationTile:
+    location = {"name": "Artium"}
+
+
 class TokenStub:
     def __init__(self, actions=4):
         self.actions = actions
-        self.tile = object()
-        self.start_tile = object()
+        self.tile = LocationTile()
+        self.start_tile = self.tile
 
 
 def make_player():
@@ -80,7 +84,7 @@ class QuestCombatTests(unittest.TestCase):
         self.assertEqual(player["legend"], 2)
         self.assertEqual(player["completed_quests"][0]["status"], "completed")
 
-    def test_defeat_fails_quest_resets_wounds_and_returns_to_start(self):
+    def test_defeat_adds_one_quest_failure_resets_wounds_and_returns_to_start(self):
         player, _quest = self._stage_three_player()
         token = player["_token_ref"]
         original_start = token.start_tile
@@ -88,8 +92,10 @@ class QuestCombatTests(unittest.TestCase):
         player["wounds"] = 3
         outcome, _message = resolve_combat_round(FixedRng(1, 20))
         self.assertEqual(outcome, "defeat")
-        self.assertFalse(player["active_quests"])
-        self.assertEqual(player["failed_quests"][0]["status"], "failed")
+        self.assertTrue(player["active_quests"])
+        self.assertEqual(player["active_quests"][0]["status"], "active")
+        self.assertEqual(player["active_quests"][0]["failures"], 1)
+        self.assertFalse(player["failed_quests"])
         self.assertEqual(player["wounds"], 0)
         self.assertIs(token.tile, original_start)
 
