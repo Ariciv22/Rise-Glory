@@ -13,6 +13,7 @@ from rg_ui.threat_navigation_fix import install_threat_navigation_fix
 from rg_ui.threat_history_fix import install_threat_history_fix
 from rg_ui.quest_markers import install_quest_marker_ui
 from rg_ui.quest_book import install_quest_book_ui
+from rg_ui.quest_history import install_quest_history_ui
 from rg_ui.dev_threat_fix import install_dev_threat_fix
 from rg_ui.combat_image_fit import install_combat_image_fit
 from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
@@ -139,6 +140,7 @@ install_threat_navigation_fix()
 install_threat_history_fix()
 install_quest_marker_ui()
 install_quest_book_ui()
+install_quest_history_ui()
 install_dev_threat_fix()
 install_premium_dice_animation()
 install_combat_image_fit()
