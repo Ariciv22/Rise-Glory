@@ -77,6 +77,13 @@ def _quest_active_in_world(quest_id: str, owner: dict[str, Any]) -> bool:
     return False
 
 
+def _quest_resolved_in_world(quest_id: str) -> bool:
+    for hero in registered_players():
+        if _quest_seen(hero, quest_id, ("completed_quests", "failed_quests", "abandoned_quests")):
+            return True
+    return False
+
+
 def accept_quest_card(player: dict[str, Any], quest_card: dict[str, Any]) -> tuple[bool, str]:
     allowed, reason = can_accept_quest(player)
     if not allowed:
@@ -85,14 +92,12 @@ def accept_quest_card(player: dict[str, Any], quest_card: dict[str, Any]) -> tup
     if is_registered_quest(quest_card):
         quest_id = str(quest_card.get("id"))
         definition = quest_definition(quest_id) or {}
-        if _quest_seen(player, quest_id, ("active_quests",)) or _quest_active_in_world(quest_id, player):
+        if _quest_seen(player, quest_id, ("active_quests",)):
+            return False, "Ten Quest jest juz aktywny u tego bohatera."
+        if _quest_active_in_world(quest_id, player):
             return False, "Ten Quest jest juz w posiadaniu innego bohatera."
-        if definition.get("unique", False) and _quest_seen(
-            player,
-            quest_id,
-            ("completed_quests", "failed_quests", "abandoned_quests"),
-        ):
-            return False, "Ten unikalny Quest zostal juz rozstrzygniety przez tego bohatera."
+        if definition.get("unique", False) and _quest_resolved_in_world(quest_id):
+            return False, "Ten unikalny Quest zostal juz rozstrzygniety w tej rozgrywce."
         runtime = activate_quest(quest_card)
     else:
         runtime = copy.deepcopy(quest_card)
