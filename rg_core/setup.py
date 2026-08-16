@@ -14,6 +14,7 @@ from rg_ui.dev_threat_fix import install_dev_threat_fix
 from rg_ui.combat_image_fit import install_combat_image_fit
 from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
+from rg_engine.quest_council_bridge import install_quest_council_bridge
 from rg_engine.threats import is_tile_entry_blocked, threat_modifier
 from rg_engine.world import register_players, reset_world_progression
 from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
@@ -126,4 +127,5 @@ install_threat_history_fix()
 install_dev_threat_fix()
 install_premium_dice_animation()
 install_combat_image_fit()
+install_quest_council_bridge()
 install_council_trade_background()
