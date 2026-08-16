@@ -5,6 +5,7 @@ from pathlib import Path
 from rg_ui import council as rg_council_background
 from rg_world.adventure import install_adventure_system
 from rg_world.world_event_markers import install_world_event_markers
+from rg_world.quest_markers import install_quest_markers
 from rg_ui.world_state import install_world_state_ui
 from rg_ui.threats import install_threat_investigation_ui
 from rg_ui.threat_layout_fix import install_threat_layout_fix
@@ -15,6 +16,7 @@ from rg_ui.combat_image_fit import install_combat_image_fit
 from rg_core.data import HERO_ARCHETYPES, STAT_NAMES, clone_hero
 from rg_engine.heroes import ensure_hero_state
 from rg_engine.quest_council_bridge import install_quest_council_bridge
+from rg_engine.quests import reset_quest_deck
 from rg_engine.threats import is_tile_entry_blocked, threat_modifier
 from rg_engine.world import register_players, reset_world_progression
 from rg_engine.world_events import movement_cost_with_world_event, reset_world_event_deck
@@ -94,6 +96,7 @@ def find_start_tiles(tiles, player_count):
 
 def create_tokens(players, tiles):
     reset_world_event_deck()
+    reset_quest_deck()
     reset_world_progression(1)
     for player in players:
         ensure_hero_state(player)
@@ -119,6 +122,7 @@ def install_council_trade_background():
 
 install_adventure_system()
 install_world_event_markers()
+install_quest_markers()
 install_world_state_ui()
 install_threat_investigation_ui()
 install_threat_layout_fix()
