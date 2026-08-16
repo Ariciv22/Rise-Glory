@@ -2,6 +2,7 @@ import random
 import unittest
 
 from rg_content.locations import initialize_location, take_quest
+from rg_engine.quest_location_bridge import install_quest_location_bridge
 from rg_engine.quests import reset_quest_deck
 from rg_engine.world import register_players
 from rg_legacy.satanic_forces import QUEST_ID, activate_quest, resolve_test
@@ -45,6 +46,10 @@ def make_player():
 
 
 class SatanicForcesTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        install_quest_location_bridge()
+
     def setUp(self):
         reset_quest_deck()
         register_players([])
