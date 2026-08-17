@@ -21,7 +21,7 @@ def _font(size: int, *, bold: bool = False):
     return pygame.font.SysFont("georgia", int(size), bold=bold)
 
 
-def _draw_textured_panel(screen, rect, mouse, *, selected=False, selected_color=None):
+def _draw_textured_panel(screen, rect, mouse, *, selected=False):
     """Rysuje dokładnie tę samą teksturę panel2.png co dolne przyciski."""
     texture = s._load_menu_button_texture(rect.size)
     hovered = rect.collidepoint(mouse)
@@ -40,19 +40,17 @@ def _draw_textured_panel(screen, rect, mouse, *, selected=False, selected_color=
         glow.fill((255, 220, 120, 22))
         screen.blit(glow, rect)
 
-    if selected and selected_color is not None:
+    if selected:
         glow = pygame.Surface(rect.size, pygame.SRCALPHA)
-        glow.fill((*selected_color[:3], 24))
+        glow.fill((255, 220, 120, 18))
         screen.blit(glow, rect)
-        pygame.draw.rect(screen, selected_color, rect, 3, border_radius=7)
+        pygame.draw.rect(screen, s.GOLD, rect, 3, border_radius=7)
 
 
 def _draw_name_field(screen, world_name, active, y):
     width = min(540, max(420, s.SCREEN_WIDTH - 540))
     rect = pygame.Rect(s.SCREEN_WIDTH / 2 - width / 2, y, width, 58)
 
-    # Pole tekstowe pozostaje czytelniejsze jako ciemne pole, ale używa już
-    # tej samej złotej stylistyki i tego samego kroju co reszta ekranu.
     pygame.draw.rect(screen, (27, 27, 25), rect, border_radius=8)
     pygame.draw.rect(screen, s.GOLD if active else (95, 88, 73), rect, 2, border_radius=8)
 
@@ -85,21 +83,10 @@ def draw_player_config(
     name_rect = _draw_name_field(screen, world_name, True, field_y)
     tf._patch_name_input_rect(name_rect)
 
-    heading_font = _font(24, bold=True)
     class_font = _font(22 if compact else 24, bold=True)
     stat_font = _font(15 if compact else 16, bold=True)
     item_font = _font(14 if compact else 15)
     button_font = _font(20, bold=True)
-
-    player_color = s.PLAYER_COLORS[player_index]
-    color_x = min(w - 230, int(name_rect.right + 55))
-    pygame.draw.circle(screen, (31, 27, 21), (color_x, name_rect.centery), 22)
-    pygame.draw.circle(screen, s.GOLD, (color_x, name_rect.centery), 21, 2)
-    pygame.draw.circle(screen, player_color, (color_x, name_rect.centery), 17)
-    screen.blit(
-        heading_font.render("Kolor gracza", True, (222, 197, 145)),
-        (color_x + 34, name_rect.centery - heading_font.get_height() // 2),
-    )
 
     selected_id = selected_archetype["id"] if selected_archetype else None
     used_ids = (
@@ -126,21 +113,12 @@ def draw_player_config(
             card_h,
         )
         selected = hero["id"] == selected_id
-        _draw_textured_panel(
-            screen,
-            rect,
-            mouse,
-            selected=selected,
-            selected_color=player_color,
-        )
-
-        dot_center = (rect.x + 25, rect.y + 25)
-        pygame.draw.circle(screen, (31, 27, 21), dot_center, 13)
-        pygame.draw.circle(screen, s.GOLD, dot_center, 12, 2)
-        pygame.draw.circle(screen, hero["color"], dot_center, 9)
+        _draw_textured_panel(screen, rect, mouse, selected=selected)
 
         title_color = (242, 218, 166) if selected or rect.collidepoint(mouse) else (226, 204, 160)
-        screen.blit(class_font.render(hero["name"], True, title_color), (rect.x + 47, rect.y + 10))
+        title = class_font.render(hero["name"], True, title_color)
+        title_rect = title.get_rect(center=(rect.centerx, rect.y + 24))
+        screen.blit(title, title_rect)
 
         if hero["id"] in used_ids:
             used_label = stat_font.render("Klasa już wybrana", True, (235, 170, 95))
@@ -149,10 +127,8 @@ def draw_player_config(
         stat_line = "  ".join(
             f"{name[:3]} {hero['stats'].get(name, 0)}" for name in s.STAT_NAMES
         )
-        screen.blit(
-            stat_font.render(stat_line, True, (203, 190, 163)),
-            (rect.x + 18, rect.y + 46),
-        )
+        stat_label = stat_font.render(stat_line, True, (203, 190, 163))
+        screen.blit(stat_label, (rect.x + 18, rect.y + 46))
 
         item_y = rect.y + (70 if compact else 76)
         item_text = f"Start: {hero['basic_item']} + {hero['class_item']}"
