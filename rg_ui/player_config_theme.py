@@ -48,6 +48,33 @@ def _draw_textured_panel(screen, rect, mouse, *, selected=False):
         pygame.draw.rect(screen, s.GOLD, rect, 3, border_radius=7)
 
 
+def _draw_action_button(screen, font, mouse, button):
+    """Dolne przyciski: panel2.png + chłodny srebrno-pergaminowy tekst."""
+    texture = s._load_menu_button_texture(button.rect.size)
+    hovered = button.rect.collidepoint(mouse)
+
+    if texture is not None:
+        shadow = pygame.Surface(button.rect.size, pygame.SRCALPHA)
+        shadow.fill((0, 0, 0, 76))
+        screen.blit(shadow, button.rect.move(3, 4))
+        screen.blit(texture, button.rect)
+    else:
+        pygame.draw.rect(screen, (28, 24, 19), button.rect, border_radius=8)
+        pygame.draw.rect(screen, s.GOLD, button.rect, 2, border_radius=8)
+
+    if hovered:
+        glow = pygame.Surface(button.rect.size, pygame.SRCALPHA)
+        glow.fill((220, 235, 240, 24))
+        screen.blit(glow, button.rect)
+
+    text_color = (226, 235, 236) if hovered else (184, 199, 204)
+    label_shadow = font.render(button.text, True, (24, 18, 13))
+    label = font.render(button.text, True, text_color)
+    center = button.rect.center
+    screen.blit(label_shadow, label_shadow.get_rect(center=(center[0] + 2, center[1] + 2)))
+    screen.blit(label, label.get_rect(center=center))
+
+
 def _patch_name_input_rect(rect):
     """Zapamiętuje fokus pola podczas kliknięcia bez zmian starej pętli gry."""
 
@@ -222,7 +249,7 @@ def draw_player_config(
     back_button = s.Button("Powrót", "back", (w / 2 - 120, button_y + 66, 240, 48))
 
     for button in [random_button, custom_button, confirm_button, back_button]:
-        tf.themed_button(screen, button_font, mouse, button)
+        _draw_action_button(screen, button_font, mouse, button)
         buttons.append(button)
 
     return buttons
