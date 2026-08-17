@@ -3,7 +3,6 @@ import random
 from pathlib import Path
 
 from rg_ui import council as rg_council_background
-from rg_world.adventure import install_adventure_system
 from rg_world.world_event_markers import install_world_event_markers
 from rg_world.quest_markers import install_quest_markers
 from rg_ui.world_state import install_world_state_ui
@@ -126,7 +125,9 @@ def install_council_trade_background():
     rg_council_background._BACKGROUND_CACHE["surface"] = None
 
 
-install_adventure_system()
+# Przygody/Wagabunda sa tymczasowo wylaczone. Modul rg_world.adventure zostaje
+# w repo do ponownego podpiecia, ale nie instalujemy go przy starcie gry, wiec
+# zetonow Przygody nie generujemy, nie rysujemy i nie uruchamiamy na mapie.
 install_world_event_markers()
 install_quest_markers()
 install_quest_effect_bridge()
