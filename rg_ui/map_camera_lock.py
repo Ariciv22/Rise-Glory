@@ -30,6 +30,12 @@ START_ZOOM_SCALE = 1.21
 # Aktualne znaczniki lokacji byly ustawione na 116x132. Zmniejszamy je o 5%.
 LOCATION_MARKER_SCALE = 0.95
 
+# Dolny pas heksa zawiera nazwe terenu. Ta wartosc wyznacza niewidzialna
+# pozioma linie nad napisem. Dolna krawedz znacznika lokacji nigdy nie moze
+# zejsc ponizej tej linii, niezaleznie od zoomu i rozmiaru grafiki.
+LOCATION_LABEL_GUARD_RATIO = 0.32
+LOCATION_LABEL_GUARD_GAP = 5
+
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
 
@@ -210,11 +216,21 @@ def _sync_generation(camera, reset_zoom=False):
         _clamp_camera(camera)
 
 
+def _location_label_guard_y(sy, camera):
+    """Niewidzialna linia, pod ktora nie moze zejsc zeton lokacji."""
+    hex_radius = HEX_SIZE * camera.zoom
+    return int(sy + hex_radius * LOCATION_LABEL_GUARD_RATIO)
+
+
 def _draw_location_marker_scaled(self, screen, camera, font):
     if not self.location:
         return
 
     sx, sy = self.center(camera)
+    guard_y = _location_label_guard_y(sy, camera)
+    guard_gap = max(3, int(LOCATION_LABEL_GUARD_GAP * camera.zoom))
+    marker_bottom_limit = guard_y - guard_gap
+
     marker = load_location_marker(self.location.get("kind"))
     if marker:
         max_width = max(46, int(116 * LOCATION_MARKER_SCALE * camera.zoom))
@@ -225,13 +241,19 @@ def _draw_location_marker_scaled(self, screen, camera, font):
             max(1, int(marker.get_height() * scale)),
         )
         rendered_marker = pygame.transform.smoothscale(marker, marker_size)
-        marker_bottom = int(sy + 60 * camera.zoom)
+
+        # Zachowujemy dotychczasowa docelowa pozycje, ale niewidzialna linia
+        # nad nazwa heksa jest twardym limitem dla dolnej krawedzi znacznika.
+        desired_bottom = int(sy + 60 * camera.zoom)
+        marker_bottom = min(desired_bottom, marker_bottom_limit)
         marker_rect = rendered_marker.get_rect(midbottom=(int(sx), marker_bottom))
         screen.blit(rendered_marker, marker_rect)
         return
 
     radius = max(16, int(25 * LOCATION_MARKER_SCALE * camera.zoom))
-    marker_y = int(sy + 36 * camera.zoom)
+    desired_marker_y = int(sy + 36 * camera.zoom)
+    max_marker_y = marker_bottom_limit - radius
+    marker_y = min(desired_marker_y, max_marker_y)
     color = self.location["color"]
     pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 5)
     pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
