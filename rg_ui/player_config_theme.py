@@ -94,10 +94,14 @@ def _draw_name_field(screen, world_name, active, y):
         cursor_bottom = rect.bottom - 14
         pygame.draw.line(screen, (244, 220, 166), (cursor_x, cursor_top), (cursor_x, cursor_bottom), 2)
 
-    screen.blit(
-        label_font.render("Imię bohatera w świecie gry", True, (203, 183, 142)),
-        (rect.x, rect.y - 25),
-    )
+    # Jasna etykieta z ciemnym cieniem pozostaje czytelna na jasnym tle mapy.
+    label_text = "Imię bohatera w świecie gry"
+    label_surface = label_font.render(label_text, True, (244, 223, 180))
+    label_shadow = label_font.render(label_text, True, (35, 28, 20))
+    label_x = rect.x
+    label_y = rect.y - 26
+    screen.blit(label_shadow, (label_x + 2, label_y + 2))
+    screen.blit(label_surface, (label_x, label_y))
     return rect
 
 
