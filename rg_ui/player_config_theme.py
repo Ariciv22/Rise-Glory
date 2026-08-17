@@ -9,6 +9,7 @@ from rg_ui import title_flow as tf
 
 
 _INSTALLED = False
+_NAME_FIELD_ACTIVE = False
 
 
 def _font(size: int, *, bold: bool = False):
@@ -47,19 +48,56 @@ def _draw_textured_panel(screen, rect, mouse, *, selected=False):
         pygame.draw.rect(screen, s.GOLD, rect, 3, border_radius=7)
 
 
+def _patch_name_input_rect(rect):
+    """Zapamiętuje fokus pola podczas kliknięcia bez zmian starej pętli gry."""
+
+    def current_name_input_rect():
+        global _NAME_FIELD_ACTIVE
+        current_rect = pygame.Rect(rect)
+        _NAME_FIELD_ACTIVE = current_rect.collidepoint(pygame.mouse.get_pos())
+        return current_rect
+
+    for module_name in ("__main__", "main"):
+        module = sys.modules.get(module_name)
+        if module is not None and hasattr(module, "player_name_input_rect"):
+            module.player_name_input_rect = current_name_input_rect
+
+
 def _draw_name_field(screen, world_name, active, y):
     width = min(540, max(420, s.SCREEN_WIDTH - 540))
     rect = pygame.Rect(s.SCREEN_WIDTH / 2 - width / 2, y, width, 58)
 
     pygame.draw.rect(screen, (27, 27, 25), rect, border_radius=8)
-    pygame.draw.rect(screen, s.GOLD if active else (95, 88, 73), rect, 2, border_radius=8)
+    border_color = s.GOLD if active else (118, 101, 72)
+    pygame.draw.rect(screen, border_color, rect, 2, border_radius=8)
 
     input_font = _font(23, bold=True)
     label_font = _font(16, bold=True)
-    value = world_name if world_name else "Wpisz imię bohatera..."
-    value_color = (232, 213, 174) if world_name else (178, 168, 147)
-    screen.blit(input_font.render(value, True, value_color), (rect.x + 18, rect.y + 14))
-    screen.blit(label_font.render("Imię bohatera w świecie gry", True, (203, 183, 142)), (rect.x, rect.y - 25))
+    text_x = rect.x + 18
+    text_y = rect.y + 14
+
+    if world_name:
+        value_surface = input_font.render(world_name, True, (232, 213, 174))
+        screen.blit(value_surface, (text_x, text_y))
+        cursor_x = text_x + value_surface.get_width() + 2
+    elif active:
+        # Po kliknięciu placeholder znika i zostaje puste pole gotowe do pisania.
+        cursor_x = text_x
+    else:
+        placeholder = input_font.render("Wpisz imię bohatera...", True, (178, 168, 147))
+        screen.blit(placeholder, (text_x, text_y))
+        cursor_x = text_x
+
+    # Migający kursor widoczny wyłącznie wtedy, gdy gracz kliknął pole.
+    if active and (pygame.time.get_ticks() // 500) % 2 == 0:
+        cursor_top = rect.y + 14
+        cursor_bottom = rect.bottom - 14
+        pygame.draw.line(screen, (244, 220, 166), (cursor_x, cursor_top), (cursor_x, cursor_bottom), 2)
+
+    screen.blit(
+        label_font.render("Imię bohatera w świecie gry", True, (203, 183, 142)),
+        (rect.x, rect.y - 25),
+    )
     return rect
 
 
@@ -80,8 +118,8 @@ def draw_player_config(
 
     compact = h < 1050
     field_y = 300 if compact else 330
-    name_rect = _draw_name_field(screen, world_name, True, field_y)
-    tf._patch_name_input_rect(name_rect)
+    name_rect = _draw_name_field(screen, world_name, _NAME_FIELD_ACTIVE, field_y)
+    _patch_name_input_rect(name_rect)
 
     class_font = _font(22 if compact else 24, bold=True)
     stat_font = _font(15 if compact else 16, bold=True)
