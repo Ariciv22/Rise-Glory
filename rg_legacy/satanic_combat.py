@@ -35,7 +35,10 @@ def begin_cursed_soldier_combat(player, action_already_paid=False, reason=""):
         quest["status"] = "combat_pending"
         quest["pending_combat"] = {"enemy_id": "przeklety_zolnierz", "action_paid": True}
         return start_pending_quest_combat(player, quest)
-    return resolve_quest_option(player, quest, 2)
+    success, message = resolve_quest_option(player, quest, 2)
+    if quest.get("status") == "combat":
+        return True, message
+    return success, message
 
 
 def resolve_final_option(player, option_index, rng=None):
