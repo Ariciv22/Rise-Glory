@@ -23,9 +23,9 @@ SAFE_TOP_RATIO = 0.06
 SAFE_BOTTOM_RATIO = 0.08
 SAFE_PIXEL_PADDING = 10
 
-# Startujemy lekko blizej niz idealne dopasowanie calej rozety. Heksy sa
-# dzieki temu wyrazniejsze, a nadmiar mapy nadal mozna obejrzec przeciaganiem.
-START_ZOOM_SCALE = 1.10
+# Startujemy blizej niz idealne dopasowanie calej rozety. Wzgledem poprzedniego
+# ustawienia 1.10 powiekszamy heksy o kolejne 10%, czyli lacznie do skali 1.21.
+START_ZOOM_SCALE = 1.21
 
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
@@ -156,8 +156,6 @@ def _clamp_camera(camera):
     dx = map_center_x - rect.centerx
     dy = map_center_y - rect.centery
 
-    # Zakres ruchu rosnie dokladnie o nadmiar rozmiaru powstaly po zoomie.
-    # Przy widoku calej mapy wynosi zero, wiec plansza pozostaje na srodku.
     max_dx = max(0.0, world_w * (camera.zoom - fit_zoom) / 2.0)
     max_dy = max(0.0, world_h * (camera.zoom - fit_zoom) / 2.0)
 
@@ -240,7 +238,6 @@ def install_locked_map_camera():
         return rect.centerx, rect.centery
 
     def center_on_tile(self, tile):
-        # Zmiana aktywnego bohatera nie przesuwa kamery na pionek.
         _sync_generation(self)
 
     def center_on_tiles(self, tiles):
@@ -264,9 +261,6 @@ def install_locked_map_camera():
         if new_zoom == old_zoom:
             return
 
-        # Nie zoomujemy pod kursorem. To bylo powodem "uciekania" heksow:
-        # kazdy scroll zmienial jednoczesnie zoom oraz x/y kamery w kierunku
-        # myszy. Zachowujemy punkt swiata znajdujacy sie w srodku owalu.
         world_at_center_x = (rect.centerx - self.x) / old_zoom
         world_at_center_y = (rect.centery - self.y) / old_zoom
 
