@@ -49,7 +49,7 @@ def _draw_textured_panel(screen, rect, mouse, *, selected=False):
 
 
 def _draw_action_button(screen, font, mouse, button):
-    """Dolne przyciski: panel2.png + chłodny srebrno-pergaminowy tekst."""
+    """Dolne przyciski: panel2.png + lekko niebieskawy jasny metal."""
     texture = s._load_menu_button_texture(button.rect.size)
     hovered = button.rect.collidepoint(mouse)
 
@@ -67,7 +67,8 @@ def _draw_action_button(screen, font, mouse, button):
         glow.fill((220, 235, 240, 24))
         screen.blit(glow, button.rect)
 
-    text_color = (226, 235, 236) if hovered else (184, 199, 204)
+    # Ten sam metaliczny kolor co globalny TEXT; hover jest tylko nieco jaśniejszy.
+    text_color = (238, 245, 252) if hovered else s.TEXT
     label_shadow = font.render(button.text, True, (24, 18, 13))
     label = font.render(button.text, True, text_color)
     center = button.rect.center
