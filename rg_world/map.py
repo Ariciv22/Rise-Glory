@@ -221,23 +221,25 @@ class Tile:
         sx, sy = self.center(camera)
         marker = load_location_marker(self.location.get("kind"))
         if marker:
-            max_width = max(34, int(84 * camera.zoom))
-            max_height = max(38, int(96 * camera.zoom))
+            # Lokacje maja byc wyraznie wieksze od innych znacznikow i czytelne
+            # nawet na bogatych graficznie heksach terenu.
+            max_width = max(48, int(116 * camera.zoom))
+            max_height = max(54, int(132 * camera.zoom))
             scale = min(max_width / marker.get_width(), max_height / marker.get_height())
             marker_size = (
                 max(1, int(marker.get_width() * scale)),
                 max(1, int(marker.get_height() * scale)),
             )
             rendered_marker = pygame.transform.smoothscale(marker, marker_size)
-            marker_bottom = int(sy + 50 * camera.zoom)
+            marker_bottom = int(sy + 60 * camera.zoom)
             marker_rect = rendered_marker.get_rect(midbottom=(int(sx), marker_bottom))
             screen.blit(rendered_marker, marker_rect)
             return
 
-        radius = max(13, int(19 * camera.zoom))
-        marker_y = int(sy + 30 * camera.zoom)
+        radius = max(17, int(25 * camera.zoom))
+        marker_y = int(sy + 36 * camera.zoom)
         color = self.location["color"]
-        pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 4)
+        pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 5)
         pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
         pygame.draw.circle(screen, (30, 24, 18), (int(sx), marker_y), radius, max(2, int(3 * camera.zoom)))
         label = font.render(self.location["symbol"], True, TEXT)
