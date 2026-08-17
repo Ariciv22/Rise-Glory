@@ -23,6 +23,10 @@ SAFE_TOP_RATIO = 0.06
 SAFE_BOTTOM_RATIO = 0.08
 SAFE_PIXEL_PADDING = 10
 
+# Startujemy lekko blizej niz idealne dopasowanie calej rozety. Heksy sa
+# dzieki temu wyrazniejsze, a nadmiar mapy nadal mozna obejrzec przeciaganiem.
+START_ZOOM_SCALE = 1.10
+
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
 
@@ -199,8 +203,9 @@ def _sync_generation(camera, reset_zoom=False):
     camera._rg_fit_zoom = fit_zoom
 
     if reset_zoom:
-        camera.zoom = fit_zoom
+        camera.zoom = min(MAX_ZOOM, fit_zoom * START_ZOOM_SCALE)
         _center_camera(camera)
+        _clamp_camera(camera)
         return
 
     if camera.zoom < fit_zoom:
