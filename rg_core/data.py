@@ -25,7 +25,8 @@ RIGHT_PANEL_W = 300
 SIDE_MARGIN = 12
 MAP_MARGIN = 28
 
-TEXT = (235, 235, 235)
+# Jasny, lekko niebieskawy metal zamiast czystej bieli w calym UI.
+TEXT = (218, 228, 238)
 MUTED = (180, 185, 190)
 BG = (18, 22, 26)
 PANEL = (24, 20, 16)
