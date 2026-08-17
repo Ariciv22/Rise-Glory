@@ -10,7 +10,7 @@ import math
 
 import pygame
 
-from rg_core.data import HEX_SIZE, MAX_ZOOM, MIN_ZOOM, TEXT
+from rg_core.data import HEX_SIZE, HOVER, MAX_ZOOM, MIN_ZOOM, MOVE, SELECTED, TEXT
 from rg_ui.common import game_layout_rects
 from rg_world.map import Camera, Tile, load_location_marker
 
@@ -22,9 +22,10 @@ SAFE_TOP_RATIO = 0.06
 SAFE_BOTTOM_RATIO = 0.08
 SAFE_PIXEL_PADDING = 10
 
-# Poprzedni startowy widok mial skale 1.815. Powiekszamy go o kolejne 50%:
-# 1.815 * 1.5 = 2.7225. Pelny widok mapy nadal jest dostepny po oddaleniu.
-START_ZOOM_SCALE = 2.7225
+# Startujemy jeszcze blizej, ale pelny widok mapy nadal jest dostepny po
+# oddaleniu. Maksymalny zoom jest ograniczony natywna rozdzielczoscia grafik,
+# a nie filtrem wyostrzajacym.
+START_ZOOM_SCALE = 3.60
 
 # Aktualne znaczniki lokacji byly ustawione na 116x132. Zmniejszamy je o 5%.
 LOCATION_MARKER_SCALE = 0.95
@@ -42,6 +43,11 @@ LOCATION_MARKER_RIGHT_GUARD_RATIO = 0.68
 
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
+
+# Kazdy typ terenu wystepuje wiele razy. Bez cache pygame wykonywaloby
+# smoothscale tej samej duzej tekstury osobno dla kazdego heksa w kazdej
+# klatce. Trzymamy tylko ostatni rozmiar dla kazdego typu terenu.
+_TERRAIN_SCALE_CACHE = {}
 
 
 def _register_tile(tile_id, x, y):
@@ -199,10 +205,12 @@ def _sync_generation(camera, reset_zoom=False):
     if generation_changed:
         camera._rg_map_generation = _TILE_GENERATION
         reset_zoom = True
+        _TERRAIN_SCALE_CACHE.clear()
 
     if size_changed:
         camera._rg_playfield_size = rect.size
         reset_zoom = True
+        _TERRAIN_SCALE_CACHE.clear()
 
     fit_zoom = _fit_zoom(rect)
     camera._rg_fit_zoom = fit_zoom
@@ -252,7 +260,6 @@ def _draw_location_marker_scaled(self, screen, camera, font):
         desired_center_x = int(sx + hex_radius * LOCATION_MARKER_OFFSET_X_RATIO)
         marker_rect = rendered_marker.get_rect(midbottom=(desired_center_x, marker_bottom))
 
-        # Prawa krawedz znacznika zatrzymuje sie przed wewnetrzna linia heksa.
         right_guard = int(sx + hex_radius * LOCATION_MARKER_RIGHT_GUARD_RATIO)
         if marker_rect.right > right_guard:
             marker_rect.right = right_guard
@@ -273,6 +280,37 @@ def _draw_location_marker_scaled(self, screen, camera, font):
     pygame.draw.circle(screen, (30, 24, 18), (marker_x, marker_y), radius, max(2, int(3 * camera.zoom)))
     label = font.render(self.location["symbol"], True, TEXT)
     screen.blit(label, label.get_rect(center=(marker_x, marker_y)))
+
+
+def _scaled_terrain_texture(textures, terrain_key, size):
+    cached = _TERRAIN_SCALE_CACHE.get(terrain_key)
+    if cached is not None and cached[0] == size:
+        return cached[1]
+
+    source = textures[terrain_key]
+    if source.get_width() == size and source.get_height() == size:
+        scaled = source
+    else:
+        scaled = pygame.transform.smoothscale(source, (size, size))
+    _TERRAIN_SCALE_CACHE[terrain_key] = (size, scaled)
+    return scaled
+
+
+def _draw_tile_high_res(self, screen, textures, camera, font, hovered=False, selected=False, valid_move=False):
+    sx, sy = self.center(camera)
+    size = max(1, int(HEX_SIZE * 2 * camera.zoom))
+    texture = _scaled_terrain_texture(textures, self.terrain_key, size)
+    screen.blit(texture, (sx - size / 2, sy - size / 2))
+
+    pts = self.screen_points(camera)
+    pygame.draw.polygon(screen, (24, 24, 24), pts, max(1, int(2 * camera.zoom)))
+    if valid_move:
+        pygame.draw.polygon(screen, MOVE, pts, max(2, int(4 * camera.zoom)))
+    if hovered:
+        pygame.draw.polygon(screen, HOVER, pts, max(2, int(5 * camera.zoom)))
+    if selected:
+        pygame.draw.polygon(screen, SELECTED, pts, max(2, int(5 * camera.zoom)))
+    self.draw_location_marker(screen, camera, font)
 
 
 def install_locked_map_camera():
@@ -330,9 +368,11 @@ def install_locked_map_camera():
         self.x = rect.centerx - world_at_center_x * new_zoom
         self.y = rect.centery - world_at_center_y * new_zoom
         _clamp_camera(self)
+        _TERRAIN_SCALE_CACHE.clear()
 
     Tile.__init__ = tile_init
     Tile.draw_location_marker = _draw_location_marker_scaled
+    Tile.draw = _draw_tile_high_res
     Camera.__init__ = camera_init
     Camera.map_view_center = map_view_center
     Camera.center_on_tile = center_on_tile
