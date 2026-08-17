@@ -15,6 +15,7 @@ from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
+from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.title_flow import install_into_main
 
 # DEV: kazde reczne otwarcie Rady rozpoczyna swieza sesje UI i dobiera kolejna
@@ -36,6 +37,11 @@ install_map_background()
 # modulu "main". Faktyczna aplikacja jest teraz w rg_core.app.
 sys.modules["main"] = _app
 install_into_main()
+
+# Kafle klas na ekranie wyboru bohatera korzystaja z dokladnie tej samej
+# grafiki panel2.png co dolne przyciski. Instalujemy to po title_flow, aby
+# docelowy renderer nie zostal nadpisany przez starszy motyw ekranu.
+install_player_config_theme(_app)
 
 
 if __name__ == "__main__":
