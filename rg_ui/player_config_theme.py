@@ -113,8 +113,19 @@ def draw_player_config(
     selected_archetype,
     used_archetypes,
 ):
+    global _NAME_FIELD_ACTIVE
+
     w, h = tf.sync(screen)
     tf.background(screen)
+
+    # Enter kończy edycję tak samo jak kliknięcie poza polem.
+    if _NAME_FIELD_ACTIVE and pygame.key.get_pressed()[pygame.K_RETURN]:
+        _NAME_FIELD_ACTIVE = False
+
+    # Systemowe TEXTINPUT jest włączane dopiero przez kliknięcie pola w app.py.
+    # Dzięki temu samo pisanie na klawiaturze przed kliknięciem nie wpisuje imienia.
+    if not _NAME_FIELD_ACTIVE:
+        pygame.key.stop_text_input()
 
     compact = h < 1050
     field_y = 300 if compact else 330
