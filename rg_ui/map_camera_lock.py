@@ -1,10 +1,9 @@
 """Sterowanie plansza heksowa wewnatrz jasnego srodka pergaminu.
 
-Cala rozeta jest widoczna przy starcie i dopasowana do jasnego pola mapy.
-Przy przyblizeniu gracz moze przeciagac plansze. Nie ukrywamy ani nie
-odrzucamy heksow na krawedziach - wszystkie sa zawsze normalnie rysowane.
-Zoom jest zakotwiczony w srodku aktualnego widoku, dzieki czemu plansza nie
-"ucieka" w strone kursora podczas przyblizania.
+Cala rozeta jest dostepna w obszarze mapy, ale startujemy wyraznie blizej,
+zeby heksy byly czytelne i wypelnialy wieksza czesc pergaminu. Przy
+przyblizeniu gracz moze przeciagac plansze. Zoom jest zakotwiczony w srodku
+aktualnego widoku, dzieki czemu plansza nie "ucieka" w strone kursora.
 """
 
 import math
@@ -23,9 +22,9 @@ SAFE_TOP_RATIO = 0.06
 SAFE_BOTTOM_RATIO = 0.08
 SAFE_PIXEL_PADDING = 10
 
-# Startujemy blizej niz idealne dopasowanie calej rozety. Wzgledem poprzedniego
-# ustawienia 1.10 powiekszamy heksy o kolejne 10%, czyli lacznie do skali 1.21.
-START_ZOOM_SCALE = 1.21
+# Poprzedni startowy widok mial skale 1.21. Powiekszamy go dokladnie 1.5 raza:
+# 1.21 * 1.5 = 1.815. Pelny widok mapy nadal jest dostepny po oddaleniu.
+START_ZOOM_SCALE = 1.815
 
 # Aktualne znaczniki lokacji byly ustawione na 116x132. Zmniejszamy je o 5%.
 LOCATION_MARKER_SCALE = 0.95
@@ -35,6 +34,11 @@ LOCATION_MARKER_SCALE = 0.95
 # zejsc ponizej tej linii, niezaleznie od zoomu i rozmiaru grafiki.
 LOCATION_LABEL_GUARD_RATIO = 0.32
 LOCATION_LABEL_GUARD_GAP = 5
+
+# Znaczniki lokacji sa lekko przesuniete w prawo, ale ich prawa krawedz nie
+# moze przekroczyc bezpiecznej linii wewnatrz heksa.
+LOCATION_MARKER_OFFSET_X_RATIO = 0.18
+LOCATION_MARKER_RIGHT_GUARD_RATIO = 0.68
 
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
@@ -118,7 +122,7 @@ def _world_size():
 
 
 def _fit_zoom(rect):
-    """Dopasowuje cala rozete do jasnego owalnego pola przy starcie."""
+    """Wylicza zoom, przy ktorym cala rozeta miesci sie w polu mapy."""
     if rect is None or _TILE_BOUNDS is None:
         return MIN_ZOOM
 
@@ -227,6 +231,7 @@ def _draw_location_marker_scaled(self, screen, camera, font):
         return
 
     sx, sy = self.center(camera)
+    hex_radius = HEX_SIZE * camera.zoom
     guard_y = _location_label_guard_y(sy, camera)
     guard_gap = max(3, int(LOCATION_LABEL_GUARD_GAP * camera.zoom))
     marker_bottom_limit = guard_y - guard_gap
@@ -242,11 +247,16 @@ def _draw_location_marker_scaled(self, screen, camera, font):
         )
         rendered_marker = pygame.transform.smoothscale(marker, marker_size)
 
-        # Zachowujemy dotychczasowa docelowa pozycje, ale niewidzialna linia
-        # nad nazwa heksa jest twardym limitem dla dolnej krawedzi znacznika.
         desired_bottom = int(sy + 60 * camera.zoom)
         marker_bottom = min(desired_bottom, marker_bottom_limit)
-        marker_rect = rendered_marker.get_rect(midbottom=(int(sx), marker_bottom))
+        desired_center_x = int(sx + hex_radius * LOCATION_MARKER_OFFSET_X_RATIO)
+        marker_rect = rendered_marker.get_rect(midbottom=(desired_center_x, marker_bottom))
+
+        # Prawa krawedz znacznika zatrzymuje sie przed wewnetrzna linia heksa.
+        right_guard = int(sx + hex_radius * LOCATION_MARKER_RIGHT_GUARD_RATIO)
+        if marker_rect.right > right_guard:
+            marker_rect.right = right_guard
+
         screen.blit(rendered_marker, marker_rect)
         return
 
@@ -254,12 +264,15 @@ def _draw_location_marker_scaled(self, screen, camera, font):
     desired_marker_y = int(sy + 36 * camera.zoom)
     max_marker_y = marker_bottom_limit - radius
     marker_y = min(desired_marker_y, max_marker_y)
+    desired_marker_x = int(sx + hex_radius * LOCATION_MARKER_OFFSET_X_RATIO)
+    right_guard = int(sx + hex_radius * LOCATION_MARKER_RIGHT_GUARD_RATIO)
+    marker_x = min(desired_marker_x, right_guard - radius - 5)
     color = self.location["color"]
-    pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 5)
-    pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
-    pygame.draw.circle(screen, (30, 24, 18), (int(sx), marker_y), radius, max(2, int(3 * camera.zoom)))
+    pygame.draw.circle(screen, (15, 12, 9), (marker_x, marker_y), radius + 5)
+    pygame.draw.circle(screen, color, (marker_x, marker_y), radius)
+    pygame.draw.circle(screen, (30, 24, 18), (marker_x, marker_y), radius, max(2, int(3 * camera.zoom)))
     label = font.render(self.location["symbol"], True, TEXT)
-    screen.blit(label, label.get_rect(center=(int(sx), marker_y)))
+    screen.blit(label, label.get_rect(center=(marker_x, marker_y)))
 
 
 def install_locked_map_camera():
