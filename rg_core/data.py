@@ -7,7 +7,9 @@ MIN_SCREEN_HEIGHT = 700
 FPS = 60
 
 HEX_SIZE = 104
-TEXTURE_SIZE = 512
+# Grafiki terenu maja natywna rozdzielczosc 1254x1254. Zachowujemy ja zamiast
+# wstepnie zmniejszac heksy do 512x512 i potem ponownie je powiekszac.
+TEXTURE_SIZE = 1254
 MAX_MAP_TILES = 64
 ACTIONS_PER_TURN = 4
 HERO_MOVES_PER_TURN = ACTIONS_PER_TURN
@@ -16,7 +18,9 @@ MAX_WOUNDS = 4
 DRAG_THRESHOLD = 4
 ZOOM_STEP = 1.10
 MIN_ZOOM = 0.35
-MAX_ZOOM = 2.325
+# Przy HEX_SIZE=104 zoom 6.0 daje heks ok. 1248 px szerokosci, czyli nadal
+# miesci sie w natywnej rozdzielczosci grafiki 1254 px bez sztucznego upscale.
+MAX_ZOOM = 6.0
 DEFAULT_ZOOM = 1.0
 
 TOP_BAR_H = 126
