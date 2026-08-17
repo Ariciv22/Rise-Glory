@@ -1,0 +1,217 @@
+from __future__ import annotations
+
+import sys
+
+import pygame
+
+from rg_ui import screens as s
+from rg_ui import title_flow as tf
+
+
+_INSTALLED = False
+
+
+def _font(size: int, *, bold: bool = False):
+    """Spójny krój fantasy dla ekranu wyboru bohatera.
+
+    W repo nie ma jeszcze finalnego pliku fontu z logo Rise & Glory, dlatego
+    używamy Georgii jako stabilnego kroju szeryfowego dostępnego na docelowych
+    komputerach. Po dodaniu właściwego fontu zmiana będzie w jednym miejscu.
+    """
+    return pygame.font.SysFont("georgia", int(size), bold=bold)
+
+
+def _draw_textured_panel(screen, rect, mouse, *, selected=False, selected_color=None):
+    """Rysuje dokładnie tę samą teksturę panel2.png co dolne przyciski."""
+    texture = s._load_menu_button_texture(rect.size)
+    hovered = rect.collidepoint(mouse)
+
+    if texture is not None:
+        shadow = pygame.Surface(rect.size, pygame.SRCALPHA)
+        shadow.fill((0, 0, 0, 76))
+        screen.blit(shadow, rect.move(3, 4))
+        screen.blit(texture, rect)
+    else:
+        pygame.draw.rect(screen, (28, 24, 19), rect, border_radius=8)
+        pygame.draw.rect(screen, s.GOLD, rect, 2, border_radius=8)
+
+    if hovered:
+        glow = pygame.Surface(rect.size, pygame.SRCALPHA)
+        glow.fill((255, 220, 120, 22))
+        screen.blit(glow, rect)
+
+    if selected and selected_color is not None:
+        glow = pygame.Surface(rect.size, pygame.SRCALPHA)
+        glow.fill((*selected_color[:3], 24))
+        screen.blit(glow, rect)
+        pygame.draw.rect(screen, selected_color, rect, 3, border_radius=7)
+
+
+def _draw_name_field(screen, world_name, active, y):
+    width = min(540, max(420, s.SCREEN_WIDTH - 540))
+    rect = pygame.Rect(s.SCREEN_WIDTH / 2 - width / 2, y, width, 58)
+
+    # Pole tekstowe pozostaje czytelniejsze jako ciemne pole, ale używa już
+    # tej samej złotej stylistyki i tego samego kroju co reszta ekranu.
+    pygame.draw.rect(screen, (27, 27, 25), rect, border_radius=8)
+    pygame.draw.rect(screen, s.GOLD if active else (95, 88, 73), rect, 2, border_radius=8)
+
+    input_font = _font(23, bold=True)
+    label_font = _font(16, bold=True)
+    value = world_name if world_name else "Wpisz imię bohatera..."
+    value_color = (232, 213, 174) if world_name else (178, 168, 147)
+    screen.blit(input_font.render(value, True, value_color), (rect.x + 18, rect.y + 14))
+    screen.blit(label_font.render("Imię bohatera w świecie gry", True, (203, 183, 142)), (rect.x, rect.y - 25))
+    return rect
+
+
+def draw_player_config(
+    screen,
+    title_font,
+    font,
+    small_font,
+    mouse,
+    player_index,
+    player_count,
+    world_name,
+    selected_archetype,
+    used_archetypes,
+):
+    w, h = tf.sync(screen)
+    tf.background(screen)
+
+    compact = h < 1050
+    field_y = 300 if compact else 330
+    name_rect = _draw_name_field(screen, world_name, True, field_y)
+    tf._patch_name_input_rect(name_rect)
+
+    heading_font = _font(24, bold=True)
+    class_font = _font(22 if compact else 24, bold=True)
+    stat_font = _font(15 if compact else 16, bold=True)
+    item_font = _font(14 if compact else 15)
+    button_font = _font(20, bold=True)
+
+    player_color = s.PLAYER_COLORS[player_index]
+    color_x = min(w - 230, int(name_rect.right + 55))
+    pygame.draw.circle(screen, (31, 27, 21), (color_x, name_rect.centery), 22)
+    pygame.draw.circle(screen, s.GOLD, (color_x, name_rect.centery), 21, 2)
+    pygame.draw.circle(screen, player_color, (color_x, name_rect.centery), 17)
+    screen.blit(
+        heading_font.render("Kolor gracza", True, (222, 197, 145)),
+        (color_x + 34, name_rect.centery - heading_font.get_height() // 2),
+    )
+
+    selected_id = selected_archetype["id"] if selected_archetype else None
+    used_ids = (
+        {hero["archetype_id"] for hero in used_archetypes}
+        if used_archetypes
+        else set()
+    )
+
+    buttons = []
+    card_w = 360
+    card_h = 108 if compact else 128
+    gap_x = 22
+    gap_y = 10 if compact else 14
+    start_x = w / 2 - (card_w * 2 + gap_x) / 2
+    start_y = name_rect.bottom + 28
+
+    for idx, hero in enumerate(s.HERO_ARCHETYPES):
+        col = idx % 2
+        row = idx // 2
+        rect = pygame.Rect(
+            start_x + col * (card_w + gap_x),
+            start_y + row * (card_h + gap_y),
+            card_w,
+            card_h,
+        )
+        selected = hero["id"] == selected_id
+        _draw_textured_panel(
+            screen,
+            rect,
+            mouse,
+            selected=selected,
+            selected_color=player_color,
+        )
+
+        dot_center = (rect.x + 25, rect.y + 25)
+        pygame.draw.circle(screen, (31, 27, 21), dot_center, 13)
+        pygame.draw.circle(screen, s.GOLD, dot_center, 12, 2)
+        pygame.draw.circle(screen, hero["color"], dot_center, 9)
+
+        title_color = (242, 218, 166) if selected or rect.collidepoint(mouse) else (226, 204, 160)
+        screen.blit(class_font.render(hero["name"], True, title_color), (rect.x + 47, rect.y + 10))
+
+        if hero["id"] in used_ids:
+            used_label = stat_font.render("Klasa już wybrana", True, (235, 170, 95))
+            screen.blit(used_label, (rect.right - used_label.get_width() - 16, rect.y + 15))
+
+        stat_line = "  ".join(
+            f"{name[:3]} {hero['stats'].get(name, 0)}" for name in s.STAT_NAMES
+        )
+        screen.blit(
+            stat_font.render(stat_line, True, (203, 190, 163)),
+            (rect.x + 18, rect.y + 46),
+        )
+
+        item_y = rect.y + (70 if compact else 76)
+        item_text = f"Start: {hero['basic_item']} + {hero['class_item']}"
+        for line in s.wrap(item_font, item_text, card_w - 36)[:2]:
+            if item_y + 18 < rect.bottom:
+                screen.blit(
+                    item_font.render(line, True, (198, 185, 158)),
+                    (rect.x + 18, item_y),
+                )
+            item_y += 18
+
+        buttons.append(s.Button("", f"archetype_{hero['id']}", rect))
+
+    cards_bottom = start_y + 3 * card_h + 2 * gap_y
+    button_y = cards_bottom + (12 if compact else 22)
+
+    button_gap = 20
+    random_w, custom_w, confirm_w = 270, 300, 330
+    group_w = random_w + button_gap + custom_w + button_gap + confirm_w
+    group_x = w / 2 - group_w / 2
+
+    random_button = s.Button("Losowy bohater", "random_hero", (group_x, button_y, random_w, 54))
+    custom_button = s.Button(
+        "Stwórz bohatera",
+        "custom_hero",
+        (group_x + random_w + button_gap, button_y, custom_w, 54),
+    )
+    confirm_button = s.Button(
+        "Zatwierdź gracza",
+        "confirm_player",
+        (
+            group_x + random_w + button_gap + custom_w + button_gap,
+            button_y,
+            confirm_w,
+            54,
+        ),
+    )
+    back_button = s.Button("Powrót", "back", (w / 2 - 120, button_y + 66, 240, 48))
+
+    for button in [random_button, custom_button, confirm_button, back_button]:
+        tf.themed_button(screen, button_font, mouse, button)
+        buttons.append(button)
+
+    return buttons
+
+
+def install_player_config_theme(app_module=None):
+    global _INSTALLED
+    if _INSTALLED:
+        return
+
+    tf.draw_player_config = draw_player_config
+
+    if app_module is not None and hasattr(app_module, "draw_player_config"):
+        app_module.draw_player_config = draw_player_config
+
+    for module_name in ("__main__", "main"):
+        module = sys.modules.get(module_name)
+        if module is not None and hasattr(module, "draw_player_config"):
+            module.draw_player_config = draw_player_config
+
+    _INSTALLED = True
