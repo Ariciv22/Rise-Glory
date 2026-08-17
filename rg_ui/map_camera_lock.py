@@ -22,9 +22,9 @@ SAFE_TOP_RATIO = 0.06
 SAFE_BOTTOM_RATIO = 0.08
 SAFE_PIXEL_PADDING = 10
 
-# Poprzedni startowy widok mial skale 1.21. Powiekszamy go dokladnie 1.5 raza:
-# 1.21 * 1.5 = 1.815. Pelny widok mapy nadal jest dostepny po oddaleniu.
-START_ZOOM_SCALE = 1.815
+# Poprzedni startowy widok mial skale 1.815. Powiekszamy go o kolejne 50%:
+# 1.815 * 1.5 = 2.7225. Pelny widok mapy nadal jest dostepny po oddaleniu.
+START_ZOOM_SCALE = 2.7225
 
 # Aktualne znaczniki lokacji byly ustawione na 116x132. Zmniejszamy je o 5%.
 LOCATION_MARKER_SCALE = 0.95
