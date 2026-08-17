@@ -11,9 +11,9 @@ import math
 
 import pygame
 
-from rg_core.data import HEX_SIZE, MAX_ZOOM, MIN_ZOOM
+from rg_core.data import HEX_SIZE, MAX_ZOOM, MIN_ZOOM, TEXT
 from rg_ui.common import game_layout_rects
-from rg_world.map import Camera, Tile
+from rg_world.map import Camera, Tile, load_location_marker
 
 
 # Obszar odpowiada jasnemu, pustemu polu pergaminu wskazanemu na grafice.
@@ -26,6 +26,9 @@ SAFE_PIXEL_PADDING = 10
 # Startujemy blizej niz idealne dopasowanie calej rozety. Wzgledem poprzedniego
 # ustawienia 1.10 powiekszamy heksy o kolejne 10%, czyli lacznie do skali 1.21.
 START_ZOOM_SCALE = 1.21
+
+# Aktualne znaczniki lokacji byly ustawione na 116x132. Zmniejszamy je o 5%.
+LOCATION_MARKER_SCALE = 0.95
 
 _TILE_GENERATION = 0
 _TILE_BOUNDS = None
@@ -53,7 +56,6 @@ def _center_map_rect():
     layout = game_layout_rects(screen)
     rect = layout["center"].copy()
 
-    # Dolny pasek informacji nalezy do HUD-u, a nie do pola planszy.
     bottom = layout.get("bottom")
     if bottom is not None and bottom.height > 0:
         rect.height = max(1, rect.height - bottom.height)
@@ -137,12 +139,7 @@ def _center_camera(camera):
 
 
 def _clamp_camera(camera):
-    """Pozwala planszy jezdzic po owalu bez skokow i bez pustego odjazdu.
-
-    Przy zoomie startowym mapa jest idealnie wycentrowana. Im mocniej gracz
-    przybliza, tym wiekszy dostaje zakres przeciagania. Srodek planszy porusza
-    sie po elipsie, zamiast po prostokatnym pudelku.
-    """
+    """Pozwala planszy jezdzic po owalu bez skokow i bez pustego odjazdu."""
     rect = playfield_rect()
     if rect is None or _TILE_BOUNDS is None:
         return
@@ -213,8 +210,38 @@ def _sync_generation(camera, reset_zoom=False):
         _clamp_camera(camera)
 
 
+def _draw_location_marker_scaled(self, screen, camera, font):
+    if not self.location:
+        return
+
+    sx, sy = self.center(camera)
+    marker = load_location_marker(self.location.get("kind"))
+    if marker:
+        max_width = max(46, int(116 * LOCATION_MARKER_SCALE * camera.zoom))
+        max_height = max(51, int(132 * LOCATION_MARKER_SCALE * camera.zoom))
+        scale = min(max_width / marker.get_width(), max_height / marker.get_height())
+        marker_size = (
+            max(1, int(marker.get_width() * scale)),
+            max(1, int(marker.get_height() * scale)),
+        )
+        rendered_marker = pygame.transform.smoothscale(marker, marker_size)
+        marker_bottom = int(sy + 60 * camera.zoom)
+        marker_rect = rendered_marker.get_rect(midbottom=(int(sx), marker_bottom))
+        screen.blit(rendered_marker, marker_rect)
+        return
+
+    radius = max(16, int(25 * LOCATION_MARKER_SCALE * camera.zoom))
+    marker_y = int(sy + 36 * camera.zoom)
+    color = self.location["color"]
+    pygame.draw.circle(screen, (15, 12, 9), (int(sx), marker_y), radius + 5)
+    pygame.draw.circle(screen, color, (int(sx), marker_y), radius)
+    pygame.draw.circle(screen, (30, 24, 18), (int(sx), marker_y), radius, max(2, int(3 * camera.zoom)))
+    label = font.render(self.location["symbol"], True, TEXT)
+    screen.blit(label, label.get_rect(center=(int(sx), marker_y)))
+
+
 def install_locked_map_camera():
-    """Instaluje dopasowanie planszy, stabilny zoom i owalny zakres dragu."""
+    """Instaluje dopasowanie planszy, stabilny zoom i tuning znacznikow."""
     if getattr(Camera, "_rise_glory_locked_map", False):
         return
 
@@ -270,6 +297,7 @@ def install_locked_map_camera():
         _clamp_camera(self)
 
     Tile.__init__ = tile_init
+    Tile.draw_location_marker = _draw_location_marker_scaled
     Camera.__init__ = camera_init
     Camera.map_view_center = map_view_center
     Camera.center_on_tile = center_on_tile
