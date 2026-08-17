@@ -12,6 +12,7 @@ install_legacy_module_aliases()
 
 from rg_core import app as _app
 from rg_ui.dev_council_reset import install_dev_council_reset
+from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
@@ -42,6 +43,11 @@ install_into_main()
 # grafiki panel2.png co dolne przyciski. Instalujemy to po title_flow, aby
 # docelowy renderer nie zostal nadpisany przez starszy motyw ekranu.
 install_player_config_theme(_app)
+
+# Gorne kafle informacyjne HUD-u maja osobne assety PNG dla kazdego typu
+# informacji (Gracz, Bohater, Klasa, Legenda, Zloto itd.). Jesli grafiki jeszcze
+# nie ma, renderer automatycznie zachowuje obecny placeholder.
+install_hud_top_stat_theme()
 
 
 if __name__ == "__main__":
