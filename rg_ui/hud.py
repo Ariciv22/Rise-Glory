@@ -9,10 +9,9 @@ from rg_core.data import (
     ORANGE,
     PANEL_DARK,
     TEXT,
-    map_name,
 )
 from rg_engine.world_events import active_world_event, movement_cost_with_world_event
-from rg_content.locations import helper_bonus_summary, helper_effect_text
+from rg_content.locations import helper_bonus_summary
 from rg_ui.player_board import (
     close_player_board,
     close_quest_details,
@@ -21,7 +20,7 @@ from rg_ui.player_board import (
     open_player_board,
     open_quest_details,
 )
-from rg_ui.common import Button, draw_image_panel, draw_lines, draw_panel, game_layout_rects, wrap
+from rg_ui.common import Button, draw_image_panel, draw_panel, game_layout_rects
 
 
 class _HudPanelButton(Button):
@@ -83,7 +82,6 @@ def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_in
         border = player.get("player_color", GOLD) if active else GOLD
         row = pygame.Rect(right.x + 12, y, right.width - 24, row_h - 8)
 
-        # Wiersz gracza nie jest już placeholderem: używa panel2.png.
         draw_image_panel(screen, row, 2)
         if active:
             pygame.draw.rect(screen, border, row, 3, border_radius=9)
@@ -114,24 +112,6 @@ def _format_stat_value(stat, base_value, bonuses):
     if bonus <= 0:
         return str(base_value)
     return f"{base_value} +{bonus}"
-
-
-def _draw_helpers(screen, font, small_font, hero, x, y, width):
-    helpers = hero.get("helpers", [])
-    screen.blit(small_font.render(f"Pomocnicy: {len(helpers)}/5", True, TEXT), (x, y))
-    y += 22
-    if not helpers:
-        screen.blit(small_font.render("brak", True, MUTED), (x, y))
-        return y + 22
-
-    for helper in helpers[:5]:
-        line = f"- {helper['name']}: {helper_effect_text(helper)}"
-        wrapped = wrap(small_font, line, width)
-        for wrapped_line in wrapped[:2]:
-            screen.blit(small_font.render(wrapped_line, True, MUTED), (x, y))
-            y += 18
-        y += 3
-    return y
 
 
 def _draw_bottom_tile_info(screen, font, small_font, selected_tile, rect):
@@ -177,7 +157,6 @@ def draw_game_ui(
     # i lacza top, lewy oraz prawy panel w jedna rame wokol planszy.
     pygame.draw.rect(screen, PANEL_DARK, top)
     draw_image_panel(screen, top, 2, ORANGE)
-    screen.blit(font.render(f"Rise & Glory - {map_name(current_map)}", True, TEXT), (36, 18))
 
     world_event = active_world_event()
     if world_event:
@@ -204,22 +183,20 @@ def draw_game_ui(
 
     pygame.draw.rect(screen, PANEL_DARK, left)
     draw_image_panel(screen, left, 5)
-    screen.blit(font.render("Aktywny bohater", True, TEXT), (left.x + 28, left.y + 24))
-    pygame.draw.circle(screen, hero.get("player_color", GOLD), (left.x + 34, left.y + 74), 12)
-    screen.blit(font.render(hero["name"], True, TEXT), (left.x + 58, left.y + 62))
-    y = left.y + 102
+
+    # Lewy HUD pokazuje tylko najwazniejsze dane bohatera. Rozbudowane dane
+    # ekwipunku, pomocnikow i opis klasy pozostaja dostepne po kliknieciu Bohater.
+    pygame.draw.circle(screen, hero.get("player_color", GOLD), (left.x + 34, left.y + 38), 12)
+    screen.blit(font.render(hero["name"], True, TEXT), (left.x + 58, left.y + 26))
+    y = left.y + 68
     screen.blit(small_font.render(f"Klasa: {hero.get('archetype_name', '-')}", True, MUTED), (left.x + 28, y))
-    y += 28
-    y = draw_lines(screen, small_font, wrap(small_font, hero.get("role", ""), left.width - 56), left.x + 28, y, MUTED, max_width=left.width - 56)
-    y += 14
+    y += 36
     screen.blit(small_font.render("Statystyki", True, TEXT), (left.x + 28, y))
     y += 26
 
     bonuses = helper_bonus_summary(hero)
     for stat, value in hero["stats"].items():
         row = pygame.Rect(left.x + 24, y - 4, left.width - 48, 25)
-
-        # Każdy pasek statystyki korzysta z panel2.png zamiast prostej ramki.
         draw_image_panel(screen, row, 2)
         screen.blit(small_font.render(stat, True, TEXT), (row.x + 10, row.y + 4))
         stat_value = _format_stat_value(stat, value, bonuses)
@@ -227,18 +204,7 @@ def draw_game_ui(
         screen.blit(value_surface, (row.right - value_surface.get_width() - 12, row.y + 4))
         y += 29
 
-    y += 8
-    equipment = [
-        f"Item: {hero['basic_item']}",
-        f"Klasowy: {hero['class_item']}",
-        f"Jedzenie: {', '.join(hero.get('food', [])) or 'brak'}",
-        f"Towar: {', '.join(hero.get('goods', [])) or 'brak'}",
-    ]
-    y = draw_lines(screen, small_font, equipment, left.x + 28, y, MUTED, max_width=left.width - 56)
-    y += 8
-    y = _draw_helpers(screen, font, small_font, hero, left.x + 28, y, left.width - 56)
-
-    hero_button_y = min(left.bottom - 64, max(left.y + 420, y + 12))
+    hero_button_y = left.bottom - 64
     hero_button = _PlayerBoardButton(
         "Bohater",
         "open_player_board",
