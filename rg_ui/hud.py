@@ -24,7 +24,30 @@ from rg_ui.player_board import (
 from rg_ui.common import Button, draw_image_panel, draw_lines, draw_panel, game_layout_rects, wrap
 
 
-class _PlayerBoardButton(Button):
+class _HudPanelButton(Button):
+    """Przycisk HUD-u korzystający z tej samej tekstury panel2.png co menu."""
+
+    def draw(self, screen, font, mouse_pos, active=False):
+        draw_image_panel(screen, self.rect, 2)
+
+        hovered = self.rect.collidepoint(mouse_pos)
+        if hovered or active:
+            glow = pygame.Surface(self.rect.size, pygame.SRCALPHA)
+            glow.fill((255, 220, 135, 22 if hovered else 14))
+            screen.blit(glow, self.rect.topleft)
+
+        if active:
+            pygame.draw.rect(screen, GOLD, self.rect, 2, border_radius=8)
+
+        if self.text:
+            shadow = font.render(self.text, True, (22, 17, 12))
+            label = font.render(self.text, True, TEXT)
+            center = self.rect.center
+            screen.blit(shadow, shadow.get_rect(center=(center[0] + 1, center[1] + 1)))
+            screen.blit(label, label.get_rect(center=center))
+
+
+class _PlayerBoardButton(_HudPanelButton):
     def clicked(self, pos):
         if not super().clicked(pos):
             return False
@@ -59,8 +82,11 @@ def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_in
         active = index == active_player_index
         border = player.get("player_color", GOLD) if active else GOLD
         row = pygame.Rect(right.x + 12, y, right.width - 24, row_h - 8)
-        pygame.draw.rect(screen, PANEL_DARK, row, border_radius=9)
-        pygame.draw.rect(screen, border, row, 3 if active else 1, border_radius=9)
+
+        # Wiersz gracza nie jest już placeholderem: używa panel2.png.
+        draw_image_panel(screen, row, 2)
+        if active:
+            pygame.draw.rect(screen, border, row, 3, border_radius=9)
 
         color = player.get("player_color", GOLD)
         pygame.draw.circle(screen, color, (row.x + 16, row.y + 15), 7)
@@ -78,7 +104,7 @@ def _draw_scoreboard(screen, font, small_font, players, tokens, active_player_in
         y += row_h
 
     button_y = min(right.bottom - 42, y + 6)
-    end_turn = Button("Koniec tury", "end_turn", (right.centerx - 64, button_y, 128, 30))
+    end_turn = _HudPanelButton("Koniec tury", "end_turn", (right.centerx - 64, button_y, 128, 30))
     end_turn.draw(screen, small_font, pygame.mouse.get_pos())
     return end_turn
 
@@ -192,11 +218,13 @@ def draw_game_ui(
     bonuses = helper_bonus_summary(hero)
     for stat, value in hero["stats"].items():
         row = pygame.Rect(left.x + 24, y - 4, left.width - 48, 25)
-        pygame.draw.rect(screen, PANEL_DARK, row, border_radius=8)
-        pygame.draw.rect(screen, GOLD, row, 1, border_radius=8)
+
+        # Każdy pasek statystyki korzysta z panel2.png zamiast prostej ramki.
+        draw_image_panel(screen, row, 2)
         screen.blit(small_font.render(stat, True, TEXT), (row.x + 10, row.y + 4))
         stat_value = _format_stat_value(stat, value, bonuses)
-        screen.blit(small_font.render(stat_value, True, TEXT), (row.right - 58, row.y + 4))
+        value_surface = small_font.render(stat_value, True, TEXT)
+        screen.blit(value_surface, (row.right - value_surface.get_width() - 12, row.y + 4))
         y += 29
 
     y += 8
