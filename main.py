@@ -44,9 +44,9 @@ install_into_main()
 # docelowy renderer nie zostal nadpisany przez starszy motyw ekranu.
 install_player_config_theme(_app)
 
-# Gorne kafle informacyjne HUD-u maja osobne assety PNG dla kazdego typu
-# informacji (Gracz, Bohater, Klasa, Legenda, Zloto itd.). Jesli grafiki jeszcze
-# nie ma, renderer automatycznie zachowuje obecny placeholder.
+# Wszystkie gorne pola HUD-u (Gracz, Bohater, Klasa, Legenda, Zloto, Rany,
+# Akcje, Runda i Rada) korzystaja teraz z tej samej grafiki panel2.png co
+# pozostale przyciski UI, zamiast z prostych placeholderowych ramek.
 install_hud_top_stat_theme()
 
 
