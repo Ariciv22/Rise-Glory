@@ -18,6 +18,7 @@ from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.title_flow import install_into_main
+from rg_ui.village_hub import install_village_hub
 
 # DEV: kazde reczne otwarcie Rady rozpoczyna swieza sesje UI i dobiera kolejna
 # karte z biezacej talii. Nie resetujemy samej talii Wydarzen Swiata.
@@ -48,6 +49,10 @@ install_player_config_theme(_app)
 # Akcje, Runda i Rada) korzystaja teraz z tej samej grafiki panel2.png co
 # pozostale przyciski UI, zamiast z prostych placeholderowych ramek.
 install_hud_top_stat_theme()
+
+# Wsie korzystaja z duzej ilustracji jako interaktywnej planszetki. Klikniecie
+# obiektu na scenie uruchamia te sama akcje co odpowiadajacy mu przycisk po lewej.
+install_village_hub(_app)
 
 
 if __name__ == "__main__":
