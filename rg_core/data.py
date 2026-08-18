@@ -29,9 +29,11 @@ RIGHT_PANEL_W = 300
 SIDE_MARGIN = 12
 MAP_MARGIN = 28
 
-# Jasny, lekko niebieskawy metal zamiast czystej bieli w calym UI.
-TEXT = (218, 228, 238)
-MUTED = (180, 185, 190)
+# Chlodne srebro dla glownego tekstu UI. Jest wyraznie bardziej metaliczne
+# od poprzedniej prawie-bieli, ale nadal zachowuje wysoki kontrast na ciemnych panelach.
+TEXT = (205, 210, 218)
+# Drugoplanowy tekst pozostaje ciemniejszym, matowym srebrem.
+MUTED = (158, 164, 172)
 BG = (18, 22, 26)
 PANEL = (24, 20, 16)
 PANEL_DARK = (15, 13, 11)
@@ -83,91 +85,81 @@ BASIC_GOODS = [
 
 HERO_ARCHETYPES = [
     {
-        "id": 1,
+        "id": "warrior",
         "name": "Wojownik",
-        "color": (215, 70, 55),
-        "stats": {"Walka": 5, "Handel": 2, "Dyplomacja": 2, "Intryga": 1, "Nauka": 1, "Kultura": 1},
-        "basic_item": "Prosty miecz",
-        "class_item": "Skorzana zbroja",
         "role": "Najlepszy do walki i eskorty.",
+        "stats": {"Walka": 5, "Handel": 2, "Dyplomacja": 2, "Intryga": 1, "Nauka": 1, "Kultura": 1},
+        "item": "Prosty miecz",
+        "class_item": "Skorzana zbroja",
     },
     {
-        "id": 2,
+        "id": "merchant",
         "name": "Handlarz",
-        "color": (220, 170, 55),
-        "stats": {"Handel": 5, "Dyplomacja": 3, "Intryga": 2, "Kultura": 1, "Nauka": 1, "Walka": 0},
-        "basic_item": "Sakwa kupca",
-        "class_item": "Pierscien kupiecki",
-        "role": "Najlepszy do wymiany, kontraktow i towarow.",
+        "role": "Zarabia i handluje korzystniej.",
+        "stats": {"Walka": 1, "Handel": 5, "Dyplomacja": 2, "Intryga": 2, "Nauka": 1, "Kultura": 1},
+        "item": "Waga kupiecka",
+        "class_item": "Sakiewka kupiecka",
     },
     {
-        "id": 3,
+        "id": "diplomat",
         "name": "Dyplomata",
-        "color": (90, 145, 220),
-        "stats": {"Dyplomacja": 5, "Kultura": 3, "Handel": 2, "Nauka": 1, "Intryga": 1, "Walka": 0},
-        "basic_item": "Elegancki stroj",
-        "class_item": "Pieczec rodu / glejt",
-        "role": "Najlepszy do rozmow, lokacji i konfliktow spolecznych.",
+        "role": "Rozwiazuje konflikty i negocjuje.",
+        "stats": {"Walka": 1, "Handel": 2, "Dyplomacja": 5, "Intryga": 1, "Nauka": 1, "Kultura": 2},
+        "item": "List polecajacy",
+        "class_item": "Pieczec dyplomatyczna",
     },
     {
-        "id": 4,
-        "name": "Kulturowiec",
-        "color": (170, 95, 210),
-        "stats": {"Kultura": 5, "Dyplomacja": 3, "Handel": 1, "Nauka": 1, "Intryga": 1, "Walka": 1},
-        "basic_item": "Ozdobny stroj",
-        "class_item": "Instrument / kronika",
-        "role": "Najlepszy do wydarzen, tlumu i slawy.",
-    },
-    {
-        "id": 5,
+        "id": "intriguer",
         "name": "Intrygant",
-        "color": (70, 170, 85),
-        "stats": {"Intryga": 5, "Dyplomacja": 2, "Handel": 2, "Walka": 1, "Nauka": 1, "Kultura": 1},
-        "basic_item": "Sztylet",
-        "class_item": "Kaptur intryganta / pierscien sekretow",
-        "role": "Najlepszy do omijania, sabotazu i informacji.",
+        "role": "Szpieg, manipulant i mistrz podstepu.",
+        "stats": {"Walka": 1, "Handel": 2, "Dyplomacja": 1, "Intryga": 5, "Nauka": 1, "Kultura": 2},
+        "item": "Wytrychy",
+        "class_item": "Zakapturzony plaszcz",
     },
     {
-        "id": 6,
+        "id": "scholar",
         "name": "Uczony",
-        "color": (70, 190, 190),
-        "stats": {"Nauka": 5, "Kultura": 2, "Handel": 2, "Dyplomacja": 1, "Intryga": 1, "Walka": 1},
-        "basic_item": "Torba badacza",
-        "class_item": "Ksiega / mapa ruin",
-        "role": "Najlepszy do ruin, mechanizmow i odkrywania slabosci.",
+        "role": "Badacz ruin, klatw i tajemnic.",
+        "stats": {"Walka": 1, "Handel": 1, "Dyplomacja": 2, "Intryga": 1, "Nauka": 5, "Kultura": 2},
+        "item": "Pochodnia",
+        "class_item": "Stara ksiega",
+    },
+    {
+        "id": "cultured",
+        "name": "Czlowiek kultury",
+        "role": "Artysta, bard i znawca obyczajow.",
+        "stats": {"Walka": 1, "Handel": 1, "Dyplomacja": 2, "Intryga": 1, "Nauka": 2, "Kultura": 5},
+        "item": "Lutnia",
+        "class_item": "Ozdobny stroj",
     },
 ]
 
-TERRAINS = {
-    "plains": {"name": "Rowniny", "image": "rowniny.png", "fallback": (112, 156, 76), "weight": 30, "passable": True, "move": 1},
-    "forest": {"name": "Las", "image": "las.png", "fallback": (49, 107, 62), "weight": 22, "passable": True, "move": 2},
-    "hills": {"name": "Wzgorza", "image": "wzgorza.png", "fallback": (139, 116, 73), "weight": 18, "passable": True, "move": 2},
-    "mountain": {"name": "Gory", "image": "gory.png", "fallback": (116, 116, 112), "weight": 12, "passable": True, "move": 2},
-    "desert": {"name": "Pustynia", "image": "pustynia.png", "fallback": (194, 165, 92), "weight": 10, "passable": True, "move": 1},
-    "tundra": {"name": "Tundra", "image": "tundra.png", "fallback": (145, 170, 154), "weight": 8, "passable": True, "move": 1},
-}
+
+def clone_hero(archetype, world_name="Bohater", player_index=0, stats=None):
+    return {
+        "name": world_name,
+        "player_number": player_index + 1,
+        "player_color": PLAYER_COLORS[player_index % len(PLAYER_COLORS)],
+        "archetype_id": archetype["id"],
+        "archetype_name": archetype["name"],
+        "role": archetype["role"],
+        "stats": dict(stats if stats is not None else archetype["stats"]),
+        "basic_item": archetype["item"],
+        "class_item": archetype["class_item"],
+        "food": [START_FOOD],
+        "goods": ["Lina"],
+        "gold": 5,
+        "legend": 0,
+        "wounds": 0,
+        "helpers": [],
+        "inventory": [],
+        "equipment": {},
+        "active_quests": [],
+        "completed_quests": [],
+        "failed_quests": [],
+        "abandoned_quests": [],
+    }
 
 
-def clone_hero(template, world_name=None, player_index=0, stats=None):
-    from rg_engine.heroes import ensure_hero_state
-
-    hero = dict(template)
-    hero["archetype_id"] = template["id"]
-    hero["archetype_name"] = template["name"]
-    hero["archetype_color"] = template["color"]
-    hero["stats"] = dict(stats if stats is not None else template["stats"])
-    hero["name"] = (world_name or template["name"]).strip()
-    hero["player_number"] = player_index + 1
-    hero["player_color"] = PLAYER_COLORS[player_index % len(PLAYER_COLORS)]
-    hero["color"] = hero["player_color"]
-    hero["gold"] = 5
-    hero["wounds"] = 0
-    hero["legend"] = 0
-    hero["food"] = [START_FOOD]
-    hero["goods"] = [random.choice(BASIC_GOODS)]
-    hero["custom_stats"] = stats is not None
-    return ensure_hero_state(hero)
-
-
-def map_name(key):
-    return next((name for item_key, name in MAP_OPTIONS if item_key == key), "Mapa")
+def map_name(map_key):
+    return dict(MAP_OPTIONS).get(map_key, map_key)
