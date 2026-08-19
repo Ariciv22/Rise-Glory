@@ -96,12 +96,7 @@ def can_advance_world_level(players: Iterable[dict] | None = None, level: int | 
 
 
 def update_world_level(players: Iterable[dict] | None = None) -> int:
-    """Sprawdza awans i może podnieść świat najwyżej o jeden poziom.
-
-    Funkcję wywołujemy w momencie zmiany Punktów Legendy. Dzięki temu awans
-    następuje natychmiast po spełnieniu warunków, ale pojedyncze zdobycie
-    Legendy nigdy nie powoduje przeskoku np. z poziomu 1 od razu na 3.
-    """
+    """Sprawdza awans i może podnieść świat najwyżej o jeden poziom."""
     global _WORLD_LEVEL
     if _FORCED_WORLD_LEVEL is not None:
         return _FORCED_WORLD_LEVEL
@@ -136,12 +131,20 @@ def quest_difficulty_from_legend_gap(player: dict, world_level: int | None = Non
     return gap * 2
 
 
-def scaled_enemy_hp(base_hp: int, world_level: int | None = None, legendary: bool = False) -> int:
-    base = max(1, int(base_hp or 1))
-    if legendary:
-        return base + 10
+def enemy_world_modifier(world_level: int | None = None) -> int:
+    """Modyfikator walki przeciwnika: I=0, II=2, III=3, IV=4."""
     level = max(1, min(4, int(world_level or current_world_level())))
-    return base + level * 2
+    return {1: 0, 2: 2, 3: 3, 4: 4}[level]
+
+
+def scaled_enemy_hp(base_hp: int, world_level: int | None = None, legendary: bool = False) -> int:
+    """Skaluje HP zgodnie z zasadami Walki V2. Legendary nie ma automatycznego bonusu."""
+    base = max(1, int(base_hp or 1))
+    return base + enemy_world_modifier(world_level)
+
+
+def scaled_enemy_stat(base_value: int, world_level: int | None = None) -> int:
+    return int(base_value or 0) + enemy_world_modifier(world_level)
 
 
 def defeat_gold_loss(world_level: int | None = None) -> int:
