@@ -228,13 +228,35 @@ def weapon_bonuses(hero: dict[str, Any]) -> tuple[int, int]:
     return int(item.get("hit_bonus", 0) or 0), int(item.get("damage_bonus", 0) or 0)
 
 
+def weapon_damage(hero: dict[str, Any]) -> int:
+    _hit_bonus, damage_bonus = weapon_bonuses(hero)
+    return max(1, 1 + int(damage_bonus or 0))
+
+
+def weapon_effects(hero: dict[str, Any]) -> dict[str, Any]:
+    ensure_equipment_state(hero)
+    weapon = hero["equipment"].get("weapon")
+    if not weapon:
+        return {}
+    return copy.deepcopy(normalise_item(weapon).get("effects") or {})
+
+
 def armor_class(hero: dict[str, Any]) -> int:
     ensure_equipment_state(hero)
-    armor = hero["equipment"].get("armor")
-    if not armor:
-        return 10
-    value = int(normalise_item(armor).get("armor_class", 0) or 0)
-    return value if value > 0 else 12
+    base = 10
+    bonus = 0
+    for slot, raw_item in hero["equipment"].items():
+        if not raw_item:
+            continue
+        item = normalise_item(raw_item)
+        value = int(item.get("armor_class", 0) or 0)
+        effect_bonus = int((item.get("effects") or {}).get("kp_bonus", 0) or 0)
+        if slot == "armor" and value >= 10:
+            base = max(base, value)
+        elif value:
+            bonus += value
+        bonus += effect_bonus
+    return max(1, base + bonus)
 
 
 def equipment_stat_bonus(hero: dict[str, Any], stat: str) -> int:
@@ -245,6 +267,59 @@ def equipment_stat_bonus(hero: dict[str, Any], stat: str) -> int:
             continue
         total += int(normalise_item(item).get("stat_bonus", {}).get(stat, 0) or 0)
     return total
+
+
+def combat_usable_inventory_indices(hero: dict[str, Any]) -> list[int]:
+    ensure_equipment_state(hero)
+    result = []
+    for index, raw_item in enumerate(hero.get("inventory", []) or []):
+        item = normalise_item(raw_item)
+        effects = item.get("effects") or {}
+        if item.get("combat_usable") or any(key in effects for key in ("heal_hp", "damage", "status", "self_status")):
+            result.append(index)
+    return result
+
+
+def combat_item_effects(hero: dict[str, Any], inventory_index: int) -> dict[str, Any]:
+    ensure_equipment_state(hero)
+    inventory = hero.get("inventory", []) or []
+    if inventory_index < 0 or inventory_index >= len(inventory):
+        return {}
+    return copy.deepcopy(normalise_item(inventory[inventory_index]).get("effects") or {})
+
+
+def consume_inventory_item(hero: dict[str, Any], inventory_index: int) -> dict[str, Any] | None:
+    ensure_equipment_state(hero)
+    inventory = hero.get("inventory", []) or []
+    if inventory_index < 0 or inventory_index >= len(inventory):
+        return None
+    item = normalise_item(inventory.pop(inventory_index))
+    hero.setdefault("discarded_items", []).append(copy.deepcopy(item))
+    return item
+
+
+def item_is_defeat_protected(item: Any, hero: dict[str, Any] | None = None) -> bool:
+    normalised = normalise_item(item)
+    if any(bool(normalised.get(key)) for key in ("protected", "key_item", "quest_item")):
+        return True
+    effects = normalised.get("effects") or {}
+    if any(bool(effects.get(key)) for key in ("protected", "key_item", "quest_item")):
+        return True
+    protected_ids = set((hero or {}).get("protected_item_ids", []) or [])
+    return str(normalised.get("id")) in protected_ids or str(normalised.get("name")) in protected_ids
+
+
+def eligible_defeat_inventory_indices(hero: dict[str, Any]) -> list[int]:
+    ensure_equipment_state(hero)
+    return [
+        index
+        for index, item in enumerate(hero.get("inventory", []) or [])
+        if not item_is_defeat_protected(item, hero)
+    ]
+
+
+def discard_inventory_item(hero: dict[str, Any], inventory_index: int) -> dict[str, Any] | None:
+    return consume_inventory_item(hero, inventory_index)
 
 
 def sell_value(item: Any) -> int:
