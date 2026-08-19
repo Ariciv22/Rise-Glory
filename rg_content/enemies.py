@@ -57,7 +57,7 @@ def _register_defaults() -> None:
     register_enemy(
         EnemyDefinition(
             enemy_id="przeklety_zolnierz",
-            name="Przeklety zolnierz",
+            name="Przeklęty żołnierz",
             base_hp=4,
             armor_class=12,
             attack_bonus=1,
