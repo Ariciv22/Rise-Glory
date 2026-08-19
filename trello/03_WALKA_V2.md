@@ -25,6 +25,8 @@ Jeżeli wynik osiąga lub przekracza KP przeciwnika, atak trafia.
 - Naturalne 20 podczas ataku oznacza 2 trafienia i dwukrotne rozpatrzenie obrażeń.
 - Naturalne 1 podczas ataku oznacza automatyczne pudło.
 - Walka nie posiada maksymalnego limitu rund. Trwa aż do pokonania jednej ze stron albo skutecznego opuszczenia walki, jeśli dana walka na to pozwala.
+- Mechanicznie walka zawsze odbywa się przeciwko jednemu przeciwnikowi.
+- Karta i grafika przeciwnika mogą przedstawiać grupę, np. bandę bandytów, watahę lub oddział, ale mechanicznie cała grupa jest rozpatrywana jako jeden przeciwnik z jedną pulą statystyk i HP.
 
 ### Broń i obrażenia
 
@@ -55,6 +57,12 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - Inne elementy wyposażenia defensywnego, takie jak tarcze, hełmy, pierścienie lub inne przedmioty, również mogą zwiększać KP, jeśli ich karta tak stanowi.
 - Premie i efekty defensywne wynikają z konkretnej karty przedmiotu.
 
+### Zmiana wyposażenia podczas walki
+
+- Bohater może zmieniać wyposażenie podczas trwającej walki.
+- Zmiana wyposażenia zużywa całe działanie bohatera w danej rundzie walki.
+- Po zmianie wyposażenia bohater nie wykonuje normalnego ataku w tej samej rundzie, chyba że konkretny efekt wyraźnie stanowi inaczej.
+
 ### Pomocnicy w walce
 
 - Pomocnik może wspierać bohatera podczas walki.
@@ -65,12 +73,18 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - Podczas walki można używać jednorazowych przedmiotów i efektów, takich jak mikstury, bomby, zwoje, jedzenie lub inne przedmioty dopuszczone przez ich kartę.
 - Użycie takiego przedmiotu zużywa działanie bohatera w danej rundzie walki zamiast wykonania ataku.
 - Po wykorzystaniu przedmiotu bohater nie wykonuje dodatkowo normalnego ataku w tej samej rundzie, chyba że konkretny efekt wyraźnie stanowi inaczej.
+- Przedmioty i efekty lecznicze używane w trakcie walki leczą HP, a nie Rany.
+- Rany nie są leczone w trakcie walki przez zwykłe mikstury/jedzenie; leczenie Ran odbywa się w odpowiednich lokacjach zgodnie z zasadami gry.
+- Szczegółowa relacja między HP bohatera a systemem Ran wymaga osobnego doprecyzowania.
 
 ### Efekty statusowe
 
 - System walki będzie obsługiwał efekty statusowe.
 - Do możliwych statusów należą m.in. zatrucie, krwawienie, ogłuszenie, podpalenie, osłabienie KP i inne podobne efekty.
-- Dokładna lista statusów, czas działania, sposób nakładania i zdejmowania zostaną dopracowane osobno.
+- Czas działania statusu określa karta lub efekt, który go nakłada, np. karta broni może wskazywać konkretną liczbę rund działania.
+- Ponowne nałożenie tego samego statusu nie kumuluje jego siły; odnawia czas trwania efektu.
+- Ogłuszenie powoduje utratę całego działania bohatera w danej rundzie. Przeciwnik nadal wykonuje swój normalny atak.
+- Dokładna lista statusów, sposób nakładania i zdejmowania zostaną dopracowane osobno.
 
 ### Zdolności specjalne przeciwników
 
@@ -83,6 +97,7 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 
 - Bossowie mogą posiadać kilka faz walki.
 - Przejście do kolejnej fazy może następować np. po spadku HP poniżej określonego progu.
+- Jeżeli atak bohatera obniży HP bossa poniżej progu kolejnej fazy, boss przechodzi do nowej fazy natychmiast, jeszcze przed swoim najbliższym działaniem.
 - Kolejna faza może zmieniać zdolności, zachowanie, sposób ataku, statystyki lub inne zasady bossa zgodnie z jego kartą.
 
 ### Ucieczka i przekupstwo
@@ -93,12 +108,20 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - Nie każda walka pozwala na ucieczkę.
 - Nie każda walka pozwala na przekupstwo.
 - Niektóre walki mogą całkowicie blokować zarówno ucieczkę, jak i przekupienie przeciwnika.
+- Jeśli bohater skutecznie ucieknie i później ponownie rozpocznie walkę z tym samym przeciwnikiem, przeciwnik rozpoczyna nową walkę z pełnym HP.
+- Jeśli bohater zostanie pokonany, ten sam przeciwnik również odzyskuje pełne HP przed kolejną próbą walki, niezależnie od tego, czy podejmie ją ten sam czy inny bohater.
 
 ### Loot i bossowie
 
 - Przeciwnicy są reprezentowani przez karty potworów/przeciwników.
 - Karta przeciwnika określa loot możliwy lub przyznawany po jego pokonaniu.
 - Boss zawsze posiada specjalną nagrodę poza zwykłym rozstrzygnięciem walki; dokładny rodzaj nagrody określa karta bossa lub powiązany scenariusz/Quest.
+
+### Ekran zakończenia walki
+
+- Po zwycięstwie wyświetlany jest osobny ekran `Zwycięstwo`.
+- Ekran pokazuje pokonanego przeciwnika, otrzymany loot i nagrody oraz aktualny stan bohatera, w tym istotne Rany/statusy.
+- Dopiero po zatwierdzeniu ekranu gracz wraca do odpowiedniego kontekstu: mapy, Questa, Zagrożenia albo Przygody.
 
 ## Punkty do działania
 
@@ -109,16 +132,23 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - [ ] Obrażenia bohatera.
 - [ ] Stałe obrażenia/Rany przeciwnika określane na karcie.
 - [ ] Rany bohatera.
+- [ ] Doprecyzować i wdrożyć HP bohatera oraz relację HP ↔ Rany.
 - [ ] Każda broń posiada osobną premię do trafienia i wartość obrażeń.
 - [ ] Atak bez broni zadaje 1 obrażenie bez premii broni.
 - [ ] Zbroja określa KP bohatera i może posiadać dodatkowe efekty.
 - [ ] Obsłużyć premie do KP z innych elementów wyposażenia, np. tarczy, hełmu lub pierścienia.
+- [ ] Obsłużyć zmianę wyposażenia podczas walki jako całe działanie bohatera w rundzie.
 - [ ] Obsłużyć bojowe efekty Pomocników.
 - [ ] Obsłużyć używanie przedmiotów jednorazowych podczas walki zamiast ataku bohatera w danej rundzie.
+- [ ] Przedmioty lecznicze w walce leczą HP, nie Rany.
 - [ ] Obsłużyć system statusów.
+- [ ] Czas statusu określany przez kartę/efekt.
+- [ ] Ponowne nałożenie statusu odnawia jego czas zamiast kumulować siłę.
+- [ ] Ogłuszenie odbiera działanie bohatera w rundzie.
 - [ ] Obsłużyć Nat 20.
 - [ ] Obsłużyć Nat 1.
 - [ ] Kolejne rundy walki bez sztywnego limitu rund.
+- [ ] Mechanicznie zawsze jeden przeciwnik; grupa może być przedstawiona jako jedna karta/grafika.
 - [ ] Pokonanie przeciwnika.
 - [ ] Pokonanie bohatera.
 - [ ] Ucieczka.
@@ -126,6 +156,8 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - [ ] Przekupstwo za Złoto.
 - [ ] Obsłużyć walki bez możliwości ucieczki i przekupstwa.
 - [ ] Nieudana ucieczka uruchamia natychmiastowy atak przeciwnika.
+- [ ] Po ucieczce przeciwnik przy kolejnej walce ma pełne HP.
+- [ ] Po pokonaniu bohatera przeciwnik przy kolejnej walce ma pełne HP.
 - [ ] Cała walka kosztuje 1 Akcję.
 - [ ] Nagrody po walce.
 - [ ] Loot określany przez kartę przeciwnika.
@@ -136,15 +168,18 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - [ ] Zdolności specjalne przeciwników aktywowane zgodnie z regułą na karcie.
 - [ ] Bossowie.
 - [ ] Wieloetapowe fazy bossów.
+- [ ] Natychmiastowe przejście bossa do nowej fazy po przekroczeniu progu HP.
 - [ ] Boss posiada specjalną nagrodę.
 - [ ] Przeciwnicy legendarni.
 - [ ] Czytelny ekran zakończenia walki.
+- [ ] Ekran Zwycięstwo z lootem, nagrodami i stanem bohatera.
 - [ ] Przygotować podstawową pulę przeciwników.
 - [ ] Przygotować przynajmniej jednego bossa testowego.
 - [ ] Przygotować punkt integracji z Kroniką Świata dla ważnych walk.
 
 ## Do dopracowania później
 
+- Dokładna relacja HP bohatera i Ran.
 - Dokładna lista i pula specjalnych efektów przeciwników.
 - Dokładne tabele/rzuty określające dodatkowe efekty podczas walki.
 - Dokładna lista statusów i zasady ich działania.
