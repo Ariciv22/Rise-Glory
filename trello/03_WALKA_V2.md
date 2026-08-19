@@ -21,19 +21,36 @@ Jeżeli wynik osiąga lub przekracza KP przeciwnika, atak trafia.
 - Bohater rozpoczyna każdą rundę walki.
 - Atak bohatera to `k20 + Walka + premie wyposażenia` przeciwko KP przeciwnika.
 - Cała walka, niezależnie od liczby rund, kosztuje 1 Akcję.
-- Bohater korzysta z systemu Ran, a przeciwnik posiada HP.
+- Zarówno bohater, jak i przeciwnik posiadają HP.
+- Bohater posiada dodatkowo osobny system Ran.
 - Naturalne 20 podczas ataku oznacza 2 trafienia i dwukrotne rozpatrzenie obrażeń.
 - Naturalne 1 podczas ataku oznacza automatyczne pudło.
 - Walka nie posiada maksymalnego limitu rund. Trwa aż do pokonania jednej ze stron albo skutecznego opuszczenia walki, jeśli dana walka na to pozwala.
 - Mechanicznie walka zawsze odbywa się przeciwko jednemu przeciwnikowi.
 - Karta i grafika przeciwnika mogą przedstawiać grupę, np. bandę bandytów, watahę lub oddział, ale mechanicznie cała grupa jest rozpatrywana jako jeden przeciwnik z jedną pulą statystyk i HP.
 
+### HP bohatera i Rany
+
+- Bazowe maksymalne HP bohatera wynosi `10 HP`.
+- Atrybuty, wyposażenie, przedmioty i inne efekty mogą zwiększać maksymalne HP bohatera.
+- Zwykłe ataki przeciwników zadają obrażenia w HP, tak samo jak ataki bohatera zadają obrażenia w HP przeciwnika.
+- Jeżeli HP bohatera spadnie do `0`, bohater traci przytomność i walka natychmiast się kończy porażką bohatera.
+- Po utracie przytomności bohater otrzymuje `1 Ranę`.
+- Rana jest osobnym, trwałym stanem bohatera i będzie wpływać na różne elementy gry; dokładny system Ran zostanie opisany później w osobnym etapie projektowym.
+- W podstawowym systemie walki nie stosujemy obecnie zwykłych ataków zadających Ranę bezpośrednio z pominięciem HP. Taka możliwość może pojawić się później jako specjalny efekt.
+- Aktualne HP bohatera pozostaje między walkami. Przykładowo bohater kończący walkę z `4/10 HP` nadal ma `4/10 HP` po powrocie do mapy.
+- HP i Rany są leczone osobno.
+- Jedzenie, mikstury, odpoczynek oraz odpowiednie efekty mogą odnawiać HP.
+- Rany są leczone w odpowiednich lokacjach zgodnie z osobnym systemem leczenia Ran.
+- Wyleczenie Rany nie odnawia automatycznie HP.
+- Odnowienie HP nie usuwa automatycznie Ran.
+
 ### Broń i obrażenia
 
 - Każda broń posiada dwa osobne parametry: premię do trafienia oraz wartość obrażeń.
 - Przykładowy zapis broni może wyglądać jak `+2 do trafienia / 2 obrażenia`.
 - Atak bez broni zadaje bazowo 1 obrażenie i nie otrzymuje premii broni.
-- Przeciwnik zadaje stałą liczbę Ran/obrażeń określoną na swojej karcie. Podstawowe obrażenia przeciwnika nie są losowane jako zakres.
+- Przeciwnik zadaje stałą liczbę obrażeń HP określoną na swojej karcie. Podstawowe obrażenia przeciwnika nie są losowane jako zakres.
 
 ### Skalowanie przeciwników Poziomem Świata
 
@@ -47,7 +64,7 @@ Poziom Świata I korzysta z bazowych statystyk przeciwnika zapisanych na jego ka
 To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8`.
 
 - Na obecnym etapie Poziom Świata skaluje wyłącznie KP, premię do trafienia i HP przeciwnika.
-- Stała liczba Ran/obrażeń zadawanych przez przeciwnika nie otrzymuje automatycznego bonusu z Poziomu Świata.
+- Stała liczba obrażeń HP zadawanych przez przeciwnika nie otrzymuje automatycznego bonusu z Poziomu Świata.
 - Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie określone osobno.
 
 ### Zbroja i obrona bohatera
@@ -62,6 +79,7 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - Bohater może zmieniać wyposażenie podczas trwającej walki.
 - Zmiana wyposażenia zużywa całe działanie bohatera w danej rundzie walki.
 - Po zmianie wyposażenia bohater nie wykonuje normalnego ataku w tej samej rundzie, chyba że konkretny efekt wyraźnie stanowi inaczej.
+- Po zmianie wyposażenia przeciwnik normalnie wykonuje swoje działanie w tej rundzie.
 
 ### Pomocnicy w walce
 
@@ -73,9 +91,9 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - Podczas walki można używać jednorazowych przedmiotów i efektów, takich jak mikstury, bomby, zwoje, jedzenie lub inne przedmioty dopuszczone przez ich kartę.
 - Użycie takiego przedmiotu zużywa działanie bohatera w danej rundzie walki zamiast wykonania ataku.
 - Po wykorzystaniu przedmiotu bohater nie wykonuje dodatkowo normalnego ataku w tej samej rundzie, chyba że konkretny efekt wyraźnie stanowi inaczej.
+- Po użyciu przedmiotu przeciwnik normalnie wykonuje swoje działanie w tej rundzie.
 - Przedmioty i efekty lecznicze używane w trakcie walki leczą HP, a nie Rany.
 - Rany nie są leczone w trakcie walki przez zwykłe mikstury/jedzenie; leczenie Ran odbywa się w odpowiednich lokacjach zgodnie z zasadami gry.
-- Szczegółowa relacja między HP bohatera a systemem Ran wymaga osobnego doprecyzowania.
 
 ### Efekty statusowe
 
@@ -84,6 +102,7 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 - Czas działania statusu określa karta lub efekt, który go nakłada, np. karta broni może wskazywać konkretną liczbę rund działania.
 - Ponowne nałożenie tego samego statusu nie kumuluje jego siły; odnawia czas trwania efektu.
 - Ogłuszenie powoduje utratę całego działania bohatera w danej rundzie. Przeciwnik nadal wykonuje swój normalny atak.
+- Wszystkie statusy bojowe znikają po zakończeniu walki.
 - Dokładna lista statusów, sposób nakładania i zdejmowania zostaną dopracowane osobno.
 
 ### Zdolności specjalne przeciwników
@@ -120,37 +139,46 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 ### Ekran zakończenia walki
 
 - Po zwycięstwie wyświetlany jest osobny ekran `Zwycięstwo`.
-- Ekran pokazuje pokonanego przeciwnika, otrzymany loot i nagrody oraz aktualny stan bohatera, w tym istotne Rany/statusy.
+- Ekran pokazuje pokonanego przeciwnika, otrzymany loot i nagrody oraz aktualny stan bohatera, w tym istotne Rany.
+- Statusy bojowe są już usunięte w momencie zakończenia walki.
 - Dopiero po zatwierdzeniu ekranu gracz wraca do odpowiedniego kontekstu: mapy, Questa, Zagrożenia albo Przygody.
 
 ## Punkty do działania
 
 - [ ] HP przeciwnika.
+- [ ] HP bohatera — bazowo 10, z możliwością zwiększania maksimum.
+- [ ] Trwałe zachowanie aktualnego HP bohatera między walkami.
+- [ ] Utrata przytomności przy 0 HP i natychmiastowe zakończenie walki.
+- [ ] Przyznanie 1 Rany po utracie przytomności.
+- [ ] Osobny system leczenia HP oraz Ran.
 - [ ] KP przeciwnika.
 - [ ] Atak bohatera.
 - [ ] Atak przeciwnika.
-- [ ] Obrażenia bohatera.
-- [ ] Stałe obrażenia/Rany przeciwnika określane na karcie.
-- [ ] Rany bohatera.
-- [ ] Doprecyzować i wdrożyć HP bohatera oraz relację HP ↔ Rany.
+- [ ] Obrażenia bohatera w HP przeciwnika.
+- [ ] Stałe obrażenia HP przeciwnika określane na karcie.
+- [ ] Rany bohatera — szczegółowy system do zaprojektowania później.
 - [ ] Każda broń posiada osobną premię do trafienia i wartość obrażeń.
 - [ ] Atak bez broni zadaje 1 obrażenie bez premii broni.
 - [ ] Zbroja określa KP bohatera i może posiadać dodatkowe efekty.
 - [ ] Obsłużyć premie do KP z innych elementów wyposażenia, np. tarczy, hełmu lub pierścienia.
 - [ ] Obsłużyć zmianę wyposażenia podczas walki jako całe działanie bohatera w rundzie.
+- [ ] Po zmianie wyposażenia przeciwnik wykonuje normalne działanie.
 - [ ] Obsłużyć bojowe efekty Pomocników.
 - [ ] Obsłużyć używanie przedmiotów jednorazowych podczas walki zamiast ataku bohatera w danej rundzie.
+- [ ] Po użyciu przedmiotu przeciwnik wykonuje normalne działanie.
 - [ ] Przedmioty lecznicze w walce leczą HP, nie Rany.
+- [ ] Obsłużyć leczenie HP przez jedzenie, mikstury, odpoczynek i efekty.
 - [ ] Obsłużyć system statusów.
 - [ ] Czas statusu określany przez kartę/efekt.
 - [ ] Ponowne nałożenie statusu odnawia jego czas zamiast kumulować siłę.
 - [ ] Ogłuszenie odbiera działanie bohatera w rundzie.
+- [ ] Wszystkie statusy bojowe znikają po zakończeniu walki.
 - [ ] Obsłużyć Nat 20.
 - [ ] Obsłużyć Nat 1.
 - [ ] Kolejne rundy walki bez sztywnego limitu rund.
 - [ ] Mechanicznie zawsze jeden przeciwnik; grupa może być przedstawiona jako jedna karta/grafika.
 - [ ] Pokonanie przeciwnika.
-- [ ] Pokonanie bohatera.
+- [ ] Pokonanie bohatera przez zejście do 0 HP.
 - [ ] Ucieczka.
 - [ ] Ucieczka poprzez test Intrygi.
 - [ ] Przekupstwo za Złoto.
@@ -179,7 +207,9 @@ To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8
 
 ## Do dopracowania później
 
-- Dokładna relacja HP bohatera i Ran.
+- Szczegółowe konsekwencje i działanie systemu Ran.
+- Dokładny stan HP bohatera po odzyskaniu przytomności po przegranej walce.
+- Ewentualne specjalne efekty zadające Rany bezpośrednio z pominięciem HP.
 - Dokładna lista i pula specjalnych efektów przeciwników.
 - Dokładne tabele/rzuty określające dodatkowe efekty podczas walki.
 - Dokładna lista statusów i zasady ich działania.
