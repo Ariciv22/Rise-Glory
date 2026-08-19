@@ -183,7 +183,6 @@ def _special_effect(session: CombatSession, effect: dict[str, Any], rng) -> dict
         actual, defeated = apply_damage(session.player, damage)
         logs.append(f"Specjalny efekt zadaje {actual} obrazen.")
         if defeated:
-            session.defense_bonus = 0
             return {"outcome": "defeat", "log": " ".join(logs)}
     if isinstance(effect.get("status"), dict):
         _apply_status(session.hero_statuses, effect["status"])
@@ -195,7 +194,6 @@ def _special_effect(session: CombatSession, effect: dict[str, Any], rng) -> dict
         before = int(session.enemy.get("hp", 0) or 0)
         session.enemy["hp"] = min(int(session.enemy.get("max_hp", before) or before), before + heal)
         logs.append(f"Przeciwnik odzyskuje {session.enemy['hp'] - before} HP.")
-    session.defense_bonus = 0
     return {"outcome": "ongoing", "log": " ".join(logs) or "Specjalny efekt nie przynosi dodatkowego skutku."}
 
 
@@ -209,7 +207,6 @@ def _special_action(session: CombatSession, rng) -> dict[str, Any] | None:
     values, threshold = special.get("activation_values"), special.get("activation_threshold")
     active = roll in {int(v) for v in values} if values is not None else (roll >= int(threshold) if threshold is not None else False)
     if not active:
-        session.defense_bonus = 0
         return {"outcome": "ongoing", "log": f"Specjalna zdolnosc nie aktywuje sie (rzut {roll}).", "special_roll": roll}
     effect, result_roll = copy.deepcopy(special.get("effect") or {}), None
     if special.get("table"):
@@ -234,7 +231,6 @@ def _enemy_action(session: CombatSession, rng) -> dict[str, Any]:
     if phase:
         logs.append(phase)
     if skip:
-        session.defense_bonus = 0
         logs.append(f"{session.enemy['name']} traci swoje dzialanie.")
         return {"outcome": "ongoing", "log": " ".join(logs)}
     special = _special_action(session, rng)
