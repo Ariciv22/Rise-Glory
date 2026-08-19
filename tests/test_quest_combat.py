@@ -62,7 +62,7 @@ class QuestCombatTests(unittest.TestCase):
         self.assertTrue(is_combat_active())
         self.assertEqual(player["_token_ref"].actions, 3)
         self.assertEqual(quest["status"], "combat")
-        self.assertEqual(get_active_combat()["enemy"]["name"], "Przeklety zolnierz")
+        self.assertEqual(get_active_combat()["enemy"]["name"], "Przeklęty żołnierz")
 
     def test_failed_final_test_opens_new_combat_module(self):
         player, quest = self._stage_three_player()
