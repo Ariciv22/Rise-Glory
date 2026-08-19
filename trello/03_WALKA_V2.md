@@ -24,12 +24,14 @@ Jeżeli wynik osiąga lub przekracza KP przeciwnika, atak trafia.
 - Bohater korzysta z systemu Ran, a przeciwnik posiada HP.
 - Naturalne 20 podczas ataku oznacza 2 trafienia i dwukrotne rozpatrzenie obrażeń.
 - Naturalne 1 podczas ataku oznacza automatyczne pudło.
+- Walka nie posiada maksymalnego limitu rund. Trwa aż do pokonania jednej ze stron albo skutecznego opuszczenia walki, jeśli dana walka na to pozwala.
 
 ### Broń i obrażenia
 
 - Każda broń posiada dwa osobne parametry: premię do trafienia oraz wartość obrażeń.
 - Przykładowy zapis broni może wyglądać jak `+2 do trafienia / 2 obrażenia`.
 - Atak bez broni zadaje bazowo 1 obrażenie i nie otrzymuje premii broni.
+- Przeciwnik zadaje stałą liczbę Ran/obrażeń określoną na swojej karcie. Podstawowe obrażenia przeciwnika nie są losowane jako zakres.
 
 ### Skalowanie przeciwników Poziomem Świata
 
@@ -42,7 +44,33 @@ Poziom Świata I korzysta z bazowych statystyk przeciwnika zapisanych na jego ka
 
 To skalowanie zastępuje wcześniejszy wariant skalowania samego HP `+2/+4/+6/+8`.
 
-Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie określone osobno.
+- Na obecnym etapie Poziom Świata skaluje wyłącznie KP, premię do trafienia i HP przeciwnika.
+- Stała liczba Ran/obrażeń zadawanych przez przeciwnika nie otrzymuje automatycznego bonusu z Poziomu Świata.
+- Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie określone osobno.
+
+### Zbroja i obrona bohatera
+
+- Zbroja w podstawowym założeniu zwiększa KP bohatera.
+- Zbroje mogą również posiadać dodatkowe efekty poza premią do KP.
+- Inne elementy wyposażenia defensywnego, takie jak tarcze, hełmy, pierścienie lub inne przedmioty, również mogą zwiększać KP, jeśli ich karta tak stanowi.
+- Premie i efekty defensywne wynikają z konkretnej karty przedmiotu.
+
+### Pomocnicy w walce
+
+- Pomocnik może wspierać bohatera podczas walki.
+- Rodzaj pomocy wynika z karty Pomocnika i może obejmować np. premię do Walki, trafienia, obrażeń, KP albo inny efekt bojowy.
+
+### Przedmioty używane w walce
+
+- Podczas walki można używać jednorazowych przedmiotów i efektów, takich jak mikstury, bomby, zwoje, jedzenie lub inne przedmioty dopuszczone przez ich kartę.
+- Użycie takiego przedmiotu zużywa działanie bohatera w danej rundzie walki zamiast wykonania ataku.
+- Po wykorzystaniu przedmiotu bohater nie wykonuje dodatkowo normalnego ataku w tej samej rundzie, chyba że konkretny efekt wyraźnie stanowi inaczej.
+
+### Efekty statusowe
+
+- System walki będzie obsługiwał efekty statusowe.
+- Do możliwych statusów należą m.in. zatrucie, krwawienie, ogłuszenie, podpalenie, osłabienie KP i inne podobne efekty.
+- Dokładna lista statusów, czas działania, sposób nakładania i zdejmowania zostaną dopracowane osobno.
 
 ### Zdolności specjalne przeciwników
 
@@ -50,6 +78,12 @@ Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie okre�
 - Szczegółowy system zdolności zostanie rozwinięty później.
 - Ogólny kierunek: co określoną liczbę rund przeciwnik może wykonywać rzut uruchamiający dodatkowy efekt, a wynik rzutu kością określa, jaki efekt wystąpił.
 - Częstotliwość, warunek aktywacji oraz sposób działania zdolności są określane indywidualnie przez kartę danego przeciwnika.
+
+### Bossowie i fazy walki
+
+- Bossowie mogą posiadać kilka faz walki.
+- Przejście do kolejnej fazy może następować np. po spadku HP poniżej określonego progu.
+- Kolejna faza może zmieniać zdolności, zachowanie, sposób ataku, statystyki lub inne zasady bossa zgodnie z jego kartą.
 
 ### Ucieczka i przekupstwo
 
@@ -73,14 +107,18 @@ Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie okre�
 - [ ] Atak bohatera.
 - [ ] Atak przeciwnika.
 - [ ] Obrażenia bohatera.
-- [ ] Obrażenia przeciwnika.
+- [ ] Stałe obrażenia/Rany przeciwnika określane na karcie.
 - [ ] Rany bohatera.
 - [ ] Każda broń posiada osobną premię do trafienia i wartość obrażeń.
 - [ ] Atak bez broni zadaje 1 obrażenie bez premii broni.
-- [ ] Zbroja określa KP bohatera.
+- [ ] Zbroja określa KP bohatera i może posiadać dodatkowe efekty.
+- [ ] Obsłużyć premie do KP z innych elementów wyposażenia, np. tarczy, hełmu lub pierścienia.
+- [ ] Obsłużyć bojowe efekty Pomocników.
+- [ ] Obsłużyć używanie przedmiotów jednorazowych podczas walki zamiast ataku bohatera w danej rundzie.
+- [ ] Obsłużyć system statusów.
 - [ ] Obsłużyć Nat 20.
 - [ ] Obsłużyć Nat 1.
-- [ ] Kolejne rundy walki.
+- [ ] Kolejne rundy walki bez sztywnego limitu rund.
 - [ ] Pokonanie przeciwnika.
 - [ ] Pokonanie bohatera.
 - [ ] Ucieczka.
@@ -97,6 +135,7 @@ Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie okre�
 - [ ] Skalowanie przeciwników Poziomem Świata: KP, trafienie i HP.
 - [ ] Zdolności specjalne przeciwników aktywowane zgodnie z regułą na karcie.
 - [ ] Bossowie.
+- [ ] Wieloetapowe fazy bossów.
 - [ ] Boss posiada specjalną nagrodę.
 - [ ] Przeciwnicy legendarni.
 - [ ] Czytelny ekran zakończenia walki.
@@ -108,6 +147,7 @@ Przeciwnicy legendarni i bossowie mogą mieć dodatkowe własne skalowanie okre�
 
 - Dokładna lista i pula specjalnych efektów przeciwników.
 - Dokładne tabele/rzuty określające dodatkowe efekty podczas walki.
+- Dokładna lista statusów i zasady ich działania.
 - Indywidualne zdolności bossów i przeciwników legendarnych.
 - Konkretne pule lootu i wartości nagród.
 
