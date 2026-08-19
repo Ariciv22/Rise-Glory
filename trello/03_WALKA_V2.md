@@ -5,7 +5,7 @@
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
 
-## Zatwierdzone zasady 1–60
+## Zatwierdzone zasady 1–70
 
 ### 1. Przebieg walki
 - Bohater zawsze rozpoczyna rundę.
@@ -59,8 +59,10 @@ Poziom I korzysta z wartości bazowych karty.
 - Zbroja zwiększa KP i może mieć dodatkowe efekty.
 - Tarcze, hełmy, pierścienie i inne elementy wyposażenia również mogą zwiększać KP, jeśli karta tak mówi.
 - Akcja `Obrona` zastępuje atak i daje na razie `+2 KP` przeciwko najbliższemu atakowi przeciwnika. Po tym ataku bonus znika.
+- Nat 20 przeciwnika jest automatycznym trafieniem i ignoruje premię KP z Obrony.
 - Po Obronie przeciwnik normalnie wykonuje działanie.
 - Bohater może zmienić wyposażenie w walce. Zmiana zużywa całe działanie bohatera w rundzie, po czym przeciwnik normalnie działa.
+- Zmiana wyposażenia polega na wybraniu przedmiotu z plecaka; nowy przedmiot zostaje założony, a poprzednio wyposażony wraca do plecaka w ramach jednego działania.
 
 ### 7. Pomocnicy i przedmioty
 - Pomocnik może pomagać w walce zgodnie ze swoją kartą, np. premią do Walki, trafienia, obrażeń, KP albo innym efektem.
@@ -69,19 +71,23 @@ Poziom I korzysta z wartości bazowych karty.
 - Leczenie przedmiotem odnawia HP, nie Rany.
 - Ofensywne przedmioty jednorazowe, np. bomby i zwoje, na obecnym etapie trafiają automatycznie bez rzutu na trafienie.
 - Ze względu na pewne trafienie takie przedmioty mają być odpowiednio drogie/wartościowe.
+- Zużyty przedmiot jednorazowy trafia na stos odrzuconych Przedmiotów.
 
 ### 8. Statusy
 - System obsługuje statusy, np. zatrucie, krwawienie, ogłuszenie, podpalenie, osłabienie KP.
 - Czas statusu określa karta/efekt.
 - Ponowne nałożenie tego samego statusu nie zwiększa jego siły; odnawia/przedłuża czas działania.
+- Efekty okresowe statusu rozpatruje się na początku rundy postaci dotkniętej statusem, przed jej działaniem.
 - Ogłuszenie odbiera całe działanie bohatera w rundzie; przeciwnik normalnie działa.
 - Wszystkie statusy bojowe znikają po zakończeniu walki.
 - Szczegółową listę statusów dopracujemy później.
 
 ### 9. Zdolności przeciwników
 - Przeciwnicy mogą mieć specjalne zdolności.
-- Ogólny kierunek: co określoną liczbę rund przeciwnik wykonuje rzut na dodatkowy efekt, a wynik kości wskazuje rezultat.
 - Częstotliwość i zasady zdolności określa indywidualnie karta przeciwnika.
+- Gdy przychodzi runda zdolności specjalnej, przeciwnik najpierw wykonuje rzut sprawdzający, czy specjalny efekt w ogóle się aktywuje.
+- Jeśli aktywacja się powiedzie, karta może wymagać kolejnego rzutu określającego konkretny efekt z tabeli wyników.
+- Zdolność specjalna zajmuje działanie przeciwnika tak jak normalny atak; nie daje automatycznie dodatkowego darmowego ataku, chyba że karta wyraźnie stanowi inaczej.
 - Specjalne zdolności bohaterów zaprojektujemy później.
 
 ### 10. Bossowie
@@ -94,6 +100,9 @@ Poziom I korzysta z wartości bazowych karty.
 - Podstawowe sposoby opuszczenia walki: test `Intrygi` albo przekupstwo za określoną liczbę Złota.
 - Wymagania określa karta przeciwnika/walki.
 - Nie każda walka pozwala na ucieczkę lub przekupstwo; część blokuje obie opcje.
+- Jeżeli dana opcja jest dostępna, jej przycisk jest widoczny w interfejsie walki.
+- Przy przekupstwie gracz widzi dokładny koszt, np. `Przekup — 8 Złota`.
+- Jeśli gracz nie ma wystarczającej ilości Złota, przycisk przekupstwa pozostaje widoczny, ale jest wyszarzony i nieaktywny.
 - Nieudana ucieczka powoduje natychmiastowy atak przeciwnika, po czym walka trwa dalej, jeśli bohater nadal ma HP.
 - Po skutecznej ucieczce bohater zostaje na aktualnym heksie i zachowuje pozostałe Akcje.
 - Przy ponownej walce po ucieczce albo porażce przeciwnik zaczyna z pełnym HP.
@@ -106,11 +115,13 @@ Poziom I korzysta z wartości bazowych karty.
 ### 13. Informacje o przeciwniku
 - Przed walką wszystkie informacje mechaniczne przeciwnika są ukryte.
 - Po rozpoczęciu walki gracz widzi wyłącznie aktualne i maksymalne HP przeciwnika.
-- KP, premia do trafienia, obrażenia, zdolności, ucieczka/przekupstwo i pozostałe dane pozostają ukryte.
+- KP, premia do trafienia, obrażenia i zdolności pozostają ukryte.
+- Dostępność ucieczki/przekupstwa jest komunikowana przez odpowiednie przyciski, a przy przekupstwie widoczny jest koszt.
 
 ### 14. Loot, zwycięstwo i pokonani wrogowie
 - Karta przeciwnika określa jego loot.
 - Po zwycięstwie karta przeciwnika trafia do osobnej talii/stosu `Pokonani wrogowie`, a nie do zwykłego stosu odrzuconych.
+- Każdy gracz może posiadać własny stos `Pokonani wrogowie`.
 - Quest/Zagrożenie może w przyszłości określić wyjątek.
 - Po zwycięstwie bohater zachowuje pozostałe Akcje i może kontynuować turę.
 - Wyświetlany jest osobny ekran `Zwycięstwo` z pokonanym przeciwnikiem, lootem/nagrodami oraz stanem bohatera. Po zatwierdzeniu gracz wraca do mapy/Questa/Zagrożenia/Przygody.
