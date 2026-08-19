@@ -1,6 +1,7 @@
 import unittest
 
-from rg_engine.combat import attempt_bribe, create_session, defend, resolve_round, use_item
+from rg_content.enemies import create_enemy, register_enemy
+from rg_engine.combat import attempt_bribe, create_session, defend, finalize_victory, resolve_round, use_item
 from rg_engine.heroes import ensure_hero_state
 
 
@@ -59,6 +60,19 @@ class CombatEngineTests(unittest.TestCase):
         defend(create_session(player, enemy), FixedRng(20))
         self.assertEqual(player["hp"], 6)
 
+    def test_nat20_applies_weapon_status_twice(self):
+        player = make_player()
+        player["equipment"]["weapon"] = {
+            "name": "Krwawy miecz",
+            "category": "weapon",
+            "slot": "weapon",
+            "effects": {"status": {"name": "Krwawienie", "duration": 2}},
+        }
+        enemy = {"name": "Cel", "max_hp": 10, "armor_class": 99, "attack_bonus": 0, "damage": 1}
+        session = create_session(player, enemy)
+        resolve_round(session, FixedRng(20, 1))
+        self.assertEqual(session.enemy_statuses["krwawienie"]["duration"], 3)
+
     def test_offensive_item_auto_hits_and_goes_to_discard(self):
         player = make_player()
         player["inventory"] = [{
@@ -82,6 +96,92 @@ class CombatEngineTests(unittest.TestCase):
         result = attempt_bribe(create_session(player, enemy), FixedRng())
         self.assertEqual(result["outcome"], "escaped")
         self.assertEqual(player["gold"], 3)
+
+    def test_special_ability_requires_activation_roll_and_replaces_normal_attack(self):
+        player = make_player()
+        enemy = {
+            "name": "Mag",
+            "max_hp": 10,
+            "armor_class": 99,
+            "attack_bonus": 20,
+            "damage": 9,
+            "special": {
+                "every": 1,
+                "activation_die": 6,
+                "activation_threshold": 4,
+                "effect": {"damage": 3},
+            },
+        }
+        result = resolve_round(create_session(player, enemy), FixedRng(1, 6))
+        self.assertEqual(result["outcome"], "ongoing")
+        self.assertEqual(player["hp"], 7)
+
+    def test_failed_special_activation_does_not_add_normal_attack(self):
+        player = make_player()
+        enemy = {
+            "name": "Mag",
+            "max_hp": 10,
+            "armor_class": 99,
+            "attack_bonus": 20,
+            "damage": 9,
+            "special": {
+                "every": 1,
+                "activation_die": 6,
+                "activation_threshold": 4,
+                "effect": {"damage": 3},
+            },
+        }
+        resolve_round(create_session(player, enemy), FixedRng(1, 2))
+        self.assertEqual(player["hp"], 10)
+
+    def test_boss_changes_phase_immediately_after_hp_threshold(self):
+        player = make_player()
+        enemy = {
+            "name": "Boss",
+            "max_hp": 4,
+            "hp": 3,
+            "armor_class": 10,
+            "attack_bonus": 0,
+            "damage": 1,
+            "boss_phases": [{"hp_percent_lte": 50, "damage": 3}],
+        }
+        session = create_session(player, enemy)
+        resolve_round(session, FixedRng(10, 20))
+        self.assertEqual(session.enemy["phase_index"], 1)
+        self.assertEqual(player["hp"], 4)
+
+    def test_world_level_scales_hp_kp_and_hit_but_not_damage(self):
+        register_enemy({
+            "id": "test_scale_enemy",
+            "name": "Skalowany",
+            "base_hp": 5,
+            "armor_class": 10,
+            "attack_bonus": 1,
+            "damage": 2,
+            "scale_with_world": True,
+        })
+        enemy = create_enemy("test_scale_enemy", 4)
+        self.assertEqual(enemy["max_hp"], 9)
+        self.assertEqual(enemy["armor_class"], 14)
+        self.assertEqual(enemy["attack_bonus"], 5)
+        self.assertEqual(enemy["damage"], 2)
+
+    def test_victory_adds_enemy_to_player_stack_and_grants_enemy_loot(self):
+        player = make_player()
+        enemy = {
+            "name": "Łupieżca",
+            "max_hp": 1,
+            "hp": 1,
+            "armor_class": 1,
+            "rewards": {"gold": 2, "legend": 1},
+        }
+        session = create_session(player, enemy)
+        resolve_round(session, FixedRng(10))
+        summary = finalize_victory(session)
+        self.assertEqual(player["gold"], 2)
+        self.assertEqual(player["legend"], 1)
+        self.assertEqual(len(player["defeated_enemies"]), 1)
+        self.assertEqual(summary["gold"], 2)
 
 
 if __name__ == "__main__":
