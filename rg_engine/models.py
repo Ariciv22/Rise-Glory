@@ -31,12 +31,15 @@ class EnemyDefinition:
     armor_class: int
     attack_bonus: int = 0
     wounds: int = 1
+    damage: int = 1
     image: str = ""
     can_escape: bool = True
     scale_with_world: bool = True
     legendary: bool = False
     escape: dict[str, Any] = field(default_factory=dict)
     rewards: dict[str, Any] = field(default_factory=dict)
+    special: dict[str, Any] = field(default_factory=dict)
+    boss_phases: tuple[dict[str, Any], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
