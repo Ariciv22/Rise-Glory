@@ -1,9 +1,30 @@
 # 03 — Walka V2
 
-**Status Kanban:** DO ZROBIENIA
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
+
+## Stan implementacji — 2026-08-19
+- [x] HP bohatera i przeciwnika oraz trwałe HP między walkami.
+- [x] Ataki k20, KP, Nat 1 i Nat 20.
+- [x] Broń: osobna premia do trafienia i obrażenia oraz efekty przy trafieniu.
+- [x] Skalowanie przeciwników Poziomem Świata: KP, trafienie i HP.
+- [x] Obrona `+2 KP` na najbliższy atak.
+- [x] Zmiana wyposażenia jako działanie w walce.
+- [x] Używanie jednorazowych przedmiotów bojowych z automatycznym trafieniem efektu.
+- [x] Bazowy silnik statusów i ich czasu działania.
+- [x] Bazowy silnik specjalnych zdolności przeciwników z rzutem aktywacji i tabelą efektu.
+- [x] Wielofazowi bossowie.
+- [x] Ucieczka przez Intrygę oraz osobne przekupstwo.
+- [x] Porażka: 1 Rana, 1 HP, utrata Złota, koniec tury, pozostanie na heksie.
+- [x] Utrata zakrytego Przedmiotu wyłącznie z plecaka; przedmioty oznaczone jako kluczowe/questowe są chronione.
+- [x] Ekran walki ukrywa wszystkie statystyki przeciwnika poza HP.
+- [x] Ekran Zwycięstwo i osobny stos `Pokonani wrogowie` gracza.
+- [x] Integracja porażki/zwycięstwa z istniejącą walką Questa i Zagrożenia przez wspólny silnik.
+- [x] Testy silnika HP, porażki, obrażeń, Obrony, Nat 20, przedmiotów i przekupstwa.
+- [ ] Do uzupełniania wraz z contentem: konkretne karty statusów, zdolności przeciwników, bossowie, loot i wartości przedmiotów.
+- [ ] Pełny osobny system konsekwencji Ran pozostaje kolejnym modułem projektowym.
 
 ## Zatwierdzone zasady 1–70
 
