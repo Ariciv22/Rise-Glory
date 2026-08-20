@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–90 zapisane, 84 odłożone
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–100 zapisane, 84 odłożone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -10,7 +10,7 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [x] Ataki k20, KP, Nat 1 i Nat 20.
 - [x] Broń: osobna premia do trafienia i obrażenia oraz efekty przy trafieniu.
 - [x] Skalowanie przeciwników Poziomem Świata: KP, trafienie i HP.
-- [x] Obrona `+2 KP` na najbliższy atak.
+- [x] Obrona `+2 KP` do początku następnej tury bohatera.
 - [x] Zmiana wyposażenia jako działanie w walce.
 - [x] Używanie jednorazowych przedmiotów bojowych z automatycznym trafieniem efektu.
 - [x] Bazowy silnik statusów i ich czasu działania.
@@ -79,7 +79,7 @@ Poziom I korzysta z wartości bazowych karty.
 ### 6. Obrona i wyposażenie
 - Zbroja zwiększa KP i może mieć dodatkowe efekty.
 - Tarcze, hełmy, pierścienie i inne elementy wyposażenia również mogą zwiększać KP, jeśli karta tak mówi.
-- Akcja `Obrona` zastępuje atak i daje na razie `+2 KP` przeciwko najbliższemu atakowi przeciwnika. Po tym ataku bonus znika.
+- Akcja `Obrona` zastępuje atak i daje na razie `+2 KP` do początku następnej tury bohatera w walce. Premia obejmuje wszystkie ataki przeciwnika wykonane przed tym momentem, również kilka ataków w ramach jednej zdolności.
 - Nat 20 przeciwnika jest automatycznym trafieniem i ignoruje premię KP z Obrony.
 - Po Obronie przeciwnik normalnie wykonuje działanie.
 - Bohater może zmienić wyposażenie w walce. Zmiana zużywa całe działanie bohatera w rundzie, po czym przeciwnik normalnie działa.
@@ -170,6 +170,18 @@ Poziom I korzysta z wartości bazowych karty.
 - **88. Kolejność statusów:** jeśli kilka statusów rozpatruje się w tym samym momencie, ich efekty są wykonywane w kolejności ich nałożenia.
 - **89. Leczenie przeciwników:** przeciwnicy i bossowie mogą posiadać specjalne zdolności leczące własne HP. Leczenie nie może przekroczyć ich `max_hp`.
 - **90. Porzucony loot i odrzucone rzeczy:** loot pozostawiony po zwycięstwie oraz rzeczy odrzucone przez bohatera przy robieniu miejsca nie przepadają. Zostają na aktualnym heksie w mieszku i mogą zostać później podniesione zgodnie z zasadami obsługi mieszka.
+
+### 17. Doprecyzowania 91–100
+- **91. Podnoszenie mieszka:** podnoszenie rzeczy z mieszka znajdującego się na heksie jest darmowe i nie kosztuje Akcji.
+- **92. Własność mieszka:** zawartość mieszka może podnieść dowolny bohater, nie tylko bohater, który pozostawił tam przedmioty lub loot.
+- **93. Kilka mieszków na jednym heksie:** osobne źródła pozostawionych rzeczy tworzą osobne mieszki; nie są automatycznie łączone w jeden wspólny mieszek.
+- **94. Czas istnienia mieszka:** mieszek pozostaje na heksie bez limitu czasu, aż jego zawartość zostanie zabrana.
+- **95. Złoto z lootu:** Złoto nie zajmuje miejsca w plecaku. Po zwycięstwie może zostać dodane do bohatera niezależnie od limitu Przedmiotów i od tego, czy część fizycznego lootu pozostaje w mieszku.
+- **96. Status bohatera a zakończenie walki:** status okresowy bohatera jest rozpatrywany dopiero na początku jego rzeczywistej rundy. Jeśli przeciwnik zostanie pokonany wcześniej, np. w swojej własnej rundzie przez legalny efekt bohatera, walka kończy się i kolejna runda bohatera już nie następuje, więc jego status nie zadaje kolejnego obrażenia. Po zakończeniu walki statusy bojowe znikają. Jeśli jednak runda bohatera faktycznie się rozpocznie i obrażenia statusowe obniżą jego HP do `0`, następuje normalna porażka.
+- **97. Leczenie przeciwnika jako działanie:** specjalna zdolność leczenia własnego HP zużywa całe działanie przeciwnika; przeciwnik nie wykonuje wtedy normalnego ataku, chyba że jego karta wyraźnie stanowi inaczej.
+- **98. Atak wielokrotny:** specjalna zdolność może wykonywać kilka osobnych ataków w jednym działaniu, np. dwa ataki. Każdy z nich wykonuje osobny rzut na trafienie i jest rozpatrywany osobno.
+- **99. Obrona przeciw atakowi wielokrotnemu:** `Obrona +2 KP` nie znika po pierwszym ataku. Trwa do początku następnej tury bohatera w walce, dzięki czemu obejmuje wszystkie ataki przeciwnika wykonane wcześniej w tej samej rundzie. Ta zasada zastępuje wcześniejsze założenie, że Obrona działa tylko przeciw najbliższemu pojedynczemu atakowi.
+- **100. Usuwanie statusów:** Przedmioty i zdolności mogą usuwać statusy podczas walki, jeśli ich efekt tak stanowi. Użycie Przedmiotu usuwającego status normalnie zużywa całe działanie bohatera w rundzie.
 
 ## Do dopracowania później
 - Pełny system Ran i ich konsekwencji.
