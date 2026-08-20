@@ -232,16 +232,13 @@ def draw_game_ui(
     if world_event:
         duration = "do następnej Rady" if world_event.get("duration") == "until_next_council" else "rozpatrzone"
         event_text = f"Wydarzenie Świata: {world_event.get('name', 'Wydarzenie')} — {duration}"
-        # Caly pas wydarzenia ma ten sam bezpieczny margines co pierwszy kafel HUD-u.
-        event_x = top.x + 56
+        # Tekst wydarzenia jest wyraznie odsuniety od grubej lewej ozdobnej ramy.
+        event_x = top.x + 92
         event_y = top.y + 14
         event_right_margin = 44
         event_text = _fit_single_line(small_font, event_text, top.right - event_x - event_right_margin)
         event_surface = small_font.render(event_text, True, GOLD)
         screen.blit(event_surface, (event_x, event_y))
-        # Linia/pas wydarzenia zaczyna sie dopiero za lewa ozdobna rama.
-        divider_y = top.y + 42
-        pygame.draw.line(screen, (92, 65, 33), (event_x - 2, divider_y), (top.right - event_right_margin, divider_y), 1)
 
     # Pierwszy kafel jest odsuniety od grubej lewej ozdobnej ramy glownego panelu.
     x = 56
