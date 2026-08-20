@@ -138,20 +138,16 @@ def _draw_top_stat_with_panel2(
         icon_name = icon_name_or_x
         x = x_or_width
 
-    # Pierwszy kafel dostaje dodatkowy margines od lewej ramy glownego panelu.
-    # Poniewaz funkcja zwraca prawa krawedz kafla, przesuwa to caly rzad tylko raz.
     x = int(x)
-    if x <= 12:
-        x += 12
 
-    # Kafel pozostaje duzy (86 px), ale caly rzad jest uniesiony wyzej.
+    # Kafel ma 86 px wysokosci. Po zwiekszeniu glownego panelu jego rzad siedzi
+    # pod osobnym pasem Wydarzenia Swiata i pozostaje nad dolna ozdobna rama.
     original_bottom = int(y) + int(height) - 14
     height = max(86, int(height))
     y = original_bottom - height
 
-    # Pelny auto-fit w obie strony. Szerokosc nie zalezy juz od stalej wartosci
-    # przypisanej do pola. Krotki tekst zweza kafel, dlugi automatycznie go rozszerza.
-    # Dotyczy to rowniez nazwy klasy, bohatera, Zlota, Legendy itd.
+    # Pelny auto-fit w obie strony. Krotki tekst zweza kafel, dlugi go rozszerza.
+    # Dotyczy to nazwy klasy, bohatera, Zlota, Legendy i pozostalych pol HUD-u.
     icon_square = min(72, height - 12) if icon_name else 0
     label_width = font.size(str(text))[0]
     left_padding = 8 if icon_name else 14
@@ -159,8 +155,6 @@ def _draw_top_stat_with_panel2(
     right_padding = 18
     desired_width = left_padding + icon_space + label_width + right_padding
 
-    # Minimalna szerokosc chroni bardzo krotkie etykiety przed wygladem waskiego paska.
-    # Maksymalna szerokosc nie pozwala wyjsc poza prawa krawedz ekranu.
     minimum_width = 118 if icon_name else 96
     available_width = max(1, screen.get_width() - x - 12)
     width = min(max(minimum_width, desired_width), available_width)
@@ -188,7 +182,8 @@ def _draw_top_stat_with_panel2(
     label_shadow = font.render(str(text), True, (24, 18, 13))
     screen.blit(label_shadow, (text_x + 1, label_y + 1))
     screen.blit(label, (text_x, label_y))
-    return box.right + 8
+    # 6 px zamiast 8: odzyskujemy miejsce po zwiekszeniu lewego marginesu.
+    return box.right + 6
 
 
 def install_hud_top_stat_theme():
