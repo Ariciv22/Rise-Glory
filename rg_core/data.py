@@ -23,9 +23,10 @@ MIN_ZOOM = 0.35
 MAX_ZOOM = 6.0
 DEFAULT_ZOOM = 1.0
 
-# Przywracamy pelny dekoracyjny panel gornego HUD-u. Same kafle statystyk
-# pozostaja powiekszone do 64 px wysokosci i zajmuja okolo polowy tej belki.
-TOP_BAR_H = 126
+# Gorny HUD ma osobny pas na Wydarzenie Swiata oraz osobny rzad duzych kafli.
+# Dzieki temu tekst wydarzenia nie nachodzi na kafle, a ich ramki nie walcza
+# z dolna ozdobna krawedzia glownego panelu.
+TOP_BAR_H = 158
 LEFT_PANEL_W = 330
 RIGHT_PANEL_W = 300
 SIDE_MARGIN = 12
