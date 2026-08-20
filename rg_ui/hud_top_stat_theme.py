@@ -147,9 +147,10 @@ def _draw_top_stat_with_panel2(
         icon_name = icon_name_or_x
         x = x_or_width
 
-    # Zachowujemy dolna krawedz wskazana przez hud.py, ale zwiekszamy wysokosc
-    # z 64 do 86 px. Kafel rosnie w gore i nadal miesci sie w panelu HUD-u.
-    original_bottom = int(y) + int(height)
+    # Kafel pozostaje duzy (86 px), ale caly rzad jest uniesiony wyzej.
+    # Zostawiamy bezpieczny margines nad dolna ozdobna krawedzia panelu HUD-u,
+    # aby ramki nie nachodzily na kolejny panel po lewej/prawej stronie.
+    original_bottom = int(y) + int(height) - 14
     height = max(86, int(height))
     y = original_bottom - height
     width = _responsive_width(screen.get_width(), int(width), int(x))
