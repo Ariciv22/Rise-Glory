@@ -37,7 +37,16 @@ def _clear_dark_neutral_pixels(surface, max_value=48, max_spread=18):
 def _crop_visible_content(surface, padding=3):
     """Przycina przezroczyste marginesy, aby sam symbol mogl wypelnic duzy kwadrat."""
     mask = pygame.mask.from_surface(surface, 8)
-    bounds = mask.get_bounding_rect()
+    components = mask.get_bounding_rects()
+    if not components:
+        return surface
+
+    # Starsze wersje Pygame nie maja Mask.get_bounding_rect(). Laczymy wiec
+    # prostokaty wszystkich widocznych skladowych w jeden wspolny obszar.
+    bounds = components[0].copy()
+    for rect in components[1:]:
+        bounds.union_ip(rect)
+
     if bounds.width <= 0 or bounds.height <= 0:
         return surface
 
