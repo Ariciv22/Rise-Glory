@@ -147,13 +147,19 @@ def _draw_top_stat_with_panel2(
         icon_name = icon_name_or_x
         x = x_or_width
 
+    # Pierwszy kafel dostaje dodatkowy margines od lewej ramy glownego panelu.
+    # Poniewaz funkcja zwraca prawa krawedz kafla, przesuwa to caly rzad tylko raz.
+    x = int(x)
+    if x <= 12:
+        x += 12
+
     # Kafel pozostaje duzy (86 px), ale caly rzad jest uniesiony wyzej.
     # Zostawiamy bezpieczny margines nad dolna ozdobna krawedzia panelu HUD-u,
     # aby ramki nie nachodzily na kolejny panel po lewej/prawej stronie.
     original_bottom = int(y) + int(height) - 14
     height = max(86, int(height))
     y = original_bottom - height
-    width = _responsive_width(screen.get_width(), int(width), int(x))
+    width = _responsive_width(screen.get_width(), int(width), x)
 
     box = pygame.Rect(x, y, width, height)
     texture = _frame_only_texture(box.size)
