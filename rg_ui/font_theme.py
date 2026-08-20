@@ -52,9 +52,19 @@ def _find_font_path(families, bold=False, italic=False):
     return None
 
 
+def _original_sysfont(name, size, bold=False, italic=False, constructor=None):
+    # Starsze wersje Pygame nie obsluguja argumentu constructor.
+    if constructor is None:
+        return _ORIGINAL_SYSFONT(name, size, bold=bold, italic=italic)
+    try:
+        return _ORIGINAL_SYSFONT(name, size, bold=bold, italic=italic, constructor=constructor)
+    except TypeError:
+        return _ORIGINAL_SYSFONT(name, size, bold=bold, italic=italic)
+
+
 def _themed_sysfont(name, size, bold=False, italic=False, constructor=None):
     if not _is_plain_ui_font(name):
-        return _ORIGINAL_SYSFONT(name, size, bold=bold, italic=italic, constructor=constructor)
+        return _original_sysfont(name, size, bold, italic, constructor)
 
     families = _TITLE_FAMILIES if int(size) >= 28 else _BODY_FAMILIES
     path = _find_font_path(families, bold=bold, italic=italic)
@@ -73,7 +83,7 @@ def _themed_sysfont(name, size, bold=False, italic=False, constructor=None):
             pass
 
     # Ostateczny fallback nadal jest serifowy, zamiast wracac do Ariala.
-    return _ORIGINAL_SYSFONT("georgia", size, bold=bold, italic=italic, constructor=constructor)
+    return _original_sysfont("georgia", size, bold, italic, constructor)
 
 
 def install_font_theme():
