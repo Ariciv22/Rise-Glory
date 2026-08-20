@@ -159,7 +159,17 @@ def _draw_top_stat_with_panel2(
     original_bottom = int(y) + int(height) - 14
     height = max(86, int(height))
     y = original_bottom - height
-    width = _responsive_width(screen.get_width(), int(width), x)
+
+    # Szerokosc bazowa jest tylko minimum. Jezeli tekst robi sie dluzszy
+    # (np. Zloto: 1000, Legenda: 120), kafel automatycznie rosnie tak, aby
+    # ikona, napis i bezpieczne marginesy zawsze miescily sie w ramce.
+    icon_square = min(72, height - 12) if icon_name else 0
+    responsive_width = _responsive_width(screen.get_width(), int(width), x)
+    label_width = font.size(str(text))[0]
+    icon_space = icon_square + 10 if icon_name else 0
+    content_width = 14 + icon_space + label_width + 18
+    available_width = max(1, screen.get_width() - x - 12)
+    width = min(max(responsive_width, content_width), available_width)
 
     box = pygame.Rect(x, y, width, height)
     texture = _frame_only_texture(box.size)
@@ -174,7 +184,6 @@ def _draw_top_stat_with_panel2(
     if icon_name:
         # Ikona ma prawie cala wysokosc kafla. Po przycieciu pustych marginesow
         # faktyczny symbol wypelnia teraz duzy kwadrat ok. 72x72 px.
-        icon_square = min(72, box.height - 12)
         icon = _transparent_top_icon(icon_name, icon_square)
         if icon is not None:
             slot = pygame.Rect(box.x + 8, box.centery - icon_square // 2, icon_square, icon_square)
