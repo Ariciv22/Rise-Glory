@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; zasady 71–80 zatwierdzone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -26,7 +26,7 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [ ] Do uzupełniania wraz z contentem: konkretne karty statusów, zdolności przeciwników, bossowie, loot i wartości przedmiotów.
 - [ ] Pełny osobny system konsekwencji Ran pozostaje kolejnym modułem projektowym.
 
-## Zatwierdzone zasady 1–70
+## Zatwierdzone zasady 1–80
 
 ### 1. Przebieg walki
 - Bohater zawsze rozpoczyna rundę.
@@ -146,6 +146,18 @@ Poziom I korzysta z wartości bazowych karty.
 - Quest/Zagrożenie może w przyszłości określić wyjątek.
 - Po zwycięstwie bohater zachowuje pozostałe Akcje i może kontynuować turę.
 - Wyświetlany jest osobny ekran `Zwycięstwo` z pokonanym przeciwnikiem, lootem/nagrodami oraz stanem bohatera. Po zatwierdzeniu gracz wraca do mapy/Questa/Zagrożenia/Przygody.
+
+### 15. Doprecyzowania 71–80
+- **71. Statusy na przeciwniku:** normalne statusy bojowe mogą działać również na przeciwników, a nie wyłącznie na bohatera.
+- **72. Specjalne ataki przeciwnika:** specjalny atak nie trafia automatycznie. Jeśli specjalna zdolność jest atakiem, przeciwnik musi wykonać normalny rzut na trafienie przeciw KP bohatera. `Obrona +2 KP` działa również przeciw takiemu specjalnemu atakowi.
+- **73. Śmierć od statusu:** jeśli okresowy efekt statusu na początku rundy przeciwnika obniży jego HP do `0`, przeciwnik ginie natychmiast i nie wykonuje już działania w tej rundzie.
+- **74. Limit leczenia HP:** leczenie nie może podnieść aktualnego HP powyżej `max_hp`. Nadmiar leczenia przepada.
+- **75. Loot przy pełnym plecaku:** jeśli bohater nie ma miejsca na zdobyty Przedmiot, może odrzucić własny Przedmiot z plecaka, aby zrobić miejsce, albo pozostawić/porzucić nowy loot.
+- **76. Przekupstwo:** skuteczne przekupstwo kończy walkę bez zwycięstwa. Bohater płaci koszt, nie otrzymuje lootu, a przeciwnik nie trafia do stosu `Pokonani wrogowie`.
+- **77. Ucieczka:** skuteczna ucieczka również nie daje lootu i przeciwnik nie jest uznawany za pokonanego ani nie trafia do `Pokonanych wrogów`.
+- **78. Źródło ostatnich obrażeń:** zabicie przeciwnika bombą, zwojem, statusem albo innym legalnym efektem jest pełnoprawnym zwycięstwem. Bohater otrzymuje normalny loot, a przeciwnik trafia do `Pokonanych wrogów`.
+- **79. Kilka progów fazy bossa naraz:** jeśli jeden efekt obrażeń przekroczy kilka progów faz bossa, wszystkie przekroczone progi są rozpatrywane i boss od razu przechodzi do końcowej osiągniętej fazy przed swoim następnym działaniem.
+- **80. Odkrywanie specjalnych ataków:** po pierwszym użyciu specjalnego ataku przez przeciwnika atak staje się ujawniony w interfejsie jako poznany; gracz widzi od tego momentu, że przeciwnik posiada ten nowy atak.
 
 ## Do dopracowania później
 - Pełny system Ran i ich konsekwencji.
