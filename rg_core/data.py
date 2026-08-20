@@ -23,7 +23,9 @@ MIN_ZOOM = 0.35
 MAX_ZOOM = 6.0
 DEFAULT_ZOOM = 1.0
 
-TOP_BAR_H = 126
+# Gorny HUD ma tylko tyle wysokosci, ile potrzebuja duze kafle statystyk.
+# Usuwamy w ten sposob wielki pusty czarny pas widoczny nad przyciskami.
+TOP_BAR_H = 88
 LEFT_PANEL_W = 330
 RIGHT_PANEL_W = 300
 SIDE_MARGIN = 12
