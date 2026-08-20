@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–100 zapisane, 84 odłożone
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–110 zapisane, 84 odłożone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -182,6 +182,18 @@ Poziom I korzysta z wartości bazowych karty.
 - **98. Atak wielokrotny:** specjalna zdolność może wykonywać kilka osobnych ataków w jednym działaniu, np. dwa ataki. Każdy z nich wykonuje osobny rzut na trafienie i jest rozpatrywany osobno.
 - **99. Obrona przeciw atakowi wielokrotnemu:** `Obrona +2 KP` nie znika po pierwszym ataku. Trwa do początku następnej tury bohatera w walce, dzięki czemu obejmuje wszystkie ataki przeciwnika wykonane wcześniej w tej samej rundzie. Ta zasada zastępuje wcześniejsze założenie, że Obrona działa tylko przeciw najbliższemu pojedynczemu atakowi.
 - **100. Usuwanie statusów:** Przedmioty i zdolności mogą usuwać statusy podczas walki, jeśli ich efekt tak stanowi. Użycie Przedmiotu usuwającego status normalnie zużywa całe działanie bohatera w rundzie.
+
+### 18. Doprecyzowania 101–110
+- **101. Pusty mieszek:** po zabraniu ostatniej rzeczy mieszek natychmiast znika z heksu.
+- **102. Częściowe podnoszenie:** bohater może zabrać z mieszka tylko wybrane rzeczy, a pozostałą zawartość zostawić na później.
+- **103. Mieszek a walka:** rzeczy z mieszka można podnosić i przekładać wyłącznie poza walką, z normalnego widoku mapy.
+- **104. Przenoszenie rzeczy między mieszkiem a bohaterem:** bohater znajdujący się na heksie z mieszkiem może swobodnie przenosić rzeczy pomiędzy mieszkiem a swoim ekwipunkiem/plecakiem. Może odłożyć własny Przedmiot do mieszka, zrobić miejsce i od razu zabrać inną rzecz z tego mieszka; takie przekładanie nie kosztuje Akcji.
+- **105. Kontrataki i reakcje:** Przedmioty, Pomocnicy i zdolności mogą posiadać efekty reaktywne, np. „gdy przeciwnik cię trafi, zadaj mu 1 obrażenie”.
+- **106. Zabicie reakcją:** jeśli legalny kontratak lub reakcja obniży HP przeciwnika do `0` w jego własnej turze, walka kończy się natychmiast jako zwycięstwo bohatera.
+- **107. Wielokrotny atak a porażka:** jeśli jeden z kolejnych ataków w ramach wielokrotnego ataku obniży HP bohatera do `0`, walka kończy się natychmiast; pozostałe ataki nie są już wykonywane.
+- **108. Statusy i Ogłuszenie:** na początku rundy najpierw rozpatruje się efekty statusów przypadające na ten moment, a dopiero potem Ogłuszenie odbiera działanie postaci, jeśli nadal żyje i walka trwa.
+- **109. Zmiana fazy bossa:** wejście w nową fazę może leczyć bossa albo zwiększyć jego `max_hp`, jeśli konkretna karta lub scenariusz tak stanowi.
+- **110. Faza od obrażeń statusowych:** jeśli obrażenia statusowe na początku rundy bossa przekroczą próg fazy, nowa faza uruchamia się natychmiast jeszcze przed działaniem bossa.
 
 ## Do dopracowania później
 - Pełny system Ran i ich konsekwencji.
