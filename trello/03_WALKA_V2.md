@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–120 zapisane, 84 odłożone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -10,11 +10,11 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [x] Ataki k20, KP, Nat 1 i Nat 20.
 - [x] Broń: osobna premia do trafienia i obrażenia oraz efekty przy trafieniu.
 - [x] Skalowanie przeciwników Poziomem Świata: KP, trafienie i HP.
-- [x] Obrona `+2 KP` na najbliższy atak.
+- [x] Obrona `+2 KP` do początku następnej tury bohatera.
 - [x] Zmiana wyposażenia jako działanie w walce.
 - [x] Używanie jednorazowych przedmiotów bojowych z automatycznym trafieniem efektu.
 - [x] Bazowy silnik statusów i ich czasu działania.
-- [x] Bazowy silnik specjalnych zdolności przeciwników z rzutem aktywacji i tabelą efektu.
+- [x] Bazowy silnik specjalnych zdolności przeciwników z rzutem na trafienie i opcjonalną tabelą efektu.
 - [x] Wielofazowi bossowie.
 - [x] Ucieczka przez Intrygę oraz osobne przekupstwo.
 - [x] Porażka: 1 Rana, 1 HP, utrata Złota, koniec tury, pozostanie na heksie.
@@ -26,7 +26,7 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [ ] Do uzupełniania wraz z contentem: konkretne karty statusów, zdolności przeciwników, bossowie, loot i wartości przedmiotów.
 - [ ] Pełny osobny system konsekwencji Ran pozostaje kolejnym modułem projektowym.
 
-## Zatwierdzone zasady 1–70
+## Zatwierdzone zasady walki
 
 ### 1. Przebieg walki
 - Bohater zawsze rozpoczyna rundę.
@@ -79,7 +79,7 @@ Poziom I korzysta z wartości bazowych karty.
 ### 6. Obrona i wyposażenie
 - Zbroja zwiększa KP i może mieć dodatkowe efekty.
 - Tarcze, hełmy, pierścienie i inne elementy wyposażenia również mogą zwiększać KP, jeśli karta tak mówi.
-- Akcja `Obrona` zastępuje atak i daje na razie `+2 KP` przeciwko najbliższemu atakowi przeciwnika. Po tym ataku bonus znika.
+- Akcja `Obrona` zastępuje atak i daje na razie `+2 KP` do początku następnej tury bohatera w walce. Premia obejmuje wszystkie ataki przeciwnika wykonane przed tym momentem, również kilka ataków w ramach jednej zdolności.
 - Nat 20 przeciwnika jest automatycznym trafieniem i ignoruje premię KP z Obrony.
 - Po Obronie przeciwnik normalnie wykonuje działanie.
 - Bohater może zmienić wyposażenie w walce. Zmiana zużywa całe działanie bohatera w rundzie, po czym przeciwnik normalnie działa.
@@ -105,9 +105,11 @@ Poziom I korzysta z wartości bazowych karty.
 
 ### 9. Zdolności przeciwników
 - Przeciwnicy mogą mieć specjalne zdolności.
-- Częstotliwość i zasady zdolności określa indywidualnie karta przeciwnika.
-- Gdy przychodzi runda zdolności specjalnej, przeciwnik najpierw wykonuje rzut sprawdzający, czy specjalny efekt w ogóle się aktywuje.
-- Jeśli aktywacja się powiedzie, karta może wymagać kolejnego rzutu określającego konkretny efekt z tabeli wyników.
+- Częstotliwość i moment użycia zdolności określa indywidualnie karta przeciwnika.
+- Nie wykonuje się osobnego rzutu sprawdzającego, czy specjalna zdolność w ogóle się aktywuje.
+- Gdy zgodnie z kartą przychodzi moment specjalnego ataku, przeciwnik od razu wykonuje normalny rzut na trafienie przeciw KP bohatera.
+- Jeśli specjalna zdolność nie jest atakiem, np. leczeniem własnego HP, rozpatruje się ją zgodnie z tekstem karty bez rzutu na trafienie.
+- Karta może wymagać dodatkowego rzutu wyłącznie wtedy, gdy sama zdolność posiada tabelę możliwych efektów.
 - Zdolność specjalna zajmuje działanie przeciwnika tak jak normalny atak; nie daje automatycznie dodatkowego darmowego ataku, chyba że karta wyraźnie stanowi inaczej.
 - Specjalne zdolności bohaterów zaprojektujemy później.
 
@@ -147,12 +149,73 @@ Poziom I korzysta z wartości bazowych karty.
 - Po zwycięstwie bohater zachowuje pozostałe Akcje i może kontynuować turę.
 - Wyświetlany jest osobny ekran `Zwycięstwo` z pokonanym przeciwnikiem, lootem/nagrodami oraz stanem bohatera. Po zatwierdzeniu gracz wraca do mapy/Questa/Zagrożenia/Przygody.
 
+### 15. Doprecyzowania 71–80
+- **71. Statusy na przeciwniku:** normalne statusy bojowe mogą działać również na przeciwników, a nie wyłącznie na bohatera.
+- **72. Specjalne ataki przeciwnika:** specjalny atak nie trafia automatycznie. Jeśli specjalna zdolność jest atakiem, przeciwnik musi wykonać normalny rzut na trafienie przeciw KP bohatera. `Obrona +2 KP` działa również przeciw takiemu specjalnemu atakowi.
+- **73. Śmierć od statusu:** jeśli okresowy efekt statusu na początku rundy przeciwnika obniży jego HP do `0`, przeciwnik ginie natychmiast i nie wykonuje już działania w tej rundzie.
+- **74. Limit leczenia HP:** leczenie nie może podnieść aktualnego HP powyżej `max_hp`. Nadmiar leczenia przepada.
+- **75. Loot przy pełnym plecaku:** jeśli bohater nie ma miejsca na zdobyty Przedmiot, może odrzucić własny Przedmiot z plecaka, aby zrobić miejsce, albo pozostawić/porzucić nowy loot.
+- **76. Przekupstwo:** skuteczne przekupstwo kończy walkę bez zwycięstwa. Bohater płaci koszt, nie otrzymuje lootu, a przeciwnik nie trafia do stosu `Pokonani wrogowie`.
+- **77. Ucieczka:** skuteczna ucieczka również nie daje lootu i przeciwnik nie jest uznawany za pokonanego ani nie trafia do `Pokonanych wrogów`.
+- **78. Źródło ostatnich obrażeń:** zabicie przeciwnika bombą, zwojem, statusem albo innym legalnym efektem jest pełnoprawnym zwycięstwem. Bohater otrzymuje normalny loot, a przeciwnik trafia do `Pokonanych wrogów`.
+- **79. Kilka progów fazy bossa naraz:** jeśli jeden efekt obrażeń przekroczy kilka progów faz bossa, wszystkie przekroczone progi są rozpatrywane i boss od razu przechodzi do końcowej osiągniętej fazy przed swoim następnym działaniem.
+- **80. Odkrywanie specjalnych ataków:** po pierwszym użyciu specjalnego ataku przez przeciwnika atak staje się ujawniony w interfejsie jako poznany; gracz widzi od tego momentu, że przeciwnik posiada ten nowy atak.
+
+### 16. Doprecyzowania 81–90
+- **81. Nat 1 / Nat 20 na specjalnym ataku:** specjalny atak przeciwnika korzystający z rzutu na trafienie podlega normalnym zasadom krytycznym: Nat 1 oznacza automatyczne pudło, a Nat 20 automatyczne trafienie.
+- **82. Krytyczne obrażenia przeciwnika:** Nat 20 przeciwnika podwaja obrażenia jego ataku.
+- **83. Krytyk specjalnego ataku:** jeśli specjalny atak przy trafieniu zadaje obrażenia i nakłada dodatkowy efekt, Nat 20 podwaja zarówno obrażenia, jak i rozpatrzenie efektu zgodnie z zasadami krytyka.
+- **84. Odporności/immunitety przeciwników:** decyzja odłożona do późniejszego projektowania konkretnych przeciwników i statusów.
+- **85. Ujawnianie odporności:** jeśli system odporności zostanie wykorzystany i bohater pierwszy raz spróbuje nałożyć status, na który przeciwnik jest odporny, odporność zostaje wtedy odkryta i od tej chwili jest widoczna w UI tej walki.
+- **86. Ogłuszenie przeciwnika:** ogłuszony przeciwnik całkowicie traci swoje działanie w rundzie, analogicznie do ogłuszonego bohatera.
+- **87. Wiele statusów naraz:** jedna postać może posiadać jednocześnie kilka różnych statusów, np. Krwawienie, Zatrucie, Podpalenie i Osłabienie KP.
+- **88. Kolejność statusów:** jeśli kilka statusów rozpatruje się w tym samym momencie, ich efekty są wykonywane w kolejności ich nałożenia.
+- **89. Leczenie przeciwników:** przeciwnicy i bossowie mogą posiadać specjalne zdolności leczące własne HP. Leczenie nie może przekroczyć ich `max_hp`.
+- **90. Porzucony loot i odrzucone rzeczy:** loot pozostawiony po zwycięstwie oraz rzeczy odrzucone przez bohatera przy robieniu miejsca nie przepadają. Zostają na aktualnym heksie w mieszku i mogą zostać później podniesione zgodnie z zasadami obsługi mieszka.
+
+### 17. Doprecyzowania 91–100
+- **91. Podnoszenie mieszka:** podnoszenie rzeczy z mieszka znajdującego się na heksie jest darmowe i nie kosztuje Akcji.
+- **92. Własność mieszka:** zawartość mieszka może podnieść dowolny bohater, nie tylko bohater, który pozostawił tam przedmioty lub loot.
+- **93. Kilka mieszków na jednym heksie:** osobne źródła pozostawionych rzeczy tworzą osobne mieszki; nie są automatycznie łączone w jeden wspólny mieszek.
+- **94. Czas istnienia mieszka:** mieszek pozostaje na heksie bez limitu czasu, aż jego zawartość zostanie zabrana.
+- **95. Złoto z lootu:** Złoto nie zajmuje miejsca w plecaku. Po zwycięstwie może zostać dodane do bohatera niezależnie od limitu Przedmiotów i od tego, czy część fizycznego lootu pozostaje w mieszku.
+- **96. Status bohatera a zakończenie walki:** status okresowy bohatera jest rozpatrywany dopiero na początku jego rzeczywistej rundy. Jeśli przeciwnik zostanie pokonany wcześniej, np. w swojej własnej rundzie przez legalny efekt bohatera, walka kończy się i kolejna runda bohatera już nie następuje, więc jego status nie zadaje kolejnego obrażenia. Po zakończeniu walki statusy bojowe znikają. Jeśli jednak runda bohatera faktycznie się rozpocznie i obrażenia statusowe obniżą jego HP do `0`, następuje normalna porażka.
+- **97. Leczenie przeciwnika jako działanie:** specjalna zdolność leczenia własnego HP zużywa całe działanie przeciwnika; przeciwnik nie wykonuje wtedy normalnego ataku, chyba że jego karta wyraźnie stanowi inaczej.
+- **98. Atak wielokrotny:** specjalna zdolność może wykonywać kilka osobnych ataków w jednym działaniu, np. dwa ataki. Każdy z nich wykonuje osobny rzut na trafienie i jest rozpatrywany osobno.
+- **99. Obrona przeciw atakowi wielokrotnemu:** `Obrona +2 KP` nie znika po pierwszym ataku. Trwa do początku następnej tury bohatera w walce, dzięki czemu obejmuje wszystkie ataki przeciwnika wykonane wcześniej w tej samej rundzie. Ta zasada zastępuje wcześniejsze założenie, że Obrona działa tylko przeciw najbliższemu pojedynczemu atakowi.
+- **100. Usuwanie statusów:** Przedmioty i zdolności mogą usuwać statusy podczas walki, jeśli ich efekt tak stanowi. Użycie Przedmiotu usuwającego status normalnie zużywa całe działanie bohatera w rundzie.
+
+### 18. Doprecyzowania 101–110
+- **101. Pusty mieszek:** po zabraniu ostatniej rzeczy mieszek natychmiast znika z heksu.
+- **102. Częściowe podnoszenie:** bohater może zabrać z mieszka tylko wybrane rzeczy, a pozostałą zawartość zostawić na później.
+- **103. Mieszek a walka:** rzeczy z mieszka można podnosić i przekładać wyłącznie poza walką, z normalnego widoku mapy.
+- **104. Przenoszenie rzeczy między mieszkiem a bohaterem:** bohater znajdujący się na heksie z mieszkiem może swobodnie przenosić rzeczy pomiędzy mieszkiem a swoim ekwipunkiem/plecakiem. Może odłożyć własny Przedmiot do mieszka, zrobić miejsce i od razu zabrać inną rzecz z tego mieszka; takie przekładanie nie kosztuje Akcji.
+- **105. Kontrataki i reakcje:** Przedmioty, Pomocnicy i zdolności mogą posiadać efekty reaktywne, np. „gdy przeciwnik cię trafi, zadaj mu 1 obrażenie”.
+- **106. Zabicie reakcją:** jeśli legalny kontratak lub reakcja obniży HP przeciwnika do `0` w jego własnej turze, walka kończy się natychmiast jako zwycięstwo bohatera.
+- **107. Wielokrotny atak a porażka:** jeśli jeden z kolejnych ataków w ramach wielokrotnego ataku obniży HP bohatera do `0`, walka kończy się natychmiast; pozostałe ataki nie są już wykonywane.
+- **108. Statusy i Ogłuszenie:** na początku rundy najpierw rozpatruje się efekty statusów przypadające na ten moment, a dopiero potem Ogłuszenie odbiera działanie postaci, jeśli nadal żyje i walka trwa.
+- **109. Zmiana fazy bossa:** wejście w nową fazę może leczyć bossa albo zwiększyć jego `max_hp`, jeśli konkretna karta lub scenariusz tak stanowi.
+- **110. Faza od obrażeń statusowych:** jeśli obrażenia statusowe na początku rundy bossa przekroczą próg fazy, nowa faza uruchamia się natychmiast jeszcze przed działaniem bossa.
+
+### 19. Doprecyzowania 111–120
+- **111. Moment reakcji po trafieniu:** kontratak lub reakcja uruchamia się dopiero po pełnym rozpatrzeniu trafienia przeciwnika, w tym obrażeń i efektów nakładanych przez ten atak.
+- **112. Reakcja przy 0 HP:** jeśli atak przeciwnika obniży HP bohatera do `0`, walka kończy się porażką i reakcje/kontrataki bohatera z tego trafienia już się nie uruchamiają.
+- **113. Kilka reakcji na jedno trafienie:** jeśli bohater posiada kilka legalnych reakcji wyzwalanych tym samym trafieniem, np. z Tarczy i Pomocnika, wszystkie mogą zostać uruchomione przez to samo zdarzenie.
+- **114. Pudło specjalnego ataku:** jeśli specjalny atak przeciwnika nie trafi, efekty zależne od trafienia, np. Krwawienie, również nie zostają nałożone.
+- **115. Brak osobnego rzutu aktywacji:** nie wykonuje się dodatkowego rzutu sprawdzającego, czy specjalna zdolność się aktywuje. Gdy przychodzi jej moment zgodnie z kartą, specjalny atak od razu wykonuje rzut na trafienie. Ta zasada zastępuje wcześniejsze założenie o osobnym rzucie aktywacji i ma ograniczyć liczbę rzutów oraz obliczeń.
+- **116. Krytyki w ataku wielokrotnym:** każdy atak składający się na zdolność wielokrotną ma własny rzut i własne Nat 1/Nat 20. Nat 20 podwaja wyłącznie ten konkretny atak i jego efekt zgodnie z zasadami krytyka, a nie całą zdolność wielokrotną.
+- **117. Nat 1 w ataku wielokrotnym:** Nat 1 powoduje automatyczne pudło tylko konkretnego ataku, na którym wypadło. Pozostałe ataki w tej samej zdolności są dalej wykonywane, o ile walka wcześniej się nie zakończyła.
+- **118. Leczenie przy zmianie fazy:** nowa faza bossa może zwiększyć `max_hp` oraz jednocześnie uleczyć bossa lub ustawić jego HP zgodnie z efektem fazy, ale wyłącznie wtedy, gdy konkretna karta/scenariusz wyraźnie tak stanowi.
+- **119. Ujawnianie nowej fazy i ataków:** wejście w nową fazę nie ujawnia automatycznie graczowi jej mechaniki ani nowych ataków. Nowy atak, efekt lub zdolność staje się widoczna wtedy, gdy przeciwnik faktycznie jej użyje.
+- **120. Log walki:** ekran walki posiada przewijany log pokazujący rozpatrzone zdarzenia, m.in. rzuty, trafienia i pudła, obrażenia, statusy, leczenie, użyte fazy/zdolności bossa oraz reakcje. Log nie ujawnia ukrytych mechanik, dopóki nie zostaną faktycznie użyte lub odkryte.
+
 ## Do dopracowania później
 - Pełny system Ran i ich konsekwencji.
 - Specjalne efekty zadające Rany bezpośrednio.
 - Pełna lista statusów.
 - Konkretne zdolności przeciwników, bossów i bohaterów.
 - Konkretne pule lootu i wartości nagród.
+- Decyzja, czy konkretni przeciwnicy mogą posiadać odporności/immunitety na statusy.
 
 ## Definition of Done
 Walka może zostać uruchomiona z Questa, Przygody lub Zagrożenia, przejść przez wszystkie rundy i zakończyć się poprawnym zwycięstwem, porażką albo ucieczką.
