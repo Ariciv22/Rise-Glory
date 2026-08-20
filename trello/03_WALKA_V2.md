@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–110 zapisane, 84 odłożone
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–120 zapisane, 84 odłożone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -14,7 +14,7 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [x] Zmiana wyposażenia jako działanie w walce.
 - [x] Używanie jednorazowych przedmiotów bojowych z automatycznym trafieniem efektu.
 - [x] Bazowy silnik statusów i ich czasu działania.
-- [x] Bazowy silnik specjalnych zdolności przeciwników z rzutem aktywacji i tabelą efektu.
+- [x] Bazowy silnik specjalnych zdolności przeciwników z rzutem na trafienie i opcjonalną tabelą efektu.
 - [x] Wielofazowi bossowie.
 - [x] Ucieczka przez Intrygę oraz osobne przekupstwo.
 - [x] Porażka: 1 Rana, 1 HP, utrata Złota, koniec tury, pozostanie na heksie.
@@ -105,9 +105,11 @@ Poziom I korzysta z wartości bazowych karty.
 
 ### 9. Zdolności przeciwników
 - Przeciwnicy mogą mieć specjalne zdolności.
-- Częstotliwość i zasady zdolności określa indywidualnie karta przeciwnika.
-- Gdy przychodzi runda zdolności specjalnej, przeciwnik najpierw wykonuje rzut sprawdzający, czy specjalny efekt w ogóle się aktywuje.
-- Jeśli aktywacja się powiedzie, karta może wymagać kolejnego rzutu określającego konkretny efekt z tabeli wyników.
+- Częstotliwość i moment użycia zdolności określa indywidualnie karta przeciwnika.
+- Nie wykonuje się osobnego rzutu sprawdzającego, czy specjalna zdolność w ogóle się aktywuje.
+- Gdy zgodnie z kartą przychodzi moment specjalnego ataku, przeciwnik od razu wykonuje normalny rzut na trafienie przeciw KP bohatera.
+- Jeśli specjalna zdolność nie jest atakiem, np. leczeniem własnego HP, rozpatruje się ją zgodnie z tekstem karty bez rzutu na trafienie.
+- Karta może wymagać dodatkowego rzutu wyłącznie wtedy, gdy sama zdolność posiada tabelę możliwych efektów.
 - Zdolność specjalna zajmuje działanie przeciwnika tak jak normalny atak; nie daje automatycznie dodatkowego darmowego ataku, chyba że karta wyraźnie stanowi inaczej.
 - Specjalne zdolności bohaterów zaprojektujemy później.
 
@@ -194,6 +196,18 @@ Poziom I korzysta z wartości bazowych karty.
 - **108. Statusy i Ogłuszenie:** na początku rundy najpierw rozpatruje się efekty statusów przypadające na ten moment, a dopiero potem Ogłuszenie odbiera działanie postaci, jeśli nadal żyje i walka trwa.
 - **109. Zmiana fazy bossa:** wejście w nową fazę może leczyć bossa albo zwiększyć jego `max_hp`, jeśli konkretna karta lub scenariusz tak stanowi.
 - **110. Faza od obrażeń statusowych:** jeśli obrażenia statusowe na początku rundy bossa przekroczą próg fazy, nowa faza uruchamia się natychmiast jeszcze przed działaniem bossa.
+
+### 19. Doprecyzowania 111–120
+- **111. Moment reakcji po trafieniu:** kontratak lub reakcja uruchamia się dopiero po pełnym rozpatrzeniu trafienia przeciwnika, w tym obrażeń i efektów nakładanych przez ten atak.
+- **112. Reakcja przy 0 HP:** jeśli atak przeciwnika obniży HP bohatera do `0`, walka kończy się porażką i reakcje/kontrataki bohatera z tego trafienia już się nie uruchamiają.
+- **113. Kilka reakcji na jedno trafienie:** jeśli bohater posiada kilka legalnych reakcji wyzwalanych tym samym trafieniem, np. z Tarczy i Pomocnika, wszystkie mogą zostać uruchomione przez to samo zdarzenie.
+- **114. Pudło specjalnego ataku:** jeśli specjalny atak przeciwnika nie trafi, efekty zależne od trafienia, np. Krwawienie, również nie zostają nałożone.
+- **115. Brak osobnego rzutu aktywacji:** nie wykonuje się dodatkowego rzutu sprawdzającego, czy specjalna zdolność się aktywuje. Gdy przychodzi jej moment zgodnie z kartą, specjalny atak od razu wykonuje rzut na trafienie. Ta zasada zastępuje wcześniejsze założenie o osobnym rzucie aktywacji i ma ograniczyć liczbę rzutów oraz obliczeń.
+- **116. Krytyki w ataku wielokrotnym:** każdy atak składający się na zdolność wielokrotną ma własny rzut i własne Nat 1/Nat 20. Nat 20 podwaja wyłącznie ten konkretny atak i jego efekt zgodnie z zasadami krytyka, a nie całą zdolność wielokrotną.
+- **117. Nat 1 w ataku wielokrotnym:** Nat 1 powoduje automatyczne pudło tylko konkretnego ataku, na którym wypadło. Pozostałe ataki w tej samej zdolności są dalej wykonywane, o ile walka wcześniej się nie zakończyła.
+- **118. Leczenie przy zmianie fazy:** nowa faza bossa może zwiększyć `max_hp` oraz jednocześnie uleczyć bossa lub ustawić jego HP zgodnie z efektem fazy, ale wyłącznie wtedy, gdy konkretna karta/scenariusz wyraźnie tak stanowi.
+- **119. Ujawnianie nowej fazy i ataków:** wejście w nową fazę nie ujawnia automatycznie graczowi jej mechaniki ani nowych ataków. Nowy atak, efekt lub zdolność staje się widoczna wtedy, gdy przeciwnik faktycznie jej użyje.
+- **120. Log walki:** ekran walki posiada przewijany log pokazujący rozpatrzone zdarzenia, m.in. rzuty, trafienia i pudła, obrażenia, statusy, leczenie, użyte fazy/zdolności bossa oraz reakcje. Log nie ujawnia ukrytych mechanik, dopóki nie zostaną faktycznie użyte lub odkryte.
 
 ## Do dopracowania później
 - Pełny system Ran i ich konsekwencji.
