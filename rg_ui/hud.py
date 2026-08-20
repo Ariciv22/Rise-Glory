@@ -221,7 +221,9 @@ def draw_game_ui(
     if world_event:
         duration = "do następnej Rady" if world_event.get("duration") == "until_next_council" else "rozpatrzone"
         event_text = f"Wydarzenie Świata: {world_event.get('name', 'Wydarzenie')} — {duration}"
-        screen.blit(small_font.render(event_text, True, GOLD), (14, 16))
+        event_surface = small_font.render(event_text, True, GOLD)
+        # Bezpieczny margines od dekoracyjnej lewej krawedzi glownego panelu.
+        screen.blit(event_surface, (top.x + 32, top.y + 14))
 
     x = 12
     top_stat_h = 64
@@ -238,7 +240,9 @@ def draw_game_ui(
         ("rada", f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 146),
     ]
     for icon_name, text, width in top_stats:
-        if x + width > sw - 12:
+        # Faktyczna szerokosc jest liczona dopiero przez motyw na podstawie
+        # ikony i tekstu, wiec nie blokujemy kafla jego dawna stala szerokoscia.
+        if x >= sw - 118:
             break
         x = _draw_top_stat(screen, font, text, icon_name, x, width, y=top_stat_y, height=top_stat_h)
 
