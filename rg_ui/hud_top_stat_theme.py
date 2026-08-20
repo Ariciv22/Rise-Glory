@@ -34,6 +34,32 @@ def _clear_dark_neutral_pixels(surface, max_value=48, max_spread=18):
     return cleaned
 
 
+def _crop_visible_content(surface, padding=3):
+    """Przycina przezroczyste marginesy, aby sam symbol mogl wypelnic duzy kwadrat."""
+    mask = pygame.mask.from_surface(surface, 8)
+    bounds = mask.get_bounding_rect()
+    if bounds.width <= 0 or bounds.height <= 0:
+        return surface
+
+    bounds.inflate_ip(padding * 2, padding * 2)
+    bounds.clamp_ip(surface.get_rect())
+    return surface.subsurface(bounds).copy()
+
+
+def _scale_into_square(surface, size):
+    size = max(1, int(size))
+    source_w, source_h = surface.get_size()
+    if source_w <= 0 or source_h <= 0:
+        return None
+
+    scale = min(size / source_w, size / source_h)
+    scaled_size = (
+        max(1, int(round(source_w * scale))),
+        max(1, int(round(source_h * scale))),
+    )
+    return pygame.transform.smoothscale(surface, scaled_size)
+
+
 def _frame_only_texture(size):
     """Zwraca panel2 bez ciemnego wypelnienia srodka kafla."""
     size = (int(size[0]), int(size[1]))
@@ -53,23 +79,44 @@ def _frame_only_texture(size):
 
 
 def _transparent_top_icon(icon_name, size):
-    """Usuwa czarne kwadratowe tlo zapisane w ikonach gornego HUD-u."""
+    """Laduje, oczyszcza, przycina i skaluje sam symbol ikony gornego HUD-u."""
     cache_key = (str(icon_name), int(size))
     if cache_key in _ICON_CACHE:
         return _ICON_CACHE[cache_key]
 
     from rg_ui import hud
 
-    icon = hud._load_top_stat_icon(icon_name, size)
-    if icon is None:
-        _ICON_CACHE[cache_key] = None
-        return None
+    filename = hud._TOP_STAT_ICON_FILES.get(str(icon_name))
+    icon = None
+    if filename:
+        path = hud.ROOT_DIR / "Grafiki" / "ikony_gornego_ui" / filename
+        if path.exists():
+            try:
+                source = pygame.image.load(str(path)).convert_alpha()
+                source = _clear_dark_neutral_pixels(source, max_value=52, max_spread=20)
+                source = _crop_visible_content(source, padding=3)
+                icon = _scale_into_square(source, size)
+            except (OSError, pygame.error):
+                icon = None
 
-    # Ikony sa glownie zlote/kolorowe, wiec usuniecie bardzo ciemnych neutralnych
-    # pikseli wycina ich czarne tlo bez naruszania glownego symbolu.
-    cleaned = _clear_dark_neutral_pixels(icon, max_value=52, max_spread=20)
-    _ICON_CACHE[cache_key] = cleaned
-    return cleaned
+    # Awaryjnie korzystamy ze starego loadera, jesli konkretnego pliku zabraknie.
+    if icon is None:
+        fallback = hud._load_top_stat_icon(icon_name, size)
+        if fallback is not None:
+            fallback = _clear_dark_neutral_pixels(fallback, max_value=52, max_spread=20)
+            fallback = _crop_visible_content(fallback, padding=1)
+            icon = _scale_into_square(fallback, size)
+
+    _ICON_CACHE[cache_key] = icon
+    return icon
+
+
+def _responsive_width(screen_width, requested_width, x):
+    """Na szerokich ekranach rozciaga kafle, a na 1600 px zachowuje bezpieczny uklad."""
+    progress = max(0.0, min(1.0, (screen_width - 1600) / 448.0))
+    width_scale = 1.0 + 0.24 * progress
+    desired = int(round(requested_width * width_scale))
+    return max(1, min(desired, screen_width - int(x) - 12))
 
 
 def _draw_top_stat_with_panel2(
@@ -82,7 +129,7 @@ def _draw_top_stat_with_panel2(
     y=54,
     height=64,
 ):
-    """Rysuje duzy kafel HUD-u jako przezroczysta ozdobna ramke panel2.png."""
+    """Rysuje powiekszony kafel HUD-u z duza ikona wypelniajaca osobny kwadrat."""
     if width is None:
         icon_name = None
         x = icon_name_or_x
@@ -91,24 +138,33 @@ def _draw_top_stat_with_panel2(
         icon_name = icon_name_or_x
         x = x_or_width
 
+    # Zachowujemy dolna krawedz wskazana przez hud.py, ale zwiekszamy wysokosc
+    # z 64 do 86 px. Kafel rosnie w gore i nadal miesci sie w panelu HUD-u.
+    original_bottom = int(y) + int(height)
+    height = max(86, int(height))
+    y = original_bottom - height
+    width = _responsive_width(screen.get_width(), int(width), int(x))
+
     box = pygame.Rect(x, y, width, height)
     texture = _frame_only_texture(box.size)
 
     if texture is not None:
-        # Bez pelnego prostokatnego cienia: to on wczesniej tworzyl czarne
-        # wypelnienie widoczne przez przezroczyste fragmenty ramki.
+        # Bez pelnego prostokatnego cienia: tlo pochodzi z glownego panelu HUD-u.
         screen.blit(texture, box)
     else:
         pygame.draw.rect(screen, GOLD, box, 2, border_radius=8)
 
-    text_x = box.x + 12
+    text_x = box.x + 14
     if icon_name:
-        icon_size = min(38, max(28, height - 20))
-        icon = _transparent_top_icon(icon_name, icon_size)
+        # Ikona ma prawie cala wysokosc kafla. Po przycieciu pustych marginesow
+        # faktyczny symbol wypelnia teraz duzy kwadrat ok. 72x72 px.
+        icon_square = min(72, box.height - 12)
+        icon = _transparent_top_icon(icon_name, icon_square)
         if icon is not None:
-            icon_rect = icon.get_rect(midleft=(box.x + 10, box.centery))
+            slot = pygame.Rect(box.x + 8, box.centery - icon_square // 2, icon_square, icon_square)
+            icon_rect = icon.get_rect(center=slot.center)
             screen.blit(icon, icon_rect)
-            text_x = icon_rect.right + 8
+            text_x = slot.right + 10
 
     label = font.render(str(text), True, TEXT)
     label_y = box.y + (box.height - label.get_height()) // 2
@@ -120,7 +176,13 @@ def _draw_top_stat_with_panel2(
 
 
 def install_hud_top_stat_theme():
-    """Podmienia gorne pola informacji na duze, przezroczyste ramki panel2.png."""
+    """Podmienia gorne pola informacji na duze ramki z duzymi ikonami."""
     from rg_ui import hud
+
+    # W repo ikona Punktow Legendy ma nazwe punkty_legend.png, nie legenda.png.
+    hud._TOP_STAT_ICON_FILES["legenda"] = "punkty_legend.png"
+    hud._TOP_STAT_ICON_CACHE.clear()
+    _ICON_CACHE.clear()
+    _FRAME_CACHE.clear()
 
     hud._draw_top_stat = _draw_top_stat_with_panel2
