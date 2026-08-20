@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; zasady 71–80 zatwierdzone
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–88 i 90 zapisane, 84 odłożone, 89 otwarte
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -26,7 +26,7 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [ ] Do uzupełniania wraz z contentem: konkretne karty statusów, zdolności przeciwników, bossowie, loot i wartości przedmiotów.
 - [ ] Pełny osobny system konsekwencji Ran pozostaje kolejnym modułem projektowym.
 
-## Zatwierdzone zasady 1–80
+## Zatwierdzone zasady walki
 
 ### 1. Przebieg walki
 - Bohater zawsze rozpoczyna rundę.
@@ -159,12 +159,26 @@ Poziom I korzysta z wartości bazowych karty.
 - **79. Kilka progów fazy bossa naraz:** jeśli jeden efekt obrażeń przekroczy kilka progów faz bossa, wszystkie przekroczone progi są rozpatrywane i boss od razu przechodzi do końcowej osiągniętej fazy przed swoim następnym działaniem.
 - **80. Odkrywanie specjalnych ataków:** po pierwszym użyciu specjalnego ataku przez przeciwnika atak staje się ujawniony w interfejsie jako poznany; gracz widzi od tego momentu, że przeciwnik posiada ten nowy atak.
 
+### 16. Doprecyzowania 81–90
+- **81. Nat 1 / Nat 20 na specjalnym ataku:** specjalny atak przeciwnika korzystający z rzutu na trafienie podlega normalnym zasadom krytycznym: Nat 1 oznacza automatyczne pudło, a Nat 20 automatyczne trafienie.
+- **82. Krytyczne obrażenia przeciwnika:** Nat 20 przeciwnika podwaja obrażenia jego ataku.
+- **83. Krytyk specjalnego ataku:** jeśli specjalny atak przy trafieniu zadaje obrażenia i nakłada dodatkowy efekt, Nat 20 podwaja zarówno obrażenia, jak i rozpatrzenie efektu zgodnie z zasadami krytyka.
+- **84. Odporności/immunitety przeciwników:** decyzja odłożona do późniejszego projektowania konkretnych przeciwników i statusów.
+- **85. Ujawnianie odporności:** jeśli system odporności zostanie wykorzystany i bohater pierwszy raz spróbuje nałożyć status, na który przeciwnik jest odporny, odporność zostaje wtedy odkryta i od tej chwili jest widoczna w UI tej walki.
+- **86. Ogłuszenie przeciwnika:** ogłuszony przeciwnik całkowicie traci swoje działanie w rundzie, analogicznie do ogłuszonego bohatera.
+- **87. Wiele statusów naraz:** jedna postać może posiadać jednocześnie kilka różnych statusów, np. Krwawienie, Zatrucie, Podpalenie i Osłabienie KP.
+- **88. Kolejność statusów:** jeśli kilka statusów rozpatruje się w tym samym momencie, ich efekty są wykonywane w kolejności ich nałożenia.
+- **89. Leczenie przeciwników:** OTWARTE — wymaga decyzji.
+- **90. Porzucony loot i odrzucone rzeczy:** loot pozostawiony po zwycięstwie oraz rzeczy odrzucone przez bohatera przy robieniu miejsca nie przepadają. Zostają na aktualnym heksie w mieszku i mogą zostać później podniesione zgodnie z zasadami obsługi mieszka.
+
 ## Do dopracowania później
 - Pełny system Ran i ich konsekwencji.
 - Specjalne efekty zadające Rany bezpośrednio.
 - Pełna lista statusów.
 - Konkretne zdolności przeciwników, bossów i bohaterów.
 - Konkretne pule lootu i wartości nagród.
+- Decyzja, czy konkretni przeciwnicy mogą posiadać odporności/immunitety na statusy.
+- Decyzja, czy przeciwnicy/bossowie mogą posiadać zdolności leczące własne HP.
 
 ## Definition of Done
 Walka może zostać uruchomiona z Questa, Przygody lub Zagrożenia, przejść przez wszystkie rundy i zakończyć się poprawnym zwycięstwem, porażką albo ucieczką.
