@@ -1,38 +1,22 @@
 import pygame
 
-from rg_core.data import GOLD, PANEL_DARK, TEXT
+from rg_core.data import GOLD, TEXT
 from rg_ui import screens as s
 
 
 _FRAME_CACHE = {}
+_ICON_CACHE = {}
 
 
-def _frame_only_texture(size):
-    """Zwraca panel2 bez ciemnego wypelnienia srodka kafla.
-
-    Panel gornego HUD-u zostaje pod spodem. Tutaj zachowujemy jedynie ozdobna
-    rame panel2.png, aby przezroczysty srodek pokazywal teksture glownego panelu,
-    a nie czarny prostokat.
-    """
-    size = (int(size[0]), int(size[1]))
-    cached = _FRAME_CACHE.get(size)
-    if cached is not None:
-        return cached
-
-    texture = s._load_menu_button_texture(size)
-    if texture is None:
-        _FRAME_CACHE[size] = None
-        return None
-
-    cleaned = texture.copy().convert_alpha()
+def _clear_dark_neutral_pixels(surface, max_value=48, max_spread=18):
+    """Usuwa czarne/prawie czarne neutralne tlo z kopii Surface."""
+    cleaned = surface.copy().convert_alpha()
     try:
         rgb = pygame.surfarray.pixels3d(cleaned)
         alpha = pygame.surfarray.pixels_alpha(cleaned)
         channel_min = rgb.min(axis=2)
         channel_max = rgb.max(axis=2)
-        # Usuwamy tylko bardzo ciemne, prawie neutralne piksele. Brazowo-zlote
-        # elementy ramki maja wieksza roznice kanalow i pozostaja widoczne.
-        dark_fill = (channel_max <= 48) & ((channel_max - channel_min) <= 18)
+        dark_fill = (channel_max <= max_value) & ((channel_max - channel_min) <= max_spread)
         alpha[dark_fill] = 0
         del alpha
         del rgb
@@ -44,11 +28,47 @@ def _frame_only_texture(size):
                 color = cleaned.unmap_rgb(pixels[px, py])
                 low = min(color.r, color.g, color.b)
                 high = max(color.r, color.g, color.b)
-                if high <= 48 and high - low <= 18:
+                if high <= max_value and high - low <= max_spread:
                     pixels[px, py] = (0, 0, 0, 0)
         del pixels
+    return cleaned
 
+
+def _frame_only_texture(size):
+    """Zwraca panel2 bez ciemnego wypelnienia srodka kafla."""
+    size = (int(size[0]), int(size[1]))
+    if size in _FRAME_CACHE:
+        return _FRAME_CACHE[size]
+
+    texture = s._load_menu_button_texture(size)
+    if texture is None:
+        _FRAME_CACHE[size] = None
+        return None
+
+    # Panel gornego HUD-u zostaje pod spodem. Z panel2 zachowujemy ozdobna
+    # brazowo-zlota rame, a ciemny neutralny srodek robimy przezroczysty.
+    cleaned = _clear_dark_neutral_pixels(texture, max_value=48, max_spread=18)
     _FRAME_CACHE[size] = cleaned
+    return cleaned
+
+
+def _transparent_top_icon(icon_name, size):
+    """Usuwa czarne kwadratowe tlo zapisane w ikonach gornego HUD-u."""
+    cache_key = (str(icon_name), int(size))
+    if cache_key in _ICON_CACHE:
+        return _ICON_CACHE[cache_key]
+
+    from rg_ui import hud
+
+    icon = hud._load_top_stat_icon(icon_name, size)
+    if icon is None:
+        _ICON_CACHE[cache_key] = None
+        return None
+
+    # Ikony sa glownie zlote/kolorowe, wiec usuniecie bardzo ciemnych neutralnych
+    # pikseli wycina ich czarne tlo bez naruszania glownego symbolu.
+    cleaned = _clear_dark_neutral_pixels(icon, max_value=52, max_spread=20)
+    _ICON_CACHE[cache_key] = cleaned
     return cleaned
 
 
@@ -75,18 +95,16 @@ def _draw_top_stat_with_panel2(
     texture = _frame_only_texture(box.size)
 
     if texture is not None:
-        # Nie rysujemy juz pelnego prostokatnego cienia. Wczesniej ten cien byl
-        # widoczny przez przezroczyste fragmenty panel2 i tworzyl czarne tlo.
+        # Bez pelnego prostokatnego cienia: to on wczesniej tworzyl czarne
+        # wypelnienie widoczne przez przezroczyste fragmenty ramki.
         screen.blit(texture, box)
     else:
-        # Fallback, gdy grafika panel2 jest niedostepna.
         pygame.draw.rect(screen, GOLD, box, 2, border_radius=8)
 
     text_x = box.x + 12
     if icon_name:
-        from rg_ui import hud
-
-        icon = hud._load_top_stat_icon(icon_name, min(38, max(28, height - 20)))
+        icon_size = min(38, max(28, height - 20))
+        icon = _transparent_top_icon(icon_name, icon_size)
         if icon is not None:
             icon_rect = icon.get_rect(midleft=(box.x + 10, box.centery))
             screen.blit(icon, icon_rect)
