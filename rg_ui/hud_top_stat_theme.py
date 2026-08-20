@@ -11,8 +11,8 @@ def _draw_top_stat_with_panel2(
     icon_name_or_x,
     x_or_width,
     width=None,
-    y=64,
-    height=46,
+    y=16,
+    height=64,
 ):
     """Rysuje gorne pole HUD-u na panel2.png i obsluguje ikone po lewej.
 
@@ -41,17 +41,17 @@ def _draw_top_stat_with_panel2(
         pygame.draw.rect(screen, PANEL_DARK, box, border_radius=8)
         pygame.draw.rect(screen, GOLD, box, 2, border_radius=8)
 
-    text_x = box.x + 10
+    text_x = box.x + 12
     if icon_name:
         # Loader ikon pozostaje w hud.py, aby cala konfiguracja nazw i cache
         # byla w jednym miejscu.
         from rg_ui import hud
 
-        icon = hud._load_top_stat_icon(icon_name, min(28, max(20, height - 14)))
+        icon = hud._load_top_stat_icon(icon_name, min(38, max(28, height - 20)))
         if icon is not None:
-            icon_rect = icon.get_rect(midleft=(box.x + 8, box.centery))
+            icon_rect = icon.get_rect(midleft=(box.x + 10, box.centery))
             screen.blit(icon, icon_rect)
-            text_x = icon_rect.right + 6
+            text_x = icon_rect.right + 8
 
     label = font.render(str(text), True, TEXT)
     label_y = box.y + (box.height - label.get_height()) // 2
