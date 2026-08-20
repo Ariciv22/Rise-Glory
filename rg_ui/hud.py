@@ -192,6 +192,17 @@ def _draw_bottom_tile_info(screen, font, small_font, selected_tile, rect):
     screen.blit(font.render(line, True, TEXT), (rect.x + 20, rect.y + max(0, (rect.height - font.get_height()) // 2)))
 
 
+def _fit_single_line(font, text, max_width):
+    """Skraca pojedynczy komunikat tak, aby nigdy nie wyjechal poza panel."""
+    text = str(text)
+    if font.size(text)[0] <= max_width:
+        return text
+    suffix = "..."
+    while text and font.size(text + suffix)[0] > max_width:
+        text = text[:-1]
+    return text.rstrip() + suffix
+
+
 def draw_game_ui(
     screen,
     font,
@@ -213,19 +224,25 @@ def draw_game_ui(
     right = layout["right"]
     bottom = layout["bottom"]
 
-    # Pelny dekoracyjny panel gornego HUD-u zostaje. Kafle statystyk sa
-    # nakladane na niego jako osobne ramki bez pelnego czarnego wypelnienia.
+    # Pelny dekoracyjny panel gornego HUD-u zostaje. Gorny pas panelu jest
+    # zarezerwowany dla Wydarzenia Swiata, a duze kafle siedza nizej.
     draw_image_panel(screen, top, 2, ORANGE)
 
     world_event = active_world_event()
     if world_event:
         duration = "do następnej Rady" if world_event.get("duration") == "until_next_council" else "rozpatrzone"
         event_text = f"Wydarzenie Świata: {world_event.get('name', 'Wydarzenie')} — {duration}"
+        event_x = top.x + 40
+        event_y = top.y + 14
+        event_text = _fit_single_line(small_font, event_text, top.width - 80)
         event_surface = small_font.render(event_text, True, GOLD)
-        # Bezpieczny margines od dekoracyjnej lewej krawedzi glownego panelu.
-        screen.blit(event_surface, (top.x + 32, top.y + 14))
+        screen.blit(event_surface, (event_x, event_y))
+        # Delikatna linia oddziela komunikat od rzedu kafli i zapobiega zlewaniu.
+        divider_y = top.y + 42
+        pygame.draw.line(screen, (92, 65, 33), (top.x + 38, divider_y), (top.right - 38, divider_y), 1)
 
-    x = 12
+    # Wiekszy wewnetrzny margines chroni pierwszy kafel przed lewa ozdobna rama.
+    x = 38
     top_stat_h = 64
     top_stat_y = top.bottom - top_stat_h - 8
     top_stats = [
@@ -240,8 +257,7 @@ def draw_game_ui(
         ("rada", f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 146),
     ]
     for icon_name, text, width in top_stats:
-        # Faktyczna szerokosc jest liczona dopiero przez motyw na podstawie
-        # ikony i tekstu, wiec nie blokujemy kafla jego dawna stala szerokoscia.
+        # Faktyczna szerokosc jest liczona przez motyw na podstawie ikony i tekstu.
         if x >= sw - 118:
             break
         x = _draw_top_stat(screen, font, text, icon_name, x, width, y=top_stat_y, height=top_stat_h)
