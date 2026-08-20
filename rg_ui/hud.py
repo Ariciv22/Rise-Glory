@@ -20,7 +20,21 @@ from rg_ui.player_board import (
     open_player_board,
     open_quest_details,
 )
-from rg_ui.common import Button, draw_image_panel, draw_panel, game_layout_rects
+from rg_ui.common import Button, ROOT_DIR, draw_image_panel, draw_panel, game_layout_rects
+
+
+_TOP_STAT_ICON_FILES = {
+    "gracz": "gracz.png",
+    "bohater": "bohater.png",
+    "klasa": "klasa.png",
+    "legenda": "legenda.png",
+    "zloto": "zloto.png",
+    "rany": "rany.png",
+    "akcje": "akcje.png",
+    "runda": "runda.png",
+    "rada": "rada.png",
+}
+_TOP_STAT_ICON_CACHE = {}
 
 
 class _HudPanelButton(Button):
@@ -61,10 +75,56 @@ class _PlayerBoardButton(_HudPanelButton):
         return True
 
 
-def _draw_top_stat(screen, font, text, x, width):
-    box = pygame.Rect(x, 78, width, 30)
+def _load_top_stat_icon(icon_name, size=20):
+    cache_key = (str(icon_name), int(size))
+    if cache_key in _TOP_STAT_ICON_CACHE:
+        return _TOP_STAT_ICON_CACHE[cache_key]
+
+    filename = _TOP_STAT_ICON_FILES.get(str(icon_name))
+    if not filename:
+        _TOP_STAT_ICON_CACHE[cache_key] = None
+        return None
+
+    path = ROOT_DIR / "Grafiki" / "ikony_gornego_ui" / filename
+    if not path.exists():
+        _TOP_STAT_ICON_CACHE[cache_key] = None
+        return None
+
+    try:
+        source = pygame.image.load(str(path)).convert_alpha()
+        source_w, source_h = source.get_size()
+        if source_w <= 0 or source_h <= 0:
+            icon = None
+        else:
+            scale = min(size / source_w, size / source_h)
+            scaled_size = (
+                max(1, int(round(source_w * scale))),
+                max(1, int(round(source_h * scale))),
+            )
+            icon = pygame.transform.smoothscale(source, scaled_size)
+    except pygame.error:
+        icon = None
+
+    _TOP_STAT_ICON_CACHE[cache_key] = icon
+    return icon
+
+
+def _draw_top_stat(screen, font, text, icon_name, x, width, y=64, height=46):
+    box = pygame.Rect(x, y, width, height)
     draw_panel(screen, box)
-    screen.blit(font.render(text, True, TEXT), (box.x + 9, box.y + 6))
+
+    icon = _load_top_stat_icon(icon_name, min(28, max(20, height - 14)))
+    text_x = box.x + 10
+    if icon is not None:
+        icon_rect = icon.get_rect(midleft=(box.x + 8, box.centery))
+        screen.blit(icon, icon_rect)
+        text_x = icon_rect.right + 6
+
+    label = font.render(text, True, TEXT)
+    shadow = font.render(text, True, (22, 17, 12))
+    label_y = box.y + max(0, (box.height - label.get_height()) // 2)
+    screen.blit(shadow, (text_x + 1, label_y + 1))
+    screen.blit(label, (text_x, label_y))
     return box.right + 8
 
 
@@ -165,21 +225,23 @@ def draw_game_ui(
         screen.blit(small_font.render(event_text, True, GOLD), (36, 48))
 
     x = 36
+    top_stat_y = 64
+    top_stat_h = 46
     top_stats = [
-        (f"Gracz: {hero.get('player_number', active_player_index + 1)}", 112),
-        (f"Bohater: {hero['name']}", 180),
-        (f"Klasa: {hero.get('archetype_name', '-')}", 170),
-        (f"Legenda: {hero.get('legend', 0)}", 126),
-        (f"Zloto: {hero.get('gold', 0)}", 108),
-        (f"Rany: {hero.get('wounds', 0)}/{MAX_WOUNDS}", 112),
-        (f"Akcje: {token.actions}/{ACTIONS_PER_TURN}", 126),
-        (f"Runda: {round_number}", 108),
-        (f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 110),
+        ("gracz", f"Gracz: {hero.get('player_number', active_player_index + 1)}", 136),
+        ("bohater", f"Bohater: {hero['name']}", 214),
+        ("klasa", f"Klasa: {hero.get('archetype_name', '-')}", 200),
+        ("legenda", f"Legenda: {hero.get('legend', 0)}", 150),
+        ("zloto", f"Zloto: {hero.get('gold', 0)}", 132),
+        ("rany", f"Rany: {hero.get('wounds', 0)}/{MAX_WOUNDS}", 138),
+        ("akcje", f"Akcje: {token.actions}/{ACTIONS_PER_TURN}", 154),
+        ("runda", f"Runda: {round_number}", 132),
+        ("rada", f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 136),
     ]
-    for text, width in top_stats:
+    for icon_name, text, width in top_stats:
         if x + width > sw - 24:
             break
-        x = _draw_top_stat(screen, small_font, text, x, width)
+        x = _draw_top_stat(screen, small_font, text, icon_name, x, width, y=top_stat_y, height=top_stat_h)
 
     pygame.draw.rect(screen, PANEL_DARK, left)
     draw_image_panel(screen, left, 5)
