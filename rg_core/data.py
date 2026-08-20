@@ -29,11 +29,11 @@ RIGHT_PANEL_W = 300
 SIDE_MARGIN = 12
 MAP_MARGIN = 28
 
-# Chlodne srebro dla glownego tekstu UI. Jest wyraznie bardziej metaliczne
-# od poprzedniej prawie-bieli, ale nadal zachowuje wysoki kontrast na ciemnych panelach.
-TEXT = (205, 210, 218)
-# Drugoplanowy tekst pozostaje ciemniejszym, matowym srebrem.
-MUTED = (158, 164, 172)
+# Wyrazne stalowe srebro dla glownego tekstu UI. Chlodniejszy i ciemniejszy
+# od bieli, aby na ciemnych panelach bylo jednoznacznie odbierane jako srebro.
+TEXT = (168, 181, 198)
+# Drugoplanowy tekst pozostaje ciemniejszym, matowym stalowym srebrem.
+MUTED = (126, 139, 155)
 BG = (18, 22, 26)
 PANEL = (24, 20, 16)
 PANEL_DARK = (15, 13, 11)
