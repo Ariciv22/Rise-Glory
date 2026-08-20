@@ -10,6 +10,13 @@ from rg_core.bootstrap import install_legacy_module_aliases
 
 install_legacy_module_aliases()
 
+# Motyw czcionek instalujemy przed importem glownej aplikacji. Dzieki temu
+# wszystkie ekrany korzystajace dotad z Ariala automatycznie dostaja bardziej
+# klimatyczny krój fantasy-serif bez przepisywania kazdego panelu osobno.
+from rg_ui.font_theme import install_font_theme
+
+install_font_theme()
+
 from rg_core import app as _app
 from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
