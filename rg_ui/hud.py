@@ -6,7 +6,6 @@ from rg_core.data import (
     GOLD,
     MAX_WOUNDS,
     MUTED,
-    ORANGE,
     PANEL_DARK,
     TEXT,
 )
@@ -109,16 +108,16 @@ def _load_top_stat_icon(icon_name, size=20):
     return icon
 
 
-def _draw_top_stat(screen, font, text, icon_name, x, width, y=64, height=46):
+def _draw_top_stat(screen, font, text, icon_name, x, width, y=16, height=64):
     box = pygame.Rect(x, y, width, height)
     draw_panel(screen, box)
 
-    icon = _load_top_stat_icon(icon_name, min(28, max(20, height - 14)))
-    text_x = box.x + 10
+    icon = _load_top_stat_icon(icon_name, min(38, max(28, height - 20)))
+    text_x = box.x + 12
     if icon is not None:
-        icon_rect = icon.get_rect(midleft=(box.x + 8, box.centery))
+        icon_rect = icon.get_rect(midleft=(box.x + 10, box.centery))
         screen.blit(icon, icon_rect)
-        text_x = icon_rect.right + 6
+        text_x = icon_rect.right + 8
 
     label = font.render(text, True, TEXT)
     shadow = font.render(text, True, (22, 17, 12))
@@ -213,35 +212,32 @@ def draw_game_ui(
     right = layout["right"]
     bottom = layout["bottom"]
 
-    # Pelne prostokaty pod teksturami usuwaja przeswity na zaokraglonych rogach
-    # i lacza top, lewy oraz prawy panel w jedna rame wokol planszy.
-    pygame.draw.rect(screen, PANEL_DARK, top)
-    draw_image_panel(screen, top, 2, ORANGE)
-
+    # Gorny HUD nie ma juz osobnego czarnego/tlo-panelu. Rysujemy tylko
+    # poszczegolne kafle statystyk, dzieki czemu znika wielki ciemny prostokat.
     world_event = active_world_event()
     if world_event:
         duration = "do następnej Rady" if world_event.get("duration") == "until_next_council" else "rozpatrzone"
         event_text = f"Wydarzenie Świata: {world_event.get('name', 'Wydarzenie')} — {duration}"
-        screen.blit(small_font.render(event_text, True, GOLD), (36, 48))
+        screen.blit(small_font.render(event_text, True, GOLD), (14, 2))
 
-    x = 36
-    top_stat_y = 64
-    top_stat_h = 46
+    x = 12
+    top_stat_h = 64
+    top_stat_y = top.bottom - top_stat_h - 8
     top_stats = [
-        ("gracz", f"Gracz: {hero.get('player_number', active_player_index + 1)}", 136),
-        ("bohater", f"Bohater: {hero['name']}", 214),
-        ("klasa", f"Klasa: {hero.get('archetype_name', '-')}", 200),
-        ("legenda", f"Legenda: {hero.get('legend', 0)}", 150),
-        ("zloto", f"Zloto: {hero.get('gold', 0)}", 132),
-        ("rany", f"Rany: {hero.get('wounds', 0)}/{MAX_WOUNDS}", 138),
-        ("akcje", f"Akcje: {token.actions}/{ACTIONS_PER_TURN}", 154),
-        ("runda", f"Runda: {round_number}", 132),
-        ("rada", f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 136),
+        ("gracz", f"Gracz: {hero.get('player_number', active_player_index + 1)}", 142),
+        ("bohater", f"Bohater: {hero['name']}", 224),
+        ("klasa", f"Klasa: {hero.get('archetype_name', '-')}", 210),
+        ("legenda", f"Legenda: {hero.get('legend', 0)}", 158),
+        ("zloto", f"Zloto: {hero.get('gold', 0)}", 140),
+        ("rany", f"Rany: {hero.get('wounds', 0)}/{MAX_WOUNDS}", 146),
+        ("akcje", f"Akcje: {token.actions}/{ACTIONS_PER_TURN}", 164),
+        ("runda", f"Runda: {round_number}", 142),
+        ("rada", f"Rada: {council_cycle}/{COUNCIL_ROUNDS}", 146),
     ]
     for icon_name, text, width in top_stats:
-        if x + width > sw - 24:
+        if x + width > sw - 12:
             break
-        x = _draw_top_stat(screen, small_font, text, icon_name, x, width, y=top_stat_y, height=top_stat_h)
+        x = _draw_top_stat(screen, font, text, icon_name, x, width, y=top_stat_y, height=top_stat_h)
 
     pygame.draw.rect(screen, PANEL_DARK, left)
     draw_image_panel(screen, left, 5)
