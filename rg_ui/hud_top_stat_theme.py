@@ -120,14 +120,6 @@ def _transparent_top_icon(icon_name, size):
     return icon
 
 
-def _responsive_width(screen_width, requested_width, x):
-    """Na szerokich ekranach rozciaga kafle, a na 1600 px zachowuje bezpieczny uklad."""
-    progress = max(0.0, min(1.0, (screen_width - 1600) / 448.0))
-    width_scale = 1.0 + 0.24 * progress
-    desired = int(round(requested_width * width_scale))
-    return max(1, min(desired, screen_width - int(x) - 12))
-
-
 def _draw_top_stat_with_panel2(
     screen,
     font,
@@ -138,11 +130,10 @@ def _draw_top_stat_with_panel2(
     y=54,
     height=64,
 ):
-    """Rysuje powiekszony kafel HUD-u z duza ikona wypelniajaca osobny kwadrat."""
+    """Rysuje duzy kafel HUD-u i dopasowuje jego szerokosc do aktualnej tresci."""
     if width is None:
         icon_name = None
         x = icon_name_or_x
-        width = x_or_width
     else:
         icon_name = icon_name_or_x
         x = x_or_width
@@ -154,36 +145,36 @@ def _draw_top_stat_with_panel2(
         x += 12
 
     # Kafel pozostaje duzy (86 px), ale caly rzad jest uniesiony wyzej.
-    # Zostawiamy bezpieczny margines nad dolna ozdobna krawedzia panelu HUD-u,
-    # aby ramki nie nachodzily na kolejny panel po lewej/prawej stronie.
     original_bottom = int(y) + int(height) - 14
     height = max(86, int(height))
     y = original_bottom - height
 
-    # Szerokosc bazowa jest tylko minimum. Jezeli tekst robi sie dluzszy
-    # (np. Zloto: 1000, Legenda: 120), kafel automatycznie rosnie tak, aby
-    # ikona, napis i bezpieczne marginesy zawsze miescily sie w ramce.
+    # Pelny auto-fit w obie strony. Szerokosc nie zalezy juz od stalej wartosci
+    # przypisanej do pola. Krotki tekst zweza kafel, dlugi automatycznie go rozszerza.
+    # Dotyczy to rowniez nazwy klasy, bohatera, Zlota, Legendy itd.
     icon_square = min(72, height - 12) if icon_name else 0
-    responsive_width = _responsive_width(screen.get_width(), int(width), x)
     label_width = font.size(str(text))[0]
+    left_padding = 8 if icon_name else 14
     icon_space = icon_square + 10 if icon_name else 0
-    content_width = 14 + icon_space + label_width + 18
+    right_padding = 18
+    desired_width = left_padding + icon_space + label_width + right_padding
+
+    # Minimalna szerokosc chroni bardzo krotkie etykiety przed wygladem waskiego paska.
+    # Maksymalna szerokosc nie pozwala wyjsc poza prawa krawedz ekranu.
+    minimum_width = 118 if icon_name else 96
     available_width = max(1, screen.get_width() - x - 12)
-    width = min(max(responsive_width, content_width), available_width)
+    width = min(max(minimum_width, desired_width), available_width)
 
     box = pygame.Rect(x, y, width, height)
     texture = _frame_only_texture(box.size)
 
     if texture is not None:
-        # Bez pelnego prostokatnego cienia: tlo pochodzi z glownego panelu HUD-u.
         screen.blit(texture, box)
     else:
         pygame.draw.rect(screen, GOLD, box, 2, border_radius=8)
 
     text_x = box.x + 14
     if icon_name:
-        # Ikona ma prawie cala wysokosc kafla. Po przycieciu pustych marginesow
-        # faktyczny symbol wypelnia teraz duzy kwadrat ok. 72x72 px.
         icon = _transparent_top_icon(icon_name, icon_square)
         if icon is not None:
             slot = pygame.Rect(box.x + 8, box.centery - icon_square // 2, icon_square, icon_square)
