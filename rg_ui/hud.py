@@ -6,6 +6,7 @@ from rg_core.data import (
     GOLD,
     MAX_WOUNDS,
     MUTED,
+    ORANGE,
     PANEL_DARK,
     TEXT,
 )
@@ -108,7 +109,7 @@ def _load_top_stat_icon(icon_name, size=20):
     return icon
 
 
-def _draw_top_stat(screen, font, text, icon_name, x, width, y=16, height=64):
+def _draw_top_stat(screen, font, text, icon_name, x, width, y=54, height=64):
     box = pygame.Rect(x, y, width, height)
     draw_panel(screen, box)
 
@@ -212,13 +213,15 @@ def draw_game_ui(
     right = layout["right"]
     bottom = layout["bottom"]
 
-    # Gorny HUD nie ma juz osobnego czarnego/tlo-panelu. Rysujemy tylko
-    # poszczegolne kafle statystyk, dzieki czemu znika wielki ciemny prostokat.
+    # Pelny dekoracyjny panel gornego HUD-u zostaje. Kafle statystyk sa
+    # nakladane na niego jako osobne ramki bez pelnego czarnego wypelnienia.
+    draw_image_panel(screen, top, 2, ORANGE)
+
     world_event = active_world_event()
     if world_event:
         duration = "do następnej Rady" if world_event.get("duration") == "until_next_council" else "rozpatrzone"
         event_text = f"Wydarzenie Świata: {world_event.get('name', 'Wydarzenie')} — {duration}"
-        screen.blit(small_font.render(event_text, True, GOLD), (14, 2))
+        screen.blit(small_font.render(event_text, True, GOLD), (14, 16))
 
     x = 12
     top_stat_h = 64
