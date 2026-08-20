@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–88 i 90 zapisane, 84 odłożone, 89 otwarte
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–90 zapisane, 84 odłożone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -168,7 +168,7 @@ Poziom I korzysta z wartości bazowych karty.
 - **86. Ogłuszenie przeciwnika:** ogłuszony przeciwnik całkowicie traci swoje działanie w rundzie, analogicznie do ogłuszonego bohatera.
 - **87. Wiele statusów naraz:** jedna postać może posiadać jednocześnie kilka różnych statusów, np. Krwawienie, Zatrucie, Podpalenie i Osłabienie KP.
 - **88. Kolejność statusów:** jeśli kilka statusów rozpatruje się w tym samym momencie, ich efekty są wykonywane w kolejności ich nałożenia.
-- **89. Leczenie przeciwników:** OTWARTE — wymaga decyzji.
+- **89. Leczenie przeciwników:** przeciwnicy i bossowie mogą posiadać specjalne zdolności leczące własne HP. Leczenie nie może przekroczyć ich `max_hp`.
 - **90. Porzucony loot i odrzucone rzeczy:** loot pozostawiony po zwycięstwie oraz rzeczy odrzucone przez bohatera przy robieniu miejsca nie przepadają. Zostają na aktualnym heksie w mieszku i mogą zostać później podniesione zgodnie z zasadami obsługi mieszka.
 
 ## Do dopracowania później
@@ -178,7 +178,6 @@ Poziom I korzysta z wartości bazowych karty.
 - Konkretne zdolności przeciwników, bossów i bohaterów.
 - Konkretne pule lootu i wartości nagród.
 - Decyzja, czy konkretni przeciwnicy mogą posiadać odporności/immunitety na statusy.
-- Decyzja, czy przeciwnicy/bossowie mogą posiadać zdolności leczące własne HP.
 
 ## Definition of Done
 Walka może zostać uruchomiona z Questa, Przygody lub Zagrożenia, przejść przez wszystkie rundy i zakończyć się poprawnym zwycięstwem, porażką albo ucieczką.
