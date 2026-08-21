@@ -5,15 +5,48 @@ import pygame
 from rg_ui import city
 
 
-CITY_UI_DIR = city.ROOT_DIR / "Grafiki" / "grafiki_lokacji"
-LIRION_SCENE_FILE = CITY_UI_DIR / "miasto1.png"
-LEFT_PANEL_FILE = CITY_UI_DIR / "lewy_ui.png"
-RIGHT_PANEL_FILE = CITY_UI_DIR / "prawy_ui.png"
+LOCATION_UI_DIR = city.ROOT_DIR / "Grafiki" / "grafiki_lokacji"
+LEFT_PANEL_FILE = LOCATION_UI_DIR / "lewy_ui.png"
+RIGHT_PANEL_FILE = LOCATION_UI_DIR / "prawy_ui.png"
 
-# Pierwszy ekran nowego UI miasta jest celowo przypiety tylko do Lirionu.
-# Pozostale miasta nadal korzystaja ze starego ekranu, dopoki nie dostana
-# wlasnej sceny / przypisania grafiki.
-CITY_MENU = [
+# Kazda z dziewieciu generowanych lokacji dostaje wlasna scene. Numer lokacji
+# pochodzi bezposrednio z rg_world.generation.build_location_data(), wiec grafika
+# pozostaje przypisana do tej samej lokacji niezaleznie od tego, na jakim heksie
+# wylosuje sie podczas generowania mapy.
+LOCATION_SCENE_FILES = {
+    ("city", 1): ("miasto1.png",),
+    ("city", 2): ("miasto2.png",),
+    ("city", 3): ("miasto3.png",),
+    ("castle", 1): ("zamek1.png",),
+    ("castle", 2): ("zamek2.png",),
+    ("castle", 3): ("zamek3.png",),
+    ("village", 1): ("wies1.png",),
+    # W repo drugi plik wsi ma obecnie znak diakrytyczny w nazwie. Zostawiamy
+    # tez wariant ASCII, zeby pozniejsza zmiana nazwy assetu nie wymagala kodu.
+    ("village", 2): ("wies2.png", "wieś2.png"),
+    ("village", 3): ("wies3.png",),
+}
+
+# Awaryjne mapowanie po nazwie. Przydaje sie dla starych zapisow lub danych,
+# ktore nie maja jeszcze pola "number".
+LOCATION_NAME_NUMBERS = {
+    "Lirion": 1,
+    "Miasto 1": 1,
+    "Miasto 2": 2,
+    "Miasto 3": 3,
+    "Artium": 1,
+    "Zamek 1": 1,
+    "Zamek 2": 2,
+    "Zamek 3": 3,
+    "Wies 1": 1,
+    "Wies 2": 2,
+    "Wies 3": 3,
+    "Wieś 1": 1,
+    "Wieś 2": 2,
+    "Wieś 3": 3,
+}
+
+LOCATION_MENU = [
     ("Sklep", "location_shop"),
     ("Karczma", "location_tavern"),
     ("Tablica ogloszen", "location_board"),
@@ -30,7 +63,7 @@ _SCALED_CACHE = {}
 _SCENE_CACHE = {}
 
 
-class CityMenuButton(city.Button):
+class LocationMenuButton(city.Button):
     """Przycisk nakladany na slot narysowany w grafice lewego panelu."""
 
     def draw(self, screen, font, mouse_pos, active=False):
@@ -90,12 +123,35 @@ def _draw_panel_asset(screen, rect, path):
     screen.blit(image, rect.topleft)
 
 
-def _cover_scene(rect):
-    source = _load_asset(LIRION_SCENE_FILE)
+def _location_number(location):
+    try:
+        number = int(location.get("number", 0) or 0)
+    except (TypeError, ValueError):
+        number = 0
+    if number in {1, 2, 3}:
+        return number
+    return LOCATION_NAME_NUMBERS.get(str(location.get("name", "")))
+
+
+def _scene_file_for_location(location):
+    kind = str(location.get("kind", ""))
+    number = _location_number(location)
+    if number is None:
+        return None
+
+    for filename in LOCATION_SCENE_FILES.get((kind, number), ()):  # pragma: no branch - mala lista assetow
+        path = LOCATION_UI_DIR / filename
+        if path.exists():
+            return path
+    return None
+
+
+def _cover_scene(rect, scene_file):
+    source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = rect.size
+    key = (str(scene_file), rect.size)
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
@@ -113,7 +169,7 @@ def _cover_scene(rect):
     return result
 
 
-def city_hub_layout(screen):
+def location_hub_layout(screen):
     """Uklad 20% panel lewy / 60% scena / 20% panel prawy + dolny pasek."""
     sw, sh = screen.get_size()
     bottom_h = max(58, min(78, int(sh * 0.085)))
@@ -129,6 +185,10 @@ def city_hub_layout(screen):
     return {"left": left, "scene": scene, "right": right, "bottom": bottom}
 
 
+# Zachowujemy stara nazwe, zeby ewentualne odwolania z innych modulow nie pekly.
+city_hub_layout = location_hub_layout
+
+
 def _menu_button_rects(left_rect):
     button_x = left_rect.x + int(left_rect.width * 0.17)
     button_w = int(left_rect.width * 0.68)
@@ -137,7 +197,7 @@ def _menu_button_rects(left_rect):
     step = int(left_rect.height * 0.118)
 
     rows = []
-    for index, (label, action) in enumerate(CITY_MENU):
+    for index, (label, action) in enumerate(LOCATION_MENU):
         rows.append((label, action, pygame.Rect(button_x, start_y + index * step, button_w, button_h)))
 
     back = pygame.Rect(
@@ -152,8 +212,9 @@ def _menu_button_rects(left_rect):
 def right_content_rect(right_rect):
     """Docelowy obszar na zmienny content prawego panelu.
 
-    Na tym etapie pozostaje pusty. Kolejne widoki (Sklep, Karczma itd.) beda
-    rysowane tylko wewnatrz tego prostokata, bez zmiany calego shellu ekranu.
+    Na tym etapie pozostaje pusty dla wszystkich dziewieciu lokacji. Kolejne
+    widoki beda rysowane tylko wewnatrz tego prostokata, zgodnie z osobnymi
+    makietami przekazywanymi dla Sklepu, Karczmy itd.
     """
     pad_x = int(right_rect.width * 0.08)
     pad_top = int(right_rect.height * 0.06)
@@ -171,22 +232,18 @@ def _draw_left_menu(screen, font, mouse_pos, selected_place, rect):
     rows, back_rect = _menu_button_rects(rect)
 
     for label, action, button_rect in rows:
-        button = CityMenuButton(label, action, button_rect)
+        button = LocationMenuButton(label, action, button_rect)
         button.draw(screen, font, mouse_pos, active=(selected_place == action))
         buttons.append(button)
 
-    back = CityMenuButton("Powrot na mape", "back_to_map", back_rect)
+    back = LocationMenuButton("Powrot na mape", "back_to_map", back_rect)
     back.draw(screen, font, mouse_pos)
     buttons.append(back)
     return buttons
 
 
 def _draw_right_content(screen, font, small_font, mouse_pos, location, player, selected_place, rect):
-    """Miejsce na docelowy content prawego panelu.
-
-    Celowo nic tutaj jeszcze nie renderujemy. Shell i obszar contentu sa gotowe,
-    a zawartosc kazdej zakladki zostanie dopisana osobno wedlug finalnych makiet.
-    """
+    """Pusty kontener na docelowy content prawego panelu."""
     _ = (screen, font, small_font, mouse_pos, location, player, selected_place, right_content_rect(rect))
     return []
 
@@ -205,7 +262,7 @@ def _draw_bottom_bar(screen, rect, message=""):
         screen.blit(label, (rect.x + 24, rect.centery - label.get_height() // 2))
 
 
-def draw_lirion_city_screen(
+def draw_location_hub_screen(
     screen,
     title_font,
     font,
@@ -216,10 +273,14 @@ def draw_lirion_city_screen(
     selected_place=None,
     message="",
 ):
+    _ = title_font
     city.initialize_location(location)
-    layout = city_hub_layout(screen)
+    scene_file = _scene_file_for_location(location)
+    if scene_file is None:
+        return None
 
-    scene_image = _cover_scene(layout["scene"])
+    layout = location_hub_layout(screen)
+    scene_image = _cover_scene(layout["scene"], scene_file)
     if scene_image is None:
         return None
 
@@ -230,8 +291,20 @@ def draw_lirion_city_screen(
     _draw_panel_asset(screen, layout["right"], RIGHT_PANEL_FILE)
 
     # Delikatne laczenia paneli ze scena jak na makiecie referencyjnej.
-    pygame.draw.line(screen, (104, 67, 27), (layout["left"].right - 1, 0), (layout["left"].right - 1, layout["left"].bottom), 2)
-    pygame.draw.line(screen, (104, 67, 27), (layout["right"].left, 0), (layout["right"].left, layout["right"].bottom), 2)
+    pygame.draw.line(
+        screen,
+        (104, 67, 27),
+        (layout["left"].right - 1, 0),
+        (layout["left"].right - 1, layout["left"].bottom),
+        2,
+    )
+    pygame.draw.line(
+        screen,
+        (104, 67, 27),
+        (layout["right"].left, 0),
+        (layout["right"].left, layout["right"].bottom),
+        2,
+    )
 
     buttons = _draw_left_menu(screen, font, mouse_pos, selected_place, layout["left"])
     buttons += _draw_right_content(
@@ -250,8 +323,33 @@ def draw_lirion_city_screen(
     return buttons
 
 
+# Kompatybilnosc z pierwsza wersja ekranu Lirionu.
+def draw_lirion_city_screen(
+    screen,
+    title_font,
+    font,
+    small_font,
+    mouse_pos,
+    location,
+    player,
+    selected_place=None,
+    message="",
+):
+    return draw_location_hub_screen(
+        screen,
+        title_font,
+        font,
+        small_font,
+        mouse_pos,
+        location,
+        player,
+        selected_place,
+        message,
+    )
+
+
 def install_city_hub(app_module):
-    """Instaluje nowy ekran tylko dla Lirionu, bez ruszania innych lokacji."""
+    """Instaluje wspolny shell UI dla 3 miast, 3 zamkow i 3 wsi."""
     if getattr(app_module, "_rise_glory_city_hub_installed", False):
         return
 
@@ -268,16 +366,17 @@ def install_city_hub(app_module):
         selected_place=None,
         message="",
     ):
-        use_lirion_ui = (
-            location.get("kind") == "city"
-            and location.get("name") == "Lirion"
+        scene_file = _scene_file_for_location(location)
+        use_location_ui = (
+            location.get("kind") in {"city", "castle", "village"}
+            and scene_file is not None
             and not city.is_combat_active()
             and screen.get_width() >= 1100
             and screen.get_height() >= 700
             and not city.parse_quest_action(selected_place)
         )
-        if use_lirion_ui:
-            result = draw_lirion_city_screen(
+        if use_location_ui:
+            result = draw_location_hub_screen(
                 screen,
                 title_font,
                 font,
@@ -304,3 +403,7 @@ def install_city_hub(app_module):
 
     app_module.draw_city_screen = wrapped
     app_module._rise_glory_city_hub_installed = True
+
+
+# Nazwa docelowa dla nowego kodu; stara pozostaje ze wzgledu na main.py i zgodnosc.
+install_location_hub = install_city_hub
