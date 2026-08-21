@@ -18,7 +18,7 @@ from rg_ui.font_theme import install_font_theme
 install_font_theme()
 
 from rg_core import app as _app
-from rg_ui.city_hub import install_city_hub
+from rg_ui.city_hub import install_location_hub
 from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.map_background_fix import install_map_background
@@ -58,13 +58,15 @@ install_player_config_theme(_app)
 # pozostale przyciski UI, zamiast z prostych placeholderowych ramek.
 install_hud_top_stat_theme()
 
-# Wsie korzystaja z duzej ilustracji jako interaktywnej planszetki. Klikniecie
-# obiektu na scenie uruchamia te sama akcje co odpowiadajacy mu przycisk po lewej.
+# Starszy ekran wsi zostaje pod spodem jako fallback dla malego okna, questow
+# oraz sytuacji, w ktorej zabraknie ktoregos assetu nowego ekranu.
 install_village_hub(_app)
 
-# Lirion korzysta z nowego ekranu miasta: lewy panel nawigacji, miasto1.png w
-# srodku i osobny prawy panel przygotowany pod zmienny content kolejnych zakladek.
-install_city_hub(_app)
+# Wspolny shell lokacji obsluguje wszystkie 9 generowanych miejsc:
+# miasto1/2/3, zamek1/2/3 oraz wies1/2/3. Lewy i prawy panel sa wspolne,
+# a srodkowa scena jest dobierana z numeru oraz typu konkretnej lokacji.
+# Prawy content nadal pozostaje pustym kontenerem do dalszego projektowania.
+install_location_hub(_app)
 
 
 if __name__ == "__main__":
