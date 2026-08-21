@@ -9,17 +9,15 @@ LOCATION_UI_DIR = city.ROOT_DIR / "Grafiki" / "grafiki_lokacji"
 LEFT_PANEL_FILE = LOCATION_UI_DIR / "lewy_ui.png"
 RIGHT_PANEL_FILE = LOCATION_UI_DIR / "prawy_ui.png"
 
-# Stala logiczna siatka ekranu lokacji. Gra bazowo pracuje w 1600x860, a
-# elementy lokacji sa skalowane z tej jednej siatki do faktycznego rozmiaru okna.
 LOCATION_CANVAS_W = 1600
 LOCATION_CANVAS_H = 860
-LOCATION_BODY_H = 790
+LOCATION_TOP_H = 70
+LOCATION_BODY_H = 720
 LOCATION_BOTTOM_H = 70
 LOCATION_LEFT_W = 320
 LOCATION_SCENE_W = 960
 LOCATION_RIGHT_W = 320
 
-# Kazda z dziewieciu generowanych lokacji dostaje wlasna scene.
 LOCATION_SCENE_FILES = {
     ("city", 1): ("miasto1.png",),
     ("city", 2): ("miasto2.png",),
@@ -68,8 +66,6 @@ _SCENE_CACHE = {}
 
 
 class LocationMenuButton(city.Button):
-    """Niewidzialny hitbox nakladany na gotowy przycisk z lewy_ui.png."""
-
     def draw(self, screen, font, mouse_pos, active=False):
         _ = font
         hovered = self.rect.collidepoint(mouse_pos)
@@ -119,9 +115,6 @@ def _scaled_asset(path, size):
 
 
 def _draw_panel_asset(screen, rect, path):
-    # Panel ma zawsze jeden docelowy ksztalt wynikajacy ze stalej siatki
-    # 1600x860. Resize okna skaluje caly layout, a nie kazdy panel wg osobnych
-    # zasad.
     image = _scaled_asset(path, rect.size)
     if image is None:
         city.draw_panel(screen, rect, city.GOLD)
@@ -153,7 +146,6 @@ def _scene_file_for_location(location):
 
 
 def _cover_surface(source, size):
-    """Wypelnia caly prostokat scena bez deformacji, dopuszczajac tylko crop tla."""
     rw, rh = max(1, int(size[0])), max(1, int(size[1]))
     iw, ih = source.get_size()
     if iw <= 0 or ih <= 0:
@@ -174,18 +166,11 @@ def _cover_surface(source, size):
 
 
 def _fit_scene(rect, scene_file):
-    """Pokazuje CALA scene i jednoczesnie nie zostawia czarnych pasow.
-
-    Oryginalna grafika jest skalowana proporcjonalnie w trybie contain i zawsze
-    pozostaje widoczna w calosci. Wolne miejsce wynikajace z innych proporcji
-    srodkowego pola wypelnia przyciemnione powiekszenie tej samej sceny zamiast
-    czarnych dziur.
-    """
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size, "fixed-grid-full-scene")
+    key = (str(scene_file), rect.size, "fixed-grid-top-bottom-bars")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
@@ -223,32 +208,35 @@ def _scaled_grid_value(value, actual, logical):
 
 
 def location_hub_layout(screen, scene_file=None):
-    """Staly layout 1600x860: 320 | 960 | 320 oraz dolny pas 70 px."""
     _ = scene_file
     sw, sh = screen.get_size()
 
-    bottom_h = max(
-        1,
-        min(
-            sh - 1,
-            _scaled_grid_value(
-                LOCATION_BOTTOM_H,
-                sh,
-                LOCATION_CANVAS_H,
-            ),
-        ),
-    )
-    body_h = max(1, sh - bottom_h)
+    top_h = max(1, _scaled_grid_value(LOCATION_TOP_H, sh, LOCATION_CANVAS_H))
+    bottom_h = max(1, _scaled_grid_value(LOCATION_BOTTOM_H, sh, LOCATION_CANVAS_H))
+
+    if top_h + bottom_h >= sh:
+        top_h = max(1, sh // 10)
+        bottom_h = max(1, sh // 10)
+
+    body_h = max(1, sh - top_h - bottom_h)
 
     left_w = _scaled_grid_value(LOCATION_LEFT_W, sw, LOCATION_CANVAS_W)
     scene_w = _scaled_grid_value(LOCATION_SCENE_W, sw, LOCATION_CANVAS_W)
     right_w = max(1, sw - left_w - scene_w)
 
-    left = pygame.Rect(0, 0, left_w, body_h)
-    scene = pygame.Rect(left.right, 0, scene_w, body_h)
-    right = pygame.Rect(scene.right, 0, right_w, body_h)
-    bottom = pygame.Rect(0, body_h, sw, sh - body_h)
-    return {"left": left, "scene": scene, "right": right, "bottom": bottom}
+    top = pygame.Rect(0, 0, sw, top_h)
+    left = pygame.Rect(0, top_h, left_w, body_h)
+    scene = pygame.Rect(left.right, top_h, scene_w, body_h)
+    right = pygame.Rect(scene.right, top_h, right_w, body_h)
+    bottom = pygame.Rect(0, top_h + body_h, sw, bottom_h)
+
+    return {
+        "top": top,
+        "left": left,
+        "scene": scene,
+        "right": right,
+        "bottom": bottom,
+    }
 
 
 city_hub_layout = location_hub_layout
@@ -257,7 +245,7 @@ city_hub_layout = location_hub_layout
 def _menu_button_rects(left_rect):
     button_x = left_rect.x + int(left_rect.width * 0.17)
     button_w = int(left_rect.width * 0.68)
-    button_h = max(36, int(left_rect.height * 0.108))
+    button_h = max(32, int(left_rect.height * 0.108))
     start_y = left_rect.y + int(left_rect.height * 0.075)
     step = int(left_rect.height * 0.118)
 
@@ -280,13 +268,12 @@ def _menu_button_rects(left_rect):
         button_x,
         left_rect.y + int(left_rect.height * 0.85),
         button_w,
-        max(36, int(left_rect.height * 0.10)),
+        max(32, int(left_rect.height * 0.10)),
     )
     return rows, back
 
 
 def right_content_rect(right_rect):
-    """Docelowy obszar na zmienny content prawego panelu."""
     pad_x = int(right_rect.width * 0.08)
     pad_top = int(right_rect.height * 0.06)
     pad_bottom = int(right_rect.height * 0.05)
@@ -323,7 +310,6 @@ def _draw_right_content(
     selected_place,
     rect,
 ):
-    """Pusty kontener na docelowy content prawego panelu."""
     _ = (
         screen,
         font,
@@ -337,7 +323,7 @@ def _draw_right_content(
     return []
 
 
-def _draw_bottom_bar(screen, rect, message=""):
+def _draw_edge_bar(screen, rect, message=""):
     pygame.draw.rect(screen, _DARK_BAR, rect)
     pygame.draw.line(
         screen,
@@ -356,12 +342,16 @@ def _draw_bottom_bar(screen, rect, message=""):
     pygame.draw.rect(screen, (111, 71, 29), rect, 2)
 
     if message:
-        font = pygame.font.SysFont("arial", 16, bold=True)
-        label = font.render(str(message)[:150], True, city.MUTED)
+        bar_font = pygame.font.SysFont("arial", 16, bold=True)
+        label = bar_font.render(str(message)[:150], True, city.MUTED)
         screen.blit(
             label,
             (rect.x + 24, rect.centery - label.get_height() // 2),
         )
+
+
+def _draw_bottom_bar(screen, rect, message=""):
+    _draw_edge_bar(screen, rect, message)
 
 
 def draw_location_hub_screen(
@@ -425,8 +415,9 @@ def draw_location_hub_screen(
         layout["right"],
     )
 
+    _draw_edge_bar(screen, layout["top"])
     effective_message = message or player.get("_location_message", "")
-    _draw_bottom_bar(screen, layout["bottom"], effective_message)
+    _draw_edge_bar(screen, layout["bottom"], effective_message)
     return buttons
 
 
@@ -455,7 +446,6 @@ def draw_lirion_city_screen(
 
 
 def install_city_hub(app_module):
-    """Instaluje wspolny shell UI dla 3 miast, 3 zamkow i 3 wsi."""
     if getattr(app_module, "_rise_glory_city_hub_installed", False):
         return
 
