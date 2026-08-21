@@ -1,4 +1,5 @@
 from pathlib import Path
+import unicodedata
 
 import pygame
 
@@ -66,6 +67,7 @@ _ASSET_CACHE = {}
 _SCALED_CACHE = {}
 _SCENE_CACHE = {}
 _PANEL_CROP_CACHE = {}
+_ARROW_FILE_CACHE = {}
 
 
 class LocationMenuButton(city.Button):
@@ -131,12 +133,11 @@ def _goldish(pixel):
 
 
 def _panel_crop_rect(path, source):
-    """Usuwa tylko czarny margines PRZED rama, nigdy samej zlotej ramy.
+    """Usuwa tylko czarny margines na zewnatrz zlotej ramy panelu.
 
-    Poprzednio panel byl przycinany sztywno o 9% z obu stron. To powodowalo,
-    ze przy prawym panelu znikal zewnetrzny pionowy bok zlotej ramy. Teraz
-    wykrywamy faktyczne pionowe krawedzie ramy w PNG i zostawiamy kilka pikseli
-    zapasu po jej zewnetrznej stronie.
+    Wykrywamy wszystkie cztery krawedzie ramy. Dzieki temu panel dochodzi
+    wizualnie do sceny, gornego HUD-u i dolnego HUD-u, ale zadna ze zlotych
+    krawedzi ani ornamentow nie jest ucinana.
     """
     key = str(path)
     if key in _PANEL_CROP_CACHE:
@@ -150,50 +151,90 @@ def _panel_crop_rect(path, source):
 
     scan_w = max(1, int(round(width * 0.22)))
     step_y = max(1, height // 320)
-    samples = max(1, (height + step_y - 1) // step_y)
-    required = max(8, int(round(samples * 0.12)))
+    samples_y = max(1, (height + step_y - 1) // step_y)
+    required_x = max(8, int(round(samples_y * 0.12)))
 
-    def gold_count(x):
+    def gold_count_x(x):
         count = 0
         for y in range(0, height, step_y):
             if _goldish(source.get_at((x, y))):
                 count += 1
-                if count >= required:
+                if count >= required_x:
                     return count
         return count
 
     left_edge = None
     for x in range(scan_w):
-        if gold_count(x) >= required:
+        if gold_count_x(x) >= required_x:
             left_edge = x
             break
 
     right_edge = None
     for x in range(width - 1, max(-1, width - scan_w - 1), -1):
-        if gold_count(x) >= required:
+        if gold_count_x(x) >= required_x:
             right_edge = x
             break
 
-    # Fallback jest celowo zachowawczy. Jesli detekcja ramy sie nie powiedzie,
-    # nie tniemy agresywnie assetu i przez to nie tracimy ornamentow.
+    scan_h = max(1, int(round(height * 0.20)))
+    step_x = max(1, width // 260)
+    samples_x = max(1, (width + step_x - 1) // step_x)
+    required_y = max(6, int(round(samples_x * 0.06)))
+
+    def gold_count_y(y):
+        count = 0
+        for x in range(0, width, step_x):
+            if _goldish(source.get_at((x, y))):
+                count += 1
+                if count >= required_y:
+                    return count
+        return count
+
+    top_edge = None
+    for y in range(scan_h):
+        if gold_count_y(y) >= required_y:
+            top_edge = y
+            break
+
+    bottom_edge = None
+    for y in range(height - 1, max(-1, height - scan_h - 1), -1):
+        if gold_count_y(y) >= required_y:
+            bottom_edge = y
+            break
+
+    # Zachowawcze fallbacki - w razie nietypowego assetu lepiej zostawic
+    # odrobine czarnego tla niz odciac zlota rame.
     if left_edge is None:
         left_edge = int(round(width * 0.045))
     if right_edge is None:
         right_edge = width - 1 - int(round(width * 0.045))
+    if top_edge is None:
+        top_edge = int(round(height * 0.025))
+    if bottom_edge is None:
+        bottom_edge = height - 1 - int(round(height * 0.025))
 
-    # Zostawiamy odrobine czarnego tla na zewnatrz ramy, aby jej zlota linia
-    # nigdy nie zostala przecieta przez granice subsurface/smoothscale.
-    frame_padding = max(2, int(round(width * 0.006)))
-    crop_left = max(0, left_edge - frame_padding)
-    crop_right = min(width, right_edge + frame_padding + 1)
+    frame_padding_x = max(2, int(round(width * 0.006)))
+    frame_padding_y = max(2, int(round(height * 0.004)))
 
-    # Ochrona przed bledna detekcja np. na bardzo ciemnym / nietypowym assetcie.
-    min_width = int(round(width * 0.70))
-    if crop_right - crop_left < min_width:
+    crop_left = max(0, left_edge - frame_padding_x)
+    crop_right = min(width, right_edge + frame_padding_x + 1)
+    crop_top = max(0, top_edge - frame_padding_y)
+    crop_bottom = min(height, bottom_edge + frame_padding_y + 1)
+
+    # Ochrona przed bledna detekcja. Nie pozwalamy automatycznemu cropowi
+    # zabrac duzej czesci prawidlowego assetu.
+    if crop_right - crop_left < int(round(width * 0.70)):
         crop_left = 0
         crop_right = width
+    if crop_bottom - crop_top < int(round(height * 0.72)):
+        crop_top = 0
+        crop_bottom = height
 
-    rect = pygame.Rect(crop_left, 0, max(1, crop_right - crop_left), height)
+    rect = pygame.Rect(
+        crop_left,
+        crop_top,
+        max(1, crop_right - crop_left),
+        max(1, crop_bottom - crop_top),
+    )
     _PANEL_CROP_CACHE[key] = rect
     return rect
 
@@ -207,11 +248,13 @@ def _scaled_panel_asset(path, size):
 
     crop_rect = _panel_crop_rect(path, source)
     key = (
-        "location-panel-frame-safe",
+        "location-panel-frame-safe-xy",
         str(path),
         size,
         crop_rect.x,
+        crop_rect.y,
         crop_rect.width,
+        crop_rect.height,
     )
     if key in _SCALED_CACHE:
         return _SCALED_CACHE[key]
@@ -232,6 +275,114 @@ def _draw_panel_asset(screen, rect, path):
         city.draw_panel(screen, rect, city.GOLD)
         return
     screen.blit(image, rect.topleft)
+
+
+def _normalized_asset_name(name):
+    normalized = unicodedata.normalize("NFKD", str(name))
+    without_marks = "".join(
+        char for char in normalized if not unicodedata.combining(char)
+    )
+    return "".join(char for char in without_marks.lower() if char.isalnum())
+
+
+def _arrow_asset_file(direction):
+    """Znajduje strzalke po nazwie, takze gdy plik ma spacje lub polskie znaki."""
+    direction = "left" if direction == "left" else "right"
+    if direction in _ARROW_FILE_CACHE:
+        return _ARROW_FILE_CACHE[direction]
+
+    exact_names = (
+        (
+            "strzalka lewa.png",
+            "strzałka lewa.png",
+            "strzalka_lewa.png",
+            "strzałka_lewa.png",
+            "strzalka-lewa.png",
+            "strzałka-lewa.png",
+            "arrow left.png",
+            "arrow_left.png",
+            "arrow-left.png",
+        )
+        if direction == "left"
+        else (
+            "strzalka prawa.png",
+            "strzałka prawa.png",
+            "strzalka_prawa.png",
+            "strzałka_prawa.png",
+            "strzalka-prawa.png",
+            "strzałka-prawa.png",
+            "arrow right.png",
+            "arrow_right.png",
+            "arrow-right.png",
+        )
+    )
+
+    for filename in exact_names:
+        path = LOCATION_UI_DIR / filename
+        if path.exists():
+            _ARROW_FILE_CACHE[direction] = path
+            return path
+
+    wanted_direction = ("lewa", "left") if direction == "left" else ("prawa", "right")
+    try:
+        candidates = sorted(LOCATION_UI_DIR.glob("*.png"))
+    except OSError:
+        candidates = []
+
+    for path in candidates:
+        normalized = _normalized_asset_name(path.name)
+        has_arrow_word = "strzalka" in normalized or "arrow" in normalized
+        has_direction = any(token in normalized for token in wanted_direction)
+        if has_arrow_word and has_direction:
+            _ARROW_FILE_CACHE[direction] = path
+            return path
+
+    _ARROW_FILE_CACHE[direction] = None
+    return None
+
+
+def _draw_asset_contained(screen, path, rect):
+    source = _load_asset(path) if path is not None else None
+    if source is None or rect.width <= 0 or rect.height <= 0:
+        return False
+
+    iw, ih = source.get_size()
+    if iw <= 0 or ih <= 0:
+        return False
+
+    scale = min(rect.width / iw, rect.height / ih)
+    size = (
+        max(1, int(round(iw * scale))),
+        max(1, int(round(ih * scale))),
+    )
+    image = _scaled_asset(path, size)
+    if image is None:
+        return False
+
+    x = rect.centerx - image.get_width() // 2
+    y = rect.centery - image.get_height() // 2
+    screen.blit(image, (x, y))
+    return True
+
+
+def _right_navigation_rects(right_rect):
+    """Pozycje stalych strzalek w stopce prawego panelu."""
+    button_w = max(48, int(round(right_rect.width * 0.27)))
+    button_h = max(20, int(round(right_rect.height * 0.036)))
+    bottom_gap = max(8, int(round(right_rect.height * 0.022)))
+    side_gap = max(10, int(round(right_rect.width * 0.15)))
+
+    y = right_rect.bottom - bottom_gap - button_h
+    left = pygame.Rect(right_rect.x + side_gap, y, button_w, button_h)
+    right = pygame.Rect(right_rect.right - side_gap - button_w, y, button_w, button_h)
+    return left, right
+
+
+def _draw_right_navigation(screen, right_rect):
+    """Strzalki sa stale widoczne niezaleznie od wybranej zakladki."""
+    left_rect, right_rect_button = _right_navigation_rects(right_rect)
+    _draw_asset_contained(screen, _arrow_asset_file("left"), left_rect)
+    _draw_asset_contained(screen, _arrow_asset_file("right"), right_rect_button)
 
 
 def _location_number(location):
@@ -373,7 +524,8 @@ def _menu_button_rects(left_rect):
 def right_content_rect(right_rect):
     pad_x = int(right_rect.width * 0.08)
     pad_top = int(right_rect.height * 0.06)
-    pad_bottom = int(right_rect.height * 0.05)
+    # Zostawiamy stale miejsce na strzalki w stopce prawego panelu.
+    pad_bottom = int(right_rect.height * 0.10)
     return pygame.Rect(
         right_rect.x + pad_x,
         right_rect.y + pad_top,
@@ -521,6 +673,10 @@ def draw_location_hub_screen(
         selected_place,
         layout["right"],
     )
+
+    # Strzalki sa elementem stalego shellu prawego panelu, wiec rysujemy je
+    # zawsze - niezaleznie od miasta/zamku/wsi i wybranej zakladki.
+    _draw_right_navigation(screen, layout["right"])
     return buttons
 
 
