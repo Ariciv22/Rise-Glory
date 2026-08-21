@@ -1,6 +1,6 @@
 # 03 — Walka V2
 
-**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–120 zapisane, 84 odłożone
+**Status Kanban:** W TRAKCIE — fundament zasad 1–70 zaimplementowany; decyzje 71–130 zapisane, 84 odłożone
 
 ## Cel
 Kompletna podstawowa walka do alfy Rise & Glory.
@@ -24,7 +24,7 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - [x] Integracja porażki/zwycięstwa z istniejącą walką Questa i Zagrożenia przez wspólny silnik.
 - [x] Testy silnika HP, porażki, obrażeń, Obrony, Nat 20, przedmiotów i przekupstwa.
 - [ ] Do uzupełniania wraz z contentem: konkretne karty statusów, zdolności przeciwników, bossowie, loot i wartości przedmiotów.
-- [ ] Pełny osobny system konsekwencji Ran pozostaje kolejnym modułem projektowym.
+- [ ] System konsekwencji Ran jest doprecyzowany projektowo w zasadach 121–130, ale wymaga implementacji i ustalenia brakujących wartości liczbowych.
 
 ## Zatwierdzone zasady walki
 
@@ -46,8 +46,8 @@ Kompletna podstawowa walka do alfy Rise & Glory.
 - Aktualne HP pozostaje między walkami.
 - Jedzenie, mikstury, odpoczynek i odpowiednie efekty leczą HP.
 - HP i Rany są leczone osobno. Leczenie Rany nie odnawia automatycznie HP i odwrotnie.
-- Rany leczy się w odpowiednich lokacjach. Szczegółowy system konsekwencji Ran zostanie opisany później.
-- Na obecnym etapie zwykłe ataki nie zadają Ran bezpośrednio z pominięciem HP.
+- Rany leczy się w odpowiednich lokacjach. Szczegółowy system konsekwencji Ran opisują zasady 121–130.
+- Zwykłe ataki nie zadają Ran bezpośrednio z pominięciem HP. Specjalne zdolności i efekty mogą zadawać Rany bezpośrednio, jeśli tekst karty wyraźnie tak stanowi.
 
 ### 3. Porażka
 - Bohater traci Złoto według Poziomu Świata: I `1`, II `2`, III `3`, IV `4`.
@@ -89,7 +89,7 @@ Poziom I korzysta z wartości bazowych karty.
 - Pomocnik może pomagać w walce zgodnie ze swoją kartą, np. premią do Walki, trafienia, obrażeń, KP albo innym efektem.
 - W walce można używać mikstur, jedzenia, bomb, zwojów i innych dopuszczonych przedmiotów.
 - Użycie przedmiotu zastępuje atak bohatera w rundzie; potem przeciwnik normalnie wykonuje działanie.
-- Leczenie przedmiotem odnawia HP, nie Rany.
+- Zwykłe leczenie przedmiotem odnawia HP, nie Rany. Specjalne, rzadkie lub drogie Przedmioty i Pomocnicy mogą usuwać Rany, jeśli ich karta wyraźnie tak stanowi.
 - Ofensywne przedmioty jednorazowe, np. bomby i zwoje, na obecnym etapie trafiają automatycznie bez rzutu na trafienie.
 - Ze względu na pewne trafienie takie przedmioty mają być odpowiednio drogie/wartościowe.
 - Zużyty przedmiot jednorazowy trafia na stos odrzuconych Przedmiotów.
@@ -209,9 +209,21 @@ Poziom I korzysta z wartości bazowych karty.
 - **119. Ujawnianie nowej fazy i ataków:** wejście w nową fazę nie ujawnia automatycznie graczowi jej mechaniki ani nowych ataków. Nowy atak, efekt lub zdolność staje się widoczna wtedy, gdy przeciwnik faktycznie jej użyje.
 - **120. Log walki:** ekran walki posiada przewijany log pokazujący rozpatrzone zdarzenia, m.in. rzuty, trafienia i pudła, obrażenia, statusy, leczenie, użyte fazy/zdolności bossa oraz reakcje. Log nie ujawnia ukrytych mechanik, dopóki nie zostaną faktycznie użyte lub odkryte.
 
+### 20. Doprecyzowania 121–130 — Rany
+- **121. Limit Ran:** bohater może posiadać maksymalnie `4 Rany`. Otrzymanie czwartej Rany uruchamia pełne Pokonanie.
+- **122. Konsekwencje Ran:** przy `1 Ranie` bohater otrzymuje `-1 do wszystkich testów`. Przy `2 Ranach` zachowuje karę za pierwszą Ranę i dodatkowo ma obniżone maksymalne HP; dokładna wartość obniżenia pozostaje do ustalenia. Przy `3 Ranach` kara do wszystkich testów wynosi `-2`, bohater nadal ma obniżone maksymalne HP i dodatkowo otrzymuje `-2 do Ruchu`.
+- **123. Czwarta Rana:** jeżeli bohater posiada 3 Rany i otrzyma kolejną, natychmiast uruchamia się pełne Pokonanie. Bohater nie wraca na pole startowe.
+- **124. Stan po Pokonaniu:** bohater pozostaje dokładnie na tym samym polu/heksie i po rozpatrzeniu Pokonania ma `1 HP`.
+- **125. Leczenie Ran w lokacji:** Rany można leczyć w odpowiednich lokacjach. Cena leczenia jednej Rany rośnie wraz z Poziomem Świata; dokładny cennik dla poziomów I–IV pozostaje do ustalenia.
+- **126. Leczenie Ran przez Przedmioty i Pomocników:** specjalne, odpowiednio rzadkie lub drogie Przedmioty oraz Pomocnicy mogą usuwać Rany, jeżeli ich karta wyraźnie tak stanowi. Mogą działać również podczas walki, jeśli ich karta na to pozwala.
+- **127. Rana po trafieniu:** przeciwnik może posiadać zdolność, która po skutecznym trafieniu zadaje bohaterowi bezpośrednio Ranę, nawet jeśli HP bohatera nie spadło do `0`.
+- **128. Rana bez rzutu na trafienie:** karta lub efekt może zadać Ranę bez rzutu na trafienie, jeżeli tekst efektu wprost tak stanowi. Taki efekt nie jest sprawdzany przeciw KP.
+- **129. Nadmiar Ran:** jeśli bohater ma 3 Rany, a pojedynczy efekt miałby zadać więcej niż 1 Ranę, czwarta Rana natychmiast uruchamia Pokonanie, a wszystkie Rany ponad limit są ignorowane.
+- **130. Rozliczenie pełnego Pokonania:** po uruchomieniu Pokonania przez czwartą Ranę licznik Ran zostaje cofnięty do `3`. Bohater pozostaje na tym samym heksie z `1 HP`, natychmiast kończy swoją turę i wszystkie niewykorzystane Akcje przepadają. Traci Złoto zgodnie z zasadą porażki zależną od Poziomu Świata oraz 1 losowy, niezałożony Przedmiot wyłącznie z plecaka; założony ekwipunek oraz chronione Przedmioty kluczowe/questowe nie biorą udziału w losowaniu.
+
 ## Do dopracowania później
-- Pełny system Ran i ich konsekwencji.
-- Specjalne efekty zadające Rany bezpośrednio.
+- Dokładna wartość obniżenia `max_hp` przy 2 i 3 Ranach.
+- Dokładny cennik leczenia Ran na Poziomach Świata I–IV.
 - Pełna lista statusów.
 - Konkretne zdolności przeciwników, bossów i bohaterów.
 - Konkretne pule lootu i wartości nagród.
