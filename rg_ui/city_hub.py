@@ -9,10 +9,17 @@ LOCATION_UI_DIR = city.ROOT_DIR / "Grafiki" / "grafiki_lokacji"
 LEFT_PANEL_FILE = LOCATION_UI_DIR / "lewy_ui.png"
 RIGHT_PANEL_FILE = LOCATION_UI_DIR / "prawy_ui.png"
 
-# Kazda z dziewieciu generowanych lokacji dostaje wlasna scene. Numer lokacji
-# pochodzi bezposrednio z rg_world.generation.build_location_data(), wiec grafika
-# pozostaje przypisana do tej samej lokacji niezaleznie od tego, na jakim heksie
-# wylosuje sie podczas generowania mapy.
+# Stala logiczna siatka ekranu lokacji. Gra bazowo pracuje w 1600x860, a
+# elementy lokacji sa skalowane z tej jednej siatki do faktycznego rozmiaru okna.
+LOCATION_CANVAS_W = 1600
+LOCATION_CANVAS_H = 860
+LOCATION_BODY_H = 790
+LOCATION_BOTTOM_H = 70
+LOCATION_LEFT_W = 320
+LOCATION_SCENE_W = 960
+LOCATION_RIGHT_W = 320
+
+# Kazda z dziewieciu generowanych lokacji dostaje wlasna scene.
 LOCATION_SCENE_FILES = {
     ("city", 1): ("miasto1.png",),
     ("city", 2): ("miasto2.png",),
@@ -112,6 +119,9 @@ def _scaled_asset(path, size):
 
 
 def _draw_panel_asset(screen, rect, path):
+    # Panel ma zawsze jeden docelowy ksztalt wynikajacy ze stalej siatki
+    # 1600x860. Resize okna skaluje caly layout, a nie kazdy panel wg osobnych
+    # zasad.
     image = _scaled_asset(path, rect.size)
     if image is None:
         city.draw_panel(screen, rect, city.GOLD)
@@ -142,68 +152,101 @@ def _scene_file_for_location(location):
     return None
 
 
+def _cover_surface(source, size):
+    """Wypelnia caly prostokat scena bez deformacji, dopuszczajac tylko crop tla."""
+    rw, rh = max(1, int(size[0])), max(1, int(size[1]))
+    iw, ih = source.get_size()
+    if iw <= 0 or ih <= 0:
+        return None
+
+    scale = max(rw / iw, rh / ih)
+    scaled_size = (
+        max(1, int(round(iw * scale))),
+        max(1, int(round(ih * scale))),
+    )
+    scaled = pygame.transform.smoothscale(source, scaled_size)
+
+    result = pygame.Surface((rw, rh), pygame.SRCALPHA)
+    src_x = max(0, (scaled.get_width() - rw) // 2)
+    src_y = max(0, (scaled.get_height() - rh) // 2)
+    result.blit(scaled, (0, 0), pygame.Rect(src_x, src_y, rw, rh))
+    return result
+
+
 def _fit_scene(rect, scene_file):
-    """Skaluje scene proporcjonalnie, bez kadrowania i bez deformacji."""
+    """Pokazuje CALA scene i jednoczesnie nie zostawia czarnych pasow.
+
+    Oryginalna grafika jest skalowana proporcjonalnie w trybie contain i zawsze
+    pozostaje widoczna w calosci. Wolne miejsce wynikajace z innych proporcji
+    srodkowego pola wypelnia przyciemnione powiekszenie tej samej sceny zamiast
+    czarnych dziur.
+    """
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size, "native-ratio-large")
+    key = (str(scene_file), rect.size, "fixed-grid-full-scene")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
-    if source.get_size() == rect.size:
-        result = source
-    else:
-        result = pygame.transform.smoothscale(source, rect.size)
-    _SCENE_CACHE[key] = result
-    return result
+    rw, rh = max(1, rect.width), max(1, rect.height)
+    background = _cover_surface(source, (rw, rh))
+    if background is None:
+        return None
+
+    shade = pygame.Surface((rw, rh), pygame.SRCALPHA)
+    shade.fill((0, 0, 0, 82))
+    background.blit(shade, (0, 0))
+
+    iw, ih = source.get_size()
+    scale = min(rw / iw, rh / ih)
+    full_size = (
+        max(1, int(round(iw * scale))),
+        max(1, int(round(ih * scale))),
+    )
+    full_scene = (
+        source
+        if source.get_size() == full_size
+        else pygame.transform.smoothscale(source, full_size)
+    )
+
+    full_x = (rw - full_scene.get_width()) // 2
+    full_y = (rh - full_scene.get_height()) // 2
+    background.blit(full_scene, (full_x, full_y))
+
+    _SCENE_CACHE[key] = background
+    return background
+
+
+def _scaled_grid_value(value, actual, logical):
+    return int(round(actual * value / logical))
 
 
 def location_hub_layout(screen, scene_file=None):
-    """Duzy widok lokacji: scena ma priorytet, a panele dopasowuja sie do niej.
-
-    Scena zawsze zachowuje natywne proporcje. Panele dostaja pozostala szerokosc
-    po bokach i ta sama wysokosc co scena. Nie ograniczamy juz calego ukladu
-    natywnymi proporcjami paneli, bo to wlasnie powodowalo ogromne czarne pola
-    oraz zbyt mala scene na ekranach 16:9.
-    """
+    """Staly layout 1600x860: 320 | 960 | 320 oraz dolny pas 70 px."""
+    _ = scene_file
     sw, sh = screen.get_size()
-    bottom_h = max(58, min(72, int(sh * 0.07)))
+
+    bottom_h = max(
+        1,
+        min(
+            sh - 1,
+            _scaled_grid_value(
+                LOCATION_BOTTOM_H,
+                sh,
+                LOCATION_CANVAS_H,
+            ),
+        ),
+    )
     body_h = max(1, sh - bottom_h)
 
-    scene_source = _load_asset(scene_file) if scene_file is not None else None
-    if scene_source is None:
-        return None
+    left_w = _scaled_grid_value(LOCATION_LEFT_W, sw, LOCATION_CANVAS_W)
+    scene_w = _scaled_grid_value(LOCATION_SCENE_W, sw, LOCATION_CANVAS_W)
+    right_w = max(1, sw - left_w - scene_w)
 
-    scene_w, scene_h = scene_source.get_size()
-    if scene_w <= 0 or scene_h <= 0:
-        return None
-
-    scene_ratio = scene_w / scene_h
-
-    # Około 16% szerokosci ekranu dla kazdego panelu daje znacznie wieksza
-    # scene, ale panele nadal pozostaja czytelne. To panele dopasowuja sie do
-    # sceny, a nie odwrotnie.
-    target_side_w = max(190, int(round(sw * 0.16)))
-    available_scene_w = max(1, sw - target_side_w * 2)
-
-    row_h_from_width = available_scene_w / scene_ratio
-    target_row_h = body_h * 0.90
-    row_h = max(1, int(round(min(float(body_h), target_row_h, row_h_from_width))))
-
-    scene_draw_w = max(1, int(round(row_h * scene_ratio)))
-    remaining_w = max(2, sw - scene_draw_w)
-    left_w = remaining_w // 2
-    right_w = remaining_w - left_w
-
-    # Caly zestaw wykorzystuje pelna szerokosc okna. Pozostala wolna wysokosc
-    # jest dzielona rowno nad i pod widokiem zamiast zmniejszac sama scene.
-    start_y = max(0, (body_h - row_h) // 2)
-
-    left = pygame.Rect(0, start_y, left_w, row_h)
-    scene = pygame.Rect(left.right, start_y, scene_draw_w, row_h)
-    right = pygame.Rect(scene.right, start_y, right_w, row_h)
+    left = pygame.Rect(0, 0, left_w, body_h)
+    scene = pygame.Rect(left.right, 0, scene_w, body_h)
+    right = pygame.Rect(scene.right, 0, right_w, body_h)
     bottom = pygame.Rect(0, body_h, sw, sh - body_h)
     return {"left": left, "scene": scene, "right": right, "bottom": bottom}
 
@@ -224,7 +267,12 @@ def _menu_button_rects(left_rect):
             (
                 label,
                 action,
-                pygame.Rect(button_x, start_y + index * step, button_w, button_h),
+                pygame.Rect(
+                    button_x,
+                    start_y + index * step,
+                    button_w,
+                    button_h,
+                ),
             )
         )
 
@@ -334,9 +382,6 @@ def draw_location_hub_screen(
         return None
 
     layout = location_hub_layout(screen, scene_file)
-    if layout is None:
-        return None
-
     scene_image = _fit_scene(layout["scene"], scene_file)
     if scene_image is None:
         return None
