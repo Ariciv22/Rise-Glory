@@ -119,16 +119,6 @@ def _draw_panel_asset(screen, rect, path):
     screen.blit(image, rect.topleft)
 
 
-def _asset_ratio(path, fallback):
-    source = _load_asset(path)
-    if source is None:
-        return float(fallback)
-    width, height = source.get_size()
-    if width <= 0 or height <= 0:
-        return float(fallback)
-    return width / height
-
-
 def _location_number(location):
     try:
         number = int(location.get("number", 0) or 0)
@@ -153,16 +143,12 @@ def _scene_file_for_location(location):
 
 
 def _fit_scene(rect, scene_file):
-    """Skaluje scene wylacznie proporcjonalnie.
-
-    Prostokat sceny jest wyliczany z natywnych proporcji samego obrazka, wiec
-    nie ma juz ani sciskania obrazu, ani rozciagania go w pionie/poziomie.
-    """
+    """Skaluje scene proporcjonalnie, bez kadrowania i bez deformacji."""
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size, "native-ratio")
+    key = (str(scene_file), rect.size, "native-ratio-large")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
@@ -175,15 +161,15 @@ def _fit_scene(rect, scene_file):
 
 
 def location_hub_layout(screen, scene_file=None):
-    """Scena nadaje proporcje calego ukladu, panele dopasowuja sie do niej.
+    """Duzy widok lokacji: scena ma priorytet, a panele dopasowuja sie do niej.
 
-    Najpierw bierzemy natywne proporcje sceny oraz obu paneli. Potem caly zestaw
-    lewy panel + scena + prawy panel jest skalowany JEDNOLICIE tak, aby zmiescil
-    sie w dostepnym oknie. Dzieki temu scena zachowuje swoj normalny format,
-    a panele nie sa juz niezaleznie rozciagane do wysokosci calego okna.
+    Scena zawsze zachowuje natywne proporcje. Panele dostaja pozostala szerokosc
+    po bokach i ta sama wysokosc co scena. Nie ograniczamy juz calego ukladu
+    natywnymi proporcjami paneli, bo to wlasnie powodowalo ogromne czarne pola
+    oraz zbyt mala scene na ekranach 16:9.
     """
     sw, sh = screen.get_size()
-    bottom_h = max(58, min(78, int(sh * 0.085)))
+    bottom_h = max(58, min(72, int(sh * 0.07)))
     body_h = max(1, sh - bottom_h)
 
     scene_source = _load_asset(scene_file) if scene_file is not None else None
@@ -194,36 +180,28 @@ def location_hub_layout(screen, scene_file=None):
     if scene_w <= 0 or scene_h <= 0:
         return None
 
-    left_ratio = _asset_ratio(LEFT_PANEL_FILE, 0.55)
     scene_ratio = scene_w / scene_h
-    right_ratio = _asset_ratio(RIGHT_PANEL_FILE, 0.55)
-    total_ratio = left_ratio + scene_ratio + right_ratio
-    if total_ratio <= 0:
-        return None
 
-    # Wysokosc calego zestawu wynika z ograniczenia szerokoscia lub wysokoscia
-    # okna. Wszystkie trzy elementy maja dokladnie te sama wysokosc.
-    row_h = min(float(body_h), sw / total_ratio)
-    row_h = max(1, int(round(row_h)))
+    # Około 16% szerokosci ekranu dla kazdego panelu daje znacznie wieksza
+    # scene, ale panele nadal pozostaja czytelne. To panele dopasowuja sie do
+    # sceny, a nie odwrotnie.
+    target_side_w = max(190, int(round(sw * 0.16)))
+    available_scene_w = max(1, sw - target_side_w * 2)
 
-    left_w = max(1, int(round(row_h * left_ratio)))
+    row_h_from_width = available_scene_w / scene_ratio
+    target_row_h = body_h * 0.90
+    row_h = max(1, int(round(min(float(body_h), target_row_h, row_h_from_width))))
+
     scene_draw_w = max(1, int(round(row_h * scene_ratio)))
-    right_w = max(1, int(round(row_h * right_ratio)))
+    remaining_w = max(2, sw - scene_draw_w)
+    left_w = remaining_w // 2
+    right_w = remaining_w - left_w
 
-    total_w = left_w + scene_draw_w + right_w
-    if total_w > sw:
-        # Korekta tylko na blad zaokraglen - bez zmiany proporcji sceny.
-        overflow = total_w - sw
-        if right_w > overflow:
-            right_w -= overflow
-        elif left_w > overflow:
-            left_w -= overflow
-        total_w = left_w + scene_draw_w + right_w
-
-    start_x = max(0, (sw - total_w) // 2)
+    # Caly zestaw wykorzystuje pelna szerokosc okna. Pozostala wolna wysokosc
+    # jest dzielona rowno nad i pod widokiem zamiast zmniejszac sama scene.
     start_y = max(0, (body_h - row_h) // 2)
 
-    left = pygame.Rect(start_x, start_y, left_w, row_h)
+    left = pygame.Rect(0, start_y, left_w, row_h)
     scene = pygame.Rect(left.right, start_y, scene_draw_w, row_h)
     right = pygame.Rect(scene.right, start_y, right_w, row_h)
     bottom = pygame.Rect(0, body_h, sw, sh - body_h)
