@@ -103,17 +103,15 @@ def _scaled_asset(path, size):
     source = _load_asset(path)
     if source is None:
         return None
+    if source.get_size() == size:
+        _SCALED_CACHE[key] = source
+        return source
     scaled = pygame.transform.smoothscale(source, size)
     _SCALED_CACHE[key] = scaled
     return scaled
 
 
 def _draw_panel_asset(screen, rect, path):
-    """Rysuje panel bez zmiany jego proporcji.
-
-    Sam rect jest wyliczany z natywnych proporcji PNG, wiec panel moze rosnac
-    razem z wysokoscia okna bez pionowego lub poziomego rozciagania ornamentow.
-    """
     image = _scaled_asset(path, rect.size)
     if image is None:
         city.draw_panel(screen, rect, city.GOLD)
@@ -121,14 +119,14 @@ def _draw_panel_asset(screen, rect, path):
     screen.blit(image, rect.topleft)
 
 
-def _panel_width_for_height(path, height, fallback_width):
+def _asset_ratio(path, fallback):
     source = _load_asset(path)
     if source is None:
-        return max(1, int(fallback_width))
-    width, source_height = source.get_size()
-    if source_height <= 0:
-        return max(1, int(fallback_width))
-    return max(1, int(round(height * width / source_height)))
+        return float(fallback)
+    width, height = source.get_size()
+    if width <= 0 or height <= 0:
+        return float(fallback)
+    return width / height
 
 
 def _location_number(location):
@@ -155,46 +153,79 @@ def _scene_file_for_location(location):
 
 
 def _fit_scene(rect, scene_file):
-    """Pokazuje CALY asset sceny i wypelnia nim caly dostepny prostokat.
+    """Skaluje scene wylacznie proporcjonalnie.
 
-    Nie stosujemy juz contain ani cover. Contain robil czarne pasy gora/dol,
-    a cover ucinal boki. Smoothscale do rozmiaru pola zachowuje cala zawartosc
-    obrazu i nie zostawia pustych pasow.
+    Prostokat sceny jest wyliczany z natywnych proporcji samego obrazka, wiec
+    nie ma juz ani sciskania obrazu, ani rozciagania go w pionie/poziomie.
     """
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size, "full")
+    key = (str(scene_file), rect.size, "native-ratio")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
-    result = pygame.transform.smoothscale(
-        source,
-        (max(1, rect.width), max(1, rect.height)),
-    )
+    if source.get_size() == rect.size:
+        result = source
+    else:
+        result = pygame.transform.smoothscale(source, rect.size)
     _SCENE_CACHE[key] = result
     return result
 
 
-def location_hub_layout(screen):
-    """Uklad lokacji z panelami zachowujacymi natywne proporcje."""
+def location_hub_layout(screen, scene_file=None):
+    """Scena nadaje proporcje calego ukladu, panele dopasowuja sie do niej.
+
+    Najpierw bierzemy natywne proporcje sceny oraz obu paneli. Potem caly zestaw
+    lewy panel + scena + prawy panel jest skalowany JEDNOLICIE tak, aby zmiescil
+    sie w dostepnym oknie. Dzieki temu scena zachowuje swoj normalny format,
+    a panele nie sa juz niezaleznie rozciagane do wysokosci calego okna.
+    """
     sw, sh = screen.get_size()
     bottom_h = max(58, min(78, int(sh * 0.085)))
     body_h = max(1, sh - bottom_h)
 
-    fallback_side = max(280, int(sw * 0.20))
-    left_w = _panel_width_for_height(LEFT_PANEL_FILE, body_h, fallback_side)
-    right_w = _panel_width_for_height(RIGHT_PANEL_FILE, body_h, fallback_side)
-
-    # Nie deformujemy paneli tylko po to, aby zmiescic skrajnie male okno.
-    # W takim przypadku wrapper wraca do starego renderera lokacji.
-    if left_w + right_w + 220 > sw:
+    scene_source = _load_asset(scene_file) if scene_file is not None else None
+    if scene_source is None:
         return None
 
-    left = pygame.Rect(0, 0, left_w, body_h)
-    right = pygame.Rect(sw - right_w, 0, right_w, body_h)
-    scene = pygame.Rect(left.right, 0, right.left - left.right, body_h)
+    scene_w, scene_h = scene_source.get_size()
+    if scene_w <= 0 or scene_h <= 0:
+        return None
+
+    left_ratio = _asset_ratio(LEFT_PANEL_FILE, 0.55)
+    scene_ratio = scene_w / scene_h
+    right_ratio = _asset_ratio(RIGHT_PANEL_FILE, 0.55)
+    total_ratio = left_ratio + scene_ratio + right_ratio
+    if total_ratio <= 0:
+        return None
+
+    # Wysokosc calego zestawu wynika z ograniczenia szerokoscia lub wysokoscia
+    # okna. Wszystkie trzy elementy maja dokladnie te sama wysokosc.
+    row_h = min(float(body_h), sw / total_ratio)
+    row_h = max(1, int(round(row_h)))
+
+    left_w = max(1, int(round(row_h * left_ratio)))
+    scene_draw_w = max(1, int(round(row_h * scene_ratio)))
+    right_w = max(1, int(round(row_h * right_ratio)))
+
+    total_w = left_w + scene_draw_w + right_w
+    if total_w > sw:
+        # Korekta tylko na blad zaokraglen - bez zmiany proporcji sceny.
+        overflow = total_w - sw
+        if right_w > overflow:
+            right_w -= overflow
+        elif left_w > overflow:
+            left_w -= overflow
+        total_w = left_w + scene_draw_w + right_w
+
+    start_x = max(0, (sw - total_w) // 2)
+    start_y = max(0, (body_h - row_h) // 2)
+
+    left = pygame.Rect(start_x, start_y, left_w, row_h)
+    scene = pygame.Rect(left.right, start_y, scene_draw_w, row_h)
+    right = pygame.Rect(scene.right, start_y, right_w, row_h)
     bottom = pygame.Rect(0, body_h, sw, sh - body_h)
     return {"left": left, "scene": scene, "right": right, "bottom": bottom}
 
@@ -205,7 +236,7 @@ city_hub_layout = location_hub_layout
 def _menu_button_rects(left_rect):
     button_x = left_rect.x + int(left_rect.width * 0.17)
     button_w = int(left_rect.width * 0.68)
-    button_h = max(52, int(left_rect.height * 0.108))
+    button_h = max(36, int(left_rect.height * 0.108))
     start_y = left_rect.y + int(left_rect.height * 0.075)
     step = int(left_rect.height * 0.118)
 
@@ -223,7 +254,7 @@ def _menu_button_rects(left_rect):
         button_x,
         left_rect.y + int(left_rect.height * 0.85),
         button_w,
-        max(50, int(left_rect.height * 0.10)),
+        max(36, int(left_rect.height * 0.10)),
     )
     return rows, back
 
@@ -324,7 +355,7 @@ def draw_location_hub_screen(
     if scene_file is None:
         return None
 
-    layout = location_hub_layout(screen)
+    layout = location_hub_layout(screen, scene_file)
     if layout is None:
         return None
 
@@ -341,14 +372,14 @@ def draw_location_hub_screen(
     pygame.draw.line(
         screen,
         (104, 67, 27),
-        (layout["left"].right - 1, 0),
+        (layout["left"].right - 1, layout["left"].top),
         (layout["left"].right - 1, layout["left"].bottom),
         2,
     )
     pygame.draw.line(
         screen,
         (104, 67, 27),
-        (layout["right"].left, 0),
+        (layout["right"].left, layout["right"].top),
         (layout["right"].left, layout["right"].bottom),
         2,
     )
