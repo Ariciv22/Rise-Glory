@@ -12,12 +12,13 @@ install_legacy_module_aliases()
 
 # Motyw czcionek instalujemy przed importem glownej aplikacji. Dzieki temu
 # wszystkie ekrany korzystajace dotad z Ariala automatycznie dostaja bardziej
-# klimatyczny krój fantasy-serif bez przepisywania kazdego panelu osobno.
+# klimatyczny kroj fantasy-serif bez przepisywania kazdego panelu osobno.
 from rg_ui.font_theme import install_font_theme
 
 install_font_theme()
 
 from rg_core import app as _app
+from rg_ui.city_hub import install_city_hub
 from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.map_background_fix import install_map_background
@@ -42,7 +43,7 @@ install_locked_map_camera()
 # Zamiast czarnego tla pod plansza rysujemy grafike Grafiki/tlo_heksow.png.
 install_map_background()
 
-# Zachowujemy zgodnosc z poprawkami ekranu tytulowego, ktore odwolują sie do
+# Zachowujemy zgodnosc z poprawkami ekranu tytulowego, ktore odwoluja sie do
 # modulu "main". Faktyczna aplikacja jest teraz w rg_core.app.
 sys.modules["main"] = _app
 install_into_main()
@@ -60,6 +61,10 @@ install_hud_top_stat_theme()
 # Wsie korzystaja z duzej ilustracji jako interaktywnej planszetki. Klikniecie
 # obiektu na scenie uruchamia te sama akcje co odpowiadajacy mu przycisk po lewej.
 install_village_hub(_app)
+
+# Lirion korzysta z nowego ekranu miasta: lewy panel nawigacji, miasto1.png w
+# srodku i osobny prawy panel przygotowany pod zmienny content kolejnych zakladek.
+install_city_hub(_app)
 
 
 if __name__ == "__main__":
