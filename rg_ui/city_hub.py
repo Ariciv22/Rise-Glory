@@ -9,15 +9,6 @@ LOCATION_UI_DIR = city.ROOT_DIR / "Grafiki" / "grafiki_lokacji"
 LEFT_PANEL_FILE = LOCATION_UI_DIR / "lewy_ui.png"
 RIGHT_PANEL_FILE = LOCATION_UI_DIR / "prawy_ui.png"
 
-LOCATION_CANVAS_W = 1600
-LOCATION_CANVAS_H = 860
-LOCATION_TOP_H = 70
-LOCATION_BODY_H = 720
-LOCATION_BOTTOM_H = 70
-LOCATION_LEFT_W = 320
-LOCATION_SCENE_W = 960
-LOCATION_RIGHT_W = 320
-
 LOCATION_SCENE_FILES = {
     ("city", 1): ("miasto1.png",),
     ("city", 2): ("miasto2.png",),
@@ -114,6 +105,16 @@ def _scaled_asset(path, size):
     return scaled
 
 
+def _asset_ratio(path, fallback):
+    image = _load_asset(path)
+    if image is None:
+        return fallback
+    width, height = image.get_size()
+    if width <= 0 or height <= 0:
+        return fallback
+    return width / height
+
+
 def _draw_panel_asset(screen, rect, path):
     image = _scaled_asset(path, rect.size)
     if image is None:
@@ -145,87 +146,66 @@ def _scene_file_for_location(location):
     return None
 
 
-def _cover_surface(source, size):
-    rw, rh = max(1, int(size[0])), max(1, int(size[1]))
-    iw, ih = source.get_size()
-    if iw <= 0 or ih <= 0:
-        return None
-
-    scale = max(rw / iw, rh / ih)
-    scaled_size = (
-        max(1, int(round(iw * scale))),
-        max(1, int(round(ih * scale))),
-    )
-    scaled = pygame.transform.smoothscale(source, scaled_size)
-
-    result = pygame.Surface((rw, rh), pygame.SRCALPHA)
-    src_x = max(0, (scaled.get_width() - rw) // 2)
-    src_y = max(0, (scaled.get_height() - rh) // 2)
-    result.blit(scaled, (0, 0), pygame.Rect(src_x, src_y, rw, rh))
-    return result
-
-
 def _fit_scene(rect, scene_file):
+    """Renderuje scene jeden raz, bez cropu, tla i powielania fragmentow."""
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size, "fixed-grid-top-bottom-bars")
+    key = (str(scene_file), rect.size, "native-ratio-single-scene")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
-    rw, rh = max(1, rect.width), max(1, rect.height)
-    background = _cover_surface(source, (rw, rh))
-    if background is None:
-        return None
+    if source.get_size() == rect.size:
+        scene = source
+    else:
+        scene = pygame.transform.smoothscale(source, rect.size)
 
-    shade = pygame.Surface((rw, rh), pygame.SRCALPHA)
-    shade.fill((0, 0, 0, 82))
-    background.blit(shade, (0, 0))
-
-    iw, ih = source.get_size()
-    scale = min(rw / iw, rh / ih)
-    full_size = (
-        max(1, int(round(iw * scale))),
-        max(1, int(round(ih * scale))),
-    )
-    full_scene = (
-        source
-        if source.get_size() == full_size
-        else pygame.transform.smoothscale(source, full_size)
-    )
-
-    full_x = (rw - full_scene.get_width()) // 2
-    full_y = (rh - full_scene.get_height()) // 2
-    background.blit(full_scene, (full_x, full_y))
-
-    _SCENE_CACHE[key] = background
-    return background
-
-
-def _scaled_grid_value(value, actual, logical):
-    return int(round(actual * value / logical))
+    _SCENE_CACHE[key] = scene
+    return scene
 
 
 def location_hub_layout(screen, scene_file=None):
-    _ = scene_file
+    """Uklad wynika z PRAWDZIWYCH proporcji PNG, nie z wymuszonych 320/960/320.
+
+    Najpierw liczymy wspolna wysokosc dla lewego panelu, sceny i prawego panelu
+    tak, aby wszystkie trzy zachowaly swoje oryginalne proporcje i razem
+    wypelnily szerokosc okna. Cala pozostala wysokosc ekranu jest dzielona po
+    rowno miedzy gorny i dolny panel.
+    """
     sw, sh = screen.get_size()
 
-    top_h = max(1, _scaled_grid_value(LOCATION_TOP_H, sh, LOCATION_CANVAS_H))
-    bottom_h = max(1, _scaled_grid_value(LOCATION_BOTTOM_H, sh, LOCATION_CANVAS_H))
+    left_ratio = _asset_ratio(LEFT_PANEL_FILE, 2 / 3)
+    right_ratio = _asset_ratio(RIGHT_PANEL_FILE, 2 / 3)
+    scene_ratio = _asset_ratio(scene_file, 16 / 9) if scene_file else 16 / 9
 
-    if top_h + bottom_h >= sh:
-        top_h = max(1, sh // 10)
-        bottom_h = max(1, sh // 10)
+    total_ratio = max(0.1, left_ratio + scene_ratio + right_ratio)
 
-    body_h = max(1, sh - top_h - bottom_h)
+    # Minimalnie zostawiamy miejsce na oba poziome panele. W typowym 16:9
+    # wysokosc wynika przede wszystkim z szerokosci i naturalnych proporcji PNG.
+    min_bar_h = max(28, int(round(sh * 0.045)))
+    max_body_h = max(1, sh - 2 * min_bar_h)
+    body_h = min(max_body_h, max(1, int(round(sw / total_ratio))))
 
-    left_w = _scaled_grid_value(LOCATION_LEFT_W, sw, LOCATION_CANVAS_W)
-    scene_w = _scaled_grid_value(LOCATION_SCENE_W, sw, LOCATION_CANVAS_W)
-    right_w = max(1, sw - left_w - scene_w)
+    left_w = max(1, int(round(body_h * left_ratio)))
+    scene_w = max(1, int(round(body_h * scene_ratio)))
+    right_w = max(1, int(round(body_h * right_ratio)))
+
+    body_w = left_w + scene_w + right_w
+
+    # Korekta pojedynczych pikseli po zaokragleniach.
+    if body_w > sw:
+        overflow = body_w - sw
+        scene_w = max(1, scene_w - overflow)
+        body_w = left_w + scene_w + right_w
+
+    body_x = max(0, (sw - body_w) // 2)
+    free_h = max(0, sh - body_h)
+    top_h = free_h // 2
+    bottom_h = free_h - top_h
 
     top = pygame.Rect(0, 0, sw, top_h)
-    left = pygame.Rect(0, top_h, left_w, body_h)
+    left = pygame.Rect(body_x, top_h, left_w, body_h)
     scene = pygame.Rect(left.right, top_h, scene_w, body_h)
     right = pygame.Rect(scene.right, top_h, right_w, body_h)
     bottom = pygame.Rect(0, top_h + body_h, sw, bottom_h)
@@ -245,7 +225,7 @@ city_hub_layout = location_hub_layout
 def _menu_button_rects(left_rect):
     button_x = left_rect.x + int(left_rect.width * 0.17)
     button_w = int(left_rect.width * 0.68)
-    button_h = max(32, int(left_rect.height * 0.108))
+    button_h = max(28, int(left_rect.height * 0.108))
     start_y = left_rect.y + int(left_rect.height * 0.075)
     step = int(left_rect.height * 0.118)
 
@@ -268,7 +248,7 @@ def _menu_button_rects(left_rect):
         button_x,
         left_rect.y + int(left_rect.height * 0.85),
         button_w,
-        max(32, int(left_rect.height * 0.10)),
+        max(28, int(left_rect.height * 0.10)),
     )
     return rows, back
 
@@ -324,6 +304,9 @@ def _draw_right_content(
 
 
 def _draw_edge_bar(screen, rect, message=""):
+    if rect.height <= 0:
+        return
+
     pygame.draw.rect(screen, _DARK_BAR, rect)
     pygame.draw.line(
         screen,
@@ -377,9 +360,16 @@ def draw_location_hub_screen(
         return None
 
     screen.fill(_SCENE_BG)
-    screen.blit(scene_image, layout["scene"].topleft)
+
+    _draw_edge_bar(screen, layout["top"])
+    _draw_edge_bar(
+        screen,
+        layout["bottom"],
+        message or player.get("_location_message", ""),
+    )
 
     _draw_panel_asset(screen, layout["left"], LEFT_PANEL_FILE)
+    screen.blit(scene_image, layout["scene"].topleft)
     _draw_panel_asset(screen, layout["right"], RIGHT_PANEL_FILE)
 
     pygame.draw.line(
@@ -414,10 +404,6 @@ def draw_location_hub_screen(
         selected_place,
         layout["right"],
     )
-
-    _draw_edge_bar(screen, layout["top"])
-    effective_message = message or player.get("_location_message", "")
-    _draw_edge_bar(screen, layout["bottom"], effective_message)
     return buttons
 
 
