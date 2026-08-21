@@ -19,11 +19,6 @@ LOCATION_BOTTOM_SHARE = 0.07
 LOCATION_LEFT_SHARE = 0.18
 LOCATION_RIGHT_SHARE = 0.19
 
-# Assety lewy_ui.png i prawy_ui.png maja wbudowane czarne marginesy po bokach.
-# Odcinamy je tylko podczas renderowania, dzieki czemu widoczna zlota rama panelu
-# dochodzi do krawedzi okna oraz bezposrednio do sceny. Samych PNG nie zmieniamy.
-LOCATION_PANEL_TRIM_X = 0.09
-
 LOCATION_SCENE_FILES = {
     ("city", 1): ("miasto1.png",),
     ("city", 2): ("miasto2.png",),
@@ -66,9 +61,11 @@ _GOLD_TEXT = (196, 151, 78)
 _GOLD_HOVER = (224, 177, 91)
 _DARK_BAR = (13, 12, 11)
 _SCENE_BG = (5, 5, 5)
+
 _ASSET_CACHE = {}
 _SCALED_CACHE = {}
 _SCENE_CACHE = {}
+_PANEL_CROP_CACHE = {}
 
 
 class LocationMenuButton(city.Button):
@@ -120,27 +117,110 @@ def _scaled_asset(path, size):
     return scaled
 
 
-def _scaled_panel_asset(path, size):
-    """Skaluje panel po usunieciu jego pustych marginesow poziomych."""
-    size = (max(1, int(size[0])), max(1, int(size[1])))
-    key = ("location-panel", str(path), size, LOCATION_PANEL_TRIM_X)
-    if key in _SCALED_CACHE:
-        return _SCALED_CACHE[key]
+def _goldish(pixel):
+    """Czy piksel nalezy do zlotej/brazowej ramy panelu."""
+    r, g, b, a = pixel
+    return (
+        a > 40
+        and r > 55
+        and g > 25
+        and b < 100
+        and (r - g) > 10
+        and (g - b) > 4
+    )
 
+
+def _panel_crop_rect(path, source):
+    """Usuwa tylko czarny margines PRZED rama, nigdy samej zlotej ramy.
+
+    Poprzednio panel byl przycinany sztywno o 9% z obu stron. To powodowalo,
+    ze przy prawym panelu znikal zewnetrzny pionowy bok zlotej ramy. Teraz
+    wykrywamy faktyczne pionowe krawedzie ramy w PNG i zostawiamy kilka pikseli
+    zapasu po jej zewnetrznej stronie.
+    """
+    key = str(path)
+    if key in _PANEL_CROP_CACHE:
+        return _PANEL_CROP_CACHE[key]
+
+    width, height = source.get_size()
+    if width <= 2 or height <= 2:
+        rect = pygame.Rect(0, 0, width, height)
+        _PANEL_CROP_CACHE[key] = rect
+        return rect
+
+    scan_w = max(1, int(round(width * 0.22)))
+    step_y = max(1, height // 320)
+    samples = max(1, (height + step_y - 1) // step_y)
+    required = max(8, int(round(samples * 0.12)))
+
+    def gold_count(x):
+        count = 0
+        for y in range(0, height, step_y):
+            if _goldish(source.get_at((x, y))):
+                count += 1
+                if count >= required:
+                    return count
+        return count
+
+    left_edge = None
+    for x in range(scan_w):
+        if gold_count(x) >= required:
+            left_edge = x
+            break
+
+    right_edge = None
+    for x in range(width - 1, max(-1, width - scan_w - 1), -1):
+        if gold_count(x) >= required:
+            right_edge = x
+            break
+
+    # Fallback jest celowo zachowawczy. Jesli detekcja ramy sie nie powiedzie,
+    # nie tniemy agresywnie assetu i przez to nie tracimy ornamentow.
+    if left_edge is None:
+        left_edge = int(round(width * 0.045))
+    if right_edge is None:
+        right_edge = width - 1 - int(round(width * 0.045))
+
+    # Zostawiamy odrobine czarnego tla na zewnatrz ramy, aby jej zlota linia
+    # nigdy nie zostala przecieta przez granice subsurface/smoothscale.
+    frame_padding = max(2, int(round(width * 0.006)))
+    crop_left = max(0, left_edge - frame_padding)
+    crop_right = min(width, right_edge + frame_padding + 1)
+
+    # Ochrona przed bledna detekcja np. na bardzo ciemnym / nietypowym assetcie.
+    min_width = int(round(width * 0.70))
+    if crop_right - crop_left < min_width:
+        crop_left = 0
+        crop_right = width
+
+    rect = pygame.Rect(crop_left, 0, max(1, crop_right - crop_left), height)
+    _PANEL_CROP_CACHE[key] = rect
+    return rect
+
+
+def _scaled_panel_asset(path, size):
+    """Skaluje panel po usunieciu tylko pustego marginesu poza zlota rama."""
+    size = (max(1, int(size[0])), max(1, int(size[1])))
     source = _load_asset(path)
     if source is None:
         return None
 
-    source_w, source_h = source.get_size()
-    trim_x = int(round(source_w * LOCATION_PANEL_TRIM_X))
-    if trim_x > 0 and trim_x * 2 < source_w:
-        crop_rect = pygame.Rect(trim_x, 0, source_w - trim_x * 2, source_h)
-        source = source.subsurface(crop_rect)
+    crop_rect = _panel_crop_rect(path, source)
+    key = (
+        "location-panel-frame-safe",
+        str(path),
+        size,
+        crop_rect.x,
+        crop_rect.width,
+    )
+    if key in _SCALED_CACHE:
+        return _SCALED_CACHE[key]
 
-    if source.get_size() == size:
-        scaled = source.copy()
+    cropped = source.subsurface(crop_rect)
+    if cropped.get_size() == size:
+        scaled = cropped.copy()
     else:
-        scaled = pygame.transform.smoothscale(source, size)
+        scaled = pygame.transform.smoothscale(cropped, size)
 
     _SCALED_CACHE[key] = scaled
     return scaled
@@ -178,12 +258,7 @@ def _scene_file_for_location(location):
 
 
 def _fit_scene(rect, scene_file):
-    """Wypelnia cale pole jedna scena bez deformacji i bez powielania obrazu.
-
-    Scena zachowuje swoje oryginalne proporcje. Jezeli proporcje PNG i pola
-    centralnego sa rozne, przycinamy tylko nadmiar przy krawedziach. Nie ma
-    czarnych pasow, rozciagania ani dodatkowego przyciemnionego tla.
-    """
+    """Wypelnia cale pole jedna scena bez deformacji i bez powielania obrazu."""
     source = _load_asset(scene_file)
     if source is None:
         return None
@@ -226,7 +301,6 @@ def location_hub_layout(screen, scene_file=None):
     top_h = max(56, int(round(sh * LOCATION_TOP_SHARE)))
     bottom_h = max(44, int(round(sh * LOCATION_BOTTOM_SHARE)))
 
-    # Nie pozwalamy paskom zabrac miejsca scenie na nizszych rozdzielczosciach.
     max_bars = max(2, int(round(sh * 0.23)))
     if top_h + bottom_h > max_bars:
         scale = max_bars / max(1, top_h + bottom_h)
@@ -238,7 +312,6 @@ def location_hub_layout(screen, scene_file=None):
     left_w = max(220, int(round(sw * LOCATION_LEFT_SHARE)))
     right_w = max(230, int(round(sw * LOCATION_RIGHT_SHARE)))
 
-    # Przy mniejszych oknach chronimy scene przed zbyt mocnym zwezeniem.
     min_scene_w = max(520, int(round(sw * 0.52)))
     if left_w + right_w + min_scene_w > sw:
         available_for_sides = max(2, sw - min_scene_w)
@@ -267,8 +340,6 @@ city_hub_layout = location_hub_layout
 
 
 def _menu_button_rects(left_rect):
-    # Po odcieciu 9% marginesu z kazdej strony przyciski w grafice zajmuja
-    # szerszy fragment panelu. Hitboxy przesuwamy razem z renderem.
     button_x = left_rect.x + int(left_rect.width * 0.10)
     button_w = int(left_rect.width * 0.82)
     button_h = max(28, int(left_rect.height * 0.108))
@@ -418,7 +489,6 @@ def draw_location_hub_screen(
     screen.blit(scene_image, layout["scene"].topleft)
     _draw_panel_asset(screen, layout["right"], RIGHT_PANEL_FILE)
 
-    # Delikatne pionowe separatory tak jak w referencji.
     pygame.draw.line(
         screen,
         (104, 67, 27),
