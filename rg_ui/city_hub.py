@@ -21,14 +21,10 @@ LOCATION_SCENE_FILES = {
     ("castle", 2): ("zamek2.png",),
     ("castle", 3): ("zamek3.png",),
     ("village", 1): ("wies1.png",),
-    # W repo drugi plik wsi ma obecnie znak diakrytyczny w nazwie. Zostawiamy
-    # tez wariant ASCII, zeby pozniejsza zmiana nazwy assetu nie wymagala kodu.
     ("village", 2): ("wies2.png", "wieś2.png"),
     ("village", 3): ("wies3.png",),
 }
 
-# Awaryjne mapowanie po nazwie. Przydaje sie dla starych zapisow lub danych,
-# ktore nie maja jeszcze pola "number".
 LOCATION_NAME_NUMBERS = {
     "Lirion": 1,
     "Miasto 1": 1,
@@ -65,16 +61,11 @@ _SCENE_CACHE = {}
 
 
 class LocationMenuButton(city.Button):
-    """Niewidzialny hitbox nakladany na gotowy przycisk z lewy_ui.png.
-
-    Napisy i ikony sa juz wypalone w grafice panelu. Kod nie rysuje ich drugi
-    raz - dodaje tylko subtelne podswietlenie hover/active i zachowuje klikniecia.
-    """
+    """Niewidzialny hitbox nakladany na gotowy przycisk z lewy_ui.png."""
 
     def draw(self, screen, font, mouse_pos, active=False):
         _ = font
         hovered = self.rect.collidepoint(mouse_pos)
-
         if hovered or active:
             overlay = pygame.Surface(self.rect.size, pygame.SRCALPHA)
             overlay.fill((205, 145, 45, 25 if hovered else 17))
@@ -118,11 +109,26 @@ def _scaled_asset(path, size):
 
 
 def _draw_panel_asset(screen, rect, path):
+    """Rysuje panel bez zmiany jego proporcji.
+
+    Sam rect jest wyliczany z natywnych proporcji PNG, wiec panel moze rosnac
+    razem z wysokoscia okna bez pionowego lub poziomego rozciagania ornamentow.
+    """
     image = _scaled_asset(path, rect.size)
     if image is None:
         city.draw_panel(screen, rect, city.GOLD)
         return
     screen.blit(image, rect.topleft)
+
+
+def _panel_width_for_height(path, height, fallback_width):
+    source = _load_asset(path)
+    if source is None:
+        return max(1, int(fallback_width))
+    width, source_height = source.get_size()
+    if source_height <= 0:
+        return max(1, int(fallback_width))
+    return max(1, int(round(height * width / source_height)))
 
 
 def _location_number(location):
@@ -141,7 +147,7 @@ def _scene_file_for_location(location):
     if number is None:
         return None
 
-    for filename in LOCATION_SCENE_FILES.get((kind, number), ()):  # pragma: no branch - mala lista assetow
+    for filename in LOCATION_SCENE_FILES.get((kind, number), ()):
         path = LOCATION_UI_DIR / filename
         if path.exists():
             return path
@@ -149,51 +155,50 @@ def _scene_file_for_location(location):
 
 
 def _fit_scene(rect, scene_file):
-    """Skaluje scene w trybie contain - zawsze widoczny jest CALY obraz.
+    """Pokazuje CALY asset sceny i wypelnia nim caly dostepny prostokat.
 
-    Nie przycinamy juz bokow/gory/dolu. Jesli proporcje okna i assetu sa rozne,
-    wolne miejsce pozostaje ciemne i obraz jest wycentrowany.
+    Nie stosujemy juz contain ani cover. Contain robil czarne pasy gora/dol,
+    a cover ucinal boki. Smoothscale do rozmiaru pola zachowuje cala zawartosc
+    obrazu i nie zostawia pustych pasow.
     """
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size, "contain")
+    key = (str(scene_file), rect.size, "full")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
-    iw, ih = source.get_size()
-    scale = min(rect.width / iw, rect.height / ih)
-    scaled_size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
-    scaled = pygame.transform.smoothscale(source, scaled_size)
-
-    result = pygame.Surface(rect.size)
-    result.fill(_SCENE_BG)
-    result.blit(
-        scaled,
-        ((rect.width - scaled.get_width()) // 2, (rect.height - scaled.get_height()) // 2),
+    result = pygame.transform.smoothscale(
+        source,
+        (max(1, rect.width), max(1, rect.height)),
     )
     _SCENE_CACHE[key] = result
     return result
 
 
 def location_hub_layout(screen):
-    """Uklad 20% panel lewy / 60% scena / 20% panel prawy + dolny pasek."""
+    """Uklad lokacji z panelami zachowujacymi natywne proporcje."""
     sw, sh = screen.get_size()
     bottom_h = max(58, min(78, int(sh * 0.085)))
     body_h = max(1, sh - bottom_h)
 
-    side_w = max(280, int(sw * 0.20))
-    side_w = min(side_w, max(280, (sw - 520) // 2))
+    fallback_side = max(280, int(sw * 0.20))
+    left_w = _panel_width_for_height(LEFT_PANEL_FILE, body_h, fallback_side)
+    right_w = _panel_width_for_height(RIGHT_PANEL_FILE, body_h, fallback_side)
 
-    left = pygame.Rect(0, 0, side_w, body_h)
-    right = pygame.Rect(sw - side_w, 0, side_w, body_h)
+    # Nie deformujemy paneli tylko po to, aby zmiescic skrajnie male okno.
+    # W takim przypadku wrapper wraca do starego renderera lokacji.
+    if left_w + right_w + 220 > sw:
+        return None
+
+    left = pygame.Rect(0, 0, left_w, body_h)
+    right = pygame.Rect(sw - right_w, 0, right_w, body_h)
     scene = pygame.Rect(left.right, 0, right.left - left.right, body_h)
     bottom = pygame.Rect(0, body_h, sw, sh - body_h)
     return {"left": left, "scene": scene, "right": right, "bottom": bottom}
 
 
-# Zachowujemy stara nazwe, zeby ewentualne odwolania z innych modulow nie pekly.
 city_hub_layout = location_hub_layout
 
 
@@ -206,7 +211,13 @@ def _menu_button_rects(left_rect):
 
     rows = []
     for index, (label, action) in enumerate(LOCATION_MENU):
-        rows.append((label, action, pygame.Rect(button_x, start_y + index * step, button_w, button_h)))
+        rows.append(
+            (
+                label,
+                action,
+                pygame.Rect(button_x, start_y + index * step, button_w, button_h),
+            )
+        )
 
     back = pygame.Rect(
         button_x,
@@ -218,12 +229,7 @@ def _menu_button_rects(left_rect):
 
 
 def right_content_rect(right_rect):
-    """Docelowy obszar na zmienny content prawego panelu.
-
-    Na tym etapie pozostaje pusty dla wszystkich dziewieciu lokacji. Kolejne
-    widoki beda rysowane tylko wewnatrz tego prostokata, zgodnie z osobnymi
-    makietami przekazywanymi dla Sklepu, Karczmy itd.
-    """
+    """Docelowy obszar na zmienny content prawego panelu."""
     pad_x = int(right_rect.width * 0.08)
     pad_top = int(right_rect.height * 0.06)
     pad_bottom = int(right_rect.height * 0.05)
@@ -250,24 +256,55 @@ def _draw_left_menu(screen, font, mouse_pos, selected_place, rect):
     return buttons
 
 
-def _draw_right_content(screen, font, small_font, mouse_pos, location, player, selected_place, rect):
+def _draw_right_content(
+    screen,
+    font,
+    small_font,
+    mouse_pos,
+    location,
+    player,
+    selected_place,
+    rect,
+):
     """Pusty kontener na docelowy content prawego panelu."""
-    _ = (screen, font, small_font, mouse_pos, location, player, selected_place, right_content_rect(rect))
+    _ = (
+        screen,
+        font,
+        small_font,
+        mouse_pos,
+        location,
+        player,
+        selected_place,
+        right_content_rect(rect),
+    )
     return []
 
 
 def _draw_bottom_bar(screen, rect, message=""):
     pygame.draw.rect(screen, _DARK_BAR, rect)
-    pygame.draw.line(screen, (87, 55, 26), (rect.left, rect.top), (rect.right, rect.top), 2)
-    pygame.draw.line(screen, (171, 112, 42), (rect.left + 10, rect.top + 4), (rect.right - 10, rect.top + 4), 1)
+    pygame.draw.line(
+        screen,
+        (87, 55, 26),
+        (rect.left, rect.top),
+        (rect.right, rect.top),
+        2,
+    )
+    pygame.draw.line(
+        screen,
+        (171, 112, 42),
+        (rect.left + 10, rect.top + 4),
+        (rect.right - 10, rect.top + 4),
+        1,
+    )
     pygame.draw.rect(screen, (111, 71, 29), rect, 2)
 
     if message:
-        # Komunikaty akcji zachowujemy poza prawym panelem, zeby nie blokowaly
-        # pozniejszego layoutu jego zmiennej zawartosci.
         font = pygame.font.SysFont("arial", 16, bold=True)
         label = font.render(str(message)[:150], True, city.MUTED)
-        screen.blit(label, (rect.x + 24, rect.centery - label.get_height() // 2))
+        screen.blit(
+            label,
+            (rect.x + 24, rect.centery - label.get_height() // 2),
+        )
 
 
 def draw_location_hub_screen(
@@ -288,6 +325,9 @@ def draw_location_hub_screen(
         return None
 
     layout = location_hub_layout(screen)
+    if layout is None:
+        return None
+
     scene_image = _fit_scene(layout["scene"], scene_file)
     if scene_image is None:
         return None
@@ -298,7 +338,6 @@ def draw_location_hub_screen(
     _draw_panel_asset(screen, layout["left"], LEFT_PANEL_FILE)
     _draw_panel_asset(screen, layout["right"], RIGHT_PANEL_FILE)
 
-    # Delikatne laczenia paneli ze scena jak na makiecie referencyjnej.
     pygame.draw.line(
         screen,
         (104, 67, 27),
@@ -314,7 +353,13 @@ def draw_location_hub_screen(
         2,
     )
 
-    buttons = _draw_left_menu(screen, font, mouse_pos, selected_place, layout["left"])
+    buttons = _draw_left_menu(
+        screen,
+        font,
+        mouse_pos,
+        selected_place,
+        layout["left"],
+    )
     buttons += _draw_right_content(
         screen,
         font,
@@ -331,7 +376,6 @@ def draw_location_hub_screen(
     return buttons
 
 
-# Kompatybilnosc z pierwsza wersja ekranu Lirionu.
 def draw_lirion_city_screen(
     screen,
     title_font,
@@ -413,5 +457,4 @@ def install_city_hub(app_module):
     app_module._rise_glory_city_hub_installed = True
 
 
-# Nazwa docelowa dla nowego kodu; stara pozostaje ze wzgledu na main.py i zgodnosc.
 install_location_hub = install_city_hub
