@@ -58,15 +58,21 @@ LOCATION_MENU = [
 _GOLD_TEXT = (196, 151, 78)
 _GOLD_HOVER = (224, 177, 91)
 _DARK_BAR = (13, 12, 11)
+_SCENE_BG = (5, 5, 5)
 _ASSET_CACHE = {}
 _SCALED_CACHE = {}
 _SCENE_CACHE = {}
 
 
 class LocationMenuButton(city.Button):
-    """Przycisk nakladany na slot narysowany w grafice lewego panelu."""
+    """Niewidzialny hitbox nakladany na gotowy przycisk z lewy_ui.png.
+
+    Napisy i ikony sa juz wypalone w grafice panelu. Kod nie rysuje ich drugi
+    raz - dodaje tylko subtelne podswietlenie hover/active i zachowuje klikniecia.
+    """
 
     def draw(self, screen, font, mouse_pos, active=False):
+        _ = font
         hovered = self.rect.collidepoint(mouse_pos)
 
         if hovered or active:
@@ -80,10 +86,6 @@ class LocationMenuButton(city.Button):
                 2,
                 border_radius=8,
             )
-
-        label = font.render(self.text, True, _GOLD_HOVER if hovered or active else _GOLD_TEXT)
-        text_x = self.rect.x + int(self.rect.width * 0.28)
-        screen.blit(label, label.get_rect(midleft=(text_x, self.rect.centery)))
 
 
 def _load_asset(path):
@@ -146,21 +148,27 @@ def _scene_file_for_location(location):
     return None
 
 
-def _cover_scene(rect, scene_file):
+def _fit_scene(rect, scene_file):
+    """Skaluje scene w trybie contain - zawsze widoczny jest CALY obraz.
+
+    Nie przycinamy juz bokow/gory/dolu. Jesli proporcje okna i assetu sa rozne,
+    wolne miejsce pozostaje ciemne i obraz jest wycentrowany.
+    """
     source = _load_asset(scene_file)
     if source is None:
         return None
 
-    key = (str(scene_file), rect.size)
+    key = (str(scene_file), rect.size, "contain")
     if key in _SCENE_CACHE:
         return _SCENE_CACHE[key]
 
     iw, ih = source.get_size()
-    scale = max(rect.width / iw, rect.height / ih)
+    scale = min(rect.width / iw, rect.height / ih)
     scaled_size = (max(1, int(iw * scale)), max(1, int(ih * scale)))
     scaled = pygame.transform.smoothscale(source, scaled_size)
 
-    result = pygame.Surface(rect.size, pygame.SRCALPHA)
+    result = pygame.Surface(rect.size)
+    result.fill(_SCENE_BG)
     result.blit(
         scaled,
         ((rect.width - scaled.get_width()) // 2, (rect.height - scaled.get_height()) // 2),
@@ -280,11 +288,11 @@ def draw_location_hub_screen(
         return None
 
     layout = location_hub_layout(screen)
-    scene_image = _cover_scene(layout["scene"], scene_file)
+    scene_image = _fit_scene(layout["scene"], scene_file)
     if scene_image is None:
         return None
 
-    screen.fill((5, 5, 5))
+    screen.fill(_SCENE_BG)
     screen.blit(scene_image, layout["scene"].topleft)
 
     _draw_panel_asset(screen, layout["left"], LEFT_PANEL_FILE)
