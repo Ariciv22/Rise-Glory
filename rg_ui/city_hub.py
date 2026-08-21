@@ -19,6 +19,11 @@ LOCATION_BOTTOM_SHARE = 0.07
 LOCATION_LEFT_SHARE = 0.18
 LOCATION_RIGHT_SHARE = 0.19
 
+# Assety lewy_ui.png i prawy_ui.png maja wbudowane czarne marginesy po bokach.
+# Odcinamy je tylko podczas renderowania, dzieki czemu widoczna zlota rama panelu
+# dochodzi do krawedzi okna oraz bezposrednio do sceny. Samych PNG nie zmieniamy.
+LOCATION_PANEL_TRIM_X = 0.09
+
 LOCATION_SCENE_FILES = {
     ("city", 1): ("miasto1.png",),
     ("city", 2): ("miasto2.png",),
@@ -115,8 +120,34 @@ def _scaled_asset(path, size):
     return scaled
 
 
+def _scaled_panel_asset(path, size):
+    """Skaluje panel po usunieciu jego pustych marginesow poziomych."""
+    size = (max(1, int(size[0])), max(1, int(size[1])))
+    key = ("location-panel", str(path), size, LOCATION_PANEL_TRIM_X)
+    if key in _SCALED_CACHE:
+        return _SCALED_CACHE[key]
+
+    source = _load_asset(path)
+    if source is None:
+        return None
+
+    source_w, source_h = source.get_size()
+    trim_x = int(round(source_w * LOCATION_PANEL_TRIM_X))
+    if trim_x > 0 and trim_x * 2 < source_w:
+        crop_rect = pygame.Rect(trim_x, 0, source_w - trim_x * 2, source_h)
+        source = source.subsurface(crop_rect)
+
+    if source.get_size() == size:
+        scaled = source.copy()
+    else:
+        scaled = pygame.transform.smoothscale(source, size)
+
+    _SCALED_CACHE[key] = scaled
+    return scaled
+
+
 def _draw_panel_asset(screen, rect, path):
-    image = _scaled_asset(path, rect.size)
+    image = _scaled_panel_asset(path, rect.size)
     if image is None:
         city.draw_panel(screen, rect, city.GOLD)
         return
@@ -236,10 +267,10 @@ city_hub_layout = location_hub_layout
 
 
 def _menu_button_rects(left_rect):
-    # Hitboxy sa liczone z faktycznego prostokata panelu. Sam napis/ikona sa
-    # juz czescia lewy_ui.png, wiec niczego drugi raz nie renderujemy.
-    button_x = left_rect.x + int(left_rect.width * 0.17)
-    button_w = int(left_rect.width * 0.68)
+    # Po odcieciu 9% marginesu z kazdej strony przyciski w grafice zajmuja
+    # szerszy fragment panelu. Hitboxy przesuwamy razem z renderem.
+    button_x = left_rect.x + int(left_rect.width * 0.10)
+    button_w = int(left_rect.width * 0.82)
     button_h = max(28, int(left_rect.height * 0.108))
     start_y = left_rect.y + int(left_rect.height * 0.075)
     step = int(left_rect.height * 0.118)
