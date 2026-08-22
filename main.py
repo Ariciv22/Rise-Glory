@@ -21,6 +21,7 @@ from rg_core import app as _app
 from rg_ui.city_hub import install_location_hub
 from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
+from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
@@ -67,6 +68,10 @@ install_village_hub(_app)
 # a srodkowa scena jest dobierana z numeru oraz typu konkretnej lokacji.
 # Prawy content nadal pozostaje pustym kontenerem do dalszego projektowania.
 install_location_hub(_app)
+
+# Gorny i dolny pas ekranu lokacji korzystaja z pelnego panel2.png, dzieki
+# czemu widoczne sa zlote naroza i ornamenty na calej ramie zamiast samych linii.
+install_location_edge_bar_theme()
 
 
 if __name__ == "__main__":
