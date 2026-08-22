@@ -236,17 +236,15 @@ Założenia do późniejszego rozwinięcia:
 - niektórych Questów Legendarnych nie powinno dać się ukończyć samotnie,
 - sam sojusz nie gwarantuje wspólnego zwycięstwa.
 
-### Zaufanie i możliwość zdrady
+### Wspólna droga do finału
 
-Możliwość wspólnego zwycięstwa ma tworzyć napięcie między rywalizacją a zaufaniem.
+Możliwość wspólnego zwycięstwa ma tworzyć prawdziwą alternatywę wobec indywidualnego wyścigu po legendę.
 
-Przez większość gry bohaterowie ścigają się o własną legendę. Pod koniec rozgrywki mogą jednak stanąć przed wyborem:
+Przez większość gry bohaterowie mogą realizować własne cele, ale pod koniec rozgrywki dwóch sprzymierzonych graczy może zdecydować się na wspólną drogę i dokonać czegoś większego, niż którykolwiek z nich byłby w stanie osiągnąć samotnie.
 
-**„Czy próbuję wygrać sam, czy zaufam innemu bohaterowi i razem spróbujemy dokonać czegoś większego?”**
+Po rozpoczęciu wspólnego Questa Legendarnego jego finał nie powinien opierać się na możliwości zdrady partnera. Jest to ścieżka świadomej współpracy dwóch bohaterów, którzy razem spełniają wymagania, razem docierają do finału i — jeśli zakończą quest powodzeniem — **razem zwyciężają**.
 
-Do momentu zakończenia wspólnego Questa Legendarnego sojusz może zostać zerwany. Jeden z bohaterów może zdradzić drugiego i spróbować wykorzystać wcześniejsze przygotowania do osiągnięcia własnego celu.
-
-Taka zdrada powinna jednak oznaczać utratę możliwości ukończenia wspólnej ścieżki i skierować graczy w inne zakończenie.
+Napięcie tej ścieżki ma wynikać z wysokiego poziomu trudności, konieczności współpracy, spełnienia różnych wymagań oraz ryzyka niepowodzenia samego questa, a nie z możliwości odebrania zwycięstwa drugiemu graczowi w ostatniej chwili.
 
 ### Przykładowe kierunki wspólnych legend
 
