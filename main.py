@@ -28,10 +28,15 @@ from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.title_flow import install_into_main
 from rg_ui.village_hub import install_village_hub
+from rg_world.location_names import install_quest_location_name_compatibility
 
 # DEV: kazde reczne otwarcie Rady rozpoczyna swieza sesje UI i dobiera kolejna
 # karte z biezacej talii. Nie resetujemy samej talii Wydarzen Swiata.
 install_dev_council_reset(_app)
+
+# Stare techniczne nazwy lokacji (np. Wies 1) nadal sa rozpoznawane przez
+# questy, ale gracz widzi juz stale nazwy wlasne wszystkich 9 lokacji.
+install_quest_location_name_compatibility()
 
 # Usuwamy jasne tlo/ramke zapisana w grafice panel2.png przyciskow menu.
 install_menu_button_fix()
