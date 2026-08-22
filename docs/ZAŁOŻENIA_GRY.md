@@ -149,7 +149,8 @@ Główne kierunki powinny obejmować możliwość:
 - podjęcia próby pokonania głównego zła,
 - przeciwstawienia się procesowi rozpadu świata,
 - wykorzystania chaosu do osiągnięcia własnych celów,
-- realizacji indywidualnego Questa Legendarnego.
+- realizacji indywidualnego Questa Legendarnego,
+- realizacji wspólnego Questa Legendarnego przez dwóch sprzymierzonych bohaterów.
 
 Nie każdy bohater musi kończyć swoją historię dokładnie w ten sam sposób.
 
@@ -209,5 +210,51 @@ Dzięki temu główna fabuła nie będzie tylko opowiedzianą historią, ale pro
 - NPC powracający na kolejnych etapach fabuły,
 - specjalny NPC / zagrożenie poruszające się po mapie na poziomie świata 3,
 - tabela losowych konsekwencji jego działania,
-- Questy Legendarne,
+- Questy Legendarne jednoosobowe i dwuosobowe,
 - możliwe zakończenia gry i osobiste cele bohaterów.
+
+---
+
+# 7. WSPÓLNA LEGENDA — DWUOSOBOWE ZWYCIĘSTWO
+
+Rise & Glory nie musi zawsze kończyć się zwycięstwem tylko jednego bohatera.
+
+Powinny istnieć specjalne **Questy Legendarne przeznaczone dla dwóch graczy**, które po spełnieniu bardzo trudnych warunków pozwalają obu sprzymierzonym bohaterom wygrać rozgrywkę wspólnie.
+
+Takie zakończenie ma reprezentować czyn tak wielki, że historia zapamiętuje nie jednego bohatera, lecz **dwóch ludzi, którzy wspólnie dokonali czegoś, czego żaden z nich nie byłby w stanie osiągnąć samotnie**.
+
+Wspólna wygrana nie może być prostą nagrodą za samo zawarcie sojuszu. Obaj gracze muszą realnie zapracować na swoją część legendy.
+
+Założenia do późniejszego rozwinięcia:
+
+- dwóch graczy musi pozostawać w formalnym sojuszu,
+- każdy z nich musi spełnić własną część wymagań Questa Legendarnego,
+- obaj muszą wnieść znaczący wkład w realizację wspólnego celu,
+- wymagania mogą korzystać z różnych specjalizacji, atrybutów, wpływów lub zasobów bohaterów,
+- jeden gracz nie może po prostu „przeciągnąć” drugiego do zwycięstwa,
+- wspólne Questy Legendarne powinny należeć do najtrudniejszych i najbardziej spektakularnych zakończeń gry,
+- niektórych Questów Legendarnych nie powinno dać się ukończyć samotnie,
+- sam sojusz nie gwarantuje wspólnego zwycięstwa.
+
+### Zaufanie i możliwość zdrady
+
+Możliwość wspólnego zwycięstwa ma tworzyć napięcie między rywalizacją a zaufaniem.
+
+Przez większość gry bohaterowie ścigają się o własną legendę. Pod koniec rozgrywki mogą jednak stanąć przed wyborem:
+
+**„Czy próbuję wygrać sam, czy zaufam innemu bohaterowi i razem spróbujemy dokonać czegoś większego?”**
+
+Do momentu zakończenia wspólnego Questa Legendarnego sojusz może zostać zerwany. Jeden z bohaterów może zdradzić drugiego i spróbować wykorzystać wcześniejsze przygotowania do osiągnięcia własnego celu.
+
+Taka zdrada powinna jednak oznaczać utratę możliwości ukończenia wspólnej ścieżki i skierować graczy w inne zakończenie.
+
+### Przykładowe kierunki wspólnych legend
+
+Robocze przykłady, które zostaną później rozwinięte lub zastąpione:
+
+- dwóch bohaterów wspólnie kończy wielką wojnę i ustanawia nowy porządek,
+- dwóch bohaterów wspólnie pokonuje główne zagrożenie, którego żaden nie byłby w stanie zwyciężyć samotnie,
+- dwóch bohaterów odbudowuje kluczowe elementy świata i zatrzymuje jego cofanie,
+- dwóch potężnych przywódców tworzy trwałe przymierze i dokonuje czynu zmieniającego historię całych krain.
+
+Najważniejsza zasada: **wspólna legenda ma być równorzędnym, pełnoprawnym sposobem zwycięstwa, a nie nagrodą pocieszenia dla drugiego gracza.**
