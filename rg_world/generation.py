@@ -2,6 +2,7 @@ import random
 
 from rg_core.data import TERRAINS
 from rg_content.locations import initialize_location
+from rg_world.location_names import location_name
 from rg_world.map import Tile, generate_positions
 
 LOCATIONS = [
@@ -22,19 +23,19 @@ def create_random_tiles(map_key):
 
 
 def build_location_data(location, number):
+    location_number = number + 1
+    legacy_name = f"{location['name']} {location_number}"
     data = {
         "kind": location["kind"],
         "type_name": location["type_name"],
-        "name": f"{location['name']} {number + 1}",
+        "name": location_name(location["kind"], location_number, legacy_name),
+        "legacy_name": legacy_name,
         "symbol": location["symbol"],
         "color": location["color"],
-        "number": number + 1,
+        "number": location_number,
     }
     if location["kind"] == "city" and number == 0:
-        data["name"] = "Lirion"
         data["background"] = "lirion_miasto"
-    elif location["kind"] == "castle" and number == 0:
-        data["name"] = "Artium"
     return initialize_location(data)
 
 
