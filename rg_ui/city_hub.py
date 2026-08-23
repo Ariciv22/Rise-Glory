@@ -369,7 +369,9 @@ def _right_navigation_rects(right_rect):
     """Pozycje stalych strzalek w stopce prawego panelu."""
     button_w = max(48, int(round(right_rect.width * 0.27)))
     button_h = max(20, int(round(right_rect.height * 0.036)))
-    bottom_gap = max(8, int(round(right_rect.height * 0.022)))
+    # Strzalki maja siedziec w dolnej stopce, pod separatorem, bez nachodzenia
+    # na zlota linie ostatniego wiersza prawego panelu.
+    bottom_gap = max(2, int(round(right_rect.height * 0.004)))
     side_gap = max(10, int(round(right_rect.width * 0.15)))
 
     y = right_rect.bottom - bottom_gap - button_h
