@@ -4,6 +4,14 @@ Ten katalog jest roboczą roadmapą rozwoju gry. Każdy główny moduł ma osobn
 
 **Stan zweryfikowany: 2026-08-23 na podstawie aktualnego kodu, integracji i plików testowych w repozytorium.**
 
+## Nadrzędny plan domknięcia gry
+
+Od 2026-08-23 obowiązuje dodatkowa, uproszczona roadmapa prowadząca jak najszybciej do pierwszej kompletnej partii od startu do zwycięstwa:
+
+**[ALFA — początek alfy (do ukończenia)](ALFA_POCZATEK_ALFY_DO_UKONCZENIA.md)**
+
+Ta roadmapa ma pierwszeństwo przy ustalaniu kolejności prac do pierwszej grywalnej ALFY. Główna zasada: element, który nie jest potrzebny do rozegrania pełnej partii od początku do końca, nie powinien blokować ALFY.
+
 ## Kolumny Kanban
 
 1. **BACKLOG** — moduł nie ma jeszcze właściwej implementacji.
@@ -56,24 +64,24 @@ Ten katalog jest roboczą roadmapą rozwoju gry. Każdy główny moduł ma osobn
    Istnieje działająca logika Poziomu Świata, progi Legendy, awans świata, kolejka komunikatów, talie Wydarzeń Świata I–IV, stosy odrzuconych, podstawowe skalowanie przeciwników i testy. Nadal trzeba domknąć wszystkie integracje progresji, nagród, sklepów, jakości przedmiotów i pozostałych systemów.
 
 14. [Ekwipunek i archetypy](14_EKWIPUNEK_I_ARCHETYPY.md)  
-   Obowiązujący katalog projektowy obejmuje 280 kart EQ: po 40 Broni, Zbroi, Hełmów, Butów, Rękawic, Amuletów i Pierścieni, z podziałem 10/10/10/10 na jakości oraz 18 archetypami. Fundament ekwipunku istnieje w silniku, ale pełny katalog, archetypy i przyszłe bonusy zestawów 2/4/6 wymagają implementacji.
+   Obowiązujący katalog projektowy obejmuje 280 kart EQ: po 40 Broni, Zbroi, Hełmów, Butów, Rękawic, Amuletów i Pierścieni, z podziałem 10/10/10/10 na jakości oraz 18 archetypami. Fundament ekwipunku istnieje w silniku, ale pełny katalog, archetypy i przyszłe bonusy zestawów 2/4/6 wymagają implementacji. Pełny katalog nie blokuje pierwszej kompletnej ALFY — do niej wystarczy reprezentatywny zestaw przedmiotów.
 
 ### BACKLOG
 
 5. [Kopalnie i Miejsca Produkcji](05_KOPALNIE_I_MIEJSCA_PRODUKCJI.md)  
-   Brak docelowego systemu Miejsc Produkcji/Kopalń.
+   Brak docelowego systemu Miejsc Produkcji/Kopalń. Nie blokuje pierwszej kompletnej ALFY.
 
 6. [Towarzysz — wspólna wyprawa 2 bohaterów](06_TOWARZYSZ_WSPOLNA_WYPRAWA.md)  
-   Zasady kierunkowe istnieją, ale brak docelowej implementacji wspólnej wyprawy dwóch bohaterów.
+   Zasady kierunkowe istnieją, ale brak docelowej implementacji wspólnej wyprawy dwóch bohaterów. Do pierwszej ALFY implementujemy tylko minimalną integrację dwóch graczy potrzebną do wspólnych Legendarnych Questów.
 
 7. [Tożsamość Bohaterów](07_TOZSAMOSC_BOHATEROW.md)  
-   Podstawowe archetypy, statystyki i wyposażenie istnieją, ale moduł charakterystycznych zdolności i wyraźnie różnych stylów gry nie został jeszcze zaimplementowany.
+   Podstawowe archetypy, statystyki i wyposażenie istnieją, ale moduł charakterystycznych zdolności i wyraźnie różnych stylów gry nie został jeszcze zaimplementowany. Nie blokuje pierwszej kompletnej ALFY.
 
 11. [Legendarny Quest i koniec gry](11_LEGENDARNY_QUEST_I_KONIEC_GRY.md)  
-   Brak docelowego systemu Legendarnego Questa, rozstrzygnięcia końca partii i ekranu finałowego.
+   Brak docelowego systemu Legendarnego Questa, rozstrzygnięcia końca partii i ekranu finałowego. Jest to jeden z kluczowych elementów nowej roadmapy domknięcia ALFY.
 
 12. [Balans i grywalna ALFA 0.1](12_BALANS_I_ALFA_0_1.md)  
-   Końcowy etap po domknięciu mechanik: pełne partie 2–6 graczy, balans ekonomii, tempa Legendy, trudności, downtime, UX i usuwanie placeholderów.
+   Końcowy etap po domknięciu minimalnego pełnego flow: pełne partie 2–6 graczy, balans ekonomii, tempa Legendy, trudności, downtime, UX i usuwanie placeholderów.
 
 ### GOTOWE
 
@@ -84,13 +92,17 @@ Na ten moment nie oznaczamy żadnego dużego modułu jako formalnie **GOTOWE**, 
 13. [Multiplayer LAN](13_MULTIPLAYER_LAN.md)  
    W repo istnieją już elementy/prototypy sieciowe i testy, ale zgodnie z decyzją projektową moduł pozostaje wstrzymany do czasu grywalnej ALFY 0.1.
 
-## Najbliższa kolejność prac
+## Najbliższa kolejność prac — skrócona droga do kompletnej ALFY
 
-1. Dokończyć aktualny moduł **Walka V2**.
-2. Wykonać pełną regresję **Zagrożeń**, **Questów** i **Rady Bohaterów** i po pozytywnym wyniku przenieść je do **GOTOWE**.
-3. Następnie domykać moduły z istniejącym fundamentem: **Ekwipunek i archetypy**, **Przygody V2**, **Kronika Świata**, **Poziom Świata i progresja**.
-4. Dopiero potem wejść w moduły bez właściwej implementacji: **Kopalnie**, **Towarzysz**, **Tożsamość Bohaterów**, **Legendarny Quest**.
-5. Na końcu pełny **Balans i ALFA 0.1**.
+1. Dokończyć tylko konieczne braki **Walki V2**.
+2. Wykonać regresję **Zagrożeń**, **Questów** i **Rady Bohaterów** i nie rozbudowywać ich przed zamknięciem regresji.
+3. Domknąć **Poziom Świata I–IV** jako pełny przepływ jednej partii.
+4. Wdrożyć **Legendarny Quest i koniec gry**: solo od 35 Legendy oraz wspólne Questy dwóch bohaterów od 30 Legendy na każdego.
+5. Dodać minimalną integrację dwóch graczy wymaganą przez wspólne Legendy zamiast pełnego modułu Towarzysza.
+6. Uzupełnić wyłącznie minimalny content potrzebny do pełnej partii: Questy I–IV, Wydarzenia, Zagrożenia, przeciwników, bossów i reprezentatywny EQ.
+7. Domknąć minimalną **Kronikę Świata** i ekran końcowy.
+8. Natychmiast rozegrać pełną partię 2 graczy, potem 4 graczy, potem 6 graczy i poprawiać tylko problemy ujawnione w realnej grze.
+9. Po uzyskaniu kompletnej grywalnej ALFY wrócić do rozszerzeń: Kopalnie, pełny Towarzysz, Tożsamość Bohaterów, pełne 280 EQ, rozbudowane Przygody i pozostałe systemy.
 
 ## Ważna zasada dla Kroniki
 
