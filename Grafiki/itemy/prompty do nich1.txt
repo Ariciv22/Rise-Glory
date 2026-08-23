@@ -1,0 +1,61 @@
+Wygeneruj tylko jeden pojedynczy obrazek zbroi. Ma przedstawiać wyłącznie samą zbroję, bez postaci, bez manekina, bez dłoni, bez broni, bez tła fabularnego, bez otoczenia, bez karty, bez ramki, bez ikon, bez napisów i bez żadnych elementów UI.
+
+Nie twórz kilku zbroi, wariantów, zestawów ani kolażu — na obrazie ma być dokładnie jeden obiekt.
+
+Zbroja ma być pokazana w całości, wycentrowana, dobrze widoczna, na prostym ciemnym neutralnym tle.
+
+Styl: wysokiej jakości dark fantasy RPG,Różnorodne kolory, profesjonalny asset do gry, realistyczne materiały, metal, skóra i tkaniny, ostre detale, czytelna sylwetka, subtelne ślady użytkowania, studyjne oświetlenie, realistyczny render przedmiotu z ekwipunku RPG.
+
+Tylko jedna zbroja. Nic więcej.
+
+Zbroja:
+Szata adepta
+
+
+
+Przeszywanica wojownika
+Skóra rzeźnika
+Kaftan intryganta
+Skóra tropiciela
+Szata adepta
+Kamizela kupiecka
+Surkot posła
+Strój kronikarza
+Pancerz podróżny
+Płaszcz medyka
+
+
+Pancerz berserkera
+Kolczuga gwardzisty
+Pancerz nocnego szlaku
+Łuskowa zbroja łowcy
+Runiczna kolczuga
+Pancerz gildii
+Zbroja ambasadora
+Pancerz trubadura
+Zbroja szlaku
+Pancerz wróżbity
+
+
+Krwawa płyta
+Płyta Żelaznego Muru
+Tkana Noc
+Smocza łuska łowcy
+Pancerz runiczny
+Pancerz Księcia Kupców
+Zbroja Królewskiego Poselstwa
+Pancerz Wielkiego Kronikarza
+Zbroja Horyzontu
+Pancerz Kapitana
+
+
+Zbroja Siedmiu Blizn
+Mur Artium
+Płaszcz Bezksiężycowej Nocy
+Pancerz Pogromcy Smoków
+Szata Tysiąca Run
+Złota Zbroja Dziesięciu Gildii
+Pancerz Pierwszego Ambasadora
+Szata Wiecznej Ballady
+Zbroja Białego Zakonu
+Pancerz Przeznaczenia
