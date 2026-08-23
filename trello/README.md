@@ -2,7 +2,7 @@
 
 Ten katalog jest roboczą roadmapą rozwoju gry. Każdy główny moduł ma osobny dokument z checklistą działań i Definition of Done.
 
-**Stan zweryfikowany: 2026-08-20 na podstawie aktualnego kodu, integracji i plików testowych w repozytorium.**
+**Stan zweryfikowany: 2026-08-23 na podstawie aktualnego kodu, integracji i plików testowych w repozytorium.**
 
 ## Kolumny Kanban
 
@@ -55,6 +55,9 @@ Ten katalog jest roboczą roadmapą rozwoju gry. Każdy główny moduł ma osobn
 10. [Poziom Świata i progresja partii](10_POZIOM_SWIATA_I_PROGRESJA.md)  
    Istnieje działająca logika Poziomu Świata, progi Legendy, awans świata, kolejka komunikatów, talie Wydarzeń Świata I–IV, stosy odrzuconych, podstawowe skalowanie przeciwników i testy. Nadal trzeba domknąć wszystkie integracje progresji, nagród, sklepów, jakości przedmiotów i pozostałych systemów.
 
+14. [Ekwipunek i archetypy](14_EKWIPUNEK_I_ARCHETYPY.md)  
+   Obowiązujący katalog projektowy obejmuje 280 kart EQ: po 40 Broni, Zbroi, Hełmów, Butów, Rękawic, Amuletów i Pierścieni, z podziałem 10/10/10/10 na jakości oraz 18 archetypami. Fundament ekwipunku istnieje w silniku, ale pełny katalog, archetypy i przyszłe bonusy zestawów 2/4/6 wymagają implementacji.
+
 ### BACKLOG
 
 5. [Kopalnie i Miejsca Produkcji](05_KOPALNIE_I_MIEJSCA_PRODUKCJI.md)  
@@ -85,7 +88,7 @@ Na ten moment nie oznaczamy żadnego dużego modułu jako formalnie **GOTOWE**, 
 
 1. Dokończyć aktualny moduł **Walka V2**.
 2. Wykonać pełną regresję **Zagrożeń**, **Questów** i **Rady Bohaterów** i po pozytywnym wyniku przenieść je do **GOTOWE**.
-3. Następnie domykać moduły z istniejącym fundamentem: **Przygody V2**, **Kronika Świata**, **Poziom Świata i progresja**.
+3. Następnie domykać moduły z istniejącym fundamentem: **Ekwipunek i archetypy**, **Przygody V2**, **Kronika Świata**, **Poziom Świata i progresja**.
 4. Dopiero potem wejść w moduły bez właściwej implementacji: **Kopalnie**, **Towarzysz**, **Tożsamość Bohaterów**, **Legendarny Quest**.
 5. Na końcu pełny **Balans i ALFA 0.1**.
 
