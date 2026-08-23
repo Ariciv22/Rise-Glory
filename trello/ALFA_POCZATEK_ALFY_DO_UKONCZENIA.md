@@ -10,6 +10,141 @@ To jest nadrzędna roadmapa do pierwszej kompletnej ALFY. Jeżeli jakiś pomysł
 
 ---
 
+# 0. MUST HAVE — CO MUSI DZIAŁAĆ, ŻEBY GRA BYŁA GRYWALNA
+
+Poniższa lista jest bramką dla grywalnej ALFY. Nie chodzi o pełny content, perfekcyjny balans ani finalny wygląd. Chodzi o to, żeby osoba uruchamiająca grę mogła bez pomocy programisty rozpocząć normalną partię, grać przez wszystkie jej fazy i doprowadzić ją do prawidłowego zwycięstwa.
+
+Jeżeli którykolwiek z poniższych punktów blokuje pełną partię, gra nie jest jeszcze uznawana za grywalną.
+
+## 0.1. Start partii i podstawowa pętla
+
+- [ ] Da się rozpocząć nową partię dla 2–6 graczy.
+- [ ] Każdy gracz otrzymuje bohatera, początkowe statystyki, zasoby i wyposażenie wymagane do startu.
+- [ ] Mapa generuje się poprawnie wraz z wymaganymi lokacjami i obiektami.
+- [ ] Kolejność tur działa od pierwszego gracza aż do końca partii.
+- [ ] Bohater posiada działające Akcje i może je normalnie wydawać.
+- [ ] Ruch po mapie działa i respektuje koszty terenu.
+- [ ] Runda poprawnie przechodzi w kolejną rundę.
+- [ ] Gra nie wpada w stan, z którego nie da się kontynuować partii.
+
+## 0.2. Rozwój bohatera
+
+- [ ] Bohater może zdobywać Punkty Legendy.
+- [ ] Bohater może rozwijać swoją siłę w trakcie partii przez zdobywanie nagród, Złota i wyposażenia.
+- [ ] Statystyki Walka, Handel, Intryga, Dyplomacja, Kultura i Nauka działają w testach tam, gdzie są wymagane.
+- [ ] Ekwipunek można zdobywać, zakładać i wykorzystywać.
+- [ ] HP, Rany i podstawowe leczenie nie mogą blokować dalszej gry przez brak obsługi stanu bohatera.
+
+## 0.3. Questy — główne źródło progresji
+
+- [ ] Gracz może otrzymać/przyjąć Quest.
+- [ ] Limit aktywnych Questów działa.
+- [ ] Quest można rozpocząć, wykonywać etapami i ukończyć albo przegrać.
+- [ ] Testy k20 i alternatywne metody rozwiązania działają.
+- [ ] Quest może wymagać podróży, zasobów, przedmiotów albo walki.
+- [ ] Nagrody i Punkty Legendy są poprawnie przyznawane.
+- [ ] Questy istnieją dla wszystkich Poziomów Świata I–IV.
+- [ ] Pula Questów jest wystarczająca, aby pełna partia nie zatrzymała się z powodu braku contentu.
+
+## 0.4. Walka
+
+- [ ] Da się rozpocząć walkę i doprowadzić ją do zwycięstwa, porażki albo legalnego opuszczenia walki.
+- [ ] HP, KP, trafienie, obrażenia i podstawowe efekty wyposażenia działają.
+- [ ] Przeciwnik wykonuje swoje działania poprawnie.
+- [ ] Porażka bohatera ma obsłużone konsekwencje i pozwala później kontynuować partię.
+- [ ] Zwycięstwo poprawnie przyznaje loot/nagrodę i wraca do wcześniejszego flow gry.
+- [ ] Walka działa również wtedy, gdy została uruchomiona przez Quest albo Zagrożenie.
+- [ ] Istnieje minimalna pula przeciwników oraz boss/finał potrzebny do pełnej partii.
+
+## 0.5. Świat, Wydarzenia i Zagrożenia
+
+- [ ] Rada uruchamia Wydarzenia Świata zgodnie z cyklem partii.
+- [ ] Wydarzenie Świata potrafi nałożyć swój efekt i później go zakończyć.
+- [ ] Zagrożenia mogą pojawić się na mapie, działać i zostać rozwiązane.
+- [ ] Aktywne Zagrożenie rzeczywiście wpływa na grę zgodnie ze swoją kartą.
+- [ ] Pula Wydarzeń Świata istnieje dla Poziomów I–IV.
+- [ ] Gra nie zatrzymuje się, jeżeli jedno Wydarzenie nie może zostać prawidłowo rozmieszczone.
+
+## 0.6. Rada Bohaterów
+
+- [ ] Rada uruchamia się we właściwym momencie.
+- [ ] Można przejść cały flow Rady od wejścia do opuszczenia jej przez wszystkich graczy.
+- [ ] Wydarzenie Świata jest rozpatrywane.
+- [ ] Podstawowy handel/oferty działają bez możliwości zablokowania sesji.
+- [ ] Po zakończeniu Rady gra wraca do normalnej partii i rozpoczyna kolejny cykl.
+
+## 0.7. Poziomy Świata I–IV
+
+- [ ] Poziom I działa od początku partii.
+- [ ] Po osiągnięciu progu lidera gra przechodzi na Poziom II.
+- [ ] Następnie poprawnie przechodzi na III i IV.
+- [ ] Po zmianie Poziomu Świata gra używa właściwych Questów i Wydarzeń.
+- [ ] Przeciwnicy/nagrody posiadają przynajmniej podstawowe skalowanie wymagane do dalszej gry.
+- [ ] Zmiana Poziomu Świata nie psuje aktywnych Questów, Zagrożeń ani bieżącego stanu partii.
+
+Obowiązujące progi:
+
+- Poziom Świata I: 0–9 Punktów Legendy lidera,
+- Poziom Świata II: 10–19,
+- Poziom Świata III: 20–29,
+- Poziom Świata IV: 30+.
+
+## 0.8. Legendarny Quest — droga do zwycięstwa
+
+- [ ] Gracz z 35 Punktami Legendy może rozpocząć dostępny Legendarny Quest SOLO.
+- [ ] Dwóch graczy mających minimum 30 Punktów Legendy każdy może rozpocząć dostępny Legendarny Quest DUO.
+- [ ] Bohater może być związany tylko z jednym aktywnym Questem Legendarnym — albo solo, albo duo.
+- [ ] Legendarny Quest posiada kilka etapów i da się go faktycznie ukończyć w normalnej partii.
+- [ ] Quest solo wymaga od jednego bohatera samodzielnego poradzenia sobie z różnymi typami problemów.
+- [ ] W duo każdy z dwóch graczy wykonuje realną część Questa, a część etapów może być wspólna.
+- [ ] Wspólny Quest posiada czytelny stan postępu Bohatera A, Bohatera B i etapów wspólnych.
+- [ ] Ukończenie solo daje zwycięstwo jednemu graczowi.
+- [ ] Ukończenie duo daje pełne wspólne zwycięstwo obu graczom.
+
+## 0.9. Koniec partii
+
+- [ ] Gra rozpoznaje ukończenie Legendarnego Questa jako warunek zwycięstwa.
+- [ ] Nie można przypadkowo kontynuować normalnej partii po jej formalnym zakończeniu.
+- [ ] Rozstrzygnięcie końca bieżącej rundy działa zgodnie z przyjętymi zasadami.
+- [ ] Ekran zwycięstwa pokazuje zwycięzcę albo dwóch zwycięzców.
+- [ ] Powstaje ostatni wpis Kroniki.
+- [ ] Da się wyświetlić „Kronikę Waszej Legendy”.
+- [ ] Z ekranu końcowego da się wrócić do menu i rozpocząć nową partię.
+
+## 0.10. Minimalny content
+
+Do uznania gry za grywalną nie potrzebujemy setek kart, ale potrzebujemy wystarczającej liczby elementów, żeby pełna partia nie zapętlała się na kilku tych samych treściach ani nie zatrzymała się z braku dostępnej zawartości.
+
+- [ ] Questy dla I, II, III i IV Poziomu Świata.
+- [ ] Wydarzenia Świata dla I, II, III i IV Poziomu Świata.
+- [ ] Reprezentatywne Zagrożenia.
+- [ ] Zwykli oraz mocniejsi przeciwnicy.
+- [ ] Bossowie/finałowi przeciwnicy tam, gdzie są potrzebni.
+- [ ] Podstawowy katalog wyposażenia dla wszystkich używanych slotów.
+- [ ] Co najmniej kilka grywalnych Legendarnych Questów solo.
+- [ ] Co najmniej kilka grywalnych Legendarnych Questów duo.
+- [ ] Minimalna warstwa fabularna/NPC potrzebna do zrozumienia, co dzieje się w świecie i dlaczego bohater wykonuje dane zadania.
+
+## 0.11. Krytyczne UX i stabilność
+
+- [ ] Wszystkie przyciski konieczne do przejścia pełnej partii są dostępne i działają.
+- [ ] Gracz wie, czyja jest aktualnie tura i ile ma Akcji.
+- [ ] Gracz widzi aktualny Poziom Świata i swoje Punkty Legendy.
+- [ ] Gracz potrafi sprawdzić aktywne Questy, stan bohatera, wyposażenie i najważniejsze efekty świata.
+- [ ] Nie istnieje znany błąd, który regularnie uniemożliwia kontynuowanie pełnej partii.
+- [ ] Nie istnieje obowiązkowa mechanika wymagająca ręcznej ingerencji programisty lub edycji stanu gry.
+- [ ] Pełną partię można przejść od menu startowego do ekranu zwycięstwa bez używania konsoli developerskiej.
+
+## BRAMKA: „GRA JEST GRYWALNA”
+
+Rise & Glory uznajemy za **grywalne**, gdy co najmniej jedna pełna partia testowa może przejść bez ingerencji programisty następujący ciąg:
+
+**Nowa gra → wybór bohaterów → mapa → tury i ruch → Questy / Walka / Rada / Wydarzenia → Punkty Legendy → Poziom I → II → III → IV → Legendarny Quest solo lub duo → zwycięstwo → Kronika → ekran końcowy.**
+
+Dopiero po osiągnięciu tej bramki dokładamy systemy, których brak nie uniemożliwia pełnej partii.
+
+---
+
 # A. RDZEŃ — domknięcie tego, co już istnieje
 
 ## 1. Walka V2
