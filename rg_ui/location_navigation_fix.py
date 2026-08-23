@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from rg_ui import city_hub
@@ -9,17 +11,16 @@ _FOOTER_BAND_CACHE = None
 
 
 def _fallback_footer_band():
-    # Bezpieczny zakres pomiedzy dolnym separatorem ostatniego slotu a
-    # ozdobna rama dolna prawego panelu.
+    # Awaryjnie zwracamy krawedzie dwoch zlotych linii ograniczajacych stopke.
     return 0.905, 0.966
 
 
 def _footer_band_ratios():
-    """Wyznacza wolna stopke prawego panelu na podstawie zlotej grafiki.
+    """Wyznacza krawedzie wolnej stopki prawego panelu z samej grafiki.
 
-    Nie opieramy pozycji strzalek na samym dolnym marginesie. Wyszukujemy
-    poziome zlote linie w dolnej czesci panelu i bierzemy przestrzen pomiedzy
-    ostatnim separatorem zawartosci a zewnetrzna rama dolna.
+    Zwracamy polozenie dolnej krawedzi separatora oraz gornej krawedzi dolnej
+    ramy. Dokladny 1 px odstep od obu linii jest nakladany juz po przeskalowaniu
+    panelu do rozdzielczosci ekranu.
     """
     global _FOOTER_BAND_CACHE
     if _FOOTER_BAND_CACHE is not None:
@@ -79,23 +80,22 @@ def _footer_band_ratios():
 
     separator = groups[frame_index - 1]
     frame_top = groups[frame_index][0]
-    padding = max(2, int(round(height * 0.004)))
-    band_top = separator[1] + padding
-    band_bottom = frame_top - padding
 
-    if band_bottom - band_top < max(12, int(round(height * 0.025))):
+    if frame_top - separator[1] < max(12, int(round(height * 0.025))):
         _FOOTER_BAND_CACHE = _fallback_footer_band()
         return _FOOTER_BAND_CACHE
 
+    # Bez dodatkowego paddingu tutaj. Docelowy odstep wynosi dokladnie 1 px
+    # na ekranie, niezaleznie od skali assetu panelu.
     _FOOTER_BAND_CACHE = (
-        max(0.0, min(1.0, band_top / height)),
-        max(0.0, min(1.0, band_bottom / height)),
+        max(0.0, min(1.0, separator[1] / height)),
+        max(0.0, min(1.0, frame_top / height)),
     )
     return _FOOTER_BAND_CACHE
 
 
 def _arrow_crop_rect(path, source):
-    """Usuwa czarne pole dookola assetu, zostawiajac sam przycisk strzalki."""
+    """Wycina czarne tlo assetu i zostawia sam obrys przycisku strzalki."""
     key = str(path)
     if key in _ARROW_CROP_CACHE:
         return _ARROW_CROP_CACHE[key]
@@ -128,16 +128,21 @@ def _arrow_crop_rect(path, source):
         _ARROW_CROP_CACHE[key] = rect
         return rect
 
-    pad_x = max(2, int(round(width * 0.02)))
-    pad_y = max(2, int(round(height * 0.04)))
-    left = max(0, left - pad_x)
-    right = min(width - 1, right + pad_x)
-    top = max(0, top - pad_y)
-    bottom = min(height - 1, bottom + pad_y)
-
+    # Nie dodajemy czarnego marginesu z oryginalnego PNG. Bounding box zlotej
+    # ramki obejmuje caly wizualny przycisk i dzieki temu skaluje sie sam guzik.
     rect = pygame.Rect(left, top, right - left + 1, bottom - top + 1)
     _ARROW_CROP_CACHE[key] = rect
     return rect
+
+
+def _cropped_arrow_size(path):
+    source = city_hub._load_asset(path) if path is not None else None
+    if source is None:
+        return None
+    crop_rect = _arrow_crop_rect(path, source)
+    if crop_rect.width <= 0 or crop_rect.height <= 0:
+        return None
+    return crop_rect.size
 
 
 def _draw_arrow_contained(screen, path, rect):
@@ -180,33 +185,42 @@ def _draw_arrow_contained(screen, path, rect):
 
 
 def _right_navigation_rects(right_rect):
-    """Centruje oba guziki dokladnie w wolnej stopce pomiedzy liniami."""
-    top_ratio, bottom_ratio = _footer_band_ratios()
-    footer_top = right_rect.y + int(round(right_rect.height * top_ratio))
-    footer_bottom = right_rect.y + int(round(right_rect.height * bottom_ratio))
+    """Powieksza guziki do wysokosci stopki z dokladnie 1 px luzu od linii."""
+    separator_ratio, frame_ratio = _footer_band_ratios()
+    separator_y = right_rect.y + int(round(right_rect.height * separator_ratio))
+    frame_y = right_rect.y + int(round(right_rect.height * frame_ratio))
 
-    if footer_bottom <= footer_top:
-        footer_top = right_rect.bottom - max(46, int(round(right_rect.height * 0.095)))
-        footer_bottom = right_rect.bottom - max(14, int(round(right_rect.height * 0.032)))
+    if frame_y <= separator_y + 4:
+        separator_y = right_rect.bottom - max(46, int(round(right_rect.height * 0.095)))
+        frame_y = right_rect.bottom - max(8, int(round(right_rect.height * 0.014)))
 
-    footer_h = max(1, footer_bottom - footer_top)
-    vertical_pad = max(2, int(round(right_rect.height * 0.006)))
-    button_h = min(
-        max(18, int(round(right_rect.height * 0.032))),
-        max(1, footer_h - vertical_pad * 2),
-    )
-    y = footer_top + max(0, (footer_h - button_h) // 2)
+    # Jeden pusty piksel nad i pod przyciskiem:
+    # separator | 1 px luzu | GUZIK | 1 px luzu | dolna rama.
+    button_top = separator_y + 2
+    button_bottom = frame_y - 1
+    button_h = max(1, button_bottom - button_top)
 
-    side_gap = max(12, int(round(right_rect.width * 0.16)))
-    center_gap = max(14, int(round(right_rect.width * 0.10)))
-    available = max(2, right_rect.width - side_gap * 2 - center_gap)
-    button_w = min(
-        max(44, int(round(right_rect.width * 0.24))),
-        max(1, available // 2),
-    )
+    left_path = city_hub._arrow_asset_file("left")
+    right_path = city_hub._arrow_asset_file("right")
+    arrow_sizes = [
+        size
+        for size in (_cropped_arrow_size(left_path), _cropped_arrow_size(right_path))
+        if size is not None
+    ]
+    max_aspect = max((w / h for w, h in arrow_sizes if h > 0), default=2.4)
 
-    left = pygame.Rect(right_rect.x + side_gap, y, button_w, button_h)
-    right = pygame.Rect(right_rect.right - side_gap - button_w, y, button_w, button_h)
+    # Szerokosc wynika z docelowej wysokosci guzika, zeby to wysokosc stopki
+    # byla ograniczeniem skali. Dwa guziki zachowuja rowny odstep od srodka.
+    desired_w = max(1, int(math.ceil(button_h * max_aspect)))
+    outer_gap = max(8, int(round(right_rect.width * 0.10)))
+    center_gap = max(12, int(round(right_rect.width * 0.08)))
+    max_button_w = max(1, (right_rect.width - outer_gap * 2 - center_gap) // 2)
+    button_w = min(desired_w, max_button_w)
+
+    pair_w = button_w * 2 + center_gap
+    pair_x = right_rect.centerx - pair_w // 2
+    left = pygame.Rect(pair_x, button_top, button_w, button_h)
+    right = pygame.Rect(pair_x + button_w + center_gap, button_top, button_w, button_h)
     return left, right
 
 
