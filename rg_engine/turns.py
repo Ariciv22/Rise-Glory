@@ -1,6 +1,7 @@
 import random
 
 from rg_core.data import COUNCIL_ROUNDS
+from rg_engine.heroes import begin_hero_turn
 
 
 def resolve_initiative(players, rng=None):
@@ -55,6 +56,7 @@ class TurnManager:
         self.position = (self.position + 1) % len(self.turn_order)
         next_index = self.active_player_index
         tokens[next_index].reset_actions()
+        begin_hero_turn(tokens[next_index].hero, tokens[next_index])
 
         council_due = False
         if round_completed:
