@@ -12,16 +12,42 @@ _ORIGINAL_FIGURE_LOAD = figures._load_image
 _CLEAN_FIGURE_CACHE = {}
 
 
-def _is_opaque_dark(color, threshold=44):
+def _is_opaque_dark(color, threshold=72):
     return color.a > 8 and max(color.r, color.g, color.b) <= threshold
 
 
-def _remove_connected_dark_canvas(image):
-    """Usuwa tylko ciemne tlo polaczone z krawedzia obrazu.
+def _corner_background_references(image):
+    width, height = image.get_size()
+    corners = [
+        image.get_at((0, 0)),
+        image.get_at((width - 1, 0)),
+        image.get_at((0, height - 1)),
+        image.get_at((width - 1, height - 1)),
+    ]
+    references = []
+    for color in corners:
+        if not _is_opaque_dark(color):
+            continue
+        if any(
+            max(
+                abs(color.r - other.r),
+                abs(color.g - other.g),
+                abs(color.b - other.b),
+            ) <= 3
+            for other in references
+        ):
+            continue
+        references.append(color)
+    return references
 
-    Nie wycinamy wszystkich czarnych pikseli globalnie, bo postacie maja
-    czarne ubrania, wlosy i cienie. Usuwany jest wylacznie ciemny komponent
-    tla dochodzacy do brzegu PNG.
+
+def _remove_connected_dark_canvas(image):
+    """Remove only the dark canvas color connected to the image edge.
+
+    Earlier code treated every RGB value <= 44 as background. That was too
+    aggressive: dark robes, hair and shadows could join the background mask
+    and disappear. The mask is now built around the actual corner colors with
+    a small per-channel tolerance, so dark clothing is preserved.
     """
     if image is None:
         return None
@@ -31,25 +57,24 @@ def _remove_connected_dark_canvas(image):
     if width <= 2 or height <= 2:
         return cleaned
 
-    corners = [
-        cleaned.get_at((0, 0)),
-        cleaned.get_at((width - 1, 0)),
-        cleaned.get_at((0, height - 1)),
-        cleaned.get_at((width - 1, height - 1)),
-    ]
-    if sum(_is_opaque_dark(color) for color in corners) < 2:
+    references = _corner_background_references(cleaned)
+    if len(references) < 2:
         return cleaned
 
     try:
-        dark = pygame.mask.from_threshold(
-            cleaned,
-            (0, 0, 0, 255),
-            (44, 44, 44, 255),
-        )
+        background_candidates = pygame.mask.Mask((width, height), fill=False)
+        for reference in references:
+            similar = pygame.mask.from_threshold(
+                cleaned,
+                reference,
+                (12, 12, 12, 255),
+            )
+            background_candidates.draw(similar, (0, 0))
+
         background = pygame.mask.Mask((width, height), fill=False)
 
-        # Zwykle caly czarny canvas jest jednym komponentem. Probkujemy jednak
-        # cala krawedz, aby dzialalo rowniez przy przerwanych rogach.
+        # Sample the whole edge. Only pixels already matching one of the
+        # corner background colors can seed a connected component.
         step = max(4, min(width, height) // 48)
         edge_points = []
         for x in range(0, width, step):
@@ -63,8 +88,8 @@ def _remove_connected_dark_canvas(image):
         )
 
         for point in edge_points:
-            if dark.get_at(point) and not background.get_at(point):
-                component = dark.connected_component(point)
+            if background_candidates.get_at(point) and not background.get_at(point):
+                component = background_candidates.connected_component(point)
                 if component.count():
                     background.draw(component, (0, 0))
 
@@ -78,17 +103,49 @@ def _remove_connected_dark_canvas(image):
         cleaned.blit(alpha_cut, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
         return figures._trim_alpha(cleaned)
     except (AttributeError, TypeError, ValueError, pygame.error):
-        # Fallback tylko dla ewidentnie czarnego canvasa.
+        # Conservative fallback: remove only pixels that are practically black.
         pixels = pygame.PixelArray(cleaned)
         try:
             for x in range(width):
                 for y in range(height):
                     color = cleaned.unmap_rgb(pixels[x, y])
-                    if color.a > 8 and max(color.r, color.g, color.b) <= 18:
+                    if color.a > 8 and max(color.r, color.g, color.b) <= 10:
                         pixels[x, y] = (0, 0, 0, 0)
         finally:
             del pixels
         return figures._trim_alpha(cleaned)
+
+
+def _pick_existing_figure_path(*relative_paths):
+    for relative_path in relative_paths:
+        if (figures.GRAPHICS_DIR / relative_path).is_file():
+            return relative_path
+    return relative_paths[0] if relative_paths else ""
+
+
+def _ensure_scholar_female_variant():
+    variants = figures.FIGURE_VARIANTS.setdefault(6, [])
+    if any(variant.get("id") == "uczona" for variant in variants):
+        return
+
+    variants.append(
+        {
+            "id": "uczona",
+            "name": "Uczona",
+            "portrait": _pick_existing_figure_path(
+                "figurki_bohaterow/nauka/uczona.png",
+                "figurki_bohaterow/nauka/uczona_kolor.png",
+                "figurki_bohaterow/nauka/Uczona.png",
+                "figurki_bohaterow/nauka/Uczona_kolor.png",
+            ),
+            "token": _pick_existing_figure_path(
+                "figurki_bohaterow/nauka/uczona_podstawka_kolor.png",
+                "figurki_bohaterow/nauka/uczona_podstawka.png",
+                "figurki_bohaterow/nauka/Uczona_podstawka_kolor.png",
+                "figurki_bohaterow/nauka/Uczona_podstawka.png",
+            ),
+        }
+    )
 
 
 def _load_figure_without_dark_canvas(relative_path):
@@ -119,7 +176,7 @@ def _union_rects(rects):
 
 
 def _draw_panel_asset(screen, rect, active=False, hovered=False):
-    """Panel figurki korzysta z tego samego panel2.png co reszta wyboru."""
+    """Figure panel uses the same panel2.png as the rest of the selector."""
     from rg_ui import screens
 
     rect = pygame.Rect(rect)
@@ -130,7 +187,6 @@ def _draw_panel_asset(screen, rect, active=False, hovered=False):
         screen.blit(shadow, rect.move(3, 4))
         screen.blit(texture, rect)
     else:
-        # Awaryjnie korzystamy ze wspolnego renderera paneli UI.
         from rg_ui.common import draw_image_panel
 
         draw_image_panel(screen, rect, 2)
@@ -141,7 +197,6 @@ def _draw_panel_asset(screen, rect, active=False, hovered=False):
         screen.blit(glow, rect)
 
     if active:
-        # To tylko stan zaznaczenia; sama ramka nadal pochodzi z assetu panel2.
         pygame.draw.rect(screen, (225, 174, 78), rect, 2, border_radius=7)
 
 
@@ -167,8 +222,6 @@ def _draw_figure_card(screen, card, variant, active, hovered):
     )
     screen.blit(label, label.get_rect(center=label_center))
 
-    # Pelna sylwetka. Nie ma osobnego czarnego prostokata obrazu:
-    # przezroczysta postac lezy bezposrednio na teksturze panelu UI.
     top_pad = max(42, int(card.height * 0.10))
     image_area = pygame.Rect(
         card.x + 14,
@@ -242,7 +295,7 @@ def _draw_full_figure_selector(screen, mouse, archetype, area, title="Wybierz fi
 
 
 def _player_selector_area(screen, buttons):
-    """Znajduje wolna kolumne obok kart klas i konczy ja przed akcjami."""
+    """Find a free column beside archetype cards and above action buttons."""
     sw, sh = screen.get_size()
     class_rects = [
         button.rect
@@ -272,8 +325,6 @@ def _player_selector_area(screen, buttons):
     left_x = 18
     left_width = class_bounds.left - margin - left_x
 
-    # Wybieramy szersza faktycznie wolna strone. Nie nakladamy selektora
-    # na karty klas nawet wtedy, gdy szerokosc okna jest nietypowa.
     if right_width >= left_width:
         x, width = right_x, right_width
     else:
@@ -399,8 +450,6 @@ def _draw_token_clean(token, screen, camera, font, selected=False):
 
     base_y = int(sy + 58 * camera.zoom)
     rect = rendered.get_rect(midbottom=(int(sx), base_y))
-
-    # Asset ma wlasna podstawke. Bez dodatkowej elipsy i bez okregu zaznaczenia.
     screen.blit(rendered, rect)
 
 
@@ -412,17 +461,15 @@ def install_hero_figure_visual_fix():
     from rg_core import app as app_module
     from rg_world import map as world_map
 
-    # Najpierw usuwamy czarny canvas z figur. Cache skalowanych obrazow trzeba
-    # wyczyscic, aby nie zostaly w nim stare wersje z czarnym prostokatem.
+    _ensure_scholar_female_variant()
+
     figures._load_image = _load_figure_without_dark_canvas
     figures._IMAGE_CACHE.clear()
     figures._SCALED_CACHE.clear()
+    _CLEAN_FIGURE_CACHE.clear()
 
-    # Finalny selector korzysta z panel2.png i pelnych sylwetek.
     figures._draw_selector = _draw_full_figure_selector
 
-    # Nie uzywamy starego wrappera, bo jego pole wyboru bylo wyliczane
-    # niezaleznie od faktycznych kart i przez to moglo na nie nachodzic.
     app_module.draw_player_config = _draw_player_config_without_overlap
     app_module.draw_custom_hero = _draw_custom_hero_without_overlap
 
