@@ -607,6 +607,292 @@ MARDEK
 
 ---
 
+# QUEST 3 — Ostatni spichlerz
+
+> **Status projektowy:** pełne drzewko fabularne z trzema finałami A/B/C. Konkretne nagrody i Punkty Legendy wymagają jeszcze zatwierdzenia.
+
+## Podstawowe informacje
+
+**Nazwa:** Ostatni spichlerz  
+**Miejsce rozpoczęcia:** wieś Thalwen  
+**Dodatkowa lokacja:** klasztor nieopodal Thalwen  
+**Typ:** średni Quest wieloetapowy / społeczny / moralny  
+**Wykorzystywane statystyki:** Dyplomacja, Intryga, Handel, Nauka, Walka  
+**Liczba finałów:** 3
+
+## Założenie Questa
+
+Od kilku tygodni mieszkańcy Thalwen głodują.
+
+Zbiory były słabe, ceny żywności rosną, a część rodzin od kilku dni nie ma już czym karmić dzieci.
+
+Jedynym miejscem, w którym nadal znajdują się duże zapasy, jest pobliski klasztor. Mnisi odmawiają jednak otwarcia spichlerza.
+
+Pewnej nocy grupa mieszkańców postanawia wziąć żywność siłą.
+
+## ETAP 1 — Noc pod klasztorem
+
+Docierasz pod klasztor późnym wieczorem.
+
+Przy murze zbiera się kilkudziesięciu mieszkańców Thalwen. Nie wyglądają jak bandyci. Są wychudzeni, zmęczeni i przestraszeni. Kilku trzyma widły i siekiery.
+
+Jeden z mężczyzn mówi:
+
+> „Mnisi mają pełne worki. Moja córka jadła wczoraj korę z drzewa. Nie wrócę do domu z pustymi rękami.”
+
+Za bramą klasztoru pojawiają się uzbrojeni strażnicy.
+
+Sytuacja może za chwilę wymknąć się spod kontroli.
+
+### OPCJA 1A — Porozmawiaj z mieszkańcami
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 11
+
+**Sukces:** przekonujesz mieszkańców, żeby na chwilę wstrzymali atak. Dowiadujesz się, że głód trwa już od kilku tygodni, a kilka rodzin sprzedało niemal cały dobytek, żeby kupować żywność.
+
+→ **ETAP 2A — Dlaczego ludzie głodują?**
+
+**Porażka:** tłum uznaje, że bronisz mnichów. Napięcie rośnie. Quest pozostaje aktywny.
+
+### OPCJA 1B — Porozmawiaj z przeorem
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 12
+
+Mnisi wpuszczają bohatera za bramę.
+
+**Sukces:** przeor **Albrecht** pokazuje klasztorny spichlerz. Rzeczywiście jest pełny. Twierdzi jednak, że zapasy muszą wystarczyć klasztorowi, pielgrzymom i okolicznym ludziom przez całą zimę. Jeżeli otworzy spichlerz teraz, za kilka miesięcy wszyscy mogą głodować.
+
+→ **ETAP 2B — Zapasy klasztoru**
+
+**Porażka:** przeor odmawia rozmowy.
+
+> „Nie będę prowadził negocjacji z człowiekiem stojącym na czele tłumu.”
+
+Quest pozostaje aktywny.
+
+### OPCJA 1C — Zakradnij się do spichlerza
+
+**Statystyka:** Intryga  
+**Trudność:** 13
+
+**Sukces:** dostajesz się do magazynów bez wiedzy mnichów i możesz sam ocenić ilość żywności.
+
+→ **ETAP 2B — Zapasy klasztoru**
+
+**Porażka:** strażnicy zauważają cię przy murze. Mnisi stają się bardziej podejrzliwi. Quest pozostaje aktywny.
+
+## ETAP 2A — Dlaczego ludzie głodują?
+
+Rozmawiasz z mieszkańcami.
+
+Okazuje się, że problem nie wynika tylko ze słabych zbiorów.
+
+Kilka tygodni wcześniej większość dostępnego zboża wykupił kupiec **Radomir**, który przechowuje je w magazynie poza Thalwen i czeka na dalszy wzrost cen.
+
+Mieszkańcy nie mają już pieniędzy, żeby kupować od niego żywność.
+
+### OPCJA 2A-1 — Sprawdź ceny i rachunki
+
+**Statystyka:** Handel  
+**Trudność:** 12
+
+**Sukces:** potwierdzasz, że Radomir wykupił ogromną część dostępnego zboża, a następnie kilkukrotnie podniósł ceny. Nie złamał formalnie prawa, ale świadomie wykorzystuje głód.
+
+→ **ETAP 3 — Noc decyzji**
+
+**Porażka:** nie udaje ci się zebrać wystarczających dowodów. Quest pozostaje aktywny.
+
+### OPCJA 2A-2 — Znajdź magazyn Radomira
+
+**Statystyka:** Intryga  
+**Trudność:** 13
+
+**Sukces:** odnajdujesz jego prywatny magazyn. W środku znajduje się wystarczająco dużo zboża, aby ulżyć wielu rodzinom.
+
+**Dodatkowa wiedza:** głód jest częściowo sztucznie pogłębiany przez spekulację.
+
+→ **ETAP 3 — Noc decyzji**
+
+**Porażka:** nie odnajdujesz magazynu. Quest pozostaje aktywny.
+
+## ETAP 2B — Zapasy klasztoru
+
+Sprawdzasz klasztorny spichlerz.
+
+Worków rzeczywiście jest bardzo dużo.
+
+### OPCJA 2B-1 — Oblicz zapasy
+
+**Statystyka:** Nauka  
+**Trudność:** 11
+
+**Sukces:** po przeliczeniu zapasów odkrywasz, że przeor mówi tylko częściową prawdę. Klasztor potrzebuje dużej części żywności na zimę, ale nawet po zachowaniu bezpiecznej rezerwy może oddać część zboża mieszkańcom. Nie wystarczy to jednak, aby wyżywić wszystkich przez wiele miesięcy.
+
+→ **ETAP 3 — Noc decyzji**
+
+**Porażka:** nie potrafisz wiarygodnie ocenić zapasów. Quest pozostaje aktywny.
+
+### OPCJA 2B-2 — Sprawdź klasztorne księgi
+
+**Statystyka:** Intryga  
+**Trudność:** 14
+
+**Sukces:** odkrywasz, że część zboża została już obiecana kupcom z **Valdren**. Mnisi chcą sprzedać je z zyskiem, aby sfinansować remont klasztoru. Przeor nie kłamał całkowicie, ale część zapasów nie jest przeznaczona na przetrwanie zimy.
+
+→ **ETAP 3 — Noc decyzji**
+
+**Dodatkowa wiedza:** sekret sprzedaży zboża obniża trudność późniejszych negocjacji z przeorem.
+
+**Porażka:** nie znajdujesz niczego rozstrzygającego. Quest pozostaje aktywny.
+
+## ETAP 3 — Noc decyzji
+
+Tłum stoi przed bramą. Mnisi stoją po drugiej stronie.
+
+Wystarczy jedna iskra, aby rozpoczęła się walka.
+
+Gracz wybiera jeden z trzech kierunków rozwiązania kryzysu.
+
+### DROGA A — Broń spichlerza
+
+Stajesz po stronie klasztoru. Uznajesz, że splądrowanie spichlerza doprowadzi do chaosu i może tylko przesunąć głód o kilka miesięcy.
+
+**Metoda 1:** Dyplomacja 14 — spróbuj rozproszyć tłum.  
+**Metoda 2:** Walka 13 — pomóż strażnikom odeprzeć napastników.
+
+**Sukces:** atak zostaje powstrzymany.
+
+→ **FINAŁ A — Zamknięte bramy**
+
+### DROGA B — Wymuś podział zapasów
+
+Próbujesz doprowadzić do kompromisu. Mnisi zachowają zapasy potrzebne na zimę, a reszta zostanie wydana najbardziej potrzebującym rodzinom.
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 14
+
+Jeżeli gracz odkrył, że część zboża była przeznaczona na sprzedaż do Valdren:
+
+**Trudność spada do 12.**
+
+**Sukces:** przeor zgadza się otworzyć część spichlerza. Tłum odstępuje od bramy.
+
+→ **FINAŁ B — Podzielony chleb**
+
+**Porażka:** przeor nie zgadza się na podział, a tłum ponownie zaczyna naciskać na bramę. Quest pozostaje aktywny zgodnie z ogólnymi zasadami porażek.
+
+### DROGA C — Otwórz spichlerz
+
+Stajesz po stronie głodujących. Uznajesz, że żywność jest teraz ważniejsza niż klasztorne plany na przyszłość.
+
+Gracz może wybrać sposób:
+
+- **Dyplomacja 15** — przekonaj strażników, żeby odstąpili,
+- **Intryga 14** — otwórz bramę od środka,
+- **Walka 14** — pomóż mieszkańcom sforsować wejście.
+
+**Sukces:** brama zostaje otwarta, a mieszkańcy wchodzą do spichlerza.
+
+→ **FINAŁ C — Chleb zabrany siłą**
+
+## FINAŁ A — Zamknięte bramy
+
+Atak zostaje powstrzymany.
+
+Spichlerz pozostaje zamknięty, a mnisi zachowują żywność.
+
+Klasztor jest bohaterowi wdzięczny.
+
+Mieszkańcy Thalwen zapamiętują jednak, po której stronie stanął.
+
+**Stan świata:**
+- klasztor zachowuje zapasy,
+- głód w Thalwen trwa,
+- bohater stanął po stronie klasztoru podczas głodu.
+
+**Nagrody i Punkty Legendy:** do ustalenia.
+
+## FINAŁ B — Podzielony chleb
+
+Udaje się zatrzymać zarówno tłum, jak i mnichów.
+
+Klasztor otwiera część spichlerza. Najbardziej potrzebujące rodziny otrzymują żywność, a mnisi zachowują rezerwę na zimę.
+
+Problem głodu nie znika całkowicie, ale udaje się uniknąć rozlewu krwi.
+
+**Stan świata:**
+- Thalwen otrzymuje część żywności,
+- klasztor zachowuje rezerwę,
+- relacje między klasztorem a wsią pozostają napięte, ale nie dochodzi do otwartego konfliktu.
+
+**Nagrody i Punkty Legendy:** do ustalenia.
+
+## FINAŁ C — Chleb zabrany siłą
+
+Brama zostaje otwarta.
+
+Głodujący mieszkańcy wpadają do spichlerza i wynoszą worki ze zbożem do Thalwen.
+
+Przez najbliższe tygodnie ludzie będą mieli co jeść, ale klasztor traci znaczną część zapasów.
+
+Przeor uznaje bohatera za współwinnego grabieży.
+
+**Stan świata:**
+- głód w Thalwen zostaje chwilowo powstrzymany,
+- klasztor traci zapasy,
+- bohater pomógł mieszkańcom splądrować klasztorny spichlerz.
+
+**Nagrody i Punkty Legendy:** do ustalenia.
+
+## Drzewko techniczne
+
+```text
+OSTATNI SPICHLERZ — THALWEN
+│
+├── DYPLOMACJA 11 — mieszkańcy
+│   └── DLACZEGO LUDZIE GŁODUJĄ?
+│       ├── Handel 12 — zbadaj ceny
+│       └── Intryga 13 — magazyn Radomira
+│
+├── DYPLOMACJA 12 — przeor
+│   └── ZAPASY KLASZTORU
+│
+└── INTRYGA 13 — zakradnij się do spichlerza
+    └── ZAPASY KLASZTORU
+        ├── Nauka 11 — policz żywność
+        └── Intryga 14 — odkryj plan sprzedaży
+
+ETAP 3 — NOC DECYZJI
+│
+├── BROŃ SPICHLERZA
+│   ├── Dyplomacja 14
+│   └── Walka 13
+│       └── FINAŁ A — ZAMKNIĘTE BRAMY
+│
+├── PODZIEL ZAPASY
+│   └── Dyplomacja 14
+│       ├── 12, jeśli odkryto sprzedaż do Valdren
+│       └── FINAŁ B — PODZIELONY CHLEB
+│
+└── OTWÓRZ SPICHLERZ
+    ├── Dyplomacja 15
+    ├── Intryga 14
+    └── Walka 14
+        └── FINAŁ C — CHLEB ZABRANY SIŁĄ
+```
+
+## Do domknięcia przed kodowaniem
+
+1. Ustalić konkretne nagrody Finału A.
+2. Ustalić konkretne nagrody Finału B.
+3. Ustalić konkretne nagrody Finału C.
+4. Rozdzielić Punkty Legendy między trzy zakończenia.
+5. Ustalić, czy Radomir ma tworzyć trwałą flagę fabularną lub wrócić w kolejnym Queście.
+
+---
+
 # Standard dla kolejnych Questów
 
 Każdy kolejny pełny Quest dopisujemy do tego pliku i opisujemy co najmniej przez:
