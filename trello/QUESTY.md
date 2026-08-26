@@ -412,13 +412,7 @@ Siedem wpisano jedną ręką. Ósme — **Oren Veld** — dodano później.
 
 ## ETAP 3A — Egzekucja
 
-Nadchodzi świt.
-
-Plac wypełnia się mieszkańcami. Ośmiu skazańców zostaje ustawionych przed szafotem.
-
-Garran patrzy na bohatera.
-
-> „Jeśli zostajesz, rób swoje.”
+Nadchodzi świt. Plac wypełnia się mieszkańcami. Ośmiu skazańców zostaje ustawionych przed szafotem.
 
 ### OPCJA 3A-1 — Pomóż Garranowi
 
@@ -434,934 +428,440 @@ Garran wykonuje pracę sam. Bohater nie otrzymuje pełnej zapłaty.
 
 ## ETAP 3B — Trop korupcji
 
-Bohater posiada przesłanki albo dowody, że Oren został dopisany do listy bezprawnie.
-
 ### OPCJA 3B-1 — Zanieś sprawę władzom
 
-**Statystyka:** Dyplomacja  
-**Trudność:** 14
+**Dyplomacja 14**
 
-**Sukces:** Egzekucja Orena zostaje wstrzymana.
+Sukces → egzekucja Orena zostaje wstrzymana.
 
 → **FINAŁ C — Ósmy skazaniec**
-
-**Porażka:** urzędnicy nie chcą opóźniać egzekucji. Quest pozostawia graczowi możliwość odnalezienia Mardeka lub samodzielnego uwolnienia Orena.
 
 ### OPCJA 3B-2 — Uwolnij Orena sam
 
-**Statystyka:** Intryga  
-**Trudność:** 15
+**Intryga 15**
 
-**Sukces:** Oren ucieka przed egzekucją.
+Sukces → Oren ucieka.
 
 → **FINAŁ D — Człowiek bez wyroku**
 
-**Porażka:** bohater zostaje zauważony, Oren wraca do celi. Dokładna kara mechaniczna do ustalenia.
-
 ## ETAP 3C — Mardek Voss
 
-Odnajdujesz urzędnika.
+Mardek próbuje kupić milczenie bohatera.
 
-Mardek szybko rozumie, dlaczego przyszedłeś. Nie próbuje nawet wszystkiemu zaprzeczać.
-
-> „Jeden człowiek umrze. Miasto będzie spokojniejsze. Ty możesz być bogatszy.”
-
-### OPCJA 3C-1 — Przyjmij łapówkę
-
-Mardek płaci za milczenie. Oren zostaje stracony.
-
+### Przyjmij łapówkę
 → **FINAŁ E — Cena milczenia**
 
-### OPCJA 3C-2 — Odmów i ujawnij Mardeka
-
-Jeżeli bohater posiada dowód korupcji, rozwiązanie może być automatyczne albo otrzymać obniżony próg.
-
-Jeżeli nie posiada dowodu:
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 15
-
-**Sukces:** Oren zostaje uratowany, a sprawa Mardeka wychodzi na jaw.
-
+### Ujawnij Mardeka
+**Dyplomacja 15** bez dowodu; łatwiej z dowodem.
 → **FINAŁ C — Ósmy skazaniec**
 
-**Porażka:** do doprecyzowania.
-
-### OPCJA 3C-3 — Szantażuj Mardeka
-
-**Statystyka:** Intryga  
-**Trudność:** 15
-
-Żądasz pieniędzy za milczenie, ale jednocześnie każesz Mardekowi usunąć Orena z listy.
-
-**Sukces:** Oren żyje, Mardek zachowuje stanowisko, bohater otrzymuje złoto.
-
+### Szantażuj Mardeka
+**Intryga 15**
 → **FINAŁ F — Brudny kompromis**
 
-**Porażka:** do doprecyzowania.
+## Finały — kierunek
 
-## FINAŁ A — Ręce kata
-
-Bohater pomaga przeprowadzić wszystkie osiem egzekucji.
-
-Garran płaci zgodnie z umową.
-
-Bohater może później dowiedzieć się, że Oren rzeczywiście był niewinny.
-
-**Kierunek nagrody:** dużo Złota, mało Legendy, negatywna flaga fabularna.
-
-## FINAŁ B — Odwrócone oczy
-
-Bohater wycofuje się przed egzekucją.
-
-Nie uratował nikogo, ale odmówił udziału.
-
-**Kierunek nagrody:** mała nagroda albo brak nagrody.
-
-## FINAŁ C — Ósmy skazaniec
-
-Bohater udowadnia, że Oren został dopisany do listy bezprawnie.
-
-Egzekucja siedmiu pozostałych odbywa się zgodnie z wyrokami, ale Oren zostaje uwolniony.
-
-**Kierunek nagrody:** dużo Punktów Legendy + wdzięczność Orena.
-
-## FINAŁ D — Człowiek bez wyroku
-
-Bohater pomaga Orenowi uciec bez oficjalnego oczyszczenia go z zarzutów.
-
-Oren żyje, ale staje się poszukiwany.
-
-**Kierunek konsekwencji:** Oren może powrócić jako NPC lub element przyszłego Questa.
-
-## FINAŁ E — Cena milczenia
-
-Bohater przyjmuje pieniądze Mardeka.
-
-Oren ginie.
-
-**Kierunek nagrody:** największa wypłata w Złocie.
-
-**Flaga fabularna:** bohater zna korupcję Mardeka i świadomie ją zaakceptował.
-
-## FINAŁ F — Brudny kompromis
-
-Bohater szantażuje Mardeka.
-
-Oren zostaje zdjęty z listy. Mardek pozostaje na stanowisku. Bohater otrzymuje pieniądze.
-
-Oren nie wie, w jaki sposób naprawdę został uratowany.
-
-**Kierunek nagrody:** Złoto + niewielka Legenda.
-
-**Trwała konsekwencja:** Mardek wie, że bohater go szantażował.
-
-## Drzewko techniczne
-
-```text
-START — OFERTA GARRANA
-│
-├── Przyjmij pracę
-│   └── SZAFOT
-│       ├── zignoruj Orena → EGZEKUCJA
-│       │   ├── pomóż Garranowi → FINAŁ A
-│       │   └── odmów → FINAŁ B
-│       │
-│       ├── Dyplomacja 12 z Orenem
-│       │   └── TROP KORUPCJI
-│       │
-│       └── Intryga 12 — rzeczy Orena
-│           └── TROP KORUPCJI
-│
-├── Dyplomacja 11 — wypytaj Garrana
-│   └── LISTA SKAZAŃCÓW
-│
-└── Intryga 13 — obejrzyj dokumenty
-    └── LISTA SKAZAŃCÓW + wiedza o manipulacji
-
-LISTA SKAZAŃCÓW
-├── Nauka 11 → TROP KORUPCJI
-├── Dyplomacja 12 → MARDEK
-└── Intryga 14 → MARDEK + dowód korupcji
-
-TROP KORUPCJI
-├── Dyplomacja 14 → FINAŁ C
-└── Intryga 15 → FINAŁ D
-
-MARDEK
-├── przyjmij łapówkę → FINAŁ E
-├── ujawnij Mardeka → FINAŁ C
-└── Intryga 15 — szantaż → FINAŁ F
-```
-
-## Do domknięcia przed kodowaniem
-
-1. Ustalić **lokację rozpoczęcia** Questa.
-2. Ustalić ostateczną **nazwę Questa**.
-3. Ustalić konkretne **nagrody wszystkich 6 finałów**.
-4. Ustalić **Punkty Legendy** dla wszystkich finałów.
-5. Dopisać skutki porażek dla testów, które są jeszcze oznaczone jako „do doprecyzowania”.
-6. Ustalić dokładną karę po nieudanej próbie uwolnienia Orena.
-7. Ustalić, jak mocno posiadanie dowodu obniża trudność ujawnienia Mardeka.
-8. Ustalić trwałe flagi świata dla Orena, Mardeka i ewentualnie Garrana.
+- **A — Ręce kata:** wszystkie egzekucje wykonane; dużo Złota, mało Legendy, negatywna flaga.
+- **B — Odwrócone oczy:** bohater odmawia udziału; mała nagroda albo brak.
+- **C — Ósmy skazaniec:** Oren oficjalnie uratowany; dużo Legendy + wdzięczność Orena.
+- **D — Człowiek bez wyroku:** Oren ucieka i staje się poszukiwany.
+- **E — Cena milczenia:** bohater bierze pieniądze Mardeka; Oren ginie.
+- **F — Brudny kompromis:** Oren żyje, Mardek pozostaje na stanowisku, bohater dostaje pieniądze.
 
 ---
 
 # QUEST 3 — Ostatni spichlerz
 
-> **Status projektowy:** pełne drzewko fabularne z trzema finałami A/B/C. Konkretne nagrody i Punkty Legendy wymagają jeszcze zatwierdzenia.
+**Miejsce rozpoczęcia:** Thalwen  
+**Typ:** społeczny / moralny  
+**Statystyki:** Dyplomacja, Intryga, Handel, Nauka, Walka  
+**Finały:** A/B/C
 
-## Podstawowe informacje
+Głodujący mieszkańcy Thalwen chcą nocą dostać się do klasztornego spichlerza. Klasztor ma zapasy, ale przeor twierdzi, że muszą wystarczyć na zimę.
 
-**Nazwa:** Ostatni spichlerz  
-**Miejsce rozpoczęcia:** wieś Thalwen  
-**Dodatkowa lokacja:** klasztor nieopodal Thalwen  
-**Typ:** średni Quest wieloetapowy / społeczny / moralny  
-**Wykorzystywane statystyki:** Dyplomacja, Intryga, Handel, Nauka, Walka  
-**Liczba finałów:** 3
+## ETAP 1
 
-## Założenie Questa
+- **Dyplomacja 11 — mieszkańcy:** odkryj skalę głodu.
+- **Dyplomacja 12 — przeor:** poznaj argument klasztoru.
+- **Intryga 13 — zakradnij się do spichlerza:** sam oceń zapasy.
 
-Od kilku tygodni mieszkańcy Thalwen głodują.
+## ETAP 2
 
-Zbiory były słabe, ceny żywności rosną, a część rodzin od kilku dni nie ma już czym karmić dzieci.
+Śledztwo może ujawnić, że kupiec **Radomir** wykupił dużą część dostępnego zboża i spekuluje cenami (**Handel 12 / Intryga 13**), a klasztor część zapasów chce sprzedać kupcom z Valdren (**Nauka 11 / Intryga 14**).
 
-Jedynym miejscem, w którym nadal znajdują się duże zapasy, jest pobliski klasztor. Mnisi odmawiają jednak otwarcia spichlerza.
+## Finały
 
-Pewnej nocy grupa mieszkańców postanawia wziąć żywność siłą.
-
-## ETAP 1 — Noc pod klasztorem
-
-Docierasz pod klasztor późnym wieczorem.
-
-Przy murze zbiera się kilkudziesięciu mieszkańców Thalwen. Nie wyglądają jak bandyci. Są wychudzeni, zmęczeni i przestraszeni. Kilku trzyma widły i siekiery.
-
-Jeden z mężczyzn mówi:
-
-> „Mnisi mają pełne worki. Moja córka jadła wczoraj korę z drzewa. Nie wrócę do domu z pustymi rękami.”
-
-Za bramą klasztoru pojawiają się uzbrojeni strażnicy.
-
-Sytuacja może za chwilę wymknąć się spod kontroli.
-
-### OPCJA 1A — Porozmawiaj z mieszkańcami
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 11
-
-**Sukces:** przekonujesz mieszkańców, żeby na chwilę wstrzymali atak. Dowiadujesz się, że głód trwa już od kilku tygodni, a kilka rodzin sprzedało niemal cały dobytek, żeby kupować żywność.
-
-→ **ETAP 2A — Dlaczego ludzie głodują?**
-
-**Porażka:** tłum uznaje, że bronisz mnichów. Napięcie rośnie. Quest pozostaje aktywny.
-
-### OPCJA 1B — Porozmawiaj z przeorem
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 12
-
-Mnisi wpuszczają bohatera za bramę.
-
-**Sukces:** przeor **Albrecht** pokazuje klasztorny spichlerz. Rzeczywiście jest pełny. Twierdzi jednak, że zapasy muszą wystarczyć klasztorowi, pielgrzymom i okolicznym ludziom przez całą zimę. Jeżeli otworzy spichlerz teraz, za kilka miesięcy wszyscy mogą głodować.
-
-→ **ETAP 2B — Zapasy klasztoru**
-
-**Porażka:** przeor odmawia rozmowy.
-
-> „Nie będę prowadził negocjacji z człowiekiem stojącym na czele tłumu.”
-
-Quest pozostaje aktywny.
-
-### OPCJA 1C — Zakradnij się do spichlerza
-
-**Statystyka:** Intryga  
-**Trudność:** 13
-
-**Sukces:** dostajesz się do magazynów bez wiedzy mnichów i możesz sam ocenić ilość żywności.
-
-→ **ETAP 2B — Zapasy klasztoru**
-
-**Porażka:** strażnicy zauważają cię przy murze. Mnisi stają się bardziej podejrzliwi. Quest pozostaje aktywny.
-
-## ETAP 2A — Dlaczego ludzie głodują?
-
-Rozmawiasz z mieszkańcami.
-
-Okazuje się, że problem nie wynika tylko ze słabych zbiorów.
-
-Kilka tygodni wcześniej większość dostępnego zboża wykupił kupiec **Radomir**, który przechowuje je w magazynie poza Thalwen i czeka na dalszy wzrost cen.
-
-Mieszkańcy nie mają już pieniędzy, żeby kupować od niego żywność.
-
-### OPCJA 2A-1 — Sprawdź ceny i rachunki
-
-**Statystyka:** Handel  
-**Trudność:** 12
-
-**Sukces:** potwierdzasz, że Radomir wykupił ogromną część dostępnego zboża, a następnie kilkukrotnie podniósł ceny. Nie złamał formalnie prawa, ale świadomie wykorzystuje głód.
-
-→ **ETAP 3 — Noc decyzji**
-
-**Porażka:** nie udaje ci się zebrać wystarczających dowodów. Quest pozostaje aktywny.
-
-### OPCJA 2A-2 — Znajdź magazyn Radomira
-
-**Statystyka:** Intryga  
-**Trudność:** 13
-
-**Sukces:** odnajdujesz jego prywatny magazyn. W środku znajduje się wystarczająco dużo zboża, aby ulżyć wielu rodzinom.
-
-**Dodatkowa wiedza:** głód jest częściowo sztucznie pogłębiany przez spekulację.
-
-→ **ETAP 3 — Noc decyzji**
-
-**Porażka:** nie odnajdujesz magazynu. Quest pozostaje aktywny.
-
-## ETAP 2B — Zapasy klasztoru
-
-Sprawdzasz klasztorny spichlerz.
-
-Worków rzeczywiście jest bardzo dużo.
-
-### OPCJA 2B-1 — Oblicz zapasy
-
-**Statystyka:** Nauka  
-**Trudność:** 11
-
-**Sukces:** po przeliczeniu zapasów odkrywasz, że przeor mówi tylko częściową prawdę. Klasztor potrzebuje dużej części żywności na zimę, ale nawet po zachowaniu bezpiecznej rezerwy może oddać część zboża mieszkańcom. Nie wystarczy to jednak, aby wyżywić wszystkich przez wiele miesięcy.
-
-→ **ETAP 3 — Noc decyzji**
-
-**Porażka:** nie potrafisz wiarygodnie ocenić zapasów. Quest pozostaje aktywny.
-
-### OPCJA 2B-2 — Sprawdź klasztorne księgi
-
-**Statystyka:** Intryga  
-**Trudność:** 14
-
-**Sukces:** odkrywasz, że część zboża została już obiecana kupcom z **Valdren**. Mnisi chcą sprzedać je z zyskiem, aby sfinansować remont klasztoru. Przeor nie kłamał całkowicie, ale część zapasów nie jest przeznaczona na przetrwanie zimy.
-
-→ **ETAP 3 — Noc decyzji**
-
-**Dodatkowa wiedza:** sekret sprzedaży zboża obniża trudność późniejszych negocjacji z przeorem.
-
-**Porażka:** nie znajdujesz niczego rozstrzygającego. Quest pozostaje aktywny.
-
-## ETAP 3 — Noc decyzji
-
-Tłum stoi przed bramą. Mnisi stoją po drugiej stronie.
-
-Wystarczy jedna iskra, aby rozpoczęła się walka.
-
-Gracz wybiera jeden z trzech kierunków rozwiązania kryzysu.
-
-### DROGA A — Broń spichlerza
-
-Stajesz po stronie klasztoru. Uznajesz, że splądrowanie spichlerza doprowadzi do chaosu i może tylko przesunąć głód o kilka miesięcy.
-
-**Metoda 1:** Dyplomacja 14 — spróbuj rozproszyć tłum.  
-**Metoda 2:** Walka 13 — pomóż strażnikom odeprzeć napastników.
-
-**Sukces:** atak zostaje powstrzymany.
-
-→ **FINAŁ A — Zamknięte bramy**
-
-### DROGA B — Wymuś podział zapasów
-
-Próbujesz doprowadzić do kompromisu. Mnisi zachowają zapasy potrzebne na zimę, a reszta zostanie wydana najbardziej potrzebującym rodzinom.
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 14
-
-Jeżeli gracz odkrył, że część zboża była przeznaczona na sprzedaż do Valdren:
-
-**Trudność spada do 12.**
-
-**Sukces:** przeor zgadza się otworzyć część spichlerza. Tłum odstępuje od bramy.
-
-→ **FINAŁ B — Podzielony chleb**
-
-**Porażka:** przeor nie zgadza się na podział, a tłum ponownie zaczyna naciskać na bramę. Quest pozostaje aktywny zgodnie z ogólnymi zasadami porażek.
-
-### DROGA C — Otwórz spichlerz
-
-Stajesz po stronie głodujących. Uznajesz, że żywność jest teraz ważniejsza niż klasztorne plany na przyszłość.
-
-Gracz może wybrać sposób:
-
-- **Dyplomacja 15** — przekonaj strażników, żeby odstąpili,
-- **Intryga 14** — otwórz bramę od środka,
-- **Walka 14** — pomóż mieszkańcom sforsować wejście.
-
-**Sukces:** brama zostaje otwarta, a mieszkańcy wchodzą do spichlerza.
-
-→ **FINAŁ C — Chleb zabrany siłą**
-
-## FINAŁ A — Zamknięte bramy
-
-Atak zostaje powstrzymany.
-
-Spichlerz pozostaje zamknięty, a mnisi zachowują żywność.
-
-Klasztor jest bohaterowi wdzięczny.
-
-Mieszkańcy Thalwen zapamiętują jednak, po której stronie stanął.
-
-**Stan świata:**
-- klasztor zachowuje zapasy,
-- głód w Thalwen trwa,
-- bohater stanął po stronie klasztoru podczas głodu.
-
-**Nagrody i Punkty Legendy:** do ustalenia.
-
-## FINAŁ B — Podzielony chleb
-
-Udaje się zatrzymać zarówno tłum, jak i mnichów.
-
-Klasztor otwiera część spichlerza. Najbardziej potrzebujące rodziny otrzymują żywność, a mnisi zachowują rezerwę na zimę.
-
-Problem głodu nie znika całkowicie, ale udaje się uniknąć rozlewu krwi.
-
-**Stan świata:**
-- Thalwen otrzymuje część żywności,
-- klasztor zachowuje rezerwę,
-- relacje między klasztorem a wsią pozostają napięte, ale nie dochodzi do otwartego konfliktu.
-
-**Nagrody i Punkty Legendy:** do ustalenia.
-
-## FINAŁ C — Chleb zabrany siłą
-
-Brama zostaje otwarta.
-
-Głodujący mieszkańcy wpadają do spichlerza i wynoszą worki ze zbożem do Thalwen.
-
-Przez najbliższe tygodnie ludzie będą mieli co jeść, ale klasztor traci znaczną część zapasów.
-
-Przeor uznaje bohatera za współwinnego grabieży.
-
-**Stan świata:**
-- głód w Thalwen zostaje chwilowo powstrzymany,
-- klasztor traci zapasy,
-- bohater pomógł mieszkańcom splądrować klasztorny spichlerz.
-
-**Nagrody i Punkty Legendy:** do ustalenia.
-
-## Drzewko techniczne
-
-```text
-OSTATNI SPICHLERZ — THALWEN
-│
-├── DYPLOMACJA 11 — mieszkańcy
-│   └── DLACZEGO LUDZIE GŁODUJĄ?
-│       ├── Handel 12 — zbadaj ceny
-│       └── Intryga 13 — magazyn Radomira
-│
-├── DYPLOMACJA 12 — przeor
-│   └── ZAPASY KLASZTORU
-│
-└── INTRYGA 13 — zakradnij się do spichlerza
-    └── ZAPASY KLASZTORU
-        ├── Nauka 11 — policz żywność
-        └── Intryga 14 — odkryj plan sprzedaży
-
-ETAP 3 — NOC DECYZJI
-│
-├── BROŃ SPICHLERZA
-│   ├── Dyplomacja 14
-│   └── Walka 13
-│       └── FINAŁ A — ZAMKNIĘTE BRAMY
-│
-├── PODZIEL ZAPASY
-│   └── Dyplomacja 14
-│       ├── 12, jeśli odkryto sprzedaż do Valdren
-│       └── FINAŁ B — PODZIELONY CHLEB
-│
-└── OTWÓRZ SPICHLERZ
-    ├── Dyplomacja 15
-    ├── Intryga 14
-    └── Walka 14
-        └── FINAŁ C — CHLEB ZABRANY SIŁĄ
-```
-
-## Do domknięcia przed kodowaniem
-
-1. Ustalić konkretne nagrody Finału A.
-2. Ustalić konkretne nagrody Finału B.
-3. Ustalić konkretne nagrody Finału C.
-4. Rozdzielić Punkty Legendy między trzy zakończenia.
-5. Ustalić, czy Radomir ma tworzyć trwałą flagę fabularną lub wrócić w kolejnym Queście.
+- **A — Zamknięte bramy:** obroń spichlerz przez Dyplomację 14 albo Walkę 13. Klasztor zachowuje zapasy, głód trwa.
+- **B — Podzielony chleb:** Dyplomacja 14, spada do 12 po odkryciu planowanej sprzedaży. Mnisi wydają część zapasów, zachowując zimową rezerwę.
+- **C — Chleb zabrany siłą:** Dyplomacja 15 / Intryga 14 / Walka 14. Mieszkańcy przejmują zboże, klasztor traci zapasy.
 
 ---
 
 # QUEST 4 — Żelazo pod sianem
 
-> **Status projektowy:** pełne drzewko fabularne z trzema finałami A/B/C. Nagrody i Punkty Legendy wymagają jeszcze zatwierdzenia.
+**Miejsce rozpoczęcia:** Norven  
+**Dodatkowa lokacja:** Vargard  
+**Statystyki:** Nauka, Dyplomacja, Intryga  
+**Finały:** A/B/C
 
-## Podstawowe informacje
+Żołnierze znajdują w stodole stary skład kusz i włóczni. Część broni pochodzi z dawnej legalnej wiejskiej straży, ale ktoś dokładał nowe uzbrojenie. Trop prowadzi do byłego żołnierza **Serana**, który potajemnie szkoli mieszkańców do obrony.
 
-**Nazwa:** Żelazo pod sianem  
-**Miejsce rozpoczęcia:** wieś Norven  
-**Dodatkowa lokacja:** zamek Vargard  
-**Typ:** średni Quest wieloetapowy / polityczny / śledczy  
-**Wykorzystywane statystyki:** Nauka, Dyplomacja, Intryga  
-**Liczba finałów:** 3
+- **Nauka 11/12:** ustal wiek broni i sprawdź rejestry Vargard.
+- **Dyplomacja 12/13:** historia gospodarza i dawnych straży.
+- **Intryga 13/14:** odkryj świeże ślady i nocne szkolenia.
 
-## Założenie Questa
+## Finały
 
-Patrol żołnierzy z Vargard przeszukuje gospodarstwa w okolicy Norven.
-
-W jednej ze stodół, pod stertami starego siana, znajduje ukrytą komorę. W środku znajdują się dziesiątki włóczni, kusze, skrzynie bełtów i stare tarcze.
-
-Dowódca patrolu uznaje, że ktoś przygotowuje zbrojne wystąpienie przeciwko Vargard.
-
-Właściciel stodoły twierdzi jednak, że broń była tam na długo przed jego narodzinami.
-
-## ETAP 1 — Skład pod stodołą
-
-Żołnierze otaczają gospodarstwo.
-
-Kapitan **Roderik** nakazuje zatrzymać gospodarza i jego dwóch synów.
-
-> „Chłopi nie chowają trzydziestu włóczni pod sianem dlatego, że boją się wilków.”
-
-Mieszkańcy Norven zaczynają zbierać się wokół gospodarstwa.
-
-### OPCJA 1A — Zbadaj znalezioną broń
-
-**Statystyka:** Nauka  
-**Trudność:** 11
-
-**Sukces:** większość włóczni i kusz jest bardzo stara. Na części odnajdujesz starte oznaczenia przypominające dawny znak Vargard. Kilka kusz jest jednak znacznie nowszych. Ktoś uzupełniał skład w ostatnich latach.
-
-→ **ETAP 2A — Stara zbrojownia**
-
-**Porażka:** nie potrafisz ustalić pochodzenia uzbrojenia. Quest pozostaje aktywny.
-
-### OPCJA 1B — Wypytaj gospodarza
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 12
-
-**Sukces:** gospodarz **Herman** opowiada o swoim dziadku. Podczas dawnej wojny był odpowiedzialny za zebranie miejscowych chłopów do obrony okolicy. Herman twierdzi, że stodoła mogła kiedyś służyć jako tajny magazyn wiejskiej straży. Sam przysięga, że nigdy nie otwierał ukrytej komory.
-
-→ **ETAP 2B — Historia wiejskiej straży**
-
-**Dodatkowa korzyść:** rodzina Hermana zaczyna ufać bohaterowi.
-
-**Porażka:** Herman uznaje, że pracujesz dla żołnierzy i odmawia dalszych odpowiedzi. Quest pozostaje aktywny.
-
-### OPCJA 1C — Przeszukaj dokładnie stodołę
-
-**Statystyka:** Intryga  
-**Trudność:** 13
-
-**Sukces:** za skrzyniami znajdujesz świeże ślady błota, nowy olej do konserwacji kusz i ślady przesuwania skrzyń. Ktoś regularnie korzysta z magazynu.
-
-→ **ETAP 2C — Kto przychodzi nocą?**
-
-**Porażka:** żołnierze zaczynają podejrzewać, że próbujesz coś przed nimi znaleźć i ukryć. Quest pozostaje aktywny.
-
-## ETAP 2A — Stara zbrojownia
-
-Znaki na broni sugerują, że przynajmniej część uzbrojenia należała kiedyś do Vargard.
-
-### Sprawdź stare rejestry w Vargard
-
-**Statystyka:** Nauka  
-**Trudność:** 12
-
-**Sukces:** odnajdujesz zapis sprzed kilkudziesięciu lat. Podczas dawnej wojny w Norven rzeczywiście utworzono lokalny oddział chłopskiej straży. W kilku gospodarstwach ukryto broń na wypadek najazdu. Skład w stodole Hermana był jednym z takich miejsc.
-
-Stara część arsenału nie była przygotowaniem do rebelii. Nowe kusze nadal pozostają niewyjaśnione.
-
-→ **ETAP 3 — Prawda o składzie**
-
-**Porażka:** nie odnajdujesz odpowiednich dokumentów. Quest pozostaje aktywny.
-
-## ETAP 2B — Historia wiejskiej straży
-
-Rozmawiasz ze starszymi mieszkańcami Norven.
-
-Kilku pamięta opowieści swoich ojców o broni rozsianej po okolicy. Jeden ze starców zauważa jednak, że dawna wiejska straż nie posiadała kusz podobnych do tych znalezionych w stodole.
-
-### Wypytaj mieszkańców
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 13
-
-**Sukces:** dowiadujesz się o **Seranie**, byłym żołnierzu, który od kilku miesięcy spotyka się nocami z młodymi mieszkańcami wsi.
-
-→ **ETAP 3 — Prawda o składzie**
-
-**Porażka:** mieszkańcy nie chcą wskazać żadnego nazwiska. Quest pozostaje aktywny.
-
-## ETAP 2C — Kto przychodzi nocą?
-
-Postanawiasz obserwować stodołę.
-
-### Śledź nocnych gości
-
-**Statystyka:** Intryga  
-**Trudność:** 14
-
-**Sukces:** po zmroku przy stodole pojawia się kilku mieszkańców. Wyciągają broń i zabierają ją na pobliską polanę. Tam czeka na nich **Seran**, były żołnierz. Seran uczy mieszkańców walczyć. Szkolenie wygląda bardziej jak przygotowanie obrony wsi niż rebelii.
-
-→ **ETAP 3 — Prawda o składzie**
-
-**Dodatkowa wiedza:** Seran przygotowuje wieś do obrony, nie do otwartego ataku na Vargard.
-
-**Porażka:** zostajesz zauważony. Seran przerywa spotkanie. Quest pozostaje aktywny.
-
-## ETAP 3 — Prawda o składzie
-
-Konfrontujesz Serana.
-
-Nie zaprzecza. To on od kilku lat uzupełniał stary arsenał, kupował kusze, bełty i naprawiał zachowaną broń.
-
-> „Trzy razy prosiliśmy Vargard o patrol. Trzy razy przyjechali po wszystkim. Kiedy następnym razem przyjdą rabusie, mam rzucać w nich kamieniami?”
-
-Seran twierdzi, że nie chce buntować Norven przeciwko Vargard. Chce, żeby mieszkańcy byli w stanie bronić się sami.
-
-Kapitan Roderik odpowiada:
-
-> „Dzisiaj mówią, że bronią wsi. Jutro któryś powie, że nie potrzebuje już pana ani zamku.”
-
-Gracz wybiera jeden z trzech kierunków.
-
-### DROGA A — Oddaj arsenał Vargard
-
-Informujesz Roderika o wszystkim. Żołnierze konfiskują cały skład, a Seran zostaje zatrzymany.
-
-→ **FINAŁ A — Rozbrojona wieś**
-
-### DROGA B — Zalegalizuj wiejską straż
-
-Próbujesz przekonać Vargard, że lepiej kontrolować uzbrojoną wieś niż ją rozbroić i pozostawić bezbronną.
-
-**Statystyka:** Dyplomacja  
-**Trudność:** 14
-
-Jeżeli wcześniej odnaleziono dokumenty potwierdzające istnienie dawnej straży:
-
-**Trudność spada do 12.**
-
-**Sukces:** Vargard zgadza się na kompromis. Broń zostaje spisana, mieszkańcy mogą zachować część arsenału, a Seran zostaje oficjalnym dowódcą lokalnej straży odpowiadającym przed Vargard.
-
-→ **FINAŁ B — Straż Norven**
-
-**Porażka:** Vargard odrzuca propozycję. Quest pozostaje aktywny.
-
-### DROGA C — Ukryj broń przed żołnierzami
-
-Decydujesz, że Vargard nie musi wiedzieć wszystkiego. Mieszkańcy przeniosą najnowszą i najlepszą część arsenału przed sporządzeniem pełnego spisu.
-
-**Statystyka:** Intryga  
-**Trudność:** 15
-
-Jeżeli wcześniej śledziłeś ludzi Serana i znasz ich kryjówki:
-
-**Trudność spada do 13.**
-
-**Sukces:** żołnierze konfiskują tylko część starego arsenału. Najlepsza broń znika, a Seran nadal potajemnie szkoli mieszkańców.
-
-→ **FINAŁ C — Broń w cieniu**
-
-**Porażka:** żołnierze odkrywają próbę ukrycia arsenału. Quest pozostaje aktywny, a sytuacja staje się bardziej napięta.
-
-## FINAŁ A — Rozbrojona wieś
-
-Żołnierze zabierają broń. Seran zostaje zatrzymany. Vargard uznaje potencjalne źródło buntu za usunięte.
-
-**Stan świata:**
-- Vargard przejmuje arsenał,
-- Seran zostaje aresztowany,
-- mieszkańcy Norven tracą możliwość samodzielnej obrony,
-- część mieszkańców zaczyna nie ufać bohaterowi.
-
-**Nagrody i Punkty Legendy:** do ustalenia.
-
-## FINAŁ B — Straż Norven
-
-Stara wiejska straż zostaje oficjalnie odtworzona. Vargard rejestruje broń i pozwala mieszkańcom zachować część arsenału. Seran formalnie odpowiada za obronę Norven.
-
-**Stan świata:**
-- Norven posiada legalną straż,
-- Seran pozostaje we wsi,
-- Vargard zachowuje formalną kontrolę,
-- wieś jest lepiej przygotowana na przyszłe Zagrożenia.
-
-**Nagrody i Punkty Legendy:** do ustalenia.
-
-## FINAŁ C — Broń w cieniu
-
-Najlepsza część arsenału zostaje ukryta. Żołnierze opuszczają Norven przekonani, że skonfiskowali większość broni. Seran nadal szkoli ludzi nocami.
-
-**Stan świata:**
-- Norven posiada tajny arsenał,
-- Seran prowadzi nielegalną straż,
-- Vargard nie zna prawdy,
-- bohater zna miejsce przechowywania broni.
-
-**Trwała flaga:** `Norven posiada tajny arsenał`.
-
-**Nagrody i Punkty Legendy:** do ustalenia.
-
-## Drzewko techniczne
-
-```text
-ŻELAZO POD SIANEM — NORVEN
-│
-├── NAUKA 11 — zbadaj broń
-│   └── stara broń + kilka nowych kusz
-│       └── VARGARD
-│           └── NAUKA 12 — stare rejestry
-│               └── dawny arsenał był legalny
-│
-├── DYPLOMACJA 12 — gospodarz
-│   └── historia dawnej straży
-│       └── DYPLOMACJA 13
-│           └── odkryj Serana
-│
-└── INTRYGA 13 — przeszukaj stodołę
-    └── ktoś nadal korzysta ze składu
-        └── INTRYGA 14
-            └── nocne szkolenie Serana
-
-ETAP 3 — SERAN
-│
-├── WYDAJ BROŃ
-│   └── FINAŁ A — ROZBROJONA WIEŚ
-│
-├── ZALEGALIZUJ STRAŻ
-│   └── DYPLOMACJA 14
-│       └── 12 z dawnymi dokumentami
-│           └── FINAŁ B — STRAŻ NORVEN
-│
-└── UKRYJ ARSENAŁ
-    └── INTRYGA 15
-        └── 13 po odkryciu nocnych kryjówek
-            └── FINAŁ C — BROŃ W CIENIU
-```
+- **A — Rozbrojona wieś:** oddaj arsenał Vargard, Seran zostaje zatrzymany.
+- **B — Straż Norven:** Dyplomacja 14, 12 ze starymi dokumentami; straż zostaje zalegalizowana.
+- **C — Broń w cieniu:** Intryga 15, 13 po odkryciu kryjówek; najlepsza broń zostaje ukryta. Flaga: `Norven posiada tajny arsenał`.
 
 ---
 
 # QUEST 5 — Ogród umarłego
 
-> **Status projektowy:** pełne drzewko fabularne z trzema finałami A/B/C. Konkretne nagrody i Punkty Legendy wymagają jeszcze zatwierdzenia.
+**Miejsce rozpoczęcia:** Eryndor  
+**Dodatkowa lokacja:** Stary Ogród  
+**Statystyki:** Nauka, Kultura, Intryga, Dyplomacja  
+**Finały:** A/B/C
 
-## Podstawowe informacje
+Wokół świeżych zwłok w kilka minut wyrastają setki kwiatów. Ich korzenie kierują się do ukrytego w ciele czarnego nasiona. Zmarły był związany ze **Strażnikami Ogrodów** i próbował dostarczyć nasiono do umierającego Starego Ogrodu. Alchemik **Calven** chce nasiono kupić.
 
-**Nazwa:** Ogród umarłego  
-**Miejsce rozpoczęcia:** miasto Eryndor  
-**Dodatkowa lokacja:** Stary Ogród poza murami Eryndor  
-**Typ:** średni Quest wieloetapowy / nadnaturalny / śledczy  
-**Wykorzystywane statystyki:** Nauka, Kultura, Intryga, Dyplomacja  
-**Liczba finałów:** 3
+- **Nauka 11:** odkryj nasiono i sposób bezpiecznego transportu.
+- **Kultura 12:** rozpoznaj Strażników Ogrodów i Stary Ogród.
+- **Intryga 13:** znajdź wiadomość o Calvenie i mapę.
+- **Dyplomacja 12 / Intryga 14:** odnajdź Calvena i zbadaj jego udział.
 
-## Założenie Questa
+## Finały
 
-Kilkaset kroków od bramy Eryndor znaleziono świeże zwłoki młodego mężczyzny.
+- **A — Ostatnie kwiaty:** zniszcz nasiono; ogród pozostaje martwy.
+- **B — Ogród powraca:** Nauka 13 albo automatycznie po wcześniejszym sukcesie Nauki; ogród odżywa i staje się aktywnym miejscem świata.
+- **C — Cena nasienia:** sprzedaj nasiono Calvenowi. Flaga: `Calven posiada Nasiono Ogrodu`.
 
-Tam, gdzie jego krew wsiąkła w ziemię, w ciągu kilku minut zaczęły wyrastać kwiaty. Po godzinie ciało otacza morze setek roślin, których nikt w Eryndor wcześniej nie widział.
+---
 
-Straż chce spalić zwłoki i kwiaty, zanim mieszkańcy uznają miejsce za cud, klątwę albo znak nadchodzącego nieszczęścia.
+# QUEST 6 — Za zamkniętą bramą
 
-## ETAP 1 — Człowiek pośród kwiatów
+**Miejsce rozpoczęcia:** Lirion  
+**Typ:** społeczny / śledczy / epidemiczny  
+**Statystyki:** Nauka, Dyplomacja, Intryga, Walka  
+**Finały:** A/B/C
 
-Straż odgradza miejsce. Kwiaty nadal wyrastają. Ich korzenie pojawiają się niemal natychmiast, jakby lata wzrostu zostały ściśnięte do kilku minut.
+## Założenie
 
-Dowódca straży mówi:
+W biedniejszej dzielnicy Lirion pojawiają się gorączka, ciemne plamy na skórze i pierwsze zgony. Straż miejska zamyka całą dzielnicę. Nikt nie może wejść ani wyjść.
 
-> „Do zachodu słońca chcę mieć z tego popiół. Człowieka można pochować. Tego czegoś nie zamierzam.”
+Dowódca **Varlen** uważa, że otwarcie bramy może narazić całe miasto.
 
-### OPCJA 1A — Zbadaj kwiaty
+## ETAP 1 — Kordon
 
-**Statystyka:** Nauka  
-**Trudność:** 11
+- **Dyplomacja 11 — porozmawiaj z Varlenem:** poznaj liczbę przypadków i miejsca zachorowań.
+- **Nauka 12 — zbadaj chorego:** znajdź czarny pył i resztki zboża na ubraniu pracownika magazynów.
+- **Intryga 13 — przedostań się do dzielnicy:** odkryj, że bogaty kupiec **Malven** przekupuje strażnika i wyprowadza swoich ludzi poza kwarantannę.
 
-**Sukces:** rośliny nie wyrastają przypadkowo. Wszystkie korzenie kierują się w stronę ciała. Źródło wzrostu znajduje się wewnątrz zwłok. Pod mostkiem mężczyzny wyczuwasz twardy przedmiot wielkości orzecha. Kwiaty próbują dostać się do czegoś, co zmarły miał przy sobie.
+## ETAP 2 — Źródło choroby
 
-→ **ETAP 2A — Nasiono**
+Mapa zachorowań i rozmowy z rodzinami prowadzą do **Magazynu Pod Trzema Kołami**. Pierwsi chorzy rozładowywali ten sam transport zboża. W workach znajdowano martwe szczury.
 
-**Porażka:** kwiaty rosną szybciej, niż jesteś w stanie je badać. Nie potrafisz ustalić ich pochodzenia. Quest pozostaje aktywny.
+**Intryga 14** może ujawnić, że Malven wiedział o pierwszych przypadkach i przez dwa dni je ukrywał, aby nie stracić towaru.
 
-### OPCJA 1B — Rozpoznaj symbole zmarłego
+W magazynie można zniszczyć skażony transport. Samo spalenie zboża nie leczy jednak ludzi, którzy już mieli z nim kontakt.
 
-**Statystyka:** Kultura  
-**Trudność:** 12
+## ETAP 3 — Kryzys kwarantanny
 
-Na szyi zmarłego znajduje się drewniany medalion przedstawiający siedem płatków otaczających pojedyncze nasiono.
+### DROGA A — Utrzymaj pełną kwarantannę
 
-**Sukces:** przypominasz sobie starą historię o **Strażnikach Ogrodów**, którzy przenosili nasiona rzadkich roślin pomiędzy odległymi gajami i ogrodami. Według opowieści niektórych nasion nie wolno było pozostawić w miejscu śmierci ich opiekuna — powinny zostać zwrócone ziemi, z której je zabrano.
+**Dyplomacja 14** albo **Walka 13**.
 
-→ **ETAP 2B — Zapomniany ogród**
+→ **FINAŁ A — Żelazny kordon**
 
-**Porażka:** symbol wydaje się znajomy, ale nie potrafisz przypomnieć sobie jego znaczenia. Quest pozostaje aktywny.
+Dzielnica pozostaje zamknięta do wygaśnięcia choroby. Zaraza nie wychodzi dalej, ale część mieszkańców umiera. Flaga: `Lirion — pełna kwarantanna`.
 
-### OPCJA 1C — Przeszukaj zwłoki
+### DROGA B — Stwórz lazaret
 
-**Statystyka:** Intryga  
-**Trudność:** 13
+**Nauka 14**, spada do **12**, jeśli odkryto źródło i zniszczono skażone zboże.
 
-**Sukces:** w bucie mężczyzny znajdujesz wiadomość:
+→ **FINAŁ B — Lazaret Lirion**
 
-> „Jeżeli mnie znajdą, nie pozwól Calvenowi zabrać nasienia.”
+Chorzy są izolowani, zdrowi stopniowo wyprowadzani i obserwowani. Powstaje lazaret. Flaga: `Lirion — utworzono lazaret`.
 
-Znajdujesz również prostą mapę prowadzącą do starego ogrodu poza Eryndor.
+### DROGA C — Otwórz bramy
 
-→ **ETAP 2C — Calven**
+**Dyplomacja 15** albo **Intryga 14**.
 
-**Porażka:** strażnik zauważa, że próbujesz zabrać coś ze zwłok. Od tej chwili dokładniej pilnuje ciała. Quest pozostaje aktywny.
+→ **FINAŁ C — Otwarte bramy**
 
-## ETAP 2A — Nasiono
+Mieszkańcy odzyskują wolność, ale po kilku dniach pojawiają się przypadki w innych częściach miasta. Flaga: `Zaraza wydostała się poza dzielnicę Lirion`.
 
-Pod ubraniem zmarłego odkrywasz niewielką ranę zszytą grubą nicią. Ktoś wszył coś pod skórę.
+### Dodatkowa konsekwencja
 
-Wewnątrz znajduje się czarne, twarde nasiono. Gdy pojawia się na powietrzu, wszystkie kwiaty wokół zwłok jednocześnie odwracają się w jego stronę.
+Jeśli bohater odkrył winę Malvena, może przekazać dowody straży. Nie tworzy to osobnego finału.
 
-W kieszeni mężczyzny znajdujesz drewniany znak Strażników Ogrodów.
+---
 
-→ odkrywasz drogę do **Starego Ogrodu**.
+# QUEST 7 — Ziarno za murami
 
-**Dodatkowa korzyść za Naukę:** bohater wie, jak bezpiecznie transportować nasiono. Jeśli później zdecyduje się zwrócić je do ogrodu, nie potrzebuje dodatkowego testu Nauki.
+**Miejsce rozpoczęcia:** Valdren  
+**Dodatkowa lokacja:** Durnhal jako cel transportu  
+**Typ:** handlowy / społeczny / polityczny  
+**Statystyki:** Handel, Intryga, Dyplomacja, Nauka  
+**Finały:** A/B/C
 
-## ETAP 2B — Zapomniany ogród
+## Założenie
 
-Poza Eryndor odnajdujesz zarośniętą ścieżkę prowadzącą do miejsca, które kiedyś musiało być ogromnym ogrodem.
+Po słabych zbiorach rada Valdren zakazuje eksportu zboża. Straż zatrzymuje trzy wozy gildii kupieckiej. Przywódca karawany **Marven** twierdzi, że kupił zboże przed wprowadzeniem zakazu i teraz władze zmuszają go do sprzedaży po zaniżonej cenie.
 
-Większość drzew jest martwa, kamienne kanały wyschły, a po dawnych rabatach pozostała popękana ziemia.
+## ETAP 1 — Wozy przy bramie
 
-Na środku znajduje się pusty kamienny postument z zagłębieniem dokładnie odpowiadającym kształtem nasionu ukrytemu w ciele zmarłego.
+- **Handel 11:** dokumenty potwierdzają zakup przed zakazem; transport miał trafić do Durnhal, gdzie cena jest niemal trzykrotnie wyższa.
+- **Nauka 12:** oceń zapasy Valdren; miasto jeszcze nie głoduje, ale masowy eksport zagrozi rezerwom.
+- **Intryga 13:** odkryj urzędnika pomagającego przemytnikom przechodzić boczną bramą.
 
-Posłaniec próbował przynieść nasiono właśnie tutaj.
+## ETAP 2 — Co naprawdę robi zakaz
 
-→ **ETAP 3 — Los nasiona**
+**Handel 13** potwierdza, że rada narzuciła kupcom niski maksymalny skup. Dalsze śledztwo ujawnia prywatne magazyny części rajców oraz urzędnika **Gerolda Vane**, który bierze łapówki za omijanie zakazu.
 
-## ETAP 2C — Calven
+**Intryga 14** może dać księgę łapówek i transportów.
 
-Rozpytujesz o imię z wiadomości.
+## Finały
 
-### Odnajdź Calvena
+### A — Zboże zostaje
 
-**Statystyka:** Dyplomacja  
-**Trudność:** 12
+Konfiskujesz transport. Valdren zwiększa rezerwy, Marven traci część majątku. Jeśli ujawniono Gerolda, zostaje zatrzymany.
 
-**Sukces:** odnajdujesz **Calvena**, bogatego alchemika i handlarza rzadkimi składnikami mieszkającego w Eryndor. Gdy wspominasz o ciele i kwiatach, natychmiast wie, o czym mówisz.
+### B — Otwarty handel
 
-> „Nie interesuje mnie trup. Interesuje mnie to, co nosił.”
+**Handel 14**, spada do **12** po poznaniu realnych zapasów. Część zboża zostaje w Valdren, część można legalnie wywieźć, a miasto płaci uczciwszą cenę.
 
-Calven twierdzi, że z nasiona można uzyskać lekarstwa, trucizny i substancje warte fortunę. Zaprzecza, że kazał kogokolwiek zabić.
+### C — Nocny transport
 
-### Zbadaj historię Calvena
+**Intryga 14**, spada do **12** po poznaniu sposobu Gerolda. Wozy opuszczają miasto, Marven zarabia w Durnhal. Flaga: `Bohater pomógł przemycić zboże z Valdren`.
 
-**Statystyka:** Intryga  
-**Trudność:** 14
+---
 
-**Sukces:** dowiadujesz się, że Calven wynajął ludzi do odnalezienia posłańca. Nie znajdujesz dowodu, że nakazał go zabić, ale jego ludzie ścigali zmarłego krótko przed śmiercią.
+# QUEST 8 — Martwy pokład
 
-→ **ETAP 3 — Los nasiona**
+**Miejsce rozpoczęcia:** Eryndor  
+**Dodatkowe miejsca:** port, wybrzeże, stara latarnia  
+**Typ:** morski / śledczy  
+**Statystyki:** Nauka, Intryga, Handel, Dyplomacja  
+**Finały:** A/B/C
 
-**Porażka:** nie znajdujesz niczego, czym mógłbyś go obciążyć. Możesz nadal przejść do decyzji o losie nasiona.
+## Założenie
 
-## ETAP 3 — Los nasiona
+Do portu wpływa bezzałogowa **„Srebrna Mewa”**. Na pokładzie pozostawiono broń, ubrania i ładunek, a w kajutach są ślady ciężkiej choroby. Brakuje jednej łodzi ratunkowej. Port obawia się zarazy.
 
-Wiesz już wystarczająco dużo. Nasiono przyciąga rośliny. Zmarły próbował dostarczyć je do umierającego Starego Ogrodu. Calven jest gotowy bardzo dobrze za nie zapłacić. Straż Eryndor chce wszystko spalić.
+## ETAP 1 — Statek bez ludzi
 
-Gracz wybiera jeden z trzech kierunków.
+- **Nauka 12:** objawy skupiają się w części załogi; w kubkach znajduje się charakterystyczny osad.
+- **Intryga 11:** ustal, że łódź ratunkową spuszczono świadomie i odpłynęła ku północnemu wybrzeżu.
+- **Handel 11:** manifest ujawnia dodatkowe, nieoficjalnie kupione beczki wody.
 
-### DROGA A — Zniszcz nasiono
+## ETAP 2 — Woda i załoga
 
-Stajesz po stronie straży. Oddajesz nasiono dowódcy. Zwłoki, kwiaty i nasiono zostają spalone.
+**Nauka 13** wykazuje, że woda z części beczek była skażona. Objawy wyglądały jak zaraza, ale prawdopodobnie były zatruciem.
 
-→ **FINAŁ A — Ostatnie kwiaty**
+Na brzegu bohater odnajduje łódź, a przy starej latarni siedmiu żywych marynarzy. Załoga uciekła, bo była przekonana, że statek jest zakażony.
 
-### DROGA B — Zwróć nasiono ogrodowi
+Na beczkach widnieje znak dostawcy **Dalvena** z Eryndor. **Intryga 13** może wykazać, że Dalven od miesięcy kupował tańszą wodę ze studni przy garbowisku i wiedział o skargach. **Dyplomacja 13** może doprowadzić do jego propozycji zapłaty za milczenie.
 
-Zabierasz ciało i nasiono do Starego Ogrodu.
+## Finały
 
-Jeżeli wcześniej pomyślnie wykonano **Naukę 11**, transport jest automatyczny.
+### A — Ogień na wodzie
 
-W przeciwnym razie:
+Statek i ładunek zostają spalone jako potencjalne źródło zarazy. Port jest bezpieczny, ale zniszczono jednostkę, która prawdopodobnie nie była zakaźna.
 
-**Statystyka:** Nauka  
-**Trudność:** 13
+### B — Srebrna Mewa wraca
 
-**Sukces:** umieszczasz nasiono w kamiennym zagłębieniu. Ziemia zaczyna drżeć, suche drzewa wypuszczają liście, a z popękanej ziemi wyrastają nowe rośliny. Kwiaty wokół ciała zmarłego więdną, gdy cały ogród zaczyna odżywać.
+**Nauka 14**, spada do **11** po wcześniejszym zbadaniu wody. Skażone zapasy są niszczone, statek oczyszczony, załoga wraca. Jeśli zebrano dowody przeciw Dalvenowi, jego interes zostaje zamknięty.
 
-→ **FINAŁ B — Ogród powraca**
+### C — Cena ciszy
 
-### DROGA C — Sprzedaj nasiono Calvenowi
+**Dyplomacja 14**, spada do **12** po wcześniejszym układzie. Oficjalny raport mówi o przypadkowym zepsuciu wody. Dalven pozostaje bezkarny. Flaga: `Bohater ukrył odpowiedzialność Dalvena za zatrucie załogi`.
 
-Wracasz do alchemika. Calven płaci za nasiono, zamyka je w metalowym pojemniku i zabiera do swojej pracowni.
+---
 
-→ **FINAŁ C — Cena nasienia**
+# QUEST 9 — Ostatnia woda
 
-## FINAŁ A — Ostatnie kwiaty
+**Miejsce rozpoczęcia:** Elarin  
+**Dodatkowe miejsce:** pola i wzgórza powyżej wsi  
+**Typ:** społeczny / gospodarczy  
+**Statystyki:** Dyplomacja, Nauka, Handel, Intryga  
+**Finały:** A/B/C
 
-Nasiono zostaje zniszczone. Straż Eryndor uznaje sprawę za zakończoną. Kwiaty znikają, a Stary Ogród pozostaje ruiną.
+## Założenie
 
-**Stan świata:**
-- nasiono zniszczone,
-- kwiaty znikają,
-- Stary Ogród pozostaje martwy,
-- Calven traci możliwość zdobycia nasiona.
+Strumień zasilający pola Elarin wysycha. Rolnicy z górnych pól budują tamy, ludzie z dolnych pól je niszczą. Po kolejnej bójce jeden człowiek zostaje ciężko ranny.
 
-**Kierunek nagrody:** solidna zapłata od władz Eryndor, niewielka Legenda.
+## ETAP 1
 
-## FINAŁ B — Ogród powraca
+- **Dyplomacja 11:** odkryj spór wokół tamy rodziny Rovenów.
+- **Nauka 11:** zauważ, że sama tama nie wyjaśnia całego spadku przepływu.
+- **Intryga 12:** odnajdź stare prawo mówiące, że żaden gospodarz nie może zatrzymać więcej niż jednej trzeciej przepływu.
 
-Nasiono zostaje zwrócone tam, gdzie miało trafić. Stary Ogród zaczyna odżywać. Ciało posłańca zostaje pochowane pośród pierwszych nowych kwiatów.
+## ETAP 2 — Prawdziwa przyczyna
 
-**Stan świata:** Stary Ogród staje się aktywnym miejscem świata.
+Badanie koryta prowadzi wyżej. Stary kanał irygacyjny został niedawno oczyszczony. Hodowca **Bran Cord** skierował część strumienia do zbiornika dla bydła.
 
-Może później działać jako źródło rzadkich ziół, miejsce Przygód, kolejnego Questa albo miejsce produkcji.
+Bran nie chce buntu ani zysku — próbuje uratować stado. Jego działanie ograniczyło wodę Rovenom, Rovenowie zbudowali tamę, a rolnicy niżej zostali prawie bez wody.
 
-**Kierunek nagrody:** najwięcej Punktów Legendy, rzadkie zioła lub materiał, najmniej Złota.
+## Finały
 
-## FINAŁ C — Cena nasienia
+### A — Dawne koryto
 
-Calven przejmuje nasiono. Płaci zgodnie z obietnicą. Kwiaty wokół miejsca śmierci usychają w ciągu kilku godzin.
+**Dyplomacja 14**, spada do **12** ze starym dokumentem. Kanał Brana zostaje zamknięty, tama Rovenów częściowo rozebrana. Każdy ponosi część strat.
 
-**Stan świata:**
-- Calven posiada nasiono,
-- Stary Ogród pozostaje martwy,
-- bohater otrzymuje dużą zapłatę.
+### B — Trzy kanały
 
-**Trwała flaga:** `Calven posiada Nasiono Ogrodu`.
+Zużyj **4 Drewna, 4 Kamienia, 2 Żelaza** oraz wykonaj **Naukę 14**, spada do **12** po dokładnym zbadaniu strumienia. Powstaje wspólny system retencji i irygacji. Flaga: `Elarin posiada system irygacyjny`.
 
-## Drzewko techniczne
+### C — Woda dla bogatszych
 
-```text
-OGRÓD UMARŁEGO — ERYNDOR
-│
-├── NAUKA 11 — zbadaj kwiaty
-│   └── odkryj nasiono w ciele
-│       └── bezpieczny transport nasiona
-│
-├── KULTURA 12 — symbol zmarłego
-│   └── Strażnicy Ogrodów
-│       └── odkryj STARY OGRÓD
-│
-└── INTRYGA 13 — przeszukaj ciało
-    ├── wiadomość o Calvenie
-    └── mapa Starego Ogrodu
-        └── CALVEN
-            ├── Dyplomacja 12 → odnajdź go
-            └── Intryga 14 → odkryj jego związek ze śmiercią
+**Handel 13**. Bohater popiera Rovenów, którzy zachowują większość wody i płacą za wsparcie. Drobni rolnicy tracą zbiory. Flaga: `Rovenowie kontrolują wodę w Elarin`.
 
-ETAP 3 — LOS NASIONA
-│
-├── ZNISZCZ NASIONO
-│   └── FINAŁ A — OSTATNIE KWIATY
-│
-├── ZWRÓĆ NASIONO
-│   └── Nauka 13
-│       └── automatycznie, jeśli wcześniej udana Nauka 11
-│           └── FINAŁ B — OGRÓD POWRACA
-│
-└── SPRZEDAJ CALVENOWI
-    └── FINAŁ C — CENA NASIENIA
-```
+---
+
+# QUEST 10 — Fałszywy król
+
+**Miejsce rozpoczęcia:** Lirion  
+**Dodatkowe miejsca:** targ, stary młyn, mennica  
+**Typ:** kryminalny / gospodarczy / śledczy  
+**Statystyki:** Handel, Intryga, Nauka, Dyplomacja  
+**Finały:** A/B/C
+
+## Założenie
+
+Z więzienia ucieka **Daven Orr**, skazany fałszerz monet. Następnego dnia na targu pojawiają się nowe falsyfikaty, więc straż automatycznie obwinia Davena.
+
+## ETAP 1 — Fałszywe monety
+
+- **Nauka 11:** nowe falsyfikaty wykonano innym zestawem narzędzi niż stare monety Davena.
+- **Handel 12:** falsyfikaty pojawiają się w dużych partiach przy wypłatach z miejskiego skarbca.
+- **Intryga 12:** odnajdź Davena w starym młynie. Twierdzi, że uciekł, bo ktoś próbował go zabić w więzieniu.
+
+## ETAP 2 — Mennica
+
+Daven wskazuje urzędnika mennicy **Olvara Renna**. **Intryga 14** może ujawnić magazyn pełen falsyfikatów, prawdziwych monet i ksiąg; **Nauka 13** wykazuje brakujący kruszec.
+
+Olvar wykorzystał reputację Davena jako zasłonę: wprowadzał fałszywe monety przez miejski skarbiec i zabierał prawdziwe.
+
+Daven jest winny wcześniejszego fałszowania, ale nie obecnego procederu.
+
+## Finały
+
+### A — Dwóch fałszerzy
+
+Oddaj Olvara i Davena władzom. Olvar odpowiada za nowy przekręt, Daven wraca do więzienia za wcześniejszy wyrok.
+
+### B — Fałszerz mennicy
+
+**Dyplomacja 14**, spada do **12**, jeśli Daven współpracował. Olvar zostaje skazany, a kara Davena zostaje zamieniona na pracę przy wykrywaniu falsyfikatów w mennicy. Flaga: `Daven pracuje dla mennicy Lirion`.
+
+### C — Ostatnia fałszywa moneta
+
+**Intryga 15**, spada do **13** po odkryciu magazynu Olvara. Daven zabiera część prawdziwych monet i ucieka, dzieląc się łupem z bohaterem. Flaga: `Daven uciekł dzięki bohaterowi`.
+
+---
+
+# QUEST 11 — Dzwony na trwogę
+
+**Miejsce rozpoczęcia:** Thalwen  
+**Dodatkowe miejsca:** stary kościół, północny trakt  
+**Typ:** militarny / społeczny / kulturowy  
+**Główne statystyki:** Kultura, Dyplomacja, Walka  
+**Finały:** A/B/C
+
+## Założenie
+
+W środku nocy kościelne dzwony zaczynają bić bez przerwy. Stary kościelny rozpoznaje w tym dawny sygnał najazdu. Na północnym trakcie widziano światła i uzbrojonych ludzi.
+
+## ETAP 1 — Trzy drogi
+
+### Kultura 11
+
+Rozpoznaj sekwencję: **„Zbrojni od północy. Więcej niż dwudziestu.”** Dawny zwyczaj mówi, że sąsiednie osady powinny odpowiedzieć własnymi dzwonami.
+
+**Kultura 13** pozwala poprawnie uruchomić dawną sieć alarmową.
+
+### Dyplomacja 12
+
+Uspokój mieszkańców, zorganizuj straże, barykady, schronienie dla dzieci i przygotowanie przeciwpożarowe. Odblokuj spotkanie z przywódcą najemników **Harkelem**.
+
+### Walka 12
+
+Rusz na zwiad, pokonaj zwiadowców i poznaj plan około trzydziestu rabusiów: podpalić stodoły, wywołać panikę, wejść główną drogą i zabrać zapasy.
+
+## Finały
+
+### A — Dzwony odpowiedziały
+
+**Kultura 14**, spada do **12** po poprawnym odczytaniu i uruchomieniu sygnałów. Okoliczne osady odpowiadają dzwonami i ogniami. Harkel widzi, że region został ostrzeżony i wycofuje się.
+
+Flaga: `Przywrócono sieć dzwonów alarmowych`.
+
+### B — Cena krwi
+
+**Dyplomacja 14**, spada do **12** po dobrym przygotowaniu wsi. Bohater przekonuje Harkela, że atak przestał się opłacać. Banda odchodzi, ale nadal istnieje.
+
+Flaga: `Harkel wycofał się z Thalwen`.
+
+### C — Krew przed świtem
+
+**Walka 14**, spada do **12** po poznaniu planu najazdu. Wieś urządza zasadzkę i rozbija bandę. Część mieszkańców zostaje rannych, ale zagrożenie zostaje usunięte.
+
+---
+
+# QUEST 12 — Prawo gościny
+
+**Miejsce rozpoczęcia:** Lirion  
+**Główne miejsce:** gospoda „Pod Białym Jeleniem”  
+**Typ:** kulturowy / tajemnica / lokalne tradycje  
+**Główne statystyki:** Kultura, Dyplomacja, Intryga  
+**Finały:** A/B/C
+
+## Założenie
+
+Gospoda zostaje zamknięta po znalezieniu czterech martwych podróżnych. Nie mają ran i nie zostali obrabowani. Ciała ułożono identycznie: dłonie na piersi, buty ku drzwiom, miedziana moneta pod językiem, wygaszone świece na parapetach.
+
+Starszy mieszkaniec rozpoznaje dawny sposób żegnania ludzi zmarłych daleko od domu.
+
+## ETAP 1 — Znaki dawnej tradycji
+
+- **Kultura 11:** rozpoznaj rytuał **Ostatniej Gościny**.
+- **Dyplomacja 12:** karczmarz **Herman Vell** mówi, że podróżni pytali o „prawo pierwszego stołu” i śpiewali starą pieśń.
+- **Intryga 12:** przy podróżnych znajdź znaki białego jelenia pod siedmioma gwiazdami, zgodne ze starym szyldem gospody.
+
+## ETAP 2 — Kultura Domów Gościnnych
+
+**Kultura 13** ujawnia historię dawnych **Domów Gościnnych** i Ostatniej Gościny. Rytuał mógł odprawić tylko gospodarz albo wyznaczona osoba.
+
+**Kultura 12** wyjaśnia Prawo Pierwszego Stołu: pierwszy stół przy palenisku miał zawsze czekać na pielgrzyma, posłańca lub biednego wędrowca.
+
+Pod starym pierwszym stołem bohater odnajduje księgę gości z czterema świeżo dopisanymi nazwiskami i piątym: **Erem Aldor**.
+
+## ETAP 3 — Erem i dzban
+
+Erem, syn poprzedniego właściciela gospody, przyznaje, że znalazł podróżnych już martwych i odprawił Ostatnią Gościnę, bo nie chciał, aby wyniesiono ich jak padlinę.
+
+Wspomina stary gliniany dzban znaleziony przez podróżnych w zamkniętej części gospody.
+
+**Kultura 14** rozpoznaje **Korzeń Drogi** — dawny koncentrat rytualnego napoju, który należało dodawać po kilka kropli do całego dzbana. Podróżni wypili go bez rozcieńczenia i zmarli. Nie było morderstwa, tylko tragicznie źle zrozumiana tradycja.
+
+## Finały
+
+### A — Ostatni goście
+
+**Kultura 14**, spada do **11** po pełnym odkryciu dawnych obyczajów. Prawda zostaje ujawniona, Erem oczyszczony z podejrzeń, podróżni pochowani zgodnie z tradycją. Flaga: `Odkryto historię Domów Gościnnych`.
+
+### B — Pierwszy stół
+
+**Dyplomacja 13 + Kultura 12**. Herman przywraca nową, bezpieczną wersję Prawa Pierwszego Stołu: każdego dnia jeden stół i prosty posiłek są przeznaczone dla podróżnego bez pieniędzy. Erem pomaga odtworzyć tradycję.
+
+Flaga: `Przywrócono Prawo Pierwszego Stołu`.
+
+### C — Zapomniany zwyczaj
+
+**Intryga 13**. Oficjalna wersja mówi o zatruciu zepsutym alkoholem. Erem nie zostaje oskarżony, ale prawdziwa historia znów znika. Herman płaci za dyskrecję.
 
 ---
 
