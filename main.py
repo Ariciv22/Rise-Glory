@@ -20,6 +20,7 @@ install_font_theme()
 from rg_core import app as _app
 from rg_ui.city_hub import install_location_hub
 from rg_ui.dev_council_reset import install_dev_council_reset
+from rg_ui.hero_figure_system import install_hero_figure_system
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
 from rg_ui.location_navigation_fix import install_location_navigation_fix
@@ -59,6 +60,11 @@ install_into_main()
 # grafiki panel2.png co dolne przyciski. Instalujemy to po title_flow, aby
 # docelowy renderer nie zostal nadpisany przez starszy motyw ekranu.
 install_player_config_theme(_app)
+
+# Wybor wygladu bohatera steruje od teraz dwiema spojnymi grafikami: postacia
+# bez podstawki na planszetce bohatera oraz ta sama postacia z podstawka jako
+# pionkiem na mapie. Dziala dla gotowego, losowego i tworzonego bohatera.
+install_hero_figure_system(_app)
 
 # Wszystkie gorne pola HUD-u (Gracz, Bohater, Klasa, Legenda, Zloto, Rany,
 # Akcje, Runda i Rada) korzystaja teraz z tej samej grafiki panel2.png co
