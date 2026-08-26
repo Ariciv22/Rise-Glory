@@ -157,21 +157,9 @@ def _draw_token_without_blue_selection(token, screen, camera, font, selected=Fal
 
     base_y = int(sy + 58 * camera.zoom)
     rect = rendered.get_rect(midbottom=(int(sx), base_y))
-    player_color = token.hero.get("player_color", token.hero.get("color", (220, 220, 220)))
 
-    # Zostaje subtelne oznaczenie koloru gracza przy podstawce.
-    # Usuwamy natomiast dodatkowy niebieski okrag zaznaczenia aktywnego pionka.
-    ring_width = max(26, int(58 * camera.zoom))
-    ring_height = max(9, int(16 * camera.zoom))
-    ring = pygame.Rect(0, 0, ring_width, ring_height)
-    ring.midbottom = (int(sx), base_y + max(1, int(2 * camera.zoom)))
-    pygame.draw.ellipse(
-        screen,
-        (20, 18, 15),
-        ring.inflate(max(3, int(6 * camera.zoom)), max(2, int(4 * camera.zoom))),
-    )
-    pygame.draw.ellipse(screen, player_color, ring, max(2, int(3 * camera.zoom)))
-
+    # Asset ma juz wlasna podstawke. Nie dorysowujemy zadnej elipsy ani okregu
+    # pod pionkiem - ani niebieskiego zaznaczenia, ani koloru gracza.
     screen.blit(rendered, rect)
 
 
@@ -182,12 +170,12 @@ def install_hero_figure_visual_fix():
 
     from rg_world import map as world_map
 
-    # Wrappery konfiguracji bohatera odwolują sie do tej funkcji globalnie,
+    # Wrappery konfiguracji bohatera odwoluja sie do tej funkcji globalnie,
     # wiec podmiana zachowuje cala istniejaca logike wyboru i tylko zmienia UI.
     figures._draw_selector = _draw_full_figure_selector
 
     # HeroToken.draw zostal juz podmieniony przez hero_figure_system, dlatego
-    # tutaj ustawiamy finalny renderer bez niebieskiej obwodki zaznaczenia.
+    # tutaj ustawiamy finalny renderer bez dodatkowych obwodek pod podstawka.
     world_map.HeroToken.draw = _draw_token_without_blue_selection
 
     _INSTALLED = True
