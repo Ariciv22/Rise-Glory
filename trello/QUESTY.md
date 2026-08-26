@@ -865,6 +865,403 @@ Flaga: `Przywrócono Prawo Pierwszego Stołu`.
 
 ---
 
+# QUEST 13 — Złodziej złodzieja
+
+**Miejsce rozpoczęcia:** trakt w pobliżu Valdren  
+**Typ:** kryminalny / bandycki / moralny  
+**Statystyki:** Intryga, Dyplomacja, Walka, Handel  
+**Finały:** A/B/C
+
+## Założenie
+
+Bandyta **Rogar** prosi bohatera o odzyskanie skrzyni ze srebrem, biżuterią i dokumentami. Sam ukradł ją kupieckiej karawanie, lecz łup został mu następnie odebrany przez bandę **Czarnych Psów**. Rogar chce, aby bohater „ukradł złodziejowi”.
+
+## ETAP 1 — Oferta Rogara
+
+- **Dyplomacja 11:** odkryj, że Rogarowi wyjątkowo zależy na skórzanej tubie z dokumentami.
+- **Intryga 12:** sprawdź pierwszy napad i odkryj, że **12 Złota** w skrzyni było wypłatą dla robotników Valdren.
+- Przyjęcie zlecenia prowadzi do kryjówki Czarnych Psów w opuszczonym kamieniołomie.
+
+## ETAP 2 — Czarne Psy
+
+Do kryjówki można dostać się przez:
+- **Intrygę 13** — zakradnij się,
+- **Dyplomację 13** — udawaj człowieka Rogara,
+- **Walkę 13** — przebij się przez strażników.
+
+Przywódca **Varek** wie, że dokumenty są cenniejsze niż sam łup. Zawierają listę paserów współpracujących z Rogarem.
+
+- **Handel 14:** odkup skrzynię za 6 Złota.
+- **Dyplomacja 14:** wynegocjuj oddanie dokumentów.
+- **Intryga 14:** poznaj dokładną kryjówkę skrzyni i obniż późniejszą trudność oszustwa.
+
+## Finały
+
+### A — Honor między złodziejami
+
+Oddaj całość Rogarowi. Robotnicy nie odzyskują wypłaty, dokumenty paserów zostają zniszczone, ale Rogar dotrzymuje umowy i płaci. Flaga: `Bohater odzyskał łup dla Rogara`.
+
+### B — To, co skradzione
+
+Oddaj łup pierwotnym właścicielom, wypłatę robotnikom, a dokumenty straży. Siatka paserów Rogara zaczyna się rozpadać. Flaga: `Bohater rozbił siatkę paserów Rogara`.
+
+### C — Trzeci złodziej
+
+**Intryga 15**, spada do **13** po poznaniu kryjówki Vareka. Bohater zatrzymuje skrzynię i podrzuca ślady, przez które Rogar i Czarne Psy oskarżają się nawzajem. Flaga: `Bohater ukradł łup obu bandytom`.
+
+---
+
+# QUEST 14 — Pogrzeb przy drodze
+
+**Miejsce rozpoczęcia:** trakt między Elarin a Artium  
+**Typ:** kulturowy / obyczajowy / społeczny  
+**Główne statystyki:** Kultura, Dyplomacja, Intryga  
+**Finały:** A/B/C
+
+## Założenie
+
+Bohater trafia na niewielki pogrzeb obcych wędrowców. Przy płytkim grobie leży ciało **Sarvena**, zmarłego podczas podróży. Najstarsza kobieta, **Mara**, mówi: „Droga przysłała nam świadka”.
+
+## ETAP 1 — Obrządek
+
+- **Kultura 11:** rozpoznaj **Ludzi Szarego Traktu** i zwyczaj, według którego człowiek zmarły w podróży zostaje pochowany przy drodze, gdzie zakończyła się jego wędrówka.
+- **Dyplomacja 11:** poznaj historię Sarvena, który zmarł po obronie grupy przed wilkami.
+- **Intryga 12:** zauważ, że grób kopany jest między starymi kamieniami granicznymi i może wywołać spór o ziemię.
+
+**Kultura 12** ujawnia znaczenie wody, chleba, pustej sakiewki, gwoździa i trzech kamieni oraz rolę **Świadka Drogi**.
+
+## ETAP 2 — Spór o ziemię
+
+Właściciel pola **Derron** próbuje zatrzymać pochówek. Twierdzi, że ziemia należy do niego.
+
+- **Kultura 13:** przypomnij dawne **Prawo Drogi**, pozwalające pochować wędrowca na pasie ziemi należącym do traktu.
+- **Dyplomacja 13:** odkryj, że Derron boi się powstania całego cmentarza przy jego polu.
+- **Intryga 13:** ustal, że Derron wcześniej przesunął kamień graniczny i grób formalnie nie leży na jego ziemi.
+
+## Finały
+
+### A — Kamień przy drodze
+
+**Kultura 14**, spada do **12** po odkryciu przesuniętego kamienia. Strażnik uznaje Prawo Drogi, ceremonia zostaje dokończona. Flaga: `Bohater został Świadkiem Drogi`.
+
+### B — Dwa pożegnania
+
+**Dyplomacja 13 + Kultura 12**. Sarven zostaje pochowany według obyczaju swoich ludzi, a jego imię trafia także do miejscowej księgi zmarłych. Flaga: `W Artium zapisano obrzęd Szarego Traktu`.
+
+### C — Droga bez końca
+
+**Dyplomacja 14**. Mara zgadza się przenieść ciało na zwykły cmentarz. Konflikt znika, lecz według jej ludu rytuał pozostaje niedokończony.
+
+---
+
+# QUEST 15 — Świeca, która nie gaśnie
+
+**Miejsce rozpoczęcia:** Eryndor  
+**Dodatkowe miejsce:** pracownia alchemika Alrena poza miastem  
+**Typ:** naukowy / eksperymentalny  
+**Główne statystyki:** Nauka, dodatkowo Intryga i Handel  
+**Finały:** A/B/C
+
+## Założenie
+
+Handlarz **Nerin** zdobywa świecę, której płomień nie gaśnie na wietrze, w deszczu, pod wodą ani po przykryciu naczyniem. Tłum uważa ją za magiczną, lecz Nerin nie potrafi jej zgasić.
+
+## ETAP 1 — Badanie
+
+- **Nauka 11:** płomień prawie nie dymi, knot niemal się nie zużywa, pod wodą pojawiają się pęcherzyki.
+- **Nauka 12:** wosk zawiera sproszkowany metal, żywicę, minerał i metalowy rdzeń.
+- **Intryga 11:** ustal, że świeca pochodziła z rzeczy zmarłego badacza **Alrena Vossa**, który próbował stworzyć ogień niewymagający drewna ani powietrza.
+
+## ETAP 2 — Mechanizm
+
+**Nauka 13** ujawnia, że świeca sama wytwarza składnik potrzebny do reakcji. Metalowy rdzeń stopniowo się nagrzewa i przy końcu reakcji może ulec gwałtownemu rozszczelnieniu.
+
+W pracowni Alrena **Nauka 12** pozwala znaleźć notatkę: próba była stabilna przez 31 godzin, po czym rdzeń eksplodował.
+
+## Finały
+
+### A — Ostatni płomień
+
+**Nauka 13**. Rozdziel reagenty i bezpiecznie zgaś prototyp. Technologia nie trafia do użytku.
+
+### B — Ogień Alrena
+
+**Nauka 15**, spada do **12** po pełnym zbadaniu konstrukcji. Bohater dodaje zawór bezpieczeństwa i tworzy stabilną **Lampę Alrena**. Flaga: `Opracowano Lampę Alrena`.
+
+### C — Cena wynalazku
+
+**Handel 13**. Sprzedaj prototyp przedsiębiorcy **Teralowi Mornowi**, który chce używać go w kopalniach mimo ryzyka. Flaga: `Teral posiada prototyp Ognia Alrena`.
+
+---
+
+# QUEST 16 — Fałszywy bohater
+
+**Miejsce rozpoczęcia:** Norven  
+**Dodatkowe miejsce:** las i wzgórza poza wsią  
+**Typ:** śledczy / społeczny / bojowy  
+**Statystyki:** Walka, Dyplomacja, Intryga, Kultura  
+**Finały:** A/B/C
+
+## Założenie
+
+Wojownik **Garrik** przywozi do Norven łeb bestii i ogłasza, że zabił potwora terroryzującego pasterzy. Wieś urządza mu ucztę. Następnego dnia dochodzi jednak do kolejnego ataku.
+
+## ETAP 1 — Prawda o trofeum
+
+- **Kultura 11:** rozpoznaj młodego skalnego drapieżcę i dowiedz się, że dorosłe osobniki żyją parami w okresie lęgowym.
+- **Dyplomacja 12:** historia Garrika zaczyna się rozpadać pod szczegółowymi pytaniami.
+- **Intryga 11:** ślady ostatniego ataku prowadzą do znacznie większego stworzenia.
+
+**Intryga 13** może wykazać, że Garrik jedynie dobił młodą bestię schwytaną wcześniej we wnyki. **Walka 12** pozwala uratować rannego pasterza, który wskazuje legowisko prawdziwej bestii.
+
+## ETAP 2 — Konfrontacja
+
+**Dyplomacja 13**, spada do **11** z dowodami. Garrik przyznaje się do kłamstwa.
+
+## Finały
+
+### A — Bohater za drugim razem
+
+**Dyplomacja 14/12**, potem **Walka 13**. Garrik zostaje zmuszony do prawdziwego polowania i tym razem rzeczywiście staje do walki. Flaga: `Garrik odkupił swoje kłamstwo`.
+
+### B — Prawdziwy bohater
+
+**Walka 14**, spada do **12** po poznaniu terenu. Bohater sam zabija prawdziwą bestię, Garrik zostaje zdemaskowany i wygnany.
+
+### C — Legenda za złoto
+
+**Intryga 13**. Bohater zabija bestię, ale pozwala Garrikowi przypisać sobie zasługę w zamian za część nagrody. Flaga: `Bohater stworzył legendę Garrika`.
+
+---
+
+# QUEST 17 — Miód wiedźmy
+
+**Miejsce rozpoczęcia:** okolice Elarin  
+**Typ:** lokalny konflikt / handel / lekkie fantasy  
+**Główne statystyki:** Walka, Handel  
+**Finały:** A/B/C
+
+## Założenie
+
+Pszczelarz **Radan** oskarża samotną kobietę z lasu o zaczarowanie uli. Pszczoły stały się agresywne, a miód czerwony i wywołujący niezwykle wyraziste sny.
+
+- **Walka 11:** przedrzyj się przez agresywne pszczoły i odkryj, że zbierają ciemnoczerwony pyłek z lasu.
+- **Handel 11:** oceń czerwony miód i odkryj, że jest wielokrotnie cenniejszy od zwykłego.
+
+Kobieta **Mira** nie jest wiedźmą. Uprawia rzadki krwawy wrzos wykorzystywany w lekarstwach. Pszczoły same zaczęły korzystać z rośliny.
+
+## Finały
+
+### A — Zwyczajny miód
+
+**Walka 13**. Mira zostaje wypędzona, jej oswojone wilki pokonane, wrzos usunięty. Pszczoły się uspokajają, ale znika rzadki produkt.
+
+### B — Czerwony miód
+
+**Handel 14**, spada do **12** po poznaniu wartości miodu. Radan i Mira rozpoczynają współpracę. Flaga: `Elarin produkuje Czerwony Miód`.
+
+### C — Tani ul
+
+**Handel 13**. Wykorzystaj strach Radana i doprowadź do sprzedaży pasieki za zaniżoną cenę kupcowi, który później dogaduje się z Mirą.
+
+---
+
+# QUEST 18 — Trzy filiżanki
+
+**Miejsce rozpoczęcia:** trakt między Valdren a Durnhal  
+**Typ:** obyczajowy / handlowy  
+**Główne statystyki:** Kultura, Handel  
+**Finały:** A/B/C
+
+## Założenie
+
+Przy ognisku siedzi samotny starszy człowiek **Olan**, lecz przygotował napój w trzech filiżankach. Gdy bohater podchodzi, mówi: „Drugi już przyszedł. Teraz brakuje tylko trzeciego”.
+
+- **Kultura 11:** rozpoznaj dawny kupiecki zwyczaj **Stołu Trzech** — sprzedający, kupujący i świadek.
+- **Handel 11:** odkryj, że dwadzieścia lat temu Olan i jego brat sprzedali ziemię kupcowi, który zapłacił tylko połowę ceny i zmarł przed spłatą.
+
+Według starego prawa dług przechodzi na potomka tylko wtedy, gdy świadek potwierdzi pierwotną umowę przy Trzech Filiżankach. Wkrótce przybywa syn kupca, **Darven**.
+
+## Finały
+
+### A — Trzecia filiżanka
+
+**Kultura 13**. Uznaj stare prawo i doprowadź do spłaty długu.
+
+### B — Nowy rachunek
+
+**Handel 14**. Wynegocjuj nową umowę: część płatności od razu, reszta w towarach przez kolejne lata.
+
+### C — Czwarty przy stole
+
+**Handel 13**. Wykup od Olana jego roszczenie za kwotę niższą niż nominalna i sam stań się wierzycielem Darvena.
+
+---
+
+# QUEST 19 — Samotny grób
+
+**Miejsce rozpoczęcia:** trakt niedaleko Artium  
+**Typ:** nadnaturalny / badawczy / bojowy  
+**Główne statystyki:** Kultura, Nauka, Walka  
+**Finały:** A/B/C
+
+## Założenie
+
+Przy drodze stoi samotny nagrobek bez cmentarza. Po oczyszczeniu mchu bohater widzi na nim własne imię albo imię jednego z Towarzyszy oraz dzisiejszą datę śmierci.
+
+- **Nauka 11:** litery powstały przez zmianę struktury kamienia; pod powierzchnią biegną czarne żyły przypominające korzenie.
+- **Kultura 11:** przypomnij legendę o **Grobach Oczekujących**, które nie przepowiadają śmierci, lecz wybierają ofiarę.
+
+Dalsze badanie wykazuje podziemny organizm żywiący się szczątkami. Stary rytuał pozwala przenieść „obowiązek” grobu na imię osoby już zmarłej.
+
+## Finały
+
+### A — Imię skreślone
+
+**Kultura 14**. Wykonaj stary rytuał. Imię bohatera znika, ale grób pozostaje i może wybrać kogoś innego.
+
+### B — Grób bez imienia
+
+**Nauka 14**, spada do **12** po zbadaniu korzeni. Odłącz organizm od nagrobka i zatrzymaj jego zdolność wybierania nowych ludzi, pozostawiając strukturę do badań.
+
+### C — Pusty dół
+
+**Walka 14**. Zejdź pod ziemię i zniszcz centralny rdzeń organizmu. Zagrożenie znika definitywnie.
+
+---
+
+# QUEST 20 — Kamień szczęścia
+
+**Miejsce rozpoczęcia:** okolice Valdren  
+**Typ:** kulturowy / oszustwo / handel  
+**Główne statystyki:** Kultura, Handel  
+**Finały:** A/B/C
+
+## Założenie
+
+Wędrowny handlarz **Beldo** sprzedaje za 4 Złota kamienie rzekomo zapewniające siedem dni szczęścia. Klienci po zakupie często natychmiast „wygrywają” na pobliskich stoiskach.
+
+- **Kultura 11:** rozpoznaj kamienie jako dawne symbole święta **Dnia Dobrego Losu**. Nigdy nie były magiczne; były życzeniem powodzenia.
+- **Handel 12:** odkryj, że pierwsze zwycięstwa klientów są ustawione, a Beldo dzieli się zyskiem z właścicielami stoisk.
+
+## Finały
+
+### A — Zwykły kamień
+
+Ujawnij publicznie oszustwo i zakończ sprzedaż magicznych „amuletów”.
+
+### B — Dobry Los
+
+**Kultura 12 + Handel 12**. Przekształć oszustwo w legalną sprzedaż tanich pamiątek i przywróć prawdziwe znaczenie święta. Flaga: `Przywrócono Dzień Dobrego Losu`.
+
+### C — Szczęście kosztuje
+
+**Handel 14**. Wejdź w interes Belda i pomóż mu skuteczniej zarabiać na wierze klientów w rzekomą magię.
+
+---
+
+# QUEST 21 — Kruk z pierścieniem
+
+**Miejsce rozpoczęcia:** okolice Eryndor  
+**Typ:** handlowy / poszukiwawczy  
+**Główna statystyka:** Handel  
+**Finały:** A/B/C
+
+## Założenie
+
+Kruk siada przed bohaterem z kosztownym pierścieniem w dziobie, a następnie odlatuje kawałek dalej i czeka, wyraźnie próbując zwabić bohatera za sobą.
+
+**Handel 11** pozwala ocenić pierścień na około 8–10 Złota i rozpoznać znak gildii jubilerów z Eryndor.
+
+Ptak prowadzi do przewróconego wozu, pod którym leży ranny jubiler **Teren**. Kruk należy do niego i zbiera rozsianą biżuterię z napadniętego transportu.
+
+**Handel 12** pozwala sprawdzić manifest i odróżnić własność Terena od kosztowności przewożonych dla klientów.
+
+## Finały
+
+### A — Uczciwa prowizja
+
+Zwróć wszystko. Teren wypłaca uczciwą nagrodę. Flaga: `Teren ufa bohaterowi`.
+
+### B — Prawo znalazcy
+
+**Handel 13**. Przed rozpoczęciem poszukiwań wynegocjuj procent wartości odzyskanego towaru i otrzymaj większą, ale legalną nagrodę.
+
+### C — Błyszczące znalezisko
+
+**Handel 14**. Zatrzymaj część najcenniejszych przedmiotów, których Teren nie potrafi dokładnie rozliczyć po napadzie, i sprzedaj je później osobno.
+
+---
+
+# QUEST 22 — Porzucony namiot
+
+**Miejsce rozpoczęcia:** las w okolicy Thalwen  
+**Typ:** tajemnica / zasadzka  
+**Główne statystyki:** Nauka, Intryga  
+**Finały:** A/B/C
+
+## Założenie
+
+Przy drodze stoi namiot. Ognisko nadal płonie, jedzenie jest ciepłe, na stole leżą karty i trzy miski, lecz mieszkańcy obozu zniknęli.
+
+- **Nauka 11:** odkryj słodkawy dym z palonej żywicy powodujący senność i utratę przytomności.
+- **Intryga 12:** znajdź ślady ludzi przeciąganych po ziemi oraz dowód, że ktoś później wrócił ponownie rozpalić ogień. Obóz jest przynętą.
+
+Banda pozostawia atrakcyjnie wyglądające obozy, usypia podróżnych i rabuje ich. W kryjówce przetrzymuje już trzech żywych jeńców.
+
+## Finały
+
+### A — Obóz bez dymu
+
+**Nauka 13**. Zneutralizuj dym, wejdź do pułapki bez utraty przytomności i uwolnij jeńców.
+
+### B — Łowcy złapani
+
+**Intryga 14**. Udawaj zatrutego, pozwól bandzie wyjść z ukrycia i odwróć zasadzkę przeciwko niej. Bandyci mogą zostać przekazani straży.
+
+### C — Ciepła kolacja
+
+**Intryga 13**. Zawrzyj układ z przywódcą bandy i weź część zgromadzonego łupu w zamian za milczenie. Pułapka nadal będzie działać na innych podróżnych.
+
+---
+
+# QUEST 23 — Wędrowny dom
+
+**Miejsce rozpoczęcia:** las między Norven a Durnhal  
+**Typ:** naukowy / badawczy / konstrukt  
+**Główna statystyka:** Nauka  
+**Finały:** A/B/C
+
+## Założenie
+
+Przez las przechodzi niewielka drewniana chatka stojąca na czterech ogromnych drewnianych nogach. Nie ma zwierząt ani woźnicy. Budynek po prostu maszeruje.
+
+## ETAP 1 — Maszyna
+
+**Nauka 11** wykazuje, że ruch jest mechaniczny: w nogach pracują przekładnie, łańcuchy i przeciwwagi.
+
+**Nauka 12** pozwala odkryć, że dom porusza się między starymi kamiennymi słupami z metalowymi znacznikami. Jeden ze słupów został przewrócony, przez co konstrukcja krąży po lesie.
+
+W środku bohater odnajduje warsztat i notatki konstruktora **Mervena**. Dom był mobilną pracownią przemieszczającą się między kopalniami i placami budowy. Merven zmarł wiele lat temu, ale mechanizm nadal wykonuje ostatnią trasę.
+
+W piwnicy znajduje się układ przeciwwag z alchemicznym rdzeniem cieplnym.
+
+## Finały
+
+### A — Ostatni krok
+
+**Nauka 12**. Odłącz główną przekładnię. Dom zatrzymuje się na zawsze i może zostać rozebrany na Drewno, Żelazo i części mechaniczne.
+
+### B — Dom wraca na drogę
+
+**Nauka 14**, spada do **12** po zbadaniu słupów. Odtwórz uszkodzony znacznik i przywróć prawidłową trasę. Flaga: `Dom Wędrowca ponownie działa`.
+
+### C — Nowa droga
+
+**Nauka 15**. Zmień system znaczników i przeprogramuj trasę domu tak, aby można było skierować go do wybranej osady lub ważnego miejsca. Flaga: `Odtworzono system ruchomych konstrukcji Mervena`.
+
+---
+
 # Standard dla kolejnych Questów
 
 Każdy kolejny pełny Quest dopisujemy do tego pliku i opisujemy co najmniej przez:
