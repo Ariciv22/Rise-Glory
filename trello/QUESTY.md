@@ -893,6 +893,478 @@ ETAP 3 — NOC DECYZJI
 
 ---
 
+# QUEST 4 — Żelazo pod sianem
+
+> **Status projektowy:** pełne drzewko fabularne z trzema finałami A/B/C. Nagrody i Punkty Legendy wymagają jeszcze zatwierdzenia.
+
+## Podstawowe informacje
+
+**Nazwa:** Żelazo pod sianem  
+**Miejsce rozpoczęcia:** wieś Norven  
+**Dodatkowa lokacja:** zamek Vargard  
+**Typ:** średni Quest wieloetapowy / polityczny / śledczy  
+**Wykorzystywane statystyki:** Nauka, Dyplomacja, Intryga  
+**Liczba finałów:** 3
+
+## Założenie Questa
+
+Patrol żołnierzy z Vargard przeszukuje gospodarstwa w okolicy Norven.
+
+W jednej ze stodół, pod stertami starego siana, znajduje ukrytą komorę. W środku znajdują się dziesiątki włóczni, kusze, skrzynie bełtów i stare tarcze.
+
+Dowódca patrolu uznaje, że ktoś przygotowuje zbrojne wystąpienie przeciwko Vargard.
+
+Właściciel stodoły twierdzi jednak, że broń była tam na długo przed jego narodzinami.
+
+## ETAP 1 — Skład pod stodołą
+
+Żołnierze otaczają gospodarstwo.
+
+Kapitan **Roderik** nakazuje zatrzymać gospodarza i jego dwóch synów.
+
+> „Chłopi nie chowają trzydziestu włóczni pod sianem dlatego, że boją się wilków.”
+
+Mieszkańcy Norven zaczynają zbierać się wokół gospodarstwa.
+
+### OPCJA 1A — Zbadaj znalezioną broń
+
+**Statystyka:** Nauka  
+**Trudność:** 11
+
+**Sukces:** większość włóczni i kusz jest bardzo stara. Na części odnajdujesz starte oznaczenia przypominające dawny znak Vargard. Kilka kusz jest jednak znacznie nowszych. Ktoś uzupełniał skład w ostatnich latach.
+
+→ **ETAP 2A — Stara zbrojownia**
+
+**Porażka:** nie potrafisz ustalić pochodzenia uzbrojenia. Quest pozostaje aktywny.
+
+### OPCJA 1B — Wypytaj gospodarza
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 12
+
+**Sukces:** gospodarz **Herman** opowiada o swoim dziadku. Podczas dawnej wojny był odpowiedzialny za zebranie miejscowych chłopów do obrony okolicy. Herman twierdzi, że stodoła mogła kiedyś służyć jako tajny magazyn wiejskiej straży. Sam przysięga, że nigdy nie otwierał ukrytej komory.
+
+→ **ETAP 2B — Historia wiejskiej straży**
+
+**Dodatkowa korzyść:** rodzina Hermana zaczyna ufać bohaterowi.
+
+**Porażka:** Herman uznaje, że pracujesz dla żołnierzy i odmawia dalszych odpowiedzi. Quest pozostaje aktywny.
+
+### OPCJA 1C — Przeszukaj dokładnie stodołę
+
+**Statystyka:** Intryga  
+**Trudność:** 13
+
+**Sukces:** za skrzyniami znajdujesz świeże ślady błota, nowy olej do konserwacji kusz i ślady przesuwania skrzyń. Ktoś regularnie korzysta z magazynu.
+
+→ **ETAP 2C — Kto przychodzi nocą?**
+
+**Porażka:** żołnierze zaczynają podejrzewać, że próbujesz coś przed nimi znaleźć i ukryć. Quest pozostaje aktywny.
+
+## ETAP 2A — Stara zbrojownia
+
+Znaki na broni sugerują, że przynajmniej część uzbrojenia należała kiedyś do Vargard.
+
+### Sprawdź stare rejestry w Vargard
+
+**Statystyka:** Nauka  
+**Trudność:** 12
+
+**Sukces:** odnajdujesz zapis sprzed kilkudziesięciu lat. Podczas dawnej wojny w Norven rzeczywiście utworzono lokalny oddział chłopskiej straży. W kilku gospodarstwach ukryto broń na wypadek najazdu. Skład w stodole Hermana był jednym z takich miejsc.
+
+Stara część arsenału nie była przygotowaniem do rebelii. Nowe kusze nadal pozostają niewyjaśnione.
+
+→ **ETAP 3 — Prawda o składzie**
+
+**Porażka:** nie odnajdujesz odpowiednich dokumentów. Quest pozostaje aktywny.
+
+## ETAP 2B — Historia wiejskiej straży
+
+Rozmawiasz ze starszymi mieszkańcami Norven.
+
+Kilku pamięta opowieści swoich ojców o broni rozsianej po okolicy. Jeden ze starców zauważa jednak, że dawna wiejska straż nie posiadała kusz podobnych do tych znalezionych w stodole.
+
+### Wypytaj mieszkańców
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 13
+
+**Sukces:** dowiadujesz się o **Seranie**, byłym żołnierzu, który od kilku miesięcy spotyka się nocami z młodymi mieszkańcami wsi.
+
+→ **ETAP 3 — Prawda o składzie**
+
+**Porażka:** mieszkańcy nie chcą wskazać żadnego nazwiska. Quest pozostaje aktywny.
+
+## ETAP 2C — Kto przychodzi nocą?
+
+Postanawiasz obserwować stodołę.
+
+### Śledź nocnych gości
+
+**Statystyka:** Intryga  
+**Trudność:** 14
+
+**Sukces:** po zmroku przy stodole pojawia się kilku mieszkańców. Wyciągają broń i zabierają ją na pobliską polanę. Tam czeka na nich **Seran**, były żołnierz. Seran uczy mieszkańców walczyć. Szkolenie wygląda bardziej jak przygotowanie obrony wsi niż rebelii.
+
+→ **ETAP 3 — Prawda o składzie**
+
+**Dodatkowa wiedza:** Seran przygotowuje wieś do obrony, nie do otwartego ataku na Vargard.
+
+**Porażka:** zostajesz zauważony. Seran przerywa spotkanie. Quest pozostaje aktywny.
+
+## ETAP 3 — Prawda o składzie
+
+Konfrontujesz Serana.
+
+Nie zaprzecza. To on od kilku lat uzupełniał stary arsenał, kupował kusze, bełty i naprawiał zachowaną broń.
+
+> „Trzy razy prosiliśmy Vargard o patrol. Trzy razy przyjechali po wszystkim. Kiedy następnym razem przyjdą rabusie, mam rzucać w nich kamieniami?”
+
+Seran twierdzi, że nie chce buntować Norven przeciwko Vargard. Chce, żeby mieszkańcy byli w stanie bronić się sami.
+
+Kapitan Roderik odpowiada:
+
+> „Dzisiaj mówią, że bronią wsi. Jutro któryś powie, że nie potrzebuje już pana ani zamku.”
+
+Gracz wybiera jeden z trzech kierunków.
+
+### DROGA A — Oddaj arsenał Vargard
+
+Informujesz Roderika o wszystkim. Żołnierze konfiskują cały skład, a Seran zostaje zatrzymany.
+
+→ **FINAŁ A — Rozbrojona wieś**
+
+### DROGA B — Zalegalizuj wiejską straż
+
+Próbujesz przekonać Vargard, że lepiej kontrolować uzbrojoną wieś niż ją rozbroić i pozostawić bezbronną.
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 14
+
+Jeżeli wcześniej odnaleziono dokumenty potwierdzające istnienie dawnej straży:
+
+**Trudność spada do 12.**
+
+**Sukces:** Vargard zgadza się na kompromis. Broń zostaje spisana, mieszkańcy mogą zachować część arsenału, a Seran zostaje oficjalnym dowódcą lokalnej straży odpowiadającym przed Vargard.
+
+→ **FINAŁ B — Straż Norven**
+
+**Porażka:** Vargard odrzuca propozycję. Quest pozostaje aktywny.
+
+### DROGA C — Ukryj broń przed żołnierzami
+
+Decydujesz, że Vargard nie musi wiedzieć wszystkiego. Mieszkańcy przeniosą najnowszą i najlepszą część arsenału przed sporządzeniem pełnego spisu.
+
+**Statystyka:** Intryga  
+**Trudność:** 15
+
+Jeżeli wcześniej śledziłeś ludzi Serana i znasz ich kryjówki:
+
+**Trudność spada do 13.**
+
+**Sukces:** żołnierze konfiskują tylko część starego arsenału. Najlepsza broń znika, a Seran nadal potajemnie szkoli mieszkańców.
+
+→ **FINAŁ C — Broń w cieniu**
+
+**Porażka:** żołnierze odkrywają próbę ukrycia arsenału. Quest pozostaje aktywny, a sytuacja staje się bardziej napięta.
+
+## FINAŁ A — Rozbrojona wieś
+
+Żołnierze zabierają broń. Seran zostaje zatrzymany. Vargard uznaje potencjalne źródło buntu za usunięte.
+
+**Stan świata:**
+- Vargard przejmuje arsenał,
+- Seran zostaje aresztowany,
+- mieszkańcy Norven tracą możliwość samodzielnej obrony,
+- część mieszkańców zaczyna nie ufać bohaterowi.
+
+**Nagrody i Punkty Legendy:** do ustalenia.
+
+## FINAŁ B — Straż Norven
+
+Stara wiejska straż zostaje oficjalnie odtworzona. Vargard rejestruje broń i pozwala mieszkańcom zachować część arsenału. Seran formalnie odpowiada za obronę Norven.
+
+**Stan świata:**
+- Norven posiada legalną straż,
+- Seran pozostaje we wsi,
+- Vargard zachowuje formalną kontrolę,
+- wieś jest lepiej przygotowana na przyszłe Zagrożenia.
+
+**Nagrody i Punkty Legendy:** do ustalenia.
+
+## FINAŁ C — Broń w cieniu
+
+Najlepsza część arsenału zostaje ukryta. Żołnierze opuszczają Norven przekonani, że skonfiskowali większość broni. Seran nadal szkoli ludzi nocami.
+
+**Stan świata:**
+- Norven posiada tajny arsenał,
+- Seran prowadzi nielegalną straż,
+- Vargard nie zna prawdy,
+- bohater zna miejsce przechowywania broni.
+
+**Trwała flaga:** `Norven posiada tajny arsenał`.
+
+**Nagrody i Punkty Legendy:** do ustalenia.
+
+## Drzewko techniczne
+
+```text
+ŻELAZO POD SIANEM — NORVEN
+│
+├── NAUKA 11 — zbadaj broń
+│   └── stara broń + kilka nowych kusz
+│       └── VARGARD
+│           └── NAUKA 12 — stare rejestry
+│               └── dawny arsenał był legalny
+│
+├── DYPLOMACJA 12 — gospodarz
+│   └── historia dawnej straży
+│       └── DYPLOMACJA 13
+│           └── odkryj Serana
+│
+└── INTRYGA 13 — przeszukaj stodołę
+    └── ktoś nadal korzysta ze składu
+        └── INTRYGA 14
+            └── nocne szkolenie Serana
+
+ETAP 3 — SERAN
+│
+├── WYDAJ BROŃ
+│   └── FINAŁ A — ROZBROJONA WIEŚ
+│
+├── ZALEGALIZUJ STRAŻ
+│   └── DYPLOMACJA 14
+│       └── 12 z dawnymi dokumentami
+│           └── FINAŁ B — STRAŻ NORVEN
+│
+└── UKRYJ ARSENAŁ
+    └── INTRYGA 15
+        └── 13 po odkryciu nocnych kryjówek
+            └── FINAŁ C — BROŃ W CIENIU
+```
+
+---
+
+# QUEST 5 — Ogród umarłego
+
+> **Status projektowy:** pełne drzewko fabularne z trzema finałami A/B/C. Konkretne nagrody i Punkty Legendy wymagają jeszcze zatwierdzenia.
+
+## Podstawowe informacje
+
+**Nazwa:** Ogród umarłego  
+**Miejsce rozpoczęcia:** miasto Eryndor  
+**Dodatkowa lokacja:** Stary Ogród poza murami Eryndor  
+**Typ:** średni Quest wieloetapowy / nadnaturalny / śledczy  
+**Wykorzystywane statystyki:** Nauka, Kultura, Intryga, Dyplomacja  
+**Liczba finałów:** 3
+
+## Założenie Questa
+
+Kilkaset kroków od bramy Eryndor znaleziono świeże zwłoki młodego mężczyzny.
+
+Tam, gdzie jego krew wsiąkła w ziemię, w ciągu kilku minut zaczęły wyrastać kwiaty. Po godzinie ciało otacza morze setek roślin, których nikt w Eryndor wcześniej nie widział.
+
+Straż chce spalić zwłoki i kwiaty, zanim mieszkańcy uznają miejsce za cud, klątwę albo znak nadchodzącego nieszczęścia.
+
+## ETAP 1 — Człowiek pośród kwiatów
+
+Straż odgradza miejsce. Kwiaty nadal wyrastają. Ich korzenie pojawiają się niemal natychmiast, jakby lata wzrostu zostały ściśnięte do kilku minut.
+
+Dowódca straży mówi:
+
+> „Do zachodu słońca chcę mieć z tego popiół. Człowieka można pochować. Tego czegoś nie zamierzam.”
+
+### OPCJA 1A — Zbadaj kwiaty
+
+**Statystyka:** Nauka  
+**Trudność:** 11
+
+**Sukces:** rośliny nie wyrastają przypadkowo. Wszystkie korzenie kierują się w stronę ciała. Źródło wzrostu znajduje się wewnątrz zwłok. Pod mostkiem mężczyzny wyczuwasz twardy przedmiot wielkości orzecha. Kwiaty próbują dostać się do czegoś, co zmarły miał przy sobie.
+
+→ **ETAP 2A — Nasiono**
+
+**Porażka:** kwiaty rosną szybciej, niż jesteś w stanie je badać. Nie potrafisz ustalić ich pochodzenia. Quest pozostaje aktywny.
+
+### OPCJA 1B — Rozpoznaj symbole zmarłego
+
+**Statystyka:** Kultura  
+**Trudność:** 12
+
+Na szyi zmarłego znajduje się drewniany medalion przedstawiający siedem płatków otaczających pojedyncze nasiono.
+
+**Sukces:** przypominasz sobie starą historię o **Strażnikach Ogrodów**, którzy przenosili nasiona rzadkich roślin pomiędzy odległymi gajami i ogrodami. Według opowieści niektórych nasion nie wolno było pozostawić w miejscu śmierci ich opiekuna — powinny zostać zwrócone ziemi, z której je zabrano.
+
+→ **ETAP 2B — Zapomniany ogród**
+
+**Porażka:** symbol wydaje się znajomy, ale nie potrafisz przypomnieć sobie jego znaczenia. Quest pozostaje aktywny.
+
+### OPCJA 1C — Przeszukaj zwłoki
+
+**Statystyka:** Intryga  
+**Trudność:** 13
+
+**Sukces:** w bucie mężczyzny znajdujesz wiadomość:
+
+> „Jeżeli mnie znajdą, nie pozwól Calvenowi zabrać nasienia.”
+
+Znajdujesz również prostą mapę prowadzącą do starego ogrodu poza Eryndor.
+
+→ **ETAP 2C — Calven**
+
+**Porażka:** strażnik zauważa, że próbujesz zabrać coś ze zwłok. Od tej chwili dokładniej pilnuje ciała. Quest pozostaje aktywny.
+
+## ETAP 2A — Nasiono
+
+Pod ubraniem zmarłego odkrywasz niewielką ranę zszytą grubą nicią. Ktoś wszył coś pod skórę.
+
+Wewnątrz znajduje się czarne, twarde nasiono. Gdy pojawia się na powietrzu, wszystkie kwiaty wokół zwłok jednocześnie odwracają się w jego stronę.
+
+W kieszeni mężczyzny znajdujesz drewniany znak Strażników Ogrodów.
+
+→ odkrywasz drogę do **Starego Ogrodu**.
+
+**Dodatkowa korzyść za Naukę:** bohater wie, jak bezpiecznie transportować nasiono. Jeśli później zdecyduje się zwrócić je do ogrodu, nie potrzebuje dodatkowego testu Nauki.
+
+## ETAP 2B — Zapomniany ogród
+
+Poza Eryndor odnajdujesz zarośniętą ścieżkę prowadzącą do miejsca, które kiedyś musiało być ogromnym ogrodem.
+
+Większość drzew jest martwa, kamienne kanały wyschły, a po dawnych rabatach pozostała popękana ziemia.
+
+Na środku znajduje się pusty kamienny postument z zagłębieniem dokładnie odpowiadającym kształtem nasionu ukrytemu w ciele zmarłego.
+
+Posłaniec próbował przynieść nasiono właśnie tutaj.
+
+→ **ETAP 3 — Los nasiona**
+
+## ETAP 2C — Calven
+
+Rozpytujesz o imię z wiadomości.
+
+### Odnajdź Calvena
+
+**Statystyka:** Dyplomacja  
+**Trudność:** 12
+
+**Sukces:** odnajdujesz **Calvena**, bogatego alchemika i handlarza rzadkimi składnikami mieszkającego w Eryndor. Gdy wspominasz o ciele i kwiatach, natychmiast wie, o czym mówisz.
+
+> „Nie interesuje mnie trup. Interesuje mnie to, co nosił.”
+
+Calven twierdzi, że z nasiona można uzyskać lekarstwa, trucizny i substancje warte fortunę. Zaprzecza, że kazał kogokolwiek zabić.
+
+### Zbadaj historię Calvena
+
+**Statystyka:** Intryga  
+**Trudność:** 14
+
+**Sukces:** dowiadujesz się, że Calven wynajął ludzi do odnalezienia posłańca. Nie znajdujesz dowodu, że nakazał go zabić, ale jego ludzie ścigali zmarłego krótko przed śmiercią.
+
+→ **ETAP 3 — Los nasiona**
+
+**Porażka:** nie znajdujesz niczego, czym mógłbyś go obciążyć. Możesz nadal przejść do decyzji o losie nasiona.
+
+## ETAP 3 — Los nasiona
+
+Wiesz już wystarczająco dużo. Nasiono przyciąga rośliny. Zmarły próbował dostarczyć je do umierającego Starego Ogrodu. Calven jest gotowy bardzo dobrze za nie zapłacić. Straż Eryndor chce wszystko spalić.
+
+Gracz wybiera jeden z trzech kierunków.
+
+### DROGA A — Zniszcz nasiono
+
+Stajesz po stronie straży. Oddajesz nasiono dowódcy. Zwłoki, kwiaty i nasiono zostają spalone.
+
+→ **FINAŁ A — Ostatnie kwiaty**
+
+### DROGA B — Zwróć nasiono ogrodowi
+
+Zabierasz ciało i nasiono do Starego Ogrodu.
+
+Jeżeli wcześniej pomyślnie wykonano **Naukę 11**, transport jest automatyczny.
+
+W przeciwnym razie:
+
+**Statystyka:** Nauka  
+**Trudność:** 13
+
+**Sukces:** umieszczasz nasiono w kamiennym zagłębieniu. Ziemia zaczyna drżeć, suche drzewa wypuszczają liście, a z popękanej ziemi wyrastają nowe rośliny. Kwiaty wokół ciała zmarłego więdną, gdy cały ogród zaczyna odżywać.
+
+→ **FINAŁ B — Ogród powraca**
+
+### DROGA C — Sprzedaj nasiono Calvenowi
+
+Wracasz do alchemika. Calven płaci za nasiono, zamyka je w metalowym pojemniku i zabiera do swojej pracowni.
+
+→ **FINAŁ C — Cena nasienia**
+
+## FINAŁ A — Ostatnie kwiaty
+
+Nasiono zostaje zniszczone. Straż Eryndor uznaje sprawę za zakończoną. Kwiaty znikają, a Stary Ogród pozostaje ruiną.
+
+**Stan świata:**
+- nasiono zniszczone,
+- kwiaty znikają,
+- Stary Ogród pozostaje martwy,
+- Calven traci możliwość zdobycia nasiona.
+
+**Kierunek nagrody:** solidna zapłata od władz Eryndor, niewielka Legenda.
+
+## FINAŁ B — Ogród powraca
+
+Nasiono zostaje zwrócone tam, gdzie miało trafić. Stary Ogród zaczyna odżywać. Ciało posłańca zostaje pochowane pośród pierwszych nowych kwiatów.
+
+**Stan świata:** Stary Ogród staje się aktywnym miejscem świata.
+
+Może później działać jako źródło rzadkich ziół, miejsce Przygód, kolejnego Questa albo miejsce produkcji.
+
+**Kierunek nagrody:** najwięcej Punktów Legendy, rzadkie zioła lub materiał, najmniej Złota.
+
+## FINAŁ C — Cena nasienia
+
+Calven przejmuje nasiono. Płaci zgodnie z obietnicą. Kwiaty wokół miejsca śmierci usychają w ciągu kilku godzin.
+
+**Stan świata:**
+- Calven posiada nasiono,
+- Stary Ogród pozostaje martwy,
+- bohater otrzymuje dużą zapłatę.
+
+**Trwała flaga:** `Calven posiada Nasiono Ogrodu`.
+
+## Drzewko techniczne
+
+```text
+OGRÓD UMARŁEGO — ERYNDOR
+│
+├── NAUKA 11 — zbadaj kwiaty
+│   └── odkryj nasiono w ciele
+│       └── bezpieczny transport nasiona
+│
+├── KULTURA 12 — symbol zmarłego
+│   └── Strażnicy Ogrodów
+│       └── odkryj STARY OGRÓD
+│
+└── INTRYGA 13 — przeszukaj ciało
+    ├── wiadomość o Calvenie
+    └── mapa Starego Ogrodu
+        └── CALVEN
+            ├── Dyplomacja 12 → odnajdź go
+            └── Intryga 14 → odkryj jego związek ze śmiercią
+
+ETAP 3 — LOS NASIONA
+│
+├── ZNISZCZ NASIONO
+│   └── FINAŁ A — OSTATNIE KWIATY
+│
+├── ZWRÓĆ NASIONO
+│   └── Nauka 13
+│       └── automatycznie, jeśli wcześniej udana Nauka 11
+│           └── FINAŁ B — OGRÓD POWRACA
+│
+└── SPRZEDAJ CALVENOWI
+    └── FINAŁ C — CENA NASIENIA
+```
+
+---
+
 # Standard dla kolejnych Questów
 
 Każdy kolejny pełny Quest dopisujemy do tego pliku i opisujemy co najmniej przez:
