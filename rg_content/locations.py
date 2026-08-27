@@ -1,7 +1,7 @@
 import copy
 import random
 
-from rg_content.quests import SATANIC_FORCES_ID, register_all_quests
+from rg_content.quests_final import register_all_quests
 from rg_engine.locations import (
     accept_quest_card,
     equip_from_backpack,
@@ -12,7 +12,8 @@ from rg_engine.locations import (
     train_in_location,
     unequip_to_backpack,
 )
-from rg_engine.quests import create_offer
+from rg_engine.quests import create_offer, draw_quest_id
+from rg_engine.world import current_world_level
 
 register_all_quests()
 
@@ -77,20 +78,6 @@ HELPER_CARDS = [
     {"name": "Przewodnik", "price": 4, "effect_text": "Pierwszy trudny teren w turze moze miec koszt nizszy o 1.", "description": "Pomaga w podrozy przez trudny teren."},
 ]
 
-QUEST_CARDS = [
-    {"name": "Wilki na trakcie", "deck": "Wojenna", "description": "Dotrzyj na wskazany trakt i rozpraw sie z wataha."},
-    {"name": "Zaginiony patrol", "deck": "Wojenna", "description": "Odszukaj zolnierzy, ktorzy nie wrocili do zamku."},
-    {"name": "Brakujacy ladunek", "deck": "Ekonomiczna", "description": "Pomoz kupcowi odzyskac potrzebne towary."},
-    {"name": "Spor o studnie", "deck": "Ekonomiczna", "description": "Rozwiaz konflikt o dostep do wody."},
-    {"name": "Zatruty strumien", "deck": "Intrygi", "description": "Ustal, kto potajemnie zatruwa wode."},
-    {"name": "Szpieg na dworze", "deck": "Intrygi", "description": "Zdobadz dowody przeciw ukrytemu agentowi."},
-    {"name": "Poselstwo do sasiadow", "deck": "Dyplomacji", "description": "Dostarcz warunki porozumienia i zakoncz spor."},
-    {"name": "Dwie sklocone rodziny", "deck": "Dyplomacji", "description": "Doprowadz do ugody miedzy rodami."},
-    {"name": "Festiwal bez artystow", "deck": "Kultury", "description": "Pomoz przygotowac wydarzenie dla mieszkancow."},
-    {"name": "Zaginiona kronika", "deck": "Kultury", "description": "Odzyskaj cenna kronike miejscowego rodu."},
-    {"name": "Spadajace gwiazdy", "deck": "Nauki", "description": "Wyjasnij niepokojace zjawisko nad traktem."},
-]
-
 SHOP_POOLS = {
     "food": FOOD_CARDS,
     "basic_good": BASIC_GOODS_CARDS,
@@ -129,12 +116,9 @@ def _draw_unique(pool, visible, rng):
 
 
 def _draw_quest(visible, rng):
-    visible_decks = {card["deck"] for card in visible if card}
-    candidates = [card for card in QUEST_CARDS if card["deck"] not in visible_decks]
-    if not candidates:
-        visible_names = {card["name"] for card in visible if card}
-        candidates = [card for card in QUEST_CARDS if card["name"] not in visible_names]
-    return _copy_card(rng.choice(candidates or QUEST_CARDS))
+    unavailable_ids = [str(card.get("id")) for card in visible if isinstance(card, dict) and card.get("id")]
+    quest_id = draw_quest_id(current_world_level(), unavailable_ids=unavailable_ids, rng=rng)
+    return create_offer(quest_id) if quest_id else None
 
 
 def initialize_location(location, rng=None):
@@ -149,10 +133,11 @@ def initialize_location(location, rng=None):
     for _ in range(3):
         helpers.append(_draw_unique(HELPER_CARDS, helpers, rng))
     quests = []
-    if location.get("name") == "Artium" and not location.get("special_quest_claimed"):
-        quests.append(create_offer(SATANIC_FORCES_ID))
     while len(quests) < 3:
-        quests.append(_draw_quest(quests, rng))
+        quest = _draw_quest(quests, rng)
+        if quest is None:
+            break
+        quests.append(quest)
     location["shop_layout"] = layout
     location["shop_offers"] = shop
     location["helper_offers"] = helpers
@@ -202,10 +187,12 @@ def take_quest(location, player, slot_index, rng=None):
     success, message = accept_quest_card(player, quest)
     if not success:
         return False, message
-    if quest.get("id") == SATANIC_FORCES_ID:
-        location["special_quest_claimed"] = True
     visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
-    offers[slot_index] = _draw_quest(visible_without_slot, rng)
+    replacement = _draw_quest(visible_without_slot, rng)
+    if replacement is None:
+        offers.pop(slot_index)
+    else:
+        offers[slot_index] = replacement
     return True, message
 
 
