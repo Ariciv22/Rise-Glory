@@ -1,7 +1,7 @@
 """Dane gry niezalezne od interfejsu."""
 
 from rg_content.enemies import create_enemy, enemy_definition
-from rg_content.quests import SATANIC_FORCES_ID, register_all_quests
+from rg_content.quests_final import register_all_quests
 from rg_content.threats import (
     CHOROBA_DRZEW_ID,
     LAWINY_ID,
@@ -17,7 +17,6 @@ register_all_world_events()
 register_all_threats()
 
 __all__ = [
-    "SATANIC_FORCES_ID",
     "WORLD_EVENTS",
     "THREATS",
     "ROZBOJNICY_ID",
