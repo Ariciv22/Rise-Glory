@@ -4,6 +4,9 @@ Stara petla aplikacji zostala przeniesiona bez zmian do ``rg_core.app``.
 Ten bootstrap mapuje dawne nazwy modulow na ich nowe, uporzadkowane miejsca,
 dzieki czemu reorganizacja nie zmienia zasad ani zachowania gry.
 Nowy kod powinien importowac juz tylko docelowe pakiety.
+
+Legacy Questy nie sa tutaj ladowane: pozostaja dostepne wyłącznie do testow
+oraz historii projektu, ale nie wchodza do aktywnej puli gry.
 """
 
 from __future__ import annotations
@@ -36,8 +39,6 @@ MODULE_ALIASES = {
     "rg_start_intro_base": "rg_ui.start_intro_base",
     "rg_title_flow": "rg_ui.title_flow",
     "rg_tooltip": "rg_ui.tooltip",
-    "rg_satanic_forces": "rg_legacy.satanic_forces",
-    "rg_satanic_combat": "rg_legacy.satanic_combat",
 }
 
 
