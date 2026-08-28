@@ -61,12 +61,16 @@ def _scaled_terrain_with_state(textures, terrain_key, size):
     """Buduje gotowy kafel: stan pod spodem + pomniejszony oryginalny heks."""
     mode = _ACTIVE_MODE if _ACTIVE_MODE in {"hover", "selected"} else "normal"
     source = textures.get(terrain_key)
-    cache_key = (terrain_key, int(size), mode, id(source))
-    cached = _COMPOSITE_CACHE.get(cache_key)
-    if cached is not None:
-        return cached
-
     size = max(1, int(size))
+
+    # Tak jak cache bazowego renderera pamietamy tylko aktualny rozmiar dla
+    # danej kombinacji terenu/stanu. Zoom nie moze przez cala sesje gromadzic
+    # setek duzych powierzchni w pamieci.
+    cache_key = (terrain_key, mode)
+    cached = _COMPOSITE_CACHE.get(cache_key)
+    if cached is not None and cached[0] == size and cached[1] is source:
+        return cached[2]
+
     inset = _gap_inset(size)
     inner_size = max(1, size - inset * 2)
 
@@ -88,7 +92,7 @@ def _scaled_terrain_with_state(textures, terrain_key, size):
     offset = (size - inner_size) // 2
     composite.blit(terrain, (offset, offset))
 
-    _COMPOSITE_CACHE[cache_key] = composite
+    _COMPOSITE_CACHE[cache_key] = (size, source, composite)
     return composite
 
 
