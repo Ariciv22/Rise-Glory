@@ -29,6 +29,8 @@ PLACE_ANCHORS = {
     "pasieka_czerwonego_miodu": "Elarin",
     "jarmark_dobrego_losu": "Valdren",
     "wedrowne_laboratorium_mervena": "Norven",
+    "most_handlowy": "Norven",
+    "ukryty_magazyn": "Elarin",
 }
 
 
