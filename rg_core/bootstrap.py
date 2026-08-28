@@ -47,3 +47,9 @@ def install_legacy_module_aliases() -> None:
         if old_name in sys.modules:
             continue
         sys.modules[old_name] = importlib.import_module(new_name)
+
+    # F8 oraz przewijanie listy Questow w menu programisty maja dzialac
+    # niezaleznie od chwilowego blokowania zdarzen KEYDOWN przez walke/animacje.
+    from rg_ui.dev_menu_input_fix import install_dev_menu_input_fix
+
+    install_dev_menu_input_fix()
