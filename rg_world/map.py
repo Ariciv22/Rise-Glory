@@ -33,6 +33,16 @@ LOCATION_MARKER_FILES = {
 }
 _LOCATION_MARKER_IMAGES = {}
 
+# Obramowanie heksow jest celowo mniej jaskrawe od dotychczasowego cyjanu.
+# Zaznaczenie rysujemy kilka pikseli wewnatrz heksa, dzieki czemu sasiad
+# renderowany pozniej nie ucina jego prawej / dolnej krawedzi.
+HEX_BORDER_DARK = (52, 39, 27)
+HEX_BORDER_GOLD = (139, 103, 53)
+HEX_HOVER_OUTER = (92, 66, 31)
+HEX_HOVER_INNER = (218, 176, 91)
+HEX_SELECTED_OUTER = (25, 61, 82)
+HEX_SELECTED_INNER = (105, 178, 198)
+
 
 def remove_location_marker_background(surface):
     cleaned = surface.copy().convert_alpha()
@@ -117,6 +127,18 @@ def load_location_marker(kind):
 
 def hex_corners(cx, cy, size):
     return [(cx + size * math.cos(math.radians(60 * i - 30)), cy + size * math.sin(math.radians(60 * i - 30))) for i in range(6)]
+
+
+def inset_polygon(points, factor):
+    """Skaluje wielokat do srodka bez zmiany jego polozenia."""
+    if not points:
+        return []
+    cx = sum(point[0] for point in points) / len(points)
+    cy = sum(point[1] for point in points) / len(points)
+    return [
+        (cx + (x - cx) * factor, cy + (y - cy) * factor)
+        for x, y in points
+    ]
 
 
 def point_in_polygon(point, polygon):
@@ -251,13 +273,31 @@ class Tile:
         texture = pygame.transform.smoothscale(textures[self.terrain_key], (size, size))
         screen.blit(texture, (sx - size / 2, sy - size / 2))
         pts = self.screen_points(camera)
-        pygame.draw.polygon(screen, (24, 24, 24), pts, max(1, int(2 * camera.zoom)))
+
+        # Stala, przygaszona rama mapy. Nie konkuruje z ozdobna rama grafiki,
+        # ale domyka szczeliny miedzy kaflami przy skalowaniu / zoomie.
+        pygame.draw.polygon(screen, HEX_BORDER_DARK, pts, max(1, int(2 * camera.zoom)))
+        gold_pts = inset_polygon(pts, 0.985)
+        pygame.draw.polygon(screen, HEX_BORDER_GOLD, gold_pts, max(1, int(1.4 * camera.zoom)))
+
         if valid_move:
-            pygame.draw.polygon(screen, MOVE, pts, max(2, int(4 * camera.zoom)))
-        if hovered:
-            pygame.draw.polygon(screen, HOVER, pts, max(2, int(5 * camera.zoom)))
+            move_pts = inset_polygon(pts, 0.965)
+            pygame.draw.polygon(screen, MOVE, move_pts, max(2, int(3 * camera.zoom)))
+
+        # Hover i zaznaczenie sa celowo wewnatrz kafla. Wczesniej linia lezala
+        # dokladnie na wspolnej krawedzi, wiec kolejny heks mogl ja przykryc.
+        if hovered and not selected:
+            hover_outer = inset_polygon(pts, 0.955)
+            hover_inner = inset_polygon(pts, 0.935)
+            pygame.draw.polygon(screen, HEX_HOVER_OUTER, hover_outer, max(3, int(6 * camera.zoom)))
+            pygame.draw.polygon(screen, HEX_HOVER_INNER, hover_inner, max(1, int(2 * camera.zoom)))
+
         if selected:
-            pygame.draw.polygon(screen, SELECTED, pts, max(2, int(5 * camera.zoom)))
+            selected_outer = inset_polygon(pts, 0.945)
+            selected_inner = inset_polygon(pts, 0.918)
+            pygame.draw.polygon(screen, HEX_SELECTED_OUTER, selected_outer, max(4, int(8 * camera.zoom)))
+            pygame.draw.polygon(screen, HEX_SELECTED_INNER, selected_inner, max(2, int(3 * camera.zoom)))
+
         self.draw_location_marker(screen, camera, font)
 
 
