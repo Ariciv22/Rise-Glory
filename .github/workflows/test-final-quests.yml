@@ -6,20 +6,30 @@ on:
     paths:
       - "rg_content/**"
       - "rg_engine/**"
+      - "rg_core/**"
       - "tests/**"
       - ".github/workflows/test-final-quests.yml"
   pull_request:
     paths:
       - "rg_content/**"
       - "rg_engine/**"
+      - "rg_core/**"
       - "tests/**"
 
 jobs:
   quest-tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code only
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            rg_content
+            rg_engine
+            rg_core
+            tests
 
       - name: Set up Python
         uses: actions/setup-python@v5
