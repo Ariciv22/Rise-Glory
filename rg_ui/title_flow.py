@@ -44,12 +44,28 @@ def themed_button(screen, font, mouse, button, fallback_draw=None):
     screen.blit(label, label.get_rect(center=button.rect.center))
 
 
+def _draw_menu_heading(screen, text, center):
+    """Czytelny nagłówek na jasnym, ilustracyjnym tle ekranu tytułowego."""
+    w, h = screen.get_size()
+    size = max(30, min(42, int(min(w, h) * 0.055)))
+    heading_font = pygame.font.SysFont("georgia", size, bold=True)
+
+    shadow = heading_font.render(text, True, (24, 17, 11))
+    label = heading_font.render(text, True, (250, 229, 184))
+    rect = label.get_rect(center=center)
+
+    # Kilkukierunkowy cień daje czytelność zarówno nad jasnym niebem,
+    # jak i nad szczegółowym krajobrazem bez dokładania kolejnego panelu UI.
+    for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (2, 2)):
+        screen.blit(shadow, shadow.get_rect(center=(center[0] + dx, center[1] + dy)))
+    screen.blit(label, rect)
+
+
 def draw_map_select(screen, title_font, font, mouse):
     w, h = sync(screen)
     background(screen)
     y = max(390, int(h * 0.42))
-    title = font.render("Wybierz mapę", True, s.TEXT)
-    screen.blit(title, title.get_rect(center=(w // 2, y)))
+    _draw_menu_heading(screen, "Wybierz mapę", (w // 2, y))
 
     buttons = [
         s.Button(name, key, (w // 2 - 215, y + 50 + i * 76, 430, 58))
@@ -71,8 +87,7 @@ def draw_player_count(screen, title_font, font, mouse):
     w, h = sync(screen)
     background(screen)
     y = max(385, int(h * 0.40))
-    title = font.render("Wybierz liczbę graczy", True, s.TEXT)
-    screen.blit(title, title.get_rect(center=(w // 2, y)))
+    _draw_menu_heading(screen, "Wybierz liczbę graczy", (w // 2, y))
 
     buttons = []
     bw, bh, gx, gy = 200, 68, 30, 22
@@ -179,20 +194,11 @@ def draw_player_config(
         stat_line = "  ".join(
             f"{name[:3]} {hero['stats'].get(name, 0)}" for name in s.STAT_NAMES
         )
+        stat_label = small_font.render(stat_line, True, s.MUTED)
         screen.blit(
-            small_font.render(stat_line, True, s.MUTED),
-            (rect.x + 18, rect.y + 46),
+            stat_label,
+            (rect.centerx - stat_label.get_width() / 2, rect.y + 62),
         )
-
-        item_y = rect.y + (70 if compact else 76)
-        item_text = f"Start: {hero['basic_item']} + {hero['class_item']}"
-        for line in s.wrap(small_font, item_text, card_w - 36)[:2]:
-            if item_y + 18 < rect.bottom:
-                screen.blit(
-                    small_font.render(line, True, s.MUTED),
-                    (rect.x + 18, item_y),
-                )
-            item_y += 18
 
         buttons.append(s.Button("", f"archetype_{hero['id']}", rect))
 
