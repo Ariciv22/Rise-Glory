@@ -19,6 +19,7 @@ on:
       - "rg_world/**"
       - "rg_ui/**"
       - "tests/**"
+      - ".github/workflows/test-final-quests.yml"
 
 jobs:
   quest-tests:
@@ -45,7 +46,7 @@ jobs:
       - name: Install pytest
         run: python -m pip install --upgrade pytest
 
-      - name: Compile quest and developer modules
+      - name: Compile quest, developer and production modules
         run: |
           python -m py_compile \
             rg_content/quest_runtime_ext.py \
@@ -58,11 +59,17 @@ jobs:
             rg_content/quests_final.py \
             rg_content/locations.py \
             rg_engine/dev_quest_tools.py \
+            rg_engine/production.py \
             rg_ui/dev_menu.py \
             rg_ui/dev_menu_input_fix.py \
+            rg_ui/production_hud.py \
+            rg_ui/production_location_hub.py \
+            rg_ui/council_flow.py \
+            rg_world/generation.py \
+            rg_world/production_visuals.py \
             rg_world/quest_places.py \
             rg_core/bootstrap.py \
             rg_core/setup.py
 
-      - name: Run final quest regression tests
-        run: python -m pytest -q tests/test_final_quests_01_23.py tests/test_dev_quest_picker.py
+      - name: Run final quest, developer and production regression tests
+        run: python -m pytest -q tests/test_final_quests_01_23.py tests/test_dev_quest_picker.py tests/test_engine_production.py
