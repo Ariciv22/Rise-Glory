@@ -11,6 +11,8 @@ from rg_world import map as world_map
 _INSTALLED = False
 _SOURCE_OVERLAY_CACHE = {}
 _SCALED_OVERLAY_CACHE = {}
+_SIDE_BAND_CACHE = {}
+_SCALED_SIDE_OVERLAY_CACHE = {}
 _PENDING = {
     "hovered": None,
     "selected": None,
@@ -23,8 +25,21 @@ _PENDING = {
 # Nie dodajemy nowej ramy na grafike heksa. Podswietlamy tylko cieple,
 # metaliczne piksele istniejacej zlotej ramy zapisanej juz w assetcie terenu.
 FRAME_RING_INNER_FACTOR = 0.84
-HOVER_TINT = (255, 232, 164)
-SELECTED_TINT = (255, 174, 66)
+
+# Hover ma byc wyrazny od razu po najechaniu: prawie biale, cieple zloto.
+HOVER_TINT = (255, 249, 214)
+HOVER_ALPHA_RANGE = (105, 192)
+
+# Klikniety heks ma spokojniejsza baze, a mocniejszy efekt przechodzi po
+# CALYCH bokach ramy. Nie rysujemy juz szesciu swiecacych punktow.
+SELECTED_TINT = (255, 180, 68)
+SELECTED_ALPHA_RANGE = (66, 124)
+SELECTED_SIDE_TINT = (255, 235, 164)
+SELECTED_SIDE_ALPHA_RANGE = (150, 235)
+
+# Ta maska sluzy tylko do wybrania fragmentu ISTNIEJACEJ ramy. Sama linia
+# nigdy nie jest renderowana, wiec nic nie nachodzi na krajobraz heksa.
+SIDE_BAND_WIDTH_FACTOR = 0.18
 
 
 def _reset_pending():
@@ -80,8 +95,16 @@ def _source_frame_overlay(source, mode):
     size = source.get_size()
     ring_mask = _frame_ring_mask(size)
     overlay = pygame.Surface(size, pygame.SRCALPHA)
-    tint = SELECTED_TINT if mode == "selected" else HOVER_TINT
-    min_alpha, max_alpha = ((72, 132) if mode == "selected" else (38, 78))
+
+    if mode == "hover":
+        tint = HOVER_TINT
+        min_alpha, max_alpha = HOVER_ALPHA_RANGE
+    elif mode == "selected_side":
+        tint = SELECTED_SIDE_TINT
+        min_alpha, max_alpha = SELECTED_SIDE_ALPHA_RANGE
+    else:
+        tint = SELECTED_TINT
+        min_alpha, max_alpha = SELECTED_ALPHA_RANGE
 
     width, height = size
     for y in range(height):
@@ -120,58 +143,131 @@ def _scaled_frame_overlay(textures, terrain_key, size, mode):
     return scaled
 
 
-def _draw_corner_glints(tile, screen, camera):
-    """Subtelne iskry siedza na istniejacych naroznikach ramy, nie na grafice."""
-    points = tile.screen_points(camera)
-    if len(points) != 6:
+def _side_band_surface(size, side_index):
+    """Maska jednego boku heksa; sluzy tylko do wyciecia zlota z assetu."""
+    key = (size, int(side_index) % 6)
+    cached = _SIDE_BAND_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    width, height = size
+    surface = pygame.Surface(size, pygame.SRCALPHA)
+    radius = max(1.0, min(width, height) / 2.0 - 2.0)
+    center_x = width / 2.0
+    center_y = height / 2.0
+    corners = world_map.hex_corners(center_x, center_y, radius)
+    index = int(side_index) % 6
+    start = corners[index]
+    end = corners[(index + 1) % 6]
+    line_width = max(8, int(min(width, height) * SIDE_BAND_WIDTH_FACTOR))
+
+    pygame.draw.line(
+        surface,
+        (255, 255, 255, 255),
+        (int(start[0]), int(start[1])),
+        (int(end[0]), int(end[1])),
+        line_width,
+    )
+    _SIDE_BAND_CACHE[key] = surface
+    return surface
+
+
+def _scaled_side_overlay(textures, terrain_key, size, side_index):
+    """Zwraca tylko zlote piksele nalezace do jednego boku oryginalnej ramy."""
+    source = textures.get(terrain_key)
+    if source is None:
+        return None
+
+    side_index = int(side_index) % 6
+    cache_key = (terrain_key, size, side_index, id(source))
+    cached = _SCALED_SIDE_OVERLAY_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    full = _scaled_frame_overlay(textures, terrain_key, size, "selected_side")
+    if full is None:
+        return None
+
+    side = full.copy()
+    side.blit(
+        _side_band_surface((size, size), side_index),
+        (0, 0),
+        special_flags=pygame.BLEND_RGBA_MULT,
+    )
+    _SCALED_SIDE_OVERLAY_CACHE[cache_key] = side
+    return side
+
+
+def _tile_overlay_position(tile, camera, size):
+    sx, sy = tile.center(camera)
+    return (
+        int(round(sx - size / 2.0)),
+        int(round(sy - size / 2.0)),
+    )
+
+
+def _blit_with_opacity(screen, surface, pos, opacity=255):
+    if surface is None or opacity <= 0:
+        return
+    if opacity >= 255:
+        screen.blit(surface, pos)
         return
 
-    center_x = sum(point[0] for point in points) / 6.0
-    center_y = sum(point[1] for point in points) / 6.0
-    anchors = [
-        (
-            int(center_x + (x - center_x) * 0.90),
-            int(center_y + (y - center_y) * 0.90),
-        )
-        for x, y in points
-    ]
+    rendered = surface.copy()
+    rendered.set_alpha(max(0, min(255, int(opacity))))
+    screen.blit(rendered, pos)
+
+
+def _draw_hover_highlight(tile, screen, textures, camera):
+    size = max(1, int(HEX_SIZE * 2 * camera.zoom))
+    overlay = _scaled_frame_overlay(textures, tile.terrain_key, size, "hover")
+    if overlay is None:
+        return
+
+    # Delikatne oddychanie zostaje, ale minimalna jasnosc jest teraz znacznie
+    # wyzsza niz poprzednio - hover ma byc czytelny na kazdym typie terenu.
+    pulse = (math.sin(pygame.time.get_ticks() / 260.0) + 1.0) * 0.5
+    opacity = int(224 + 31 * pulse)
+    _blit_with_opacity(
+        screen,
+        overlay,
+        _tile_overlay_position(tile, camera, size),
+        opacity,
+    )
+
+
+def _draw_selected_side_shimmer(tile, screen, textures, camera):
+    """Animuje cale boki istniejacej zlotej ramy zamiast punktow w rogach."""
+    size = max(1, int(HEX_SIZE * 2 * camera.zoom))
+    pos = _tile_overlay_position(tile, camera, size)
+
+    # Ciepla baza utrzymuje czytelnosc kliknietego heksa nawet pomiedzy
+    # kolejnymi falami swiatla.
+    base = _scaled_frame_overlay(textures, tile.terrain_key, size, "selected")
+    _blit_with_opacity(screen, base, pos, 245)
 
     ticks = pygame.time.get_ticks()
-    pulse = (math.sin(ticks / 180.0) + 1.0) * 0.5
-    active_index = (ticks // 230) % len(anchors)
-    zoom = max(0.35, float(camera.zoom))
-    base_radius = max(3, min(9, int(2.0 + 1.7 * zoom)))
 
-    for index, center in enumerate(anchors):
-        radius = base_radius + (2 if index == active_index else 0)
-        glow_radius = radius * 3
-        glow = pygame.Surface((glow_radius * 2 + 2, glow_radius * 2 + 2), pygame.SRCALPHA)
-        glow_center = (glow_radius + 1, glow_radius + 1)
-        alpha_boost = int(18 + 18 * pulse)
-        if index == active_index:
-            alpha_boost += 30
-        pygame.draw.circle(glow, (255, 181, 65, alpha_boost), glow_center, glow_radius)
-        pygame.draw.circle(glow, (255, 220, 135, min(130, alpha_boost * 2)), glow_center, radius + 2)
-        screen.blit(glow, (center[0] - glow_center[0], center[1] - glow_center[1]))
-
-        core = (255, 232, 169)
-        pygame.draw.circle(screen, core, center, max(1, radius // 2))
-        if index == active_index:
-            arm = radius + 3
-            pygame.draw.line(screen, (255, 246, 213), (center[0] - arm, center[1]), (center[0] + arm, center[1]), 1)
-            pygame.draw.line(screen, (255, 246, 213), (center[0], center[1] - arm), (center[0], center[1] + arm), 1)
+    # Kazdy z 6 bokow swieci jako CALY fragment prawdziwej ramy. Fazy sa
+    # przesuniete, wiec jasnosc plynie dookola heksa zamiast migac punktami.
+    for side_index in range(6):
+        phase = ticks / 210.0 - side_index * 0.92
+        wave = (math.sin(phase) + 1.0) * 0.5
+        opacity = int(86 + 169 * wave)
+        side = _scaled_side_overlay(
+            textures,
+            tile.terrain_key,
+            size,
+            side_index,
+        )
+        _blit_with_opacity(screen, side, pos, opacity)
 
 
 def _draw_frame_highlight(tile, screen, textures, camera, mode):
-    size = max(1, int(HEX_SIZE * 2 * camera.zoom))
-    overlay = _scaled_frame_overlay(textures, tile.terrain_key, size, mode)
-    if overlay is not None:
-        sx, sy = tile.center(camera)
-        pos = (int(round(sx - size / 2.0)), int(round(sy - size / 2.0)))
-        screen.blit(overlay, pos)
-
-    if mode == "selected":
-        _draw_corner_glints(tile, screen, camera)
+    if mode == "hover":
+        _draw_hover_highlight(tile, screen, textures, camera)
+    else:
+        _draw_selected_side_shimmer(tile, screen, textures, camera)
 
 
 def _flush_interaction_highlights():
