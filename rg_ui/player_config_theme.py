@@ -13,12 +13,7 @@ _NAME_FIELD_ACTIVE = False
 
 
 def _font(size: int, *, bold: bool = False):
-    """Spójny krój fantasy dla ekranu wyboru bohatera.
-
-    W repo nie ma jeszcze finalnego pliku fontu z logo Rise & Glory, dlatego
-    używamy Georgii jako stabilnego kroju szeryfowego dostępnego na docelowych
-    komputerach. Po dodaniu właściwego fontu zmiana będzie w jednym miejscu.
-    """
+    """Spójny krój fantasy dla ekranu wyboru bohatera."""
     return pygame.font.SysFont("georgia", int(size), bold=bold)
 
 
@@ -67,7 +62,6 @@ def _draw_action_button(screen, font, mouse, button):
         glow.fill((220, 235, 240, 24))
         screen.blit(glow, button.rect)
 
-    # Ten sam metaliczny kolor co globalny TEXT; hover jest tylko nieco jaśniejszy.
     text_color = (238, 245, 252) if hovered else s.TEXT
     label_shadow = font.render(button.text, True, (24, 18, 13))
     label = font.render(button.text, True, text_color)
@@ -109,20 +103,17 @@ def _draw_name_field(screen, world_name, active, y):
         screen.blit(value_surface, (text_x, text_y))
         cursor_x = text_x + value_surface.get_width() + 2
     elif active:
-        # Po kliknięciu placeholder znika i zostaje puste pole gotowe do pisania.
         cursor_x = text_x
     else:
         placeholder = input_font.render("Wpisz imię bohatera...", True, (178, 168, 147))
         screen.blit(placeholder, (text_x, text_y))
         cursor_x = text_x
 
-    # Migający kursor widoczny wyłącznie wtedy, gdy gracz kliknął pole.
     if active and (pygame.time.get_ticks() // 500) % 2 == 0:
         cursor_top = rect.y + 14
         cursor_bottom = rect.bottom - 14
         pygame.draw.line(screen, (244, 220, 166), (cursor_x, cursor_top), (cursor_x, cursor_bottom), 2)
 
-    # Jasna etykieta z ciemnym cieniem pozostaje czytelna na jasnym tle mapy.
     label_text = "Imię bohatera w świecie gry"
     label_surface = label_font.render(label_text, True, (244, 223, 180))
     label_shadow = label_font.render(label_text, True, (35, 28, 20))
@@ -150,12 +141,9 @@ def draw_player_config(
     w, h = tf.sync(screen)
     tf.background(screen)
 
-    # Enter kończy edycję tak samo jak kliknięcie poza polem.
     if _NAME_FIELD_ACTIVE and pygame.key.get_pressed()[pygame.K_RETURN]:
         _NAME_FIELD_ACTIVE = False
 
-    # Systemowe TEXTINPUT jest włączane dopiero przez kliknięcie pola w app.py.
-    # Dzięki temu samo pisanie na klawiaturze przed kliknięciem nie wpisuje imienia.
     if not _NAME_FIELD_ACTIVE:
         pygame.key.stop_text_input()
 
@@ -166,7 +154,6 @@ def draw_player_config(
 
     class_font = _font(22 if compact else 24, bold=True)
     stat_font = _font(15 if compact else 16, bold=True)
-    item_font = _font(14 if compact else 15)
     button_font = _font(20, bold=True)
 
     selected_id = selected_archetype["id"] if selected_archetype else None
@@ -198,7 +185,7 @@ def draw_player_config(
 
         title_color = (242, 218, 166) if selected or rect.collidepoint(mouse) else (226, 204, 160)
         title = class_font.render(hero["name"], True, title_color)
-        title_rect = title.get_rect(center=(rect.centerx, rect.y + 24))
+        title_rect = title.get_rect(center=(rect.centerx, rect.y + 34))
         screen.blit(title, title_rect)
 
         if hero["id"] in used_ids:
@@ -208,19 +195,12 @@ def draw_player_config(
         stat_line = "  ".join(
             f"{name[:3]} {hero['stats'].get(name, 0)}" for name in s.STAT_NAMES
         )
-        stat_label = stat_font.render(stat_line, True, (203, 190, 163))
-        screen.blit(stat_label, (rect.x + 18, rect.y + 46))
+        stat_label = stat_font.render(stat_line, True, (216, 204, 177))
+        stat_rect = stat_label.get_rect(center=(rect.centerx, rect.y + (72 if compact else 82)))
+        screen.blit(stat_label, stat_rect)
 
-        item_y = rect.y + (70 if compact else 76)
-        item_text = f"Start: {hero['basic_item']} + {hero['class_item']}"
-        for line in s.wrap(item_font, item_text, card_w - 36)[:2]:
-            if item_y + 18 < rect.bottom:
-                screen.blit(
-                    item_font.render(line, True, (198, 185, 158)),
-                    (rect.x + 18, item_y),
-                )
-            item_y += 18
-
+        # Przedmioty startowe nadal są częścią danych i mechaniki bohatera,
+        # ale nie pokazujemy ich na ekranie wyboru archetypu.
         buttons.append(s.Button("", f"archetype_{hero['id']}", rect))
 
     cards_bottom = start_y + 3 * card_h + 2 * gap_y
