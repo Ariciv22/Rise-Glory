@@ -221,6 +221,8 @@ def quest_created_places(players: list[dict[str, Any]] | None = None) -> list[di
         ("q17_result", "czerwony_miod"): {"id": "pasieka_czerwonego_miodu", "name": "Pasieka Czerwonego Miodu", "source_quest": 17},
         ("q20_result", "dzien_dobrego_losu"): {"id": "jarmark_dobrego_losu", "name": "Jarmark Dobrego Losu w Valdren", "source_quest": 20},
         ("q23_result", "trasa_naprawiona"): {"id": "wedrowne_laboratorium_mervena", "name": "Wedrowne Laboratorium Mervena", "source_quest": 23, "mobile": True},
+        ("q25_result", "most_handlowy"): {"id": "most_handlowy", "name": "Most Handlowy", "source_quest": 25},
+        ("q30_result", "ukryty_magazyn"): {"id": "ukryty_magazyn", "name": "Ukryty Magazyn", "source_quest": 30},
     }
     found: dict[str, dict[str, Any]] = {}
     for player in players or []:
