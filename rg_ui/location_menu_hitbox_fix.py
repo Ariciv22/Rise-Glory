@@ -8,18 +8,19 @@ from rg_ui import city_hub
 
 
 _INSTALLED = False
+_ORIGINAL_DRAW_LEFT_MENU = city_hub._draw_left_menu
+_FONT_CACHE = {}
 
 # Lewy panel jest gotowa grafika z SZESCIOMA widocznymi kafelkami. Ich srodki
-# sa wyznaczone przez srodki ikon zapisanych w grafice panelu. Wczesniejszy
-# kod dzielil obszar matematycznie (a modul Zakladow dodatkowo dopisywal
-# niewidoczny 7. wpis), przez co hitboxy ladowaly pomiedzy prawdziwymi ramkami.
+# sa wyznaczone przez srodki ikon zapisanych w grafice panelu. Szosty kafelek
+# jest od teraz Gildia i prowadzi do istniejacego ekranu praw eksploatacji.
 _VISIBLE_ACTIONS = (
     "location_shop",
     "location_tavern",
     "location_board",
     "location_training",
     "location_healing",
-    "location_equipment",
+    "location_industry",
 )
 
 # Proporcje sa mierzone wzgledem calego lewego panelu. Kazdy hitbox jest
@@ -90,20 +91,90 @@ def _menu_button_rects_from_icons(left_rect):
     return rows, back
 
 
+def _guild_font(size):
+    size = max(14, int(size))
+    cached = _FONT_CACHE.get(size)
+    if cached is not None:
+        return cached
+    try:
+        font = pygame.font.SysFont("georgia", size)
+    except pygame.error:
+        font = pygame.font.Font(None, size)
+    _FONT_CACHE[size] = font
+    return font
+
+
+def _draw_guild_label(screen, button_rect):
+    """Przykrywa napis Ekwipunek zapisany w PNG i rysuje Gildia."""
+    text_left = button_rect.x + int(button_rect.width * 0.30)
+    text_right = button_rect.right - int(button_rect.width * 0.08)
+    text_top = button_rect.y + int(button_rect.height * 0.19)
+    text_bottom = button_rect.bottom - int(button_rect.height * 0.17)
+    cover = pygame.Rect(
+        text_left,
+        text_top,
+        max(1, text_right - text_left),
+        max(1, text_bottom - text_top),
+    )
+
+    # Wnetrze assetu jest niemal czarne. Przykrywamy tylko stary napis,
+    # pozostawiajac cala zlota ramke oraz obecna ikone nietkniete.
+    pygame.draw.rect(screen, (12, 12, 11), cover)
+
+    font = _guild_font(button_rect.height * 0.31)
+    label = font.render("Gildia", True, city_hub._GOLD_TEXT)
+    label_rect = label.get_rect(
+        midleft=(
+            text_left + int(button_rect.width * 0.015),
+            button_rect.centery,
+        )
+    )
+    screen.blit(label, label_rect)
+
+
+def _draw_left_menu_with_guild(screen, font, mouse_pos, selected_place, rect):
+    buttons = _ORIGINAL_DRAW_LEFT_MENU(
+        screen,
+        font,
+        mouse_pos,
+        selected_place,
+        rect,
+    )
+    for button in buttons:
+        if getattr(button, "action", None) == "location_industry":
+            _draw_guild_label(screen, button.rect)
+            break
+    return buttons
+
+
+def _replace_equipment_with_guild():
+    menu = []
+    guild_added = False
+
+    for label, action in city_hub.LOCATION_MENU:
+        if action in {"location_equipment", "location_industry"}:
+            if not guild_added:
+                menu.append(("Gildia", "location_industry"))
+                guild_added = True
+            continue
+        menu.append((label, action))
+
+    if not guild_added:
+        # Aktualny panel ma piec pozostalych kategorii + szosty slot Gildii.
+        menu = menu[:5] + [("Gildia", "location_industry")]
+
+    city_hub.LOCATION_MENU[:] = menu[:6]
+
+
 def install_location_menu_hitbox_fix():
     global _INSTALLED
     if _INSTALLED:
         return
 
-    # Grafika lewego panelu ma tylko 6 przyciskow. Usuwamy niewidoczny wpis
-    # location_industry dodawany przez starszy modul produkcji, bo zmienial on
-    # geometrie wszystkich pozostalych hitboxow. Sam system Zakladow zostaje w
-    # kodzie i moze dostac osobne, widoczne wejscie w UI bez psucia tego panelu.
-    city_hub.LOCATION_MENU[:] = [
-        (label, action)
-        for label, action in city_hub.LOCATION_MENU
-        if action != "location_industry"
-    ]
+    # Modul produkcji moze przed nami dodac techniczny wpis location_industry.
+    # Skladamy go z dawnym Ekwipunkiem do jednego, widocznego szostego kafelka.
+    _replace_equipment_with_guild()
 
     city_hub._menu_button_rects = _menu_button_rects_from_icons
+    city_hub._draw_left_menu = _draw_left_menu_with_guild
     _INSTALLED = True
