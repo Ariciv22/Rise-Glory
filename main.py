@@ -7,7 +7,14 @@ zeby uruchamianie gry nadal bylo tak proste jak ``python main.py``.
 import sys
 
 from rg_core.bootstrap import install_legacy_module_aliases
+from rg_ui.map_camera_lock import install_locked_map_camera
 
+# Szybki renderer planszy musi zostac zalozony zanim bootstrap zaimportuje
+# rg_core.setup. Setup doklada potem znaczniki Questow, Miejsc i Wydarzen Swiata
+# jako nakladki na ten renderer. Gdy kolejnosc byla odwrotna, pozniejsza podmiana
+# Tile.draw kasowala czesc nakladek, a modul Zakladow potrafil przywrocic stary,
+# wolny renderer skalujacy teksture osobno dla kazdego heksa w kazdej klatce.
+install_locked_map_camera()
 install_legacy_module_aliases()
 
 # Motyw czcionek instalujemy przed importem glownej aplikacji. Dzieki temu
@@ -27,7 +34,6 @@ from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
 from rg_ui.location_navigation_fix import install_location_navigation_fix
 from rg_ui.location_quest_board import install_location_quest_board
 from rg_ui.map_background_fix import install_map_background
-from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.production_hud import install_production_hud
@@ -48,15 +54,14 @@ install_quest_location_name_compatibility()
 # Usuwamy jasne tlo/ramke zapisana w grafice panel2.png przyciskow menu.
 install_menu_button_fix()
 
-# Najpierw instalujemy viewport planszy. Dzieki temu same heksy i pionki sa
-# przycinane do jasnego srodka pergaminu, ale tlo moze zostac narysowane na
-# calym centralnym obszarze.
-install_locked_map_camera()
-
-# Zamiast czarnego tla pod plansza rysujemy grafike Grafiki/tlo_heksow.png.
+# Renderer planszy zostal zainstalowany przed bootstrapem. W tym miejscu
+# rg_core.setup zdazyl juz dolozyc swoje nakladki na Tile.draw, wiec teraz
+# bezpiecznie opakowujemy caly lancuch tlem mapy.
 install_map_background()
 
 # Gotowe i budowane zaklady dostaja osobny, maly znacznik na swoim heksie.
+# Modul przechwytuje aktualny Tile.draw dopiero tutaj, dzieki czemu zachowuje
+# szybki renderer, tlo oraz nakladki Questow/Wydarzen.
 install_production_visuals()
 
 # Zachowujemy zgodnosc z poprawkami ekranu tytulowego, ktore odwoluja sie do
