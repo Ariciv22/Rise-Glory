@@ -82,7 +82,22 @@ def _distance(tile):
 
 
 def find_start_tiles(tiles, player_count):
-    passable = [tile for tile in tiles if tile.terrain["passable"] and not getattr(tile, "adventure", None)]
+    # Pola startowe pozostaja na obrzezach mapy i nie moga byc zajete przez
+    # lokacje ani gotowe zaklady gospodarcze wygenerowane przy starcie swiata.
+    passable = [
+        tile
+        for tile in tiles
+        if tile.terrain["passable"]
+        and not getattr(tile, "adventure", None)
+        and not getattr(tile, "location", None)
+        and not getattr(tile, "production_site", None)
+    ]
+    if not passable:
+        passable = [
+            tile
+            for tile in tiles
+            if tile.terrain["passable"] and not getattr(tile, "location", None)
+        ]
     if not passable:
         passable = [tile for tile in tiles if tile.terrain["passable"]]
     if not passable:

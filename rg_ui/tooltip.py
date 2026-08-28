@@ -1,22 +1,34 @@
 import pygame
 
 from rg_core.data import GOLD, MUTED, PANEL, PANEL_DARK, TEXT
+from rg_engine.production import potential_summary, site_owner_label
 from rg_ui.common import draw_lines
 
-TOOLTIP_W = 250
+TOOLTIP_W = 300
 TOOLTIP_PADDING = 14
 
 
-def get_location_lines(tile):
+def get_tile_lines(tile):
     location = tile.location
     terrain = tile.terrain
-    return [
-        location["name"],
-        f"Typ: {location['name']}",
+    site = getattr(tile, "production_site", None)
+    title = location["name"] if location else f"Heks {tile.id}"
+    lines = [
+        title,
         f"Teren: {terrain['name']}",
         f"Koszt ruchu: {terrain['move']}",
-        "Questy i akcje dodamy pozniej.",
+        f"POTENCJAŁ: {potential_summary(tile)}",
+        f"Jurysdykcja: {getattr(tile, 'jurisdiction_name', None) or 'brak'}",
     ]
+    if site:
+        status = "aktywny" if site.get("status") == "active" else "w budowie"
+        lines.append(f"Zakład: {site.get('name', 'Zakład')} ({status})")
+        lines.append(f"Właściciel: {site_owner_label(site)}")
+    else:
+        right_owner = getattr(tile, "extraction_right_owner_name", None)
+        lines.append("Zakład: brak")
+        lines.append(f"Prawo eksploatacji: {right_owner or 'wolne'}")
+    return lines
 
 
 def clamp_tooltip_position(mouse_pos, tooltip_w, tooltip_h, screen_w, screen_h):
@@ -30,11 +42,11 @@ def clamp_tooltip_position(mouse_pos, tooltip_w, tooltip_h, screen_w, screen_h):
 
 
 def draw_location_tooltip(screen, font, small_font, hovered_tile, mouse_pos):
-    if not hovered_tile or not hovered_tile.location:
+    if not hovered_tile:
         return
 
-    lines = get_location_lines(hovered_tile)
-    tooltip_h = 132
+    lines = get_tile_lines(hovered_tile)
+    tooltip_h = 190
     screen_w, screen_h = screen.get_size()
     x, y = clamp_tooltip_position(mouse_pos, TOOLTIP_W, tooltip_h, screen_w, screen_h)
     rect = pygame.Rect(x, y, TOOLTIP_W, tooltip_h)
@@ -45,8 +57,20 @@ def draw_location_tooltip(screen, font, small_font, hovered_tile, mouse_pos):
     title_rect = pygame.Rect(rect.x + 10, rect.y + 10, rect.width - 20, 30)
     pygame.draw.rect(screen, PANEL_DARK, title_rect, border_radius=8)
 
-    color = hovered_tile.location["color"]
+    if hovered_tile.location:
+        color = hovered_tile.location["color"]
+    else:
+        color = GOLD
     pygame.draw.circle(screen, color, (title_rect.x + 15, title_rect.centery), 8)
     screen.blit(font.render(lines[0], True, TEXT), (title_rect.x + 32, title_rect.y + 5))
 
-    draw_lines(screen, small_font, lines[1:], rect.x + TOOLTIP_PADDING, rect.y + 50, MUTED, line_h=20, max_width=rect.width - TOOLTIP_PADDING * 2)
+    draw_lines(
+        screen,
+        small_font,
+        lines[1:],
+        rect.x + TOOLTIP_PADDING,
+        rect.y + 50,
+        MUTED,
+        line_h=19,
+        max_width=rect.width - TOOLTIP_PADDING * 2,
+    )

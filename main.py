@@ -29,9 +29,12 @@ from rg_ui.map_background_fix import install_map_background
 from rg_ui.map_camera_lock import install_locked_map_camera
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
+from rg_ui.production_hud import install_production_hud
+from rg_ui.production_location_hub import install_production_location_hub
 from rg_ui.title_flow import install_into_main
 from rg_ui.village_hub import install_village_hub
 from rg_world.location_names import install_quest_location_name_compatibility
+from rg_world.production_visuals import install_production_visuals
 
 # DEV: kazde reczne otwarcie Rady rozpoczyna swieza sesje UI i dobiera kolejna
 # karte z biezacej talii. Nie resetujemy samej talii Wydarzen Swiata.
@@ -51,6 +54,9 @@ install_locked_map_camera()
 
 # Zamiast czarnego tla pod plansza rysujemy grafike Grafiki/tlo_heksow.png.
 install_map_background()
+
+# Gotowe i budowane zaklady dostaja osobny, maly znacznik na swoim heksie.
+install_production_visuals()
 
 # Zachowujemy zgodnosc z poprawkami ekranu tytulowego, ktore odwoluja sie do
 # modulu "main". Faktyczna aplikacja jest teraz w rg_core.app.
@@ -76,6 +82,10 @@ install_hero_figure_visual_fix()
 # pozostale przyciski UI, zamiast z prostych placeholderowych ramek.
 install_hud_top_stat_theme()
 
+# Dolny HUD pokazuje zawsze POTENCJAL wybranego heksa i daje akcje budowy lub
+# testowego przejmowania, gdy aktywny bohater stoi na tym heksie.
+install_production_hud(_app)
+
 # Starszy ekran wsi zostaje pod spodem jako fallback dla malego okna, questow
 # oraz sytuacji, w ktorej zabraknie ktoregos assetu nowego ekranu.
 install_village_hub(_app)
@@ -83,8 +93,11 @@ install_village_hub(_app)
 # Wspolny shell lokacji obsluguje wszystkie 9 generowanych miejsc:
 # miasto1/2/3, zamek1/2/3 oraz wies1/2/3. Lewy i prawy panel sa wspolne,
 # a srodkowa scena jest dobierana z numeru oraz typu konkretnej lokacji.
-# Prawy content nadal pozostaje pustym kontenerem do dalszego projektowania.
 install_location_hub(_app)
+
+# Zakladka Zaklady pokazuje trzy gotowe inwestycje nalezace do lokacji oraz
+# wolne prawa eksploatacji heksow podlegajacych tej lokacji.
+install_production_location_hub()
 
 # Strzalki na dole prawego panelu sa centrowane w prawdziwej wolnej stopce
 # pomiedzy separatorem ostatniego slotu a ozdobna rama dolna. Przy renderze
