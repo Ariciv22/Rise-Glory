@@ -46,7 +46,7 @@ def _fit(font, value, width):
 
 
 def _menu_button_rects_with_industry(left_rect):
-    """Miesci 7 zakladek i przycisk powrotu bez nakladania elementow."""
+    """Starszy fallback geometrii; docelowe 6 hitboxow ustawia osobny modul."""
     button_x = left_rect.x + int(left_rect.width * 0.10)
     button_w = int(left_rect.width * 0.82)
     top = left_rect.y + int(left_rect.height * 0.055)
@@ -131,7 +131,7 @@ def _draw_industry(screen, font, small_font, mouse, location, player, right_rect
     width = content.width
     y = content.y
 
-    title = font.render("Zakłady", True, city_hub._GOLD_TEXT)
+    title = font.render("Gildia", True, city_hub._GOLD_TEXT)
     screen.blit(title, (x, y))
     y += title.get_height() + 8
 
@@ -146,7 +146,7 @@ def _draw_industry(screen, font, small_font, mouse, location, player, right_rect
             y += 84
 
     y += 4
-    header = small_font.render("Prawa do budowy", True, city_hub._GOLD_TEXT)
+    header = small_font.render("Prawa do eksploatacji", True, city_hub._GOLD_TEXT)
     screen.blit(header, (x, y))
     y += header.get_height() + 7
 
@@ -197,7 +197,7 @@ def install_production_location_hub():
     if _INSTALLED:
         return
     if not any(action == "location_industry" for _label, action in city_hub.LOCATION_MENU):
-        city_hub.LOCATION_MENU.append(("Zakłady", "location_industry"))
+        city_hub.LOCATION_MENU.append(("Gildia", "location_industry"))
     city_hub._menu_button_rects = _menu_button_rects_with_industry
     city_hub._draw_right_content = _draw_right_content_with_industry
     _INSTALLED = True
