@@ -4,8 +4,12 @@ import pygame
 
 from rg_content import register_all_world_events
 from rg_core.data import ACTIONS_PER_TURN, GOLD, MUTED, PANEL_DARK, TEXT
+from rg_engine.dev_quest_tools import (
+    add_quest_for_testing,
+    clear_active_quests_for_testing,
+    developer_quest_rows,
+)
 from rg_engine.devtools import (
-    DEV_FLAGS,
     add_gold,
     change_legend,
     dev_flag,
@@ -41,6 +45,29 @@ FLAG_LABELS = {
 }
 
 DEV_PROBLEM_ID = "dev_rozbojnicy_na_trakcie"
+_QUEST_ROWS = developer_quest_rows()
+_QUEST_SCROLL = 0
+_QUEST_VISIBLE_ROWS = 8
+_LAST_DRAW_TICKS = -10000
+
+
+def dev_menu_recently_visible(max_age_ms=180):
+    return pygame.time.get_ticks() - int(_LAST_DRAW_TICKS) <= int(max_age_ms)
+
+
+def scroll_dev_quests(wheel_y):
+    """Przewija liste Questow. Dodatnie wheel_y oznacza ruch w gore."""
+    global _QUEST_SCROLL
+    maximum = max(0, len(_QUEST_ROWS) - int(_QUEST_VISIBLE_ROWS))
+    _QUEST_SCROLL = max(0, min(maximum, int(_QUEST_SCROLL) - int(wheel_y)))
+    return _QUEST_SCROLL
+
+
+def _shift_quest_scroll(step):
+    global _QUEST_SCROLL
+    maximum = max(0, len(_QUEST_ROWS) - int(_QUEST_VISIBLE_ROWS))
+    _QUEST_SCROLL = max(0, min(maximum, int(_QUEST_SCROLL) + int(step)))
+    return _QUEST_SCROLL
 
 
 def _button(screen, font, mouse, buttons, text, action, rect, active=False):
@@ -115,6 +142,22 @@ def handle_dev_action(action, hero, token, players):
         result["message"] = "Wyłączono wszystkie opcje programisty i przywrócono automatyczny poziom świata."
         return result
 
+    if action.startswith("dev_add_quest:"):
+        number = int(action.split(":", 1)[1])
+        _success, message = add_quest_for_testing(hero, number)
+        result["message"] = message
+        return result
+
+    if action == "dev_clear_active_quests":
+        _count, message = clear_active_quests_for_testing(hero)
+        result["message"] = message
+        return result
+
+    if action.startswith("dev_quest_scroll:"):
+        step = int(action.split(":", 1)[1])
+        _shift_quest_scroll(step)
+        return result
+
     if action.startswith("dev_toggle:"):
         flag = action.split(":", 1)[1]
         enabled = toggle_dev_flag(flag)
@@ -185,20 +228,81 @@ def handle_dev_action(action, hero, token, players):
     return result
 
 
+def _draw_quest_picker(screen, small_font, mouse, buttons, hero, panel, right_x, col_w, message_top):
+    global _QUEST_VISIBLE_ROWS, _QUEST_SCROLL
+
+    title_y = panel.y + 176
+    _section_title(screen, small_font, "QUESTY 1–30 — DODAJ DO TESTU", right_x, title_y)
+    active_count = len(hero.get("active_quests", []) or [])
+    status = f"Aktywne: {active_count}/3 | kółko myszy przewija listę"
+    screen.blit(small_font.render(status, True, MUTED), (right_x, title_y + 27))
+
+    controls_y = title_y + 52
+    _button(screen, small_font, mouse, buttons, "▲", "dev_quest_scroll:-1", (right_x, controls_y, 42, 34))
+    _button(screen, small_font, mouse, buttons, "▼", "dev_quest_scroll:1", (right_x + 48, controls_y, 42, 34))
+    _button(screen, small_font, mouse, buttons, "WYCZYŚĆ AKTYWNE", "dev_clear_active_quests", (right_x + 102, controls_y, col_w - 102, 34))
+
+    list_top = controls_y + 46
+    list_bottom = message_top - 12
+    list_rect = pygame.Rect(right_x, list_top, col_w, max(120, list_bottom - list_top))
+    pygame.draw.rect(screen, PANEL_DARK, list_rect, border_radius=10)
+    pygame.draw.rect(screen, GOLD, list_rect, 1, border_radius=10)
+
+    row_h = 39
+    gap = 5
+    _QUEST_VISIBLE_ROWS = max(3, min(9, (list_rect.height - 12) // (row_h + gap)))
+    maximum = max(0, len(_QUEST_ROWS) - _QUEST_VISIBLE_ROWS)
+    _QUEST_SCROLL = max(0, min(maximum, _QUEST_SCROLL))
+
+    active_ids = {
+        str(quest.get("id") or "")
+        for quest in hero.get("active_quests", []) or []
+        if isinstance(quest, dict)
+    }
+    visible = _QUEST_ROWS[_QUEST_SCROLL : _QUEST_SCROLL + _QUEST_VISIBLE_ROWS]
+    for row_index, quest in enumerate(visible):
+        y = list_rect.y + 7 + row_index * (row_h + gap)
+        label = f"Q{quest['number']:02d}  {quest['name']}  [{quest['board_location']}]"
+        active = quest["id"] in active_ids
+        _button(
+            screen,
+            small_font,
+            mouse,
+            buttons,
+            label,
+            f"dev_add_quest:{quest['number']}",
+            (list_rect.x + 8, y, list_rect.width - 28, row_h),
+            active=active,
+        )
+
+    track = pygame.Rect(list_rect.right - 14, list_rect.y + 8, 6, list_rect.height - 16)
+    pygame.draw.rect(screen, (55, 50, 43), track, border_radius=3)
+    if len(_QUEST_ROWS) > _QUEST_VISIBLE_ROWS:
+        thumb_h = max(28, int(track.height * (_QUEST_VISIBLE_ROWS / len(_QUEST_ROWS))))
+        travel = max(1, track.height - thumb_h)
+        thumb_y = track.y + int(travel * (_QUEST_SCROLL / maximum)) if maximum else track.y
+        pygame.draw.rect(screen, GOLD, (track.x, thumb_y, track.width, thumb_h), border_radius=3)
+    else:
+        pygame.draw.rect(screen, GOLD, track, border_radius=3)
+
+
 def draw_dev_menu(screen, title_font, font, small_font, mouse, hero, token, players, round_number, message=""):
+    global _LAST_DRAW_TICKS
+    _LAST_DRAW_TICKS = pygame.time.get_ticks()
+
     sw, sh = screen.get_size()
     shade = pygame.Surface((sw, sh), pygame.SRCALPHA)
     shade.fill((0, 0, 0, 205))
     screen.blit(shade, (0, 0))
 
-    width = min(1040, sw - 70)
+    width = min(1120, sw - 70)
     height = min(760, sh - 70)
     panel = pygame.Rect((sw - width) // 2, (sh - height) // 2, width, height)
     draw_panel(screen, panel, GOLD)
 
     buttons = []
     screen.blit(title_font.render("Menu programisty", True, TEXT), (panel.x + 28, panel.y + 20))
-    screen.blit(small_font.render("F8 — otwórz / zamknij. Narzędzia działają tylko w bieżącej sesji.", True, MUTED), (panel.x + 30, panel.y + 70))
+    screen.blit(small_font.render("F8 — otwórz / zamknij. Lista Questów jest przewijalna kółkiem myszy.", True, MUTED), (panel.x + 30, panel.y + 70))
 
     forced = forced_world_level()
     world_mode = f"WYMUSZONY {forced}" if forced is not None else "AUTO"
@@ -213,68 +317,72 @@ def draw_dev_menu(screen, title_font, font, small_font, mouse, hero, token, play
     draw_lines(screen, small_font, wrap(small_font, status, status_rect.width - 24)[:2], status_rect.x + 12, status_rect.y + 9, TEXT, line_h=20)
 
     left_x = panel.x + 30
-    right_x = panel.centerx + 10
-    col_w = panel.width // 2 - 50
-    y = panel.y + 176
+    right_x = panel.centerx + 18
+    col_w = panel.width // 2 - 56
 
+    y = panel.y + 176
     _section_title(screen, font, "Poziom świata", left_x, y)
-    y += 36
+    y += 32
     button_w = (col_w - 20) // 5
     world_buttons = [("AUTO", "auto"), ("I", "1"), ("II", "2"), ("III", "3"), ("IV", "4")]
     for index, (label, value) in enumerate(world_buttons):
         active = (forced is None and value == "auto") or (forced is not None and str(forced) == value)
         _button(screen, small_font, mouse, buttons, label, f"dev_world:{value}", (left_x + index * (button_w + 5), y, button_w, 38), active=active)
 
-    y += 56
+    y = panel.y + 256
     _section_title(screen, font, "Legenda aktywnego bohatera", left_x, y)
-    y += 36
+    y += 32
     _button(screen, small_font, mouse, buttons, "-10 LP", "dev_legend_minus_10", (left_x, y, 100, 38))
     _button(screen, small_font, mouse, buttons, "+10 LP", "dev_legend_plus_10", (left_x + 108, y, 100, 38))
-    set_x = left_x + 222
+    set_x = left_x + 218
     for index, value in enumerate((0, 10, 20, 30)):
-        _button(screen, small_font, mouse, buttons, str(value), f"dev_legend_set:{value}", (set_x + index * 58, y, 52, 38))
+        _button(screen, small_font, mouse, buttons, str(value), f"dev_legend_set:{value}", (set_x + index * 56, y, 50, 38))
 
-    y += 66
+    y = panel.y + 340
     _section_title(screen, font, "Szybkie akcje testowe", left_x, y)
-    y += 36
-    _button(screen, small_font, mouse, buttons, "+50 złota", "dev_gold_plus_50", (left_x, y, 130, 40))
-    _button(screen, small_font, mouse, buttons, "Wylecz wszystko", "dev_heal_all", (left_x + 138, y, 150, 40))
-    _button(screen, small_font, mouse, buttons, "Odnów akcje", "dev_refill_actions", (left_x + 296, y, 140, 40))
-    y += 50
-    _button(screen, small_font, mouse, buttons, "Następne Wydarzenie Świata", "dev_next_event", (left_x, y, 252, 42))
-    _button(screen, small_font, mouse, buttons, "Otwórz Radę teraz", "dev_open_council", (left_x + 262, y, 174, 42))
-    y += 50
-    _button(screen, small_font, mouse, buttons, "[DEV] Dodaj Problem na mapę", "dev_spawn_problem", (left_x, y, 252, 42))
+    y += 32
+    _button(screen, small_font, mouse, buttons, "+50 złota", "dev_gold_plus_50", (left_x, y, 124, 38))
+    _button(screen, small_font, mouse, buttons, "Wylecz wszystko", "dev_heal_all", (left_x + 132, y, 142, 38))
+    _button(screen, small_font, mouse, buttons, "Odnów akcje", "dev_refill_actions", (left_x + 282, y, 134, 38))
+    y += 46
+    _button(screen, small_font, mouse, buttons, "Następne Wydarzenie", "dev_next_event", (left_x, y, 198, 38))
+    _button(screen, small_font, mouse, buttons, "Otwórz Radę", "dev_open_council", (left_x + 206, y, 150, 38))
+    y += 46
+    _button(screen, small_font, mouse, buttons, "[DEV] Dodaj Problem na mapę", "dev_spawn_problem", (left_x, y, 250, 38))
 
-    y2 = panel.y + 176
-    _section_title(screen, font, "Przełączniki", right_x, y2)
-    y2 += 40
-    for flag in ("infinite_actions", "infinite_gold", "no_wounds", "council_every_round"):
+    y = panel.y + 512
+    _section_title(screen, font, "Przełączniki", left_x, y)
+    y += 32
+    flags = ("infinite_actions", "infinite_gold", "no_wounds", "council_every_round")
+    flag_w = (col_w - 8) // 2
+    for index, flag in enumerate(flags):
+        row = index // 2
+        col = index % 2
         enabled = dev_flag(flag)
         label = f"{FLAG_LABELS[flag]}: {'WŁ.' if enabled else 'WYŁ.'}"
-        _button(screen, small_font, mouse, buttons, label, f"dev_toggle:{flag}", (right_x, y2, col_w, 44), active=enabled)
-        y2 += 54
-
-    y2 += 10
-    _section_title(screen, font, "Aktywne Wydarzenie Świata", right_x, y2)
-    y2 += 34
-    active_event = active_world_event()
-    event_rect = pygame.Rect(right_x, y2, col_w, 100)
-    pygame.draw.rect(screen, PANEL_DARK, event_rect, border_radius=10)
-    pygame.draw.rect(screen, GOLD, event_rect, 1, border_radius=10)
-    if active_event:
-        lines = [active_event.get("name", "Wydarzenie"), active_event.get("effect_text", "")]
-    else:
-        lines = ["Brak aktywnego wydarzenia."]
-    draw_lines(screen, small_font, wrap(small_font, " — ".join(lines), event_rect.width - 20)[:4], event_rect.x + 10, event_rect.y + 10, TEXT, line_h=20)
+        _button(
+            screen,
+            small_font,
+            mouse,
+            buttons,
+            label,
+            f"dev_toggle:{flag}",
+            (left_x + col * (flag_w + 8), y + row * 48, flag_w, 40),
+            active=enabled,
+        )
 
     message_rect = pygame.Rect(panel.x + 28, panel.bottom - 104, panel.width - 56, 50)
+    _draw_quest_picker(screen, small_font, mouse, buttons, hero, panel, right_x, col_w, message_rect.y)
+
     pygame.draw.rect(screen, PANEL_DARK, message_rect, border_radius=10)
     pygame.draw.rect(screen, (100, 110, 116), message_rect, 1, border_radius=10)
     if message:
         draw_lines(screen, small_font, wrap(small_font, message, message_rect.width - 20)[:2], message_rect.x + 10, message_rect.y + 7, TEXT, line_h=19)
     else:
-        screen.blit(small_font.render("Opcje testowe nie są zapisywane jako normalne zasady gry.", True, MUTED), (message_rect.x + 10, message_rect.y + 15))
+        active_event = active_world_event()
+        event_name = active_event.get("name", "brak") if active_event else "brak"
+        info = f"Opcje testowe są tymczasowe. Aktywne Wydarzenie Świata: {event_name}."
+        screen.blit(small_font.render(info, True, MUTED), (message_rect.x + 10, message_rect.y + 15))
 
     _button(screen, small_font, mouse, buttons, "WYŁĄCZ WSZYSTKIE OPCJE", "dev_reset", (panel.x + 28, panel.bottom - 44, 250, 34))
     _button(screen, small_font, mouse, buttons, "ZAMKNIJ [F8]", "dev_close", (panel.right - 190, panel.bottom - 44, 162, 34))
