@@ -115,9 +115,14 @@ def _draw_unique(pool, visible, rng):
     return _copy_card(rng.choice(candidates or pool))
 
 
-def _draw_quest(visible, rng):
+def _draw_quest(visible, rng, location_name=None):
     unavailable_ids = [str(card.get("id")) for card in visible if isinstance(card, dict) and card.get("id")]
-    quest_id = draw_quest_id(current_world_level(), unavailable_ids=unavailable_ids, rng=rng)
+    quest_id = draw_quest_id(
+        current_world_level(),
+        unavailable_ids=unavailable_ids,
+        rng=rng,
+        location_name=location_name,
+    )
     return create_offer(quest_id) if quest_id else None
 
 
@@ -134,7 +139,7 @@ def initialize_location(location, rng=None):
         helpers.append(_draw_unique(HELPER_CARDS, helpers, rng))
     quests = []
     while len(quests) < 3:
-        quest = _draw_quest(quests, rng)
+        quest = _draw_quest(quests, rng, location.get("name"))
         if quest is None:
             break
         quests.append(quest)
@@ -188,7 +193,7 @@ def take_quest(location, player, slot_index, rng=None):
     if not success:
         return False, message
     visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
-    replacement = _draw_quest(visible_without_slot, rng)
+    replacement = _draw_quest(visible_without_slot, rng, location.get("name"))
     if replacement is None:
         offers.pop(slot_index)
     else:
