@@ -51,6 +51,7 @@ jobs:
             rg_content/quests_pack_01_08.py \
             rg_content/quests_pack_09_16.py \
             rg_content/quests_pack_17_23.py \
+            rg_content/quests_pack_24_30.py \
             rg_content/quests_final.py \
             rg_content/locations.py \
             rg_world/quest_places.py \
