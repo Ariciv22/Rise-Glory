@@ -31,6 +31,7 @@ from rg_ui.hero_figure_system import install_hero_figure_system
 from rg_ui.hero_figure_visual_fix import install_hero_figure_visual_fix
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
+from rg_ui.location_menu_hitbox_fix import install_location_menu_hitbox_fix
 from rg_ui.location_navigation_fix import install_location_navigation_fix
 from rg_ui.location_quest_board import install_location_quest_board
 from rg_ui.map_background_fix import install_map_background
@@ -104,6 +105,12 @@ install_location_hub(_app)
 # Zakladka Zaklady pokazuje trzy gotowe inwestycje nalezace do lokacji oraz
 # wolne prawa eksploatacji heksow podlegajacych tej lokacji.
 install_production_location_hub()
+
+# Lewy panel ma szesc widocznych kafelkow. Hitbox kazdego jest centrowany na
+# srodku jego ikony i obejmuje cala widoczna ramke, bez martwych pasow pomiedzy
+# tekstem a ikona. Usuwamy tez niewidoczny siodmy hitbox dodawany przez modul
+# Zakladow, bo nie ma dla niego kafelka w aktualnym assetcie panelu.
+install_location_menu_hitbox_fix()
 
 # Tablica Ogloszen wypelnia gotowe pola prawego UI: ikona w kolku, grafika
 # tablicy, trzy kafle ofert oraz pozioma karta Questa otwierana po kliknieciu.
