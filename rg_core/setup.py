@@ -5,6 +5,7 @@ from pathlib import Path
 from rg_ui import council as rg_council_background
 from rg_world.world_event_markers import install_world_event_markers
 from rg_world.quest_markers import install_quest_markers
+from rg_world.quest_places import install_quest_places
 from rg_ui.world_state import install_world_state_ui
 from rg_ui.threats import install_threat_investigation_ui
 from rg_ui.threat_layout_fix import install_threat_layout_fix
@@ -130,6 +131,7 @@ def install_council_trade_background():
 # zetonow Przygody nie generujemy, nie rysujemy i nie uruchamiamy na mapie.
 install_world_event_markers()
 install_quest_markers()
+install_quest_places()
 install_quest_effect_bridge()
 install_quest_location_bridge()
 install_quest_world_bridge()
