@@ -85,9 +85,9 @@ install_hero_figure_system(_app)
 # nie ma dodatkowego niebieskiego okregu pod podstawka.
 install_hero_figure_visual_fix()
 
-# Zaznaczenie heksa nie doklada kolejnej ramy na grafike. Podswietlamy tylko
-# zlote piksele istniejacego obramowania assetu i dodajemy subtelne iskry na
-# naroznikach. Efekt jest rysowany po wszystkich heksach, wiec nic go nie ucina.
+# Heksy nie zmieniaja wygladu przy najechaniu, kliknieciu ani wskazaniu
+# mozliwego ruchu. Interakcje nadal dzialaja logicznie, ale mapa pokazuje
+# wylacznie oryginalne assety kafli bez dodatkowych obrysow i kolorow.
 install_hex_selection_theme()
 
 # Wszystkie gorne pola HUD-u (Gracz, Bohater, Klasa, Legenda, Zloto, Rany,
