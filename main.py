@@ -29,6 +29,7 @@ from rg_ui.city_hub import install_location_hub
 from rg_ui.dev_council_reset import install_dev_council_reset
 from rg_ui.hero_figure_system import install_hero_figure_system
 from rg_ui.hero_figure_visual_fix import install_hero_figure_visual_fix
+from rg_ui.hex_selection_theme import install_hex_selection_theme
 from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
 from rg_ui.location_menu_hitbox_fix import install_location_menu_hitbox_fix
@@ -83,6 +84,11 @@ install_hero_figure_system(_app)
 # Wybory wygladu dostaja wysokie ramki z pelnymi sylwetkami, a aktywny pionek
 # nie ma dodatkowego niebieskiego okregu pod podstawka.
 install_hero_figure_visual_fix()
+
+# Zaznaczenie heksa nie doklada kolejnej ramy na grafike. Podswietlamy tylko
+# zlote piksele istniejacego obramowania assetu i dodajemy subtelne iskry na
+# naroznikach. Efekt jest rysowany po wszystkich heksach, wiec nic go nie ucina.
+install_hex_selection_theme()
 
 # Wszystkie gorne pola HUD-u (Gracz, Bohater, Klasa, Legenda, Zloto, Rany,
 # Akcje, Runda i Rada) korzystaja teraz z tej samej grafiki panel2.png co
