@@ -23,9 +23,9 @@ def setup_module(_module):
     register_all_quests()
 
 
-def test_all_23_final_quests_are_registered_with_stable_numbers():
-    assert len(QUESTS) == 23
-    for number in range(1, 24):
+def test_all_30_final_quests_are_registered_with_stable_numbers():
+    assert len(QUESTS) == 30
+    for number in range(1, 31):
         matches = [quest for quest in QUESTS if int(quest.get("quest_number", 0)) == number]
         assert len(matches) == 1
         definition = quest_definition(matches[0]["id"])
@@ -41,13 +41,30 @@ def test_elarin_board_draws_only_elarin_quests():
     reset_quest_deck()
     rng = random.Random(1701)
     drawn = []
-    for _ in range(3):
+    for _ in range(4):
         quest_id = draw_quest_id(1, rng=rng, location_name="Elarin")
         assert quest_id is not None
         drawn.append(quest_id)
         definition = quest_definition(quest_id)
         assert definition["board_location"] == "Elarin"
-    assert set(drawn) == {"dzwon_miedzy_nami", "ostatnia_woda", "miod_wiedzmy"}
+    assert set(drawn) == {"dzwon_miedzy_nami", "ostatnia_woda", "miod_wiedzmy", "dom_bez_drzwi"}
+
+
+def test_new_quests_24_30_cover_seven_different_boards():
+    expected = {
+        24: "Artium",
+        25: "Norven",
+        26: "Thalwen",
+        27: "Eryndor",
+        28: "Lirion",
+        29: "Durnhal",
+        30: "Elarin",
+    }
+    for number, location in expected.items():
+        definition = next(quest for quest in QUESTS if quest["quest_number"] == number)
+        assert definition["board_location"] == location
+        assert len(definition["stages"]) >= 3
+        assert len(definition["ending_rewards"]) == 3
 
 
 def test_q21_offer_contains_issuer_and_immediate_teren_scene():
@@ -69,6 +86,49 @@ def test_q09_three_channels_reward_sets_result_and_creates_farm_place():
     assert player["story_flags"]["q09_result"] == "trzy_kanaly"
     places = quest_created_places([player])
     assert any(place["id"] == "folwark_elarin" for place in places)
+
+
+def test_q25_trade_bridge_creates_permanent_place():
+    player = ensure_hero_state({"gold": 0, "legend": 0})
+    quest = activate_quest("most_bez_wlasciciela")
+    player["active_quests"].append(quest)
+
+    complete_quest(player, quest, ending_id="most_handlowy")
+
+    assert player["gold"] == 9
+    assert player["legend"] == 3
+    assert player["story_flags"]["q25_result"] == "most_handlowy"
+    places = quest_created_places([player])
+    assert any(place["id"] == "most_handlowy" for place in places)
+
+
+def test_q29_wolf_can_become_real_companion_reward():
+    player = ensure_hero_state({"gold": 0, "legend": 0})
+    quest = activate_quest("wilk_przy_palenisku")
+    player["active_quests"].append(quest)
+
+    complete_quest(player, quest, ending_id="wilk_towarzysz")
+
+    assert player["gold"] == 7
+    assert player["legend"] == 3
+    assert player["story_flags"]["q29_result"] == "wilk_towarzysz"
+    wolf = next(helper for helper in player["helpers"] if helper.get("id") == "wilk_przy_palenisku")
+    assert wolf["stat_bonus"]["Walka"] == 1
+    assert wolf["stat_bonus"]["Intryga"] == 1
+
+
+def test_q30_hidden_warehouse_creates_permanent_place():
+    player = ensure_hero_state({"gold": 0, "legend": 0})
+    quest = activate_quest("dom_bez_drzwi")
+    player["active_quests"].append(quest)
+
+    complete_quest(player, quest, ending_id="ukryty_magazyn")
+
+    assert player["gold"] == 8
+    assert player["legend"] == 3
+    assert player["story_flags"]["q30_result"] == "ukryty_magazyn"
+    places = quest_created_places([player])
+    assert any(place["id"] == "ukryty_magazyn" for place in places)
 
 
 def test_reckless_healer_reduces_healing_cost_by_two_with_floor_one():
