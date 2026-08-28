@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import random
+from types import SimpleNamespace
 
 from rg_content.quest_pack_common import LEKKOMYSLNY_ZNACHOR, MINIATUROWY_WEDROWNY_DOM
 from rg_content.quest_runtime_ext import miniature_house_available, quest_created_places
+from rg_content.quest_special_rewards import miniature_house_targets, teleport_with_miniature_house
 from rg_content.quests_final import QUESTS, register_all_quests
 from rg_engine.heroes import ensure_hero_state, healing_cost_per_wound
 from rg_engine.items import add_item
@@ -76,9 +78,6 @@ def test_reckless_healer_reduces_healing_cost_by_two_with_floor_one():
 
 def test_q23_miniature_house_is_unique_reward_and_once_per_round_capability():
     player = ensure_hero_state({})
-    add_item(player, MINIATUROWY_WEDROWNY_DOM)
-    assert miniature_house_available(player, round_number=4) is True
-
     quest = activate_quest("wedrowny_dom")
     player["active_quests"].append(quest)
     complete_quest(player, quest, ending_id="dom_przeprogramowany")
@@ -86,3 +85,36 @@ def test_q23_miniature_house_is_unique_reward_and_once_per_round_capability():
     assert player["gold"] == 18
     assert player["legend"] == 2
     assert player["story_flags"]["q23_result"] == "dom_przeprogramowany"
+    assert miniature_house_available(player, round_number=4) is True
+
+
+def test_miniature_house_teleports_to_nearest_place_and_requires_choice_on_tie():
+    player = ensure_hero_state({})
+    add_item(player, MINIATUROWY_WEDROWNY_DOM)
+
+    start = SimpleNamespace(id=1, q=0, r=0, location=None)
+    elarin = SimpleNamespace(id=2, q=1, r=0, location={"name": "Elarin", "kind": "village"})
+    norven = SimpleNamespace(id=3, q=0, r=1, location={"name": "Norven", "kind": "village"})
+    far_city = SimpleNamespace(id=4, q=4, r=0, location={"name": "Lirion", "kind": "city"})
+    token = SimpleNamespace(tile=start)
+    tiles = [start, elarin, norven, far_city]
+
+    targets = miniature_house_targets(player, token, tiles, round_number=7)
+    assert {target["tile_id"] for target in targets} == {2, 3}
+
+    success, message = teleport_with_miniature_house(player, token, tiles, round_number=7)
+    assert success is False
+    assert "Wybierz cel" in message
+    assert token.tile is start
+
+    success, _message = teleport_with_miniature_house(
+        player,
+        token,
+        tiles,
+        round_number=7,
+        target_tile_id=2,
+    )
+    assert success is True
+    assert token.tile is elarin
+    assert miniature_house_available(player, round_number=7) is False
+    assert miniature_house_available(player, round_number=8) is True
