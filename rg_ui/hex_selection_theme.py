@@ -16,15 +16,14 @@ _COMPOSITE_CACHE = {}
 _OVERLAY_CACHE = {}
 _PENDING_OVERLAYS = {"hover": None, "selected": None}
 _FRAME_OPEN = False
+_LAST_CAMERA = None
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 HOVER_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hex_hover.png"
 SELECTED_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hex_selected.png"
 
-# Wizualna grafika heksa jest lekko mniejsza od jego logicznego hitboxa.
-# Powstaje dzieki temu waska, ciemna szczelina, ale sam asset hover/selected
-# jest juz gotowa przezroczysta rama. Nie przycinamy go ponownie do 2-8 px,
-# bo jego swiecace elementy leza glebiej wewnatrz PNG.
+# Logiczny rozmiar heksa pozostaje bez zmian. Pomniejszamy wyłącznie grafikę
+# terenu, aby między sąsiadami została cienka szczelina na stan interakcji.
 GAP_FACTOR = 0.009
 GAP_MIN_PX = 2
 GAP_MAX_PX = 8
@@ -69,7 +68,7 @@ def _hex_background(size: int) -> pygame.Surface:
 
 
 def _scaled_terrain_with_gap(textures, terrain_key, size):
-    """Buduje normalny kafel z mala ciemna szczelina dookola grafiki."""
+    """Normalny kafel z cienką ciemną szczeliną wokół assetu terenu."""
     source = textures.get(terrain_key)
     size = max(1, int(size))
 
@@ -90,14 +89,7 @@ def _scaled_terrain_with_gap(textures, terrain_key, size):
 
 
 def _scaled_overlay_asset(mode: str, size: int):
-    """Skaluje caly gotowy PNG hover/selected bez dodatkowej maski.
-
-    Assety maja juz przezroczysty srodek i przezroczyste tlo poza heksagonalna
-    rama. Poprzednia wersja nakladala na nie jeszcze bardzo waska maske
-    2-8 pikseli przy matematycznej krawedzi heksa. To wycinalo praktycznie
-    cala widoczna grafike, bo zlota/swiecaca rama PNG znajduje sie kilkanascie
-    pikseli glebiej. Teraz rysujemy dokladnie asset dostarczony do gry.
-    """
+    """Skaluje cały dostarczony PNG bez dodatkowego wycinania jego ramy."""
     asset = _load_asset(mode)
     if asset is None:
         return None
@@ -137,13 +129,14 @@ def _queue_overlay(tile, hovered: bool, selected: bool):
         _PENDING_OVERLAYS["hover"] = tile
 
 
-def draw_hex_state_overlays(screen, camera):
-    """Rysuje gotowe PNG hover/selected po narysowaniu wszystkich heksow."""
+def draw_hex_state_overlays(screen, camera=None):
+    """Rysuje PNG hover/selected jako osobną końcową warstwę mapy."""
     global _FRAME_OPEN
-    if not _FRAME_OPEN:
+    camera = camera or _LAST_CAMERA
+    if not _FRAME_OPEN or camera is None:
         return
 
-    # Hover najpierw, selected na koncu - klikniety heks ma priorytet.
+    # Hover najpierw, selected jako ostatni stan mapy.
     for mode in ("hover", "selected"):
         tile = _PENDING_OVERLAYS.get(mode)
         if tile is None:
@@ -157,8 +150,7 @@ def draw_hex_state_overlays(screen, camera):
             continue
 
         sx, sy = tile.center(camera)
-        rect = overlay.get_rect(center=(int(sx), int(sy)))
-        screen.blit(overlay, rect)
+        screen.blit(overlay, overlay.get_rect(center=(int(sx), int(sy))))
 
     _PENDING_OVERLAYS["hover"] = None
     _PENDING_OVERLAYS["selected"] = None
@@ -166,19 +158,19 @@ def draw_hex_state_overlays(screen, camera):
 
 
 def install_hex_selection_theme():
-    """Instaluje assetowe stany hover/klik bez technicznych obrysow.
+    """Instaluje assetowe hover/klik bez programowych obrysów.
 
-    Najpierw renderowane sa wszystkie kafle. Tile.draw tylko zapamietuje heks
-    hover/selected. Gotowy PNG stanu jest rysowany dopiero przed pierwszym
-    pionkiem bohatera, czyli juz po wszystkich sasiednich heksach. Sam PNG ma
-    przezroczysty srodek, wiec nie zaslania krajobrazu.
+    W poprzedniej wersji flush warstwy był ukryty w ``HeroToken.draw``. To było
+    kruche, bo pionek jest wielokrotnie opakowywany przez inne moduły UI.
+    Teraz Tile.draw wyłącznie zapamiętuje stan, a finalny PNG jest jawnie
+    rysowany tuż przed HUD-em gry. Oznacza to: wszystkie heksy i pionki są już
+    gotowe, więc żaden sąsiad nie może zasłonić ramy.
     """
     global _INSTALLED
     if _INSTALLED:
         return
 
     current_tile_draw = world_map.Tile.draw
-    current_token_draw = world_map.HeroToken.draw
     map_camera_lock._scaled_terrain_texture = _scaled_terrain_with_gap
 
     def tile_draw_with_asset_state(
@@ -191,12 +183,12 @@ def install_hex_selection_theme():
         selected=False,
         valid_move=False,
     ):
-        if int(getattr(self, "id", -1)) == 1:
-            _begin_map_frame()
+        global _LAST_CAMERA
+        _LAST_CAMERA = camera
         _queue_overlay(self, hovered, selected)
 
-        # Stare programowe obrysy pozostaja wylaczone. Wyglad interakcji
-        # pochodzi wylacznie z hex_hover.png / hex_selected.png.
+        # Wygląd interakcji pochodzi wyłącznie z PNG. Nie przepuszczamy starych
+        # niebieskich/złotych programowych outline'ów ani valid_move.
         return current_tile_draw(
             self,
             screen,
@@ -208,24 +200,21 @@ def install_hex_selection_theme():
             valid_move=False,
         )
 
-    def token_draw_after_hex_overlays(
-        self,
-        screen,
-        camera,
-        font,
-        selected=False,
-    ):
-        draw_hex_state_overlays(screen, camera)
-        return current_token_draw(
-            self,
-            screen,
-            camera,
-            font,
-            selected=selected,
-        )
-
     tile_draw_with_asset_state._rise_glory_hex_asset_states = True
-    token_draw_after_hex_overlays._rise_glory_hex_overlay_flush = True
     world_map.Tile.draw = tile_draw_with_asset_state
-    world_map.HeroToken.draw = token_draw_after_hex_overlays
+
+    # production_hud jest instalowany chwilę PO tym module w main.py. Podmieniamy
+    # więc jego funkcję wejściową już teraz. Kiedy install_production_hud(_app)
+    # przypisze ją do aplikacji, będzie to właśnie ten wrapper.
+    from rg_ui import production_hud
+
+    current_game_ui_draw = production_hud.draw_game_ui_with_production
+
+    def draw_game_ui_after_hex_overlays(screen, *args, **kwargs):
+        draw_hex_state_overlays(screen, _LAST_CAMERA)
+        return current_game_ui_draw(screen, *args, **kwargs)
+
+    draw_game_ui_after_hex_overlays._rise_glory_hex_overlay_flush = True
+    production_hud.draw_game_ui_with_production = draw_game_ui_after_hex_overlays
+
     _INSTALLED = True
