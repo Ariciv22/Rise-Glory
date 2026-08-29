@@ -19,8 +19,8 @@ _FRAME_OPEN = False
 _LAST_CAMERA = None
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-HOVER_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hex_hover.png"
-SELECTED_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hex_selected.png"
+HOVER_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hover_hex.png"
+SELECTED_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "click_hex.png"
 
 # Logiczny rozmiar heksa pozostaje bez zmian. Pomniejszamy wyłącznie grafikę
 # terenu, aby między sąsiadami została cienka szczelina na stan interakcji.
