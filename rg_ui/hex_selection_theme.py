@@ -22,9 +22,9 @@ HOVER_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hex_hover.png"
 SELECTED_ASSET = ROOT_DIR / "Grafiki" / "Grafiki UI" / "hex_selected.png"
 
 # Wizualna grafika heksa jest lekko mniejsza od jego logicznego hitboxa.
-# Powstaje dzieki temu waska, ciemna szczelina, w ktorej pokazujemy osobny
-# asset hover/selected. Logika ruchu, klikniecia i pozycje znacznikow zostaja
-# bez zmian.
+# Powstaje dzieki temu waska, ciemna szczelina, ale sam asset hover/selected
+# jest juz gotowa przezroczysta rama. Nie przycinamy go ponownie do 2-8 px,
+# bo jego swiecace elementy leza glebiej wewnatrz PNG.
 GAP_FACTOR = 0.009
 GAP_MIN_PX = 2
 GAP_MAX_PX = 8
@@ -69,12 +69,7 @@ def _hex_background(size: int) -> pygame.Surface:
 
 
 def _scaled_terrain_with_gap(textures, terrain_key, size):
-    """Buduje normalny kafel z mala ciemna szczelina dookola grafiki.
-
-    Assety hover/selected nie sa juz skladane bezposrednio z pojedynczym
-    kaflem. Gdy robilismy to tutaj, kolejne heksy renderowane w petli mogly
-    przykrywac ich boki. Warstwa interakcji jest teraz odkladana na pozniej.
-    """
+    """Buduje normalny kafel z mala ciemna szczelina dookola grafiki."""
     source = textures.get(terrain_key)
     size = max(1, int(size))
 
@@ -94,15 +89,21 @@ def _scaled_terrain_with_gap(textures, terrain_key, size):
     return composite
 
 
-def _scaled_overlay_ring(mode: str, size: int):
-    """Zwraca PNG przyciety wylacznie do szczeliny przy krawedzi heksa."""
+def _scaled_overlay_asset(mode: str, size: int):
+    """Skaluje caly gotowy PNG hover/selected bez dodatkowej maski.
+
+    Assety maja juz przezroczysty srodek i przezroczyste tlo poza heksagonalna
+    rama. Poprzednia wersja nakladala na nie jeszcze bardzo waska maske
+    2-8 pikseli przy matematycznej krawedzi heksa. To wycinalo praktycznie
+    cala widoczna grafike, bo zlota/swiecaca rama PNG znajduje sie kilkanascie
+    pikseli glebiej. Teraz rysujemy dokladnie asset dostarczony do gry.
+    """
     asset = _load_asset(mode)
     if asset is None:
         return None
 
     size = max(1, int(size))
-    inset = _gap_inset(size)
-    cache_key = (mode, size, inset, id(asset))
+    cache_key = (mode, size, id(asset))
     cached = _OVERLAY_CACHE.get(cache_key)
     if cached is not None:
         return cached
@@ -111,16 +112,6 @@ def _scaled_overlay_ring(mode: str, size: int):
         rendered = asset.copy()
     else:
         rendered = pygame.transform.smoothscale(asset, (size, size))
-
-    # Przycinamy asset do pierscienia odpowiadajacego faktycznej szczelinie.
-    # Dzieki temu warstwa moze byc rysowana NA KONCU i nadal nigdy nie przykrywa
-    # krajobrazu wewnatrz kafla.
-    mask = pygame.Surface((size, size), pygame.SRCALPHA)
-    outer_radius = max(1.0, size / 2.0 - 1.0)
-    inner_radius = max(1.0, outer_radius - inset)
-    pygame.draw.polygon(mask, (255, 255, 255, 255), _hex_points(size, outer_radius))
-    pygame.draw.polygon(mask, (0, 0, 0, 0), _hex_points(size, inner_radius))
-    rendered.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
     _OVERLAY_CACHE[cache_key] = rendered
     return rendered
@@ -147,18 +138,12 @@ def _queue_overlay(tile, hovered: bool, selected: bool):
 
 
 def draw_hex_state_overlays(screen, camera):
-    """Rysuje hover/selected dopiero po narysowaniu WSZYSTKICH heksow.
-
-    Funkcja jest odpalana tuz przed pierwszym pionkiem bohatera. W glownej
-    petli gry pionki sa renderowane bezposrednio po petli kafli, wiec jest to
-    bezpieczny punkt: zaden sasiedni heks nie moze juz przykryc obramowania,
-    a pionki nadal pozostaja nad nim.
-    """
+    """Rysuje gotowe PNG hover/selected po narysowaniu wszystkich heksow."""
     global _FRAME_OPEN
     if not _FRAME_OPEN:
         return
 
-    # Selected jest wazniejsze wizualnie, dlatego rysujemy je jako ostatnie.
+    # Hover najpierw, selected na koncu - klikniety heks ma priorytet.
     for mode in ("hover", "selected"):
         tile = _PENDING_OVERLAYS.get(mode)
         if tile is None:
@@ -167,7 +152,7 @@ def draw_hex_state_overlays(screen, camera):
             continue
 
         size = max(1, int(HEX_SIZE * 2 * camera.zoom))
-        overlay = _scaled_overlay_ring(mode, size)
+        overlay = _scaled_overlay_asset(mode, size)
         if overlay is None:
             continue
 
@@ -183,10 +168,10 @@ def draw_hex_state_overlays(screen, camera):
 def install_hex_selection_theme():
     """Instaluje assetowe stany hover/klik bez technicznych obrysow.
 
-    Kazdy heks ma stale niewielka szczeline. Podczas petli kafli tylko
-    zapamietujemy, ktory heks jest hover/selected. Wlasciwe PNG sa rysowane
-    dopiero po wszystkich kaflach, przed pionkami, wiec sasiad nie moze ich
-    juz zaslonic.
+    Najpierw renderowane sa wszystkie kafle. Tile.draw tylko zapamietuje heks
+    hover/selected. Gotowy PNG stanu jest rysowany dopiero przed pierwszym
+    pionkiem bohatera, czyli juz po wszystkich sasiednich heksach. Sam PNG ma
+    przezroczysty srodek, wiec nie zaslania krajobrazu.
     """
     global _INSTALLED
     if _INSTALLED:
@@ -206,15 +191,12 @@ def install_hex_selection_theme():
         selected=False,
         valid_move=False,
     ):
-        # Tile ID 1 jest pierwszym kaflem generowanej rozety. Reset w tym
-        # miejscu zabezpiecza tez sytuacje, w ktorej poprzednia klatka nie
-        # doszla do renderowania pionkow.
         if int(getattr(self, "id", -1)) == 1:
             _begin_map_frame()
         _queue_overlay(self, hovered, selected)
 
-        # Bazowy renderer nie dostaje zadnych flag wizualnych, wiec nie wracaja
-        # stare niebieskie/zolte linie ani highlight mozliwego ruchu.
+        # Stare programowe obrysy pozostaja wylaczone. Wyglad interakcji
+        # pochodzi wylacznie z hex_hover.png / hex_selected.png.
         return current_tile_draw(
             self,
             screen,
@@ -233,8 +215,6 @@ def install_hex_selection_theme():
         font,
         selected=False,
     ):
-        # W app.py tokeny sa rysowane bezposrednio po calej petli tile.draw.
-        # Pierwszy token sluzy wiec jako pewny flush odroczonej warstwy stanu.
         draw_hex_state_overlays(screen, camera)
         return current_token_draw(
             self,
