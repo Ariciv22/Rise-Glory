@@ -92,5 +92,7 @@ def test_bottom_hud_tracks_hovered_hex_without_changing_selected_actions():
     assert "display_tile = hovered_tile or selected_tile" in source
     assert "selected_value = potential(selected_tile) if selected_tile is not None else {}" in source
     assert "if can_build and display_tile is selected_tile:" in source
-    assert "first_y = rect.y + 16" in source
+    assert "left_inset = min(260, max(180, int(round(rect.width * 0.14))))" in source
+    assert "text_x = rect.x + left_inset" in source
+    assert "first_y = rect.y + max(8, (rect.height - 44) // 2)" in source
     assert "second_y = min(" in source

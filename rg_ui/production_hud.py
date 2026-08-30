@@ -89,14 +89,16 @@ def _hovered_map_tile(screen, mouse):
     return None
 
 
-def _text_rows(rect, font):
-    """Dwie linie tekstu w bezpiecznej strefie ponizej gornej dekoracji."""
-    first_y = rect.y + 16
+def _text_layout(rect, font):
+    """Tekst omija lewa dekoracje panelu, ale pozostaje na starej wysokosci."""
+    left_inset = min(260, max(180, int(round(rect.width * 0.14))))
+    text_x = rect.x + left_inset
+    first_y = rect.y + max(8, (rect.height - 44) // 2)
     second_y = min(
         rect.bottom - font.get_height() - 4,
-        first_y + max(19, font.get_linesize()),
+        first_y + 24,
     )
-    return first_y, second_y
+    return text_x, first_y, second_y
 
 
 def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mouse):
@@ -111,7 +113,7 @@ def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mou
     draw_image_panel(screen, rect, 2)
     pad = 18
     state_rect = _world_state_slot(rect)
-    text_y1, text_y2 = _text_rows(rect, small_font)
+    text_x, text_y1, text_y2 = _text_layout(rect, small_font)
 
     # Podglad reaguje natychmiast na kursor. Gdy kursor opusci plansze,
     # zostawiamy informacje o ostatnio kliknietym heksie jako fallback.
@@ -119,17 +121,17 @@ def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mou
     display_tile = hovered_tile or selected_tile
 
     if display_tile is None:
-        text_w = max(80, state_rect.x - pad - (rect.x + pad))
+        text_w = max(80, state_rect.x - pad - text_x)
         line1 = "POTENCJAŁ HEKSA: najedź kursorem lub wybierz heks na mapie."
         line2 = str(hero.get("_map_message", ""))
         screen.blit(
             small_font.render(_shorten(small_font, line1, text_w), True, TEXT),
-            (rect.x + pad, text_y1),
+            (text_x, text_y1),
         )
         if line2:
             screen.blit(
                 small_font.render(_shorten(small_font, line2, text_w), True, MUTED),
-                (rect.x + pad, text_y2),
+                (text_x, text_y2),
             )
         world_state._draw_state_button(screen, small_font, rect)
         return []
@@ -165,7 +167,7 @@ def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mou
         text_right = action_rect.x - pad
     else:
         text_right = state_rect.x - pad
-    text_w = max(80, text_right - (rect.x + pad))
+    text_w = max(80, text_right - text_x)
 
     line1 = (
         f"Heks {display_tile.id}: {display_tile.terrain['name']} | "
@@ -190,11 +192,11 @@ def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mou
 
     screen.blit(
         small_font.render(_shorten(small_font, line1, text_w), True, TEXT),
-        (rect.x + pad, text_y1),
+        (text_x, text_y1),
     )
     screen.blit(
         small_font.render(_shorten(small_font, line2, text_w), True, MUTED),
-        (rect.x + pad, text_y2),
+        (text_x, text_y2),
     )
 
     buttons = []
