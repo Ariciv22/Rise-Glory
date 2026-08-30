@@ -45,6 +45,10 @@ from rg_ui.village_hub import install_village_hub
 from rg_world.location_names import install_quest_location_name_compatibility
 from rg_world.production_visuals import install_production_visuals
 
+# Informacja przy kursorze ma byc szybka, ale nie wyskakiwac przy przypadkowym
+# przejechaniu przez plansze. 1,5 s ciaglego wskazywania tego samego heksa.
+_app.HEX_TOOLTIP_DELAY_MS = 1500
+
 # DEV: kazde reczne otwarcie Rady rozpoczyna swieza sesje UI i dobiera kolejna
 # karte z biezacej talii. Nie resetujemy samej talii Wydarzen Swiata.
 install_dev_council_reset(_app)
@@ -61,9 +65,9 @@ install_menu_button_fix()
 # bezpiecznie opakowujemy caly lancuch tlem mapy.
 install_map_background()
 
-# Gotowe i budowane zaklady dostaja osobny, maly znacznik na swoim heksie.
-# Modul przechwytuje aktualny Tile.draw dopiero tutaj, dzieki czemu zachowuje
-# szybki renderer, tlo oraz nakladki Questow/Wydarzen.
+# Zachowujemy hook Zakladow w lancuchu renderera, ale nie rysujemy juz
+# tymczasowych kolek z literami materialow. W ich miejscu pojawia sie pozniej
+# male assety kopalni, tartakow, kamieniolomow, lowisk itd.
 install_production_visuals()
 
 # Zachowujemy zgodnosc z poprawkami ekranu tytulowego, ktore odwoluja sie do
