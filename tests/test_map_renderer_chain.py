@@ -51,7 +51,7 @@ def test_scoreboard_text_is_redrawn_inside_dedicated_ui_panels():
 def test_production_hud_reserves_world_event_slot_and_removes_alpha_takeover():
     source = (ROOT / "rg_ui" / "production_hud.py").read_text(encoding="utf-8")
 
-    assert '"Przejmij (ALFA)"' not in source
+    assert "production_takeover:" not in source
     assert "takeover_placeholder" not in source
     assert "state_rect = _world_state_slot(rect)" in source
     assert "world_state._draw_state_button(screen, small_font, rect)" in source
