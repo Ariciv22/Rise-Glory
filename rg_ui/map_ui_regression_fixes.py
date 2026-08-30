@@ -136,9 +136,12 @@ def _draw_scoreboard_without_covering_art(
         )
         y += row_h + row_gap
 
+    # Koniec tury ma stale miejsce przy samym dole panelu. Nie przesuwa sie
+    # juz razem z liczba graczy i nie zajmuje przestrzeni pod tabela. Dolny
+    # margines 12 px chroni ozdobna rame panel5, a srodkowanie omija kompas.
     end_rect = pygame.Rect(
         right.centerx - 70,
-        min(y + 2, list_bottom - 38),
+        right.bottom - 46,
         140,
         34,
     )
