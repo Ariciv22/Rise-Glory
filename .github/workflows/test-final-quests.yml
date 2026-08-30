@@ -53,6 +53,7 @@ jobs:
         run: |
           python -m py_compile \
             main.py \
+            rg_core/app.py \
             rg_content/quest_runtime_ext.py \
             rg_content/quest_special_rewards.py \
             rg_content/quest_pack_common.py \
@@ -65,6 +66,7 @@ jobs:
             rg_engine/dev_quest_tools.py \
             rg_engine/production.py \
             rg_ui/city_hub.py \
+            rg_ui/hex_info_panel.py \
             rg_ui/location_menu_hitbox_fix.py \
             rg_ui/location_quest_board.py \
             rg_ui/dev_menu.py \
