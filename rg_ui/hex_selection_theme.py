@@ -89,7 +89,13 @@ def _scaled_terrain_with_gap(textures, terrain_key, size):
 
 
 def _scaled_overlay_asset(mode: str, size: int):
-    """Skaluje bezpośrednio hover_hex/click_hex do aktualnego rozmiaru heksa."""
+    """Skaluje hover_hex/click_hex zawsze bezpośrednio z pliku źródłowego.
+
+    Zwykłe ``pygame.transform.scale`` dawało widoczne kwadratowe piksele przy
+    powiększaniu 512-pikselowej ramki na dużym zoomie. ``smoothscale`` filtruje
+    raster, ale nadal korzystamy wyłącznie z mastera, więc nie ma wielokrotnego
+    skalowania już przeskalowanej kopii.
+    """
     asset = _load_asset(mode)
     if asset is None:
         return None
@@ -103,9 +109,7 @@ def _scaled_overlay_asset(mode: str, size: int):
     if asset.get_size() == (size, size):
         rendered = asset.copy()
     else:
-        # Assety mają ostre, cienkie linie. Przy powiększaniu zwykłe scale
-        # zachowuje je czytelniej niż smoothscale, które dawało efekt mydła.
-        rendered = pygame.transform.scale(asset, (size, size))
+        rendered = pygame.transform.smoothscale(asset, (size, size))
 
     _OVERLAY_CACHE[cache_key] = rendered
     return rendered
