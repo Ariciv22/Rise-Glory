@@ -57,6 +57,48 @@ def _world_state_slot(rect):
     )
 
 
+def _hovered_map_tile(screen, mouse):
+    """Zwraca heks bezposrednio pod kursorem, ale tylko w polu planszy.
+
+    To jest wylacznie podglad dla dolnego HUD-u. Nie zmieniamy selected_tile,
+    nie uruchamiamy ruchu i nie podmieniamy celu przyciskow gospodarczych.
+    """
+    layout = game_layout_rects(screen)
+    map_rect = layout["center"].copy()
+    map_rect.height = max(0, layout["bottom"].top - map_rect.top)
+    if not map_rect.collidepoint(mouse):
+        return None
+
+    try:
+        from rg_world.world_event_markers import active_camera, bound_tiles
+
+        camera = active_camera()
+        tiles = bound_tiles()
+    except (ImportError, AttributeError):
+        return None
+
+    if camera is None:
+        return None
+
+    for tile in tiles:
+        try:
+            if tile.contains(mouse, camera):
+                return tile
+        except (AttributeError, TypeError):
+            continue
+    return None
+
+
+def _text_rows(rect, font):
+    """Dwie linie tekstu w bezpiecznej strefie ponizej gornej dekoracji."""
+    first_y = rect.y + 16
+    second_y = min(
+        rect.bottom - font.get_height() - 4,
+        first_y + max(19, font.get_linesize()),
+    )
+    return first_y, second_y
+
+
 def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mouse):
     _ = font
     rect = game_layout_rects(screen)["bottom"]
@@ -69,30 +111,45 @@ def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mou
     draw_image_panel(screen, rect, 2)
     pad = 18
     state_rect = _world_state_slot(rect)
+    text_y1, text_y2 = _text_rows(rect, small_font)
 
-    if selected_tile is None:
+    # Podglad reaguje natychmiast na kursor. Gdy kursor opusci plansze,
+    # zostawiamy informacje o ostatnio kliknietym heksie jako fallback.
+    hovered_tile = _hovered_map_tile(screen, mouse)
+    display_tile = hovered_tile or selected_tile
+
+    if display_tile is None:
         text_w = max(80, state_rect.x - pad - (rect.x + pad))
-        line1 = "POTENCJAŁ HEKSA: wybierz heks na mapie."
+        line1 = "POTENCJAŁ HEKSA: najedź kursorem lub wybierz heks na mapie."
         line2 = str(hero.get("_map_message", ""))
         screen.blit(
             small_font.render(_shorten(small_font, line1, text_w), True, TEXT),
-            (rect.x + pad, rect.y + 12),
+            (rect.x + pad, text_y1),
         )
         if line2:
             screen.blit(
                 small_font.render(_shorten(small_font, line2, text_w), True, MUTED),
-                (rect.x + pad, rect.y + 36),
+                (rect.x + pad, text_y2),
             )
         world_state._draw_state_button(screen, small_font, rect)
         return []
 
-    value = potential(selected_tile)
-    site = getattr(selected_tile, "production_site", None)
-    on_tile = token is not None and getattr(token, "tile", None) is selected_tile
+    value = potential(display_tile)
+    site = getattr(display_tile, "production_site", None)
+
+    # Akcje nadal dotycza tylko kliknietego heksa. Sam hover nigdy nie daje
+    # prawa do budowy ani nie zmienia celu klikniecia.
+    on_selected_tile = (
+        selected_tile is not None
+        and token is not None
+        and getattr(token, "tile", None) is selected_tile
+    )
+    selected_value = potential(selected_tile) if selected_tile is not None else {}
+    selected_site = getattr(selected_tile, "production_site", None) if selected_tile is not None else None
     can_build = (
-        on_tile
-        and site is None
-        and value.get("material")
+        on_selected_tile
+        and selected_site is None
+        and selected_value.get("material")
         and player_has_right(hero, selected_tile)
     )
 
@@ -111,32 +168,33 @@ def _draw_tile_economy(screen, font, small_font, hero, token, selected_tile, mou
     text_w = max(80, text_right - (rect.x + pad))
 
     line1 = (
-        f"Heks {selected_tile.id}: {selected_tile.terrain['name']} | "
-        f"POTENCJAŁ: {potential_summary(selected_tile)} | "
-        f"Jurysdykcja: {getattr(selected_tile, 'jurisdiction_name', None) or 'brak'}"
+        f"Heks {display_tile.id}: {display_tile.terrain['name']} | "
+        f"POTENCJAŁ: {potential_summary(display_tile)} | "
+        f"Jurysdykcja: {getattr(display_tile, 'jurisdiction_name', None) or 'brak'}"
     )
     if site:
         status = "aktywny" if site.get("status") == "active" else "w budowie"
         line2 = f"{site.get('name', 'Zakład')} ({status}) | Właściciel: {site_owner_label(site)}"
     else:
-        right_name = getattr(selected_tile, "extraction_right_owner_name", None) or "wolne"
+        right_name = getattr(display_tile, "extraction_right_owner_name", None) or "wolne"
         line2 = f"Zakład: brak | Prawo eksploatacji: {right_name}"
 
-    if can_build:
+    # Koszt budowy pokazujemy tylko wtedy, gdy podglad dotyczy tego samego
+    # heksa, na ktorym faktycznie mozna teraz wykonac akcje.
+    if can_build and display_tile is selected_tile:
         line2 = f"{line2} | {build_cost_text(hero, selected_tile)}"
 
     message = str(hero.get("_map_message", ""))
     if message:
         line2 = f"{line2} | {message}"
 
-    y1 = rect.y + max(8, (rect.height - 44) // 2)
     screen.blit(
         small_font.render(_shorten(small_font, line1, text_w), True, TEXT),
-        (rect.x + pad, y1),
+        (rect.x + pad, text_y1),
     )
     screen.blit(
         small_font.render(_shorten(small_font, line2, text_w), True, MUTED),
-        (rect.x + pad, y1 + 24),
+        (rect.x + pad, text_y2),
     )
 
     buttons = []

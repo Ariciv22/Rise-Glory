@@ -81,3 +81,16 @@ def test_blocked_world_threats_can_be_resolved_from_adjacent_hexes():
     assert "world_state._HEX_ACTION_RECTS.append" in source
     assert '"Zablokowany heks obok"' in source
     assert "install_threat_adjacent_resolution()" in production
+
+
+def test_bottom_hud_tracks_hovered_hex_without_changing_selected_actions():
+    source = (ROOT / "rg_ui" / "production_hud.py").read_text(encoding="utf-8")
+
+    assert "def _hovered_map_tile(screen, mouse):" in source
+    assert 'map_rect.height = max(0, layout["bottom"].top - map_rect.top)' in source
+    assert "tile.contains(mouse, camera)" in source
+    assert "display_tile = hovered_tile or selected_tile" in source
+    assert "selected_value = potential(selected_tile) if selected_tile is not None else {}" in source
+    assert "if can_build and display_tile is selected_tile:" in source
+    assert "first_y = rect.y + 16" in source
+    assert "second_y = min(" in source
