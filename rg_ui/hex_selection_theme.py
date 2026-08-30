@@ -29,9 +29,25 @@ GAP_MIN_PX = 2
 GAP_MAX_PX = 8
 NORMAL_GAP_COLOR = (12, 9, 6, 255)
 
+# Assety hover_hex/click_hex maja minimalnie zbyt wysoko zakonczony dolny grot
+# wzgledem rzeczywistej geometrii heksa. Nie przesuwamy ani nie powiekszamy
+# calego kafla: gorna krawedz nakladki zostaje na swoim miejscu, a sama grafika
+# stanu jest rozciagana wyłącznie w dol. Dzięki temu dolny grot i obie dolne
+# przekatne dochodza do ram sasiednich heksow bez rozjezdzania bokow.
+OVERLAY_BOTTOM_STRETCH_FACTOR = 0.018
+OVERLAY_BOTTOM_STRETCH_MIN_PX = 3
+OVERLAY_BOTTOM_STRETCH_MAX_PX = 18
+
 
 def _gap_inset(size: int) -> int:
     return max(GAP_MIN_PX, min(GAP_MAX_PX, int(round(size * GAP_FACTOR))))
+
+
+def _overlay_bottom_extra(size: int) -> int:
+    return max(
+        OVERLAY_BOTTOM_STRETCH_MIN_PX,
+        min(OVERLAY_BOTTOM_STRETCH_MAX_PX, int(round(size * OVERLAY_BOTTOM_STRETCH_FACTOR))),
+    )
 
 
 def _load_asset(mode: str):
@@ -89,27 +105,28 @@ def _scaled_terrain_with_gap(textures, terrain_key, size):
 
 
 def _scaled_overlay_asset(mode: str, size: int):
-    """Skaluje hover_hex/click_hex zawsze bezpośrednio z pliku źródłowego.
+    """Skaluje hover_hex/click_hex bezposrednio z pliku z lekkim wydluzeniem dolu.
 
-    Zwykłe ``pygame.transform.scale`` dawało widoczne kwadratowe piksele przy
-    powiększaniu 512-pikselowej ramki na dużym zoomie. ``smoothscale`` filtruje
-    raster, ale nadal korzystamy wyłącznie z mastera, więc nie ma wielokrotnego
-    skalowania już przeskalowanej kopii.
+    Zwykle ``pygame.transform.scale`` dawalo widoczne kwadratowe piksele przy
+    powiekszaniu 512-pikselowej ramki na duzym zoomie. ``smoothscale`` filtruje
+    raster, ale nadal korzystamy wylacznie z mastera. Szerokosc pozostaje
+    dokladnie zgodna z heksem; dodatkowe piksele dostaje tylko wysokosc.
     """
     asset = _load_asset(mode)
     if asset is None:
         return None
 
     size = max(1, int(size))
-    cache_key = (mode, size, id(asset))
+    render_size = (size, size + _overlay_bottom_extra(size))
+    cache_key = (mode, render_size, id(asset))
     cached = _OVERLAY_CACHE.get(cache_key)
     if cached is not None:
         return cached
 
-    if asset.get_size() == (size, size):
+    if asset.get_size() == render_size:
         rendered = asset.copy()
     else:
-        rendered = pygame.transform.smoothscale(asset, (size, size))
+        rendered = pygame.transform.smoothscale(asset, render_size)
 
     _OVERLAY_CACHE[cache_key] = rendered
     return rendered
@@ -136,7 +153,7 @@ def _queue_overlay(tile, hovered: bool, selected: bool):
 
 
 def draw_hex_state_overlays(screen, camera=None):
-    """Rysuje hover_hex/click_hex jako osobną końcową warstwę mapy."""
+    """Rysuje hover_hex/click_hex jako osobna koncowa warstwe mapy."""
     global _FRAME_OPEN
     camera = camera or _LAST_CAMERA
     if not _FRAME_OPEN or camera is None:
@@ -155,7 +172,13 @@ def draw_hex_state_overlays(screen, camera=None):
             continue
 
         sx, sy = tile.center(camera)
-        screen.blit(overlay, overlay.get_rect(center=(int(sx), int(sy))))
+
+        # Kotwiczymy nakladke po GORNEJ krawedzi bazowego kwadratu heksa,
+        # zamiast centrowac powiekszona wysokosc. Dodatkowe piksele trafiaja
+        # wiec tylko pod heks i domykaja niedociagniety dol widoczny na mapie.
+        left = int(round(sx - size / 2.0))
+        top = int(round(sy - size / 2.0))
+        screen.blit(overlay, (left, top))
 
     _PENDING_OVERLAYS["hover"] = None
     _PENDING_OVERLAYS["selected"] = None
@@ -163,7 +186,7 @@ def draw_hex_state_overlays(screen, camera=None):
 
 
 def install_hex_selection_theme():
-    """Instaluje assetowe hover/klik bez programowych obrysów."""
+    """Instaluje assetowe hover/klik bez programowych obrysow."""
     global _INSTALLED
     if _INSTALLED:
         return
