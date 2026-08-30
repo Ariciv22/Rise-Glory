@@ -67,6 +67,7 @@ jobs:
             rg_engine/production.py \
             rg_ui/city_hub.py \
             rg_ui/hex_info_panel.py \
+            rg_ui/map_ui_regression_fixes.py \
             rg_ui/location_menu_hitbox_fix.py \
             rg_ui/location_quest_board.py \
             rg_ui/dev_menu.py \
