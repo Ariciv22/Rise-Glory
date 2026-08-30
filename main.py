@@ -35,6 +35,7 @@ from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
 from rg_ui.location_menu_hitbox_fix import install_location_menu_hitbox_fix
 from rg_ui.location_navigation_fix import install_location_navigation_fix
 from rg_ui.location_quest_board import install_location_quest_board
+from rg_ui.location_right_panel_content import install_location_right_panel_content
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
@@ -126,6 +127,11 @@ install_location_menu_hitbox_fix()
 # tablicy, trzy kafle ofert oraz pozioma karta Questa otwierana po kliknieciu.
 # Instalujemy ja po Zakladach, aby oba moduly mogly wspoldzielic prawy panel.
 install_location_quest_board()
+
+# Kazda pozycja lewego panelu ma teraz spojna prezentacje po prawej: ta sama
+# ikona trafia do okraglego slotu, nazwa budynku do naglowka, a dedykowany
+# prawe_ui_*.png wypelnia duza ramke. Dolna czesc zostaje dla funkcji zakladki.
+install_location_right_panel_content()
 
 # Strzalki na dole prawego panelu sa centrowane w prawdziwej wolnej stopce
 # pomiedzy separatorem ostatniego slotu a ozdobna rama dolna. Przy renderze
