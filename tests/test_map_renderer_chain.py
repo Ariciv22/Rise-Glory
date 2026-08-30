@@ -22,8 +22,11 @@ def test_production_visuals_wrap_current_tile_draw_at_install_time():
     assert "world_map.Tile.draw = tile_draw_with_production" in source
 
 
-def test_production_marker_fonts_are_cached():
+def test_temporary_letter_production_markers_are_removed():
     source = (ROOT / "rg_world" / "production_visuals.py").read_text(encoding="utf-8")
 
-    assert "_FONT_CACHE" in source
-    assert "def _marker_font" in source
+    assert "_MATERIAL_SHORT" not in source
+    assert "pygame.draw.circle" not in source
+    assert '"Dr"' not in source
+    assert '"Sk"' not in source
+    assert '"Ag"' not in source
