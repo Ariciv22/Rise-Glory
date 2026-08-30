@@ -67,3 +67,17 @@ def test_location_hex_info_gets_quest_button_without_seventh_city_slot():
     assert '"enter_selected_location"' in source
     assert "quest_marker_ui._QUEST_PANEL_ID = self.quest_id" in source
     assert "buttons.extend([quest_button, enter_button])" in source
+
+
+def test_blocked_world_threats_can_be_resolved_from_adjacent_hexes():
+    source = (ROOT / "rg_ui" / "threat_adjacent_resolution.py").read_text(encoding="utf-8")
+    production = (ROOT / "rg_ui" / "production_hud.py").read_text(encoding="utf-8")
+
+    assert 'str(effect.get("type") or "") != "block_entry"' in source
+    assert 'scope in {"marker", "marker_tile", "marker_tiles", "local"}' in source
+    assert "tile is origin or not world_map.are_adjacent(origin, tile)" in source
+    assert "marker_event_ids_on_tile(tile)" in source
+    assert "threat_hex_action_state(player, token, marker_ref)" in source
+    assert "world_state._HEX_ACTION_RECTS.append" in source
+    assert '"Zablokowany heks obok"' in source
+    assert "install_threat_adjacent_resolution()" in production

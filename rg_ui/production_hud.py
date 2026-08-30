@@ -215,10 +215,12 @@ def install_production_hud(app_module=None):
     if app_module is not None:
         app_module.draw_game_ui = draw_game_ui_with_production
 
-    # Ta poprawka jest instalowana tutaj, bo production_hud jest pierwszym
+    # Te poprawki instaluja sie tutaj, bo production_hud jest pierwszym
     # pozniejszym modulem mapy uruchamianym po kompletnym lancuchu setupu
     # (Wydarzenia Swiata, Zagrozenia i Questy sa juz wtedy opakowane).
     from rg_ui.map_ui_regression_fixes import install_map_ui_regression_fixes
+    from rg_ui.threat_adjacent_resolution import install_threat_adjacent_resolution
 
     install_map_ui_regression_fixes(app_module)
+    install_threat_adjacent_resolution()
     _INSTALLED = True
