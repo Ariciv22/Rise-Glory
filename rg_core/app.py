@@ -30,10 +30,12 @@ from rg_start_intro import (
 from rg_tooltip import draw_location_tooltip
 from rg_turns import TurnManager, resolve_initiative
 from rg_ui import over_ui, ui_rects
+from rg_ui.hex_info_panel import draw_hex_info_panel, hex_info_panel_rect
 from rg_world import generate_world
 
 STATE_START_INTRO = "start_intro"
 STATE_INTRO = "intro"
+HEX_TOOLTIP_DELAY_MS = 2500
 _LAYOUT_MODULES = [rg_data, rg_ui, rg_map, rg_hud, rg_city_screen, rg_intro, rg_screens]
 
 
@@ -127,6 +129,9 @@ def main():
     dragging = False
     drag_moved = False
     drag_start = last_mouse = (0, 0)
+    hover_timer_tile = None
+    hover_timer_started_at = 0
+    tooltip_hovered = None
     fullscreen = False
     running = True
 
@@ -204,11 +209,24 @@ def main():
             apply_runtime_dev_flags(players[active_player_index], selected_token, ACTIONS_PER_TURN)
 
         rects = ui_rects(screen) if state == STATE_GAME else []
+        if state == STATE_GAME and selected_tile is not None:
+            rects = [*rects, hex_info_panel_rect(screen)]
+
         if state == STATE_GAME and not dev_menu_open and not dragging and not over_ui(mouse, rects):
             for tile in tiles:
                 if tile.contains(mouse, camera):
                     hovered = tile
                     break
+
+        now_ms = pygame.time.get_ticks()
+        if hovered is not hover_timer_tile:
+            hover_timer_tile = hovered
+            hover_timer_started_at = now_ms if hovered is not None else 0
+        tooltip_hovered = (
+            hovered
+            if hovered is not None and now_ms - hover_timer_started_at >= HEX_TOOLTIP_DELAY_MS
+            else None
+        )
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -427,19 +445,31 @@ def main():
                     for button in game_buttons:
                         if button.clicked(event.pos):
                             clicked_button = True
-                            if button.action == "end_turn":
+                            action = str(button.action)
+                            if action == "end_turn":
                                 advance_turn()
+                            elif action == "close_hex_info":
+                                selected_tile = None
+                            elif action == "enter_selected_location":
+                                if (
+                                    selected_tile is not None
+                                    and selected_tile.location
+                                    and selected_tile.location.get("kind") in {"city", "village", "castle"}
+                                    and selected_token
+                                    and selected_token.tile is selected_tile
+                                ):
+                                    current_city = selected_tile.location
+                                    selected_city_place = None
+                                    location_message = ""
+                                    state = STATE_CITY
+                                elif players and 0 <= active_player_index < len(players):
+                                    players[active_player_index]["_map_message"] = "Najpierw podejdź bohaterem na wybrany heks."
                             break
                     if not clicked_button and not drag_moved and not over_ui(event.pos, rects):
                         for tile in tiles:
                             if tile.contains(event.pos, camera):
                                 selected_tile = tile
-                                if tile.location and tile.location.get("kind") in {"city", "village", "castle"} and selected_token and tile == selected_token.tile:
-                                    current_city = tile.location
-                                    selected_city_place = None
-                                    location_message = ""
-                                    state = STATE_CITY
-                                elif selected_token and selected_token.can_move_to(tile):
+                                if selected_token and selected_token.can_move_to(tile):
                                     selected_token.move_to(tile)
                                 break
 
@@ -492,7 +522,19 @@ def main():
                 turn_manager.round_number if turn_manager else 1,
                 turn_manager.council_cycle if turn_manager else 1,
             )
-            draw_location_tooltip(screen, font, small_font, hovered, mouse)
+            game_buttons = list(game_buttons or [])
+            game_buttons.extend(
+                draw_hex_info_panel(
+                    screen,
+                    font,
+                    small_font,
+                    active_hero,
+                    selected_token,
+                    selected_tile,
+                    mouse,
+                )
+            )
+            draw_location_tooltip(screen, font, small_font, tooltip_hovered, mouse)
 
         if dev_menu_open and state in [STATE_GAME, STATE_CITY] and players and selected_token:
             active_hero = players[active_player_index]
