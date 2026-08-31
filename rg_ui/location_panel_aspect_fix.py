@@ -12,6 +12,10 @@ _INSTALLED = False
 # zewnetrznego czarnego marginesu.
 _LEFT_PANEL_FALLBACK_ASPECT = 1023 / 1537
 
+# Pelny panel zachowujacy aspekt okazal sie wizualnie zbyt dominujacy.
+# Zmniejszamy go proporcjonalnie do 80%, bez ponownego sciskania grafiki.
+_LEFT_PANEL_SCALE = 0.80
+
 
 def _left_panel_aspect() -> float:
     source = city_hub._load_asset(city_hub.LEFT_PANEL_FILE)
@@ -29,12 +33,12 @@ def _left_panel_aspect() -> float:
 
 
 def install_location_panel_aspect_fix() -> None:
-    """Nie pozwala sciskac lewy_ui.png do arbitralnych 18% ekranu.
+    """Rysuje lewy UI mniejszy, ale nadal w prawidlowych proporcjach.
 
-    Wysokosc panelu nadal wynika z dostepnego miejsca pomiedzy gornym i dolnym
-    HUD-em, ale jego szerokosc jest liczona z proporcji samego assetu. Dzieki
-    temu kafle, ikony i napisy zachowuja naturalne proporcje na ekranach miast,
-    zamkow i wsi.
+    Panel zajmuje 80% wysokosci dostepnego obszaru lokacji. Jego szerokosc jest
+    liczona z proporcji samego assetu, wiec kafle, ikony i napisy nie sa ani
+    sciskane, ani rozciagane. Panel jest wycentrowany pionowo pomiedzy gornym i
+    dolnym HUD-em, a odzyskane miejsce trafia do srodkowej sceny.
     """
     global _INSTALLED
     if _INSTALLED:
@@ -50,25 +54,30 @@ def install_location_panel_aspect_fix() -> None:
         body_h = base["left"].height
         right_w = base["right"].width
 
-        desired_left_w = max(220, int(round(body_h * _left_panel_aspect())))
+        desired_left_h = max(1, int(round(body_h * _LEFT_PANEL_SCALE)))
+        desired_left_w = max(220, int(round(desired_left_h * _left_panel_aspect())))
 
         # Scena nadal musi zostac duza i czytelna. Ten limit jest tylko
-        # bezpiecznikiem dla malych okien; przy typowych 1080p/1440p lewy panel
-        # dostaje pelna szerokosc wynikajaca z jego oryginalnych proporcji.
+        # bezpiecznikiem dla malych okien.
         min_scene_w = max(440, int(round(sw * 0.40)))
         max_left_w = max(1, sw - right_w - min_scene_w)
         left_w = min(desired_left_w, max_left_w)
 
-        # Nowy shell jest uruchamiany dopiero od 1100 px szerokosci, wiec w
-        # praktyce ten fallback nie powinien byc potrzebny. Chroni jednak layout
-        # przed ujemna szerokoscia przy nietypowym resize okna.
+        # Jesli limit szerokosci wymusil dalsze pomniejszenie, zmniejszamy tez
+        # wysokosc, aby nadal zachowac proporcje assetu.
+        aspect = max(0.01, _left_panel_aspect())
+        left_h = min(desired_left_h, max(1, int(round(left_w / aspect))))
+
         if left_w < 1:
             left_w = max(1, base["left"].width)
+        if left_h < 1:
+            left_h = max(1, body_h)
 
+        left_y = body_y + max(0, (body_h - left_h) // 2)
         scene_w = max(1, sw - left_w - right_w)
 
-        left = pygame.Rect(0, body_y, left_w, body_h)
-        scene = pygame.Rect(left.right, body_y, scene_w, body_h)
+        left = pygame.Rect(0, left_y, left_w, left_h)
+        scene = pygame.Rect(left_w, body_y, scene_w, body_h)
         right = pygame.Rect(scene.right, body_y, right_w, body_h)
 
         return {
