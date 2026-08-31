@@ -275,22 +275,21 @@ def install_location_ui_refinement() -> None:
 
         context = _ACTIVE_CONTEXT
         top_bar = pygame.Rect(rect).centery < screen.get_height() // 2
-        text = str(message or "").strip()
 
         if top_bar:
-            if not text and context:
-                location, _player, selected_place = context
-                text = _top_bar_text(location, selected_place)
+            text = str(message or "").strip()
+            if context:
+                location, _player, selected_place, feedback = context
+                # Feedback z akcji ma pierwszenstwo. Gdy go nie ma, gorny pasek
+                # nadal pokazuje nazwe lokacji i aktualnej sekcji.
+                text = feedback or text or _top_bar_text(location, selected_place)
             _draw_centered_bar_text(screen, rect, text, top_bar=True)
             return
 
-        # Komunikat po zakupie/leczeniu ma pierwszenstwo przed statystykami.
-        if text:
-            _draw_centered_bar_text(screen, rect, text, top_bar=False)
-            return
-
+        # Dolny pasek jest stale zarezerwowany dla statystyk gracza.
+        # Celowo ignorujemy przekazany tutaj feedback z city_hub.
         if context:
-            _location, player, _selected_place = context
+            _location, player, _selected_place, _feedback = context
             _draw_bottom_stat_strip(screen, rect, player)
 
     def draw_location_hub_screen(
@@ -306,7 +305,8 @@ def install_location_ui_refinement() -> None:
     ):
         global _ACTIVE_CONTEXT
         previous = _ACTIVE_CONTEXT
-        _ACTIVE_CONTEXT = (location, player, selected_place)
+        feedback = str(message or (player or {}).get("_location_message", "") or "").strip()
+        _ACTIVE_CONTEXT = (location, player, selected_place, feedback)
         try:
             return original_draw_location_hub_screen(
                 screen,
