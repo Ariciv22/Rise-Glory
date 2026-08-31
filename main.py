@@ -34,6 +34,7 @@ from rg_ui.hud_top_stat_theme import install_hud_top_stat_theme
 from rg_ui.location_edge_bar_theme import install_location_edge_bar_theme
 from rg_ui.location_menu_hitbox_fix import install_location_menu_hitbox_fix
 from rg_ui.location_navigation_fix import install_location_navigation_fix
+from rg_ui.location_panel_aspect_fix import install_location_panel_aspect_fix
 from rg_ui.location_quest_board import install_location_quest_board
 from rg_ui.location_right_panel_content import install_location_right_panel_content
 from rg_ui.location_ui_refinement import install_location_ui_refinement
@@ -114,6 +115,11 @@ install_village_hub(_app)
 # a srodkowa scena jest dobierana z numeru oraz typu konkretnej lokacji.
 install_location_hub(_app)
 
+# Lewy panel nie jest juz wciskany w stale 18% szerokosci ekranu. Jego
+# szerokosc wynika z wysokosci oraz rzeczywistych proporcji lewy_ui.png,
+# dzieki czemu kafle i ikony nie sa poziomo scisniete.
+install_location_panel_aspect_fix()
+
 # Zakladka Zaklady pokazuje trzy gotowe inwestycje nalezace do lokacji oraz
 # wolne prawa eksploatacji heksow podlegajacych tej lokacji.
 install_production_location_hub()
@@ -144,8 +150,8 @@ install_location_navigation_fix()
 install_location_edge_bar_theme()
 
 # Ostatnia warstwa dopieszcza gotowy shell: powieksza napisy lewego menu,
-# pokazuje lokacje/sekcje w gornym pasie, statystyki bohatera w dolnym oraz
-# miesci cala grafike budynku w zlotej ramce prawego panelu bez cropowania.
+# pokazuje stale statystyki bohatera w gornym pasie, lokacje/sekcje i feedback
+# w dolnym oraz miesci cala grafike budynku w zlotej ramce prawego panelu.
 install_location_ui_refinement()
 
 
