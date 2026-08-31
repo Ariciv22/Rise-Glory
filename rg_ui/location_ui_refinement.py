@@ -3,12 +3,14 @@ from __future__ import annotations
 import pygame
 
 from rg_ui import city_hub
+from rg_ui import hud_top_stat_theme
 from rg_ui import location_right_panel_content
 
 
 _INSTALLED = False
 _ACTIVE_CONTEXT = None
 _FONT_CACHE = {}
+_BOTTOM_ICON_CACHE = {}
 
 _MENU_LABELS = {
     "location_shop": "Sklep",
@@ -19,6 +21,14 @@ _MENU_LABELS = {
     "location_industry": "Gildia",
     "location_equipment": "Gildia",
     "back_to_map": "Powrót na mapę",
+}
+
+_ROOT_DIR = city_hub.city.ROOT_DIR
+_BOTTOM_ICON_FILES = {
+    "gold": _ROOT_DIR / "Grafiki" / "ikony_gornego_ui" / "zloto.png",
+    "legend": _ROOT_DIR / "Grafiki" / "ikony_gornego_ui" / "punkty_legend.png",
+    "hp": _ROOT_DIR / "Grafiki" / "buttony_panele_lokacji" / "hp_potion.png",
+    "wounds": _ROOT_DIR / "Grafiki" / "ikony_gornego_ui" / "rany.png",
 }
 
 
@@ -132,14 +142,86 @@ def _top_bar_text(location, selected_place) -> str:
     return f"{location_name}  •  {section}"
 
 
-def _bottom_bar_text(player) -> str:
+def _bottom_icon(name: str, size: int):
+    """Laduje sam symbol dolnego paska, bez czarnego tla assetu."""
+    size = max(1, int(size))
+    key = (str(name), size)
+    if key in _BOTTOM_ICON_CACHE:
+        return _BOTTOM_ICON_CACHE[key]
+
+    path = _BOTTOM_ICON_FILES.get(str(name))
+    icon = None
+    if path is not None:
+        source = city_hub._load_asset(path)
+        if source is not None:
+            try:
+                cleaned = hud_top_stat_theme._clear_dark_neutral_pixels(
+                    source,
+                    max_value=52,
+                    max_spread=20,
+                )
+                cleaned = hud_top_stat_theme._crop_visible_content(cleaned, padding=3)
+                icon = hud_top_stat_theme._scale_into_square(cleaned, size)
+            except (ValueError, pygame.error):
+                icon = None
+
+    _BOTTOM_ICON_CACHE[key] = icon
+    return icon
+
+
+def _draw_bottom_stat_strip(screen, rect, player):
+    """Cztery zwarte grupy: ikona + wartosc, bez technicznych podpisow."""
+    rect = pygame.Rect(rect)
     player = player or {}
+
     gold = int(player.get("gold", 0) or 0)
     legend = int(player.get("legend", 0) or 0)
     hp = int(player.get("hp", 0) or 0)
     max_hp = int(player.get("max_hp", 10) or 10)
     wounds = int(player.get("wounds", 0) or 0)
-    return f"Złoto: {gold}  •  Legenda: {legend}  •  HP: {hp}/{max_hp}  •  Rany: {wounds}/4"
+
+    values = (
+        ("gold", str(gold)),
+        ("legend", str(legend)),
+        ("hp", f"{hp}/{max_hp}"),
+        ("wounds", f"{wounds}/4"),
+    )
+
+    icon_size = min(44, max(28, int(round(rect.height * 0.56))))
+    value_font = _font(
+        min(24, max(17, int(round(rect.height * 0.31)))),
+        bold=True,
+    )
+    icon_gap = max(5, int(round(icon_size * 0.13)))
+    group_gap = max(24, int(round(rect.width * 0.022)))
+
+    prepared = []
+    total_width = 0
+    for icon_name, value in values:
+        icon = _bottom_icon(icon_name, icon_size)
+        label = value_font.render(value, True, getattr(city_hub.city, "TEXT", (168, 181, 198)))
+        shadow = value_font.render(value, True, (24, 18, 13))
+        icon_width = icon.get_width() if icon is not None else 0
+        width = icon_width + (icon_gap if icon_width else 0) + label.get_width()
+        prepared.append((icon, label, shadow, width))
+        total_width += width
+
+    if prepared:
+        total_width += group_gap * (len(prepared) - 1)
+
+    x = rect.centerx - total_width // 2
+    for icon, label, shadow, width in prepared:
+        if icon is not None:
+            icon_rect = icon.get_rect(midleft=(x, rect.centery))
+            screen.blit(icon, icon_rect)
+            text_x = icon_rect.right + icon_gap
+        else:
+            text_x = x
+
+        text_y = rect.centery - label.get_height() // 2
+        screen.blit(shadow, (text_x + 1, text_y + 2))
+        screen.blit(label, (text_x, text_y))
+        x += width + group_gap
 
 
 def _draw_centered_bar_text(screen, rect, text, top_bar: bool):
@@ -194,14 +276,22 @@ def install_location_ui_refinement() -> None:
         context = _ACTIVE_CONTEXT
         top_bar = pygame.Rect(rect).centery < screen.get_height() // 2
         text = str(message or "").strip()
-        if not text and context:
-            location, player, selected_place = context
-            text = (
-                _top_bar_text(location, selected_place)
-                if top_bar
-                else _bottom_bar_text(player)
-            )
-        _draw_centered_bar_text(screen, rect, text, top_bar=top_bar)
+
+        if top_bar:
+            if not text and context:
+                location, _player, selected_place = context
+                text = _top_bar_text(location, selected_place)
+            _draw_centered_bar_text(screen, rect, text, top_bar=True)
+            return
+
+        # Komunikat po zakupie/leczeniu ma pierwszenstwo przed statystykami.
+        if text:
+            _draw_centered_bar_text(screen, rect, text, top_bar=False)
+            return
+
+        if context:
+            _location, player, _selected_place = context
+            _draw_bottom_stat_strip(screen, rect, player)
 
     def draw_location_hub_screen(
         screen,
