@@ -36,6 +36,7 @@ from rg_ui.location_menu_hitbox_fix import install_location_menu_hitbox_fix
 from rg_ui.location_navigation_fix import install_location_navigation_fix
 from rg_ui.location_quest_board import install_location_quest_board
 from rg_ui.location_right_panel_content import install_location_right_panel_content
+from rg_ui.location_ui_refinement import install_location_ui_refinement
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
@@ -141,6 +142,11 @@ install_location_navigation_fix()
 # Gorny i dolny pas ekranu lokacji korzystaja z pelnego panel2.png, dzieki
 # czemu widoczne sa zlote naroza i ornamenty na calej ramie zamiast samych linii.
 install_location_edge_bar_theme()
+
+# Ostatnia warstwa dopieszcza gotowy shell: powieksza napisy lewego menu,
+# pokazuje lokacje/sekcje w gornym pasie, statystyki bohatera w dolnym oraz
+# miesci cala grafike budynku w zlotej ramce prawego panelu bez cropowania.
+install_location_ui_refinement()
 
 
 if __name__ == "__main__":
