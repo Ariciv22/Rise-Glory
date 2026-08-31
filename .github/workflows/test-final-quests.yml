@@ -72,6 +72,7 @@ jobs:
             rg_ui/threat_adjacent_resolution.py \
             rg_ui/location_menu_hitbox_fix.py \
             rg_ui/location_quest_board.py \
+            rg_ui/location_ui_refinement.py \
             rg_ui/dev_menu.py \
             rg_ui/dev_menu_input_fix.py \
             rg_ui/production_hud.py \
