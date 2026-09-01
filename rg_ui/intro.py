@@ -253,13 +253,14 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     if iw <= 0 or ih <= 0:
         return None
 
-    # Ramka jest liczona juz po odcieciu przezroczystych marginesow.
-    # Dzięki temu jej WIDOCZNY dol dotyka dolnej krawedzi okna.
+    # Ramka pozostaje szeroka, ale jej wysokosc jest celowo zmniejszona do
+    # polowy. Dzieki temu nie zaslania duzej czesci grafiki intra.
     target_w = min(sw - 8, 1720)
-    target_h = int(round(target_w * ih / iw))
+    natural_h = int(round(target_w * ih / iw))
+    target_h = max(1, int(round(natural_h * 0.50)))
 
-    # Na niskich rozdzielczosciach nie pozwalamy ramce zabrac calego ekranu.
-    max_h = max(250, int(sh * 0.52))
+    # Na niskich rozdzielczosciach zachowujemy ten sam, niski charakter panelu.
+    max_h = max(125, int(sh * 0.26))
     if target_h > max_h:
         scale = max_h / target_h
         target_w = max(1, int(round(target_w * scale)))
@@ -273,26 +274,29 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     panel.midbottom = (sw // 2, sh + 1)
     screen.blit(frame, panel.topleft)
 
-    # Tekst zaczyna sie wyraznie ponizej gornej krawedzi ramki.
+    # Po zmniejszeniu ramki tekst dostaje wieksza czesc jej srodka, a liczba
+    # rysowanych linii wynika z faktycznej wysokosci pola.
     text_area = pygame.Rect(
         panel.x + int(panel.width * 0.075),
-        panel.y + int(panel.height * 0.215),
+        panel.y + int(panel.height * 0.19),
         int(panel.width * 0.85),
-        int(panel.height * 0.46),
+        int(panel.height * 0.47),
     )
 
     wrapped = []
     for paragraph in text.split("\n"):
         wrapped.extend(wrap(small_font, paragraph, text_area.width))
 
+    line_h = max(18, int(small_font.get_height() * 1.14))
+    max_lines = max(1, text_area.height // line_h)
     draw_lines(
         screen,
         small_font,
-        wrapped[:7],
+        wrapped[:max_lines],
         text_area.x,
         text_area.y,
         TEXT,
-        line_h=max(20, int(small_font.get_height() * 1.28)),
+        line_h=line_h,
         max_width=text_area.width,
     )
 
@@ -301,23 +305,26 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
         counter,
         (
             panel.right - int(panel.width * 0.075) - counter.get_width(),
-            panel.y + int(panel.height * 0.12),
+            panel.y + int(panel.height * 0.10),
         ),
     )
 
-    # Hitboxy i ikony sa ustawione dokladnie w pustych polach ramki.
-    # Lewy: SKIP. Prawy: FORWARD.
-    skip_rect = pygame.Rect(
-        panel.x + int(panel.width * 0.040),
-        panel.y + int(panel.height * 0.805),
-        int(panel.width * 0.155),
-        int(panel.height * 0.125),
+    # Srodki hitboxow trafiaja w geometryczne srodki ozdobnych pol ramki.
+    # Wczesniej byly zbyt przesuniete do srodka calego panelu.
+    button_w = max(1, int(panel.width * 0.15))
+    button_h = max(1, int(panel.height * 0.15))
+    button_center_y = panel.y + int(panel.height * 0.875)
+
+    skip_rect = pygame.Rect(0, 0, button_w, button_h)
+    skip_rect.center = (
+        panel.x + int(panel.width * 0.10),
+        button_center_y,
     )
-    next_rect = pygame.Rect(
-        panel.x + int(panel.width * 0.805),
-        panel.y + int(panel.height * 0.805),
-        int(panel.width * 0.155),
-        int(panel.height * 0.125),
+
+    next_rect = pygame.Rect(0, 0, button_w, button_h)
+    next_rect.center = (
+        panel.x + int(panel.width * 0.90),
+        button_center_y,
     )
 
     skip_icon = _find_image_by_stems(INTRO_UI_DIR, INTRO_SKIP_ICON_STEMS)
