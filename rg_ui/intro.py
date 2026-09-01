@@ -310,19 +310,21 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     )
 
     # Srodki hitboxow trafiaja w geometryczne srodki ozdobnych pol ramki.
+    # Pola sa lekko odsuniete od samych krawedzi panelu, wiec oba srodki
+    # przesuwamy symetrycznie do wewnatrz: Skip w prawo, Forward w lewo.
     button_w = max(1, int(panel.width * 0.15))
     button_h = max(1, int(panel.height * 0.15))
     button_center_y = panel.y + int(panel.height * 0.875)
 
     skip_rect = pygame.Rect(0, 0, button_w, button_h)
     skip_rect.center = (
-        panel.x + int(panel.width * 0.10),
+        panel.x + int(panel.width * 0.1175),
         button_center_y,
     )
 
     next_rect = pygame.Rect(0, 0, button_w, button_h)
     next_rect.center = (
-        panel.x + int(panel.width * 0.90),
+        panel.x + int(panel.width * 0.8825),
         button_center_y,
     )
 
