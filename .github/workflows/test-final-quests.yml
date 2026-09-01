@@ -68,6 +68,7 @@ jobs:
             rg_ui/city_hub.py \
             rg_ui/font_theme.py \
             rg_ui/hex_info_panel.py \
+            rg_ui/intro.py \
             rg_ui/map_ui_regression_fixes.py \
             rg_ui/threat_adjacent_resolution.py \
             rg_ui/location_menu_hitbox_fix.py \
