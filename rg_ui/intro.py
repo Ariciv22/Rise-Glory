@@ -253,13 +253,15 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     if iw <= 0 or ih <= 0:
         return None
 
-    # Ramka pozostaje szeroka, ale jej wysokosc jest celowo zmniejszona do
-    # polowy. Dzieki temu nie zaslania duzej czesci grafiki intra.
-    target_w = min(sw - 8, 1720)
-    natural_h = int(round(target_w * ih / iw))
-    target_h = max(1, int(round(natural_h * 0.50)))
+    # Zmniejszamy cala ramke proporcjonalnie. Szerokosc i wysokosc dostaja
+    # dokladnie ten sam wspolczynnik, wiec asset nigdy nie jest rozciagany ani
+    # zgniatany w jednej osi.
+    full_w = min(sw - 8, 1720)
+    target_w = max(1, int(round(full_w * 0.50)))
+    target_h = max(1, int(round(target_w * ih / iw)))
 
-    # Na niskich rozdzielczosciach zachowujemy ten sam, niski charakter panelu.
+    # Dodatkowy bezpiecznik na bardzo niskie okna nadal skaluje obie osie
+    # wspolnie, zachowujac oryginalne proporcje ramki.
     max_h = max(125, int(sh * 0.26))
     if target_h > max_h:
         scale = max_h / target_h
@@ -274,8 +276,6 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     panel.midbottom = (sw // 2, sh + 1)
     screen.blit(frame, panel.topleft)
 
-    # Po zmniejszeniu ramki tekst dostaje wieksza czesc jej srodka, a liczba
-    # rysowanych linii wynika z faktycznej wysokosci pola.
     text_area = pygame.Rect(
         panel.x + int(panel.width * 0.075),
         panel.y + int(panel.height * 0.19),
@@ -310,7 +310,6 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     )
 
     # Srodki hitboxow trafiaja w geometryczne srodki ozdobnych pol ramki.
-    # Wczesniej byly zbyt przesuniete do srodka calego panelu.
     button_w = max(1, int(panel.width * 0.15))
     button_h = max(1, int(panel.height * 0.15))
     button_center_y = panel.y + int(panel.height * 0.875)
