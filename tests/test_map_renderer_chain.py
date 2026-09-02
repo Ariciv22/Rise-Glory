@@ -69,6 +69,16 @@ def test_location_hex_info_gets_quest_button_without_seventh_city_slot():
     assert "buttons.extend([quest_button, enter_button])" in source
 
 
+def test_hex_info_panel_is_hidden_while_quest_modal_is_open():
+    source = (ROOT / "rg_ui" / "quest_hex_info_visibility.py").read_text(encoding="utf-8")
+    main = (ROOT / "main.py").read_text(encoding="utf-8")
+
+    assert "is_quest_marker_modal_open()" in source
+    assert "return []" in source
+    assert "app_module.draw_hex_info_panel = draw_hex_info_panel_with_quest_visibility" in source
+    assert main.index("install_production_hud(_app)") < main.index("install_quest_hex_info_visibility(_app)")
+
+
 def test_blocked_world_threats_can_be_resolved_from_adjacent_hexes():
     source = (ROOT / "rg_ui" / "threat_adjacent_resolution.py").read_text(encoding="utf-8")
     production = (ROOT / "rg_ui" / "production_hud.py").read_text(encoding="utf-8")
