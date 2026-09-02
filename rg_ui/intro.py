@@ -197,7 +197,7 @@ def draw_intro_fallback(screen, index, title_font, font):
     for step in range(18):
         color = 22 + step * 4
         rect = pygame.Rect(step * 38, step * 26, sw - step * 76, sh - step * 52)
-        if rect.width > 0 or rect.height > 0:
+        if rect.width > 0 and rect.height > 0:
             pygame.draw.rect(screen, (color, color - 2, max(12, color - 8)), rect, 1)
 
     title = title_font.render(f"Brak obrazka intro {index + 1}", True, TEXT)
