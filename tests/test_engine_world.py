@@ -2,8 +2,10 @@ from rg_engine.world import (
     current_world_level,
     quest_difficulty_from_legend_gap,
     register_players,
+    register_world_level_change_hook,
     required_ready_players,
     reset_world_progression,
+    unregister_world_level_change_hook,
     update_world_level,
 )
 
@@ -28,6 +30,22 @@ def test_leader_alone_can_open_world_level_two():
     ]
     register_players(players)
     assert update_world_level() == 2
+
+
+def test_world_level_hook_runs_immediately_on_successful_advance():
+    players = [{"legend": 10}, {"legend": 0}]
+    register_players(players)
+    calls = []
+
+    def on_change(previous, current):
+        calls.append((previous, current))
+
+    register_world_level_change_hook(on_change)
+    try:
+        assert update_world_level() == 2
+        assert calls == [(1, 2)]
+    finally:
+        unregister_world_level_change_hook(on_change)
 
 
 def test_world_cannot_reach_level_three_without_half_of_group_on_level_two():
