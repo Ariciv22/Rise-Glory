@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Callable, Iterable
 
 _REGISTERED_PLAYERS: list[dict] = []
 _FORCED_WORLD_LEVEL: int | None = None
 _WORLD_LEVEL = 1
 _WORLD_LEVEL_CHANGES: list[tuple[int, int]] = []
+_WORLD_LEVEL_CHANGE_HOOKS: list[Callable[[int, int], None]] = []
 
 
 def register_players(players: Iterable[dict] | None) -> None:
@@ -18,6 +19,18 @@ def register_players(players: Iterable[dict] | None) -> None:
 def registered_players() -> list[dict]:
     """Zwraca graczy bieżącej rozgrywki z zachowaniem referencji do ich stanu."""
     return list(_REGISTERED_PLAYERS)
+
+
+def register_world_level_change_hook(callback: Callable[[int, int], None]) -> None:
+    """Rejestruje integrację wykonywaną natychmiast po realnym awansie świata."""
+    if callback not in _WORLD_LEVEL_CHANGE_HOOKS:
+        _WORLD_LEVEL_CHANGE_HOOKS.append(callback)
+
+
+def unregister_world_level_change_hook(callback: Callable[[int, int], None]) -> None:
+    """Usuwa wcześniej zarejestrowaną integrację zmiany Poziomu Świata."""
+    if callback in _WORLD_LEVEL_CHANGE_HOOKS:
+        _WORLD_LEVEL_CHANGE_HOOKS.remove(callback)
 
 
 def reset_world_progression(level: int = 1) -> int:
@@ -106,6 +119,11 @@ def update_world_level(players: Iterable[dict] | None = None) -> int:
         previous = _WORLD_LEVEL
         _WORLD_LEVEL += 1
         _WORLD_LEVEL_CHANGES.append((previous, _WORLD_LEVEL))
+        # Integracje (np. Tablice Ogłoszeń) reagują od razu po zakończeniu
+        # akcji, która przyznała brakujące Punkty Legendy. Nie czekamy na turę
+        # ani Radę, a aktywne Questy/Zagrożenia pozostają nietknięte.
+        for callback in list(_WORLD_LEVEL_CHANGE_HOOKS):
+            callback(previous, _WORLD_LEVEL)
     return _WORLD_LEVEL
 
 
