@@ -46,6 +46,7 @@ from rg_ui.production_location_hub import install_production_location_hub
 from rg_ui.quest_hex_info_visibility import install_quest_hex_info_visibility
 from rg_ui.title_flow import install_into_main
 from rg_ui.village_hub import install_village_hub
+from rg_ui.world_level_transition import install_world_level_transition
 from rg_world.location_names import install_quest_location_name_compatibility
 from rg_world.production_visuals import install_production_visuals
 
@@ -159,6 +160,12 @@ install_location_edge_bar_theme()
 # pokazuje stale statystyki bohatera w gornym pasie, lokacje/sekcje i feedback
 # w dolnym oraz miesci cala grafike budynku w zlotej ramce prawego panelu.
 install_location_ui_refinement()
+
+# Zmiana Poziomu Swiata po akcji dostaje automatyczny, modalny ekran przejscia.
+# Nie ma przycisku Kontynuuj: warstwa blokuje przypadkowe interakcje przez ok.
+# 3 sekundy i sama znika. Instalujemy ja na samym koncu, aby byla nad Questem,
+# walka, panelem heksa, tooltipami i ekranem lokacji.
+install_world_level_transition(_app)
 
 
 if __name__ == "__main__":
