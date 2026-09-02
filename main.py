@@ -43,6 +43,7 @@ from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.production_hud import install_production_hud
 from rg_ui.production_location_hub import install_production_location_hub
+from rg_ui.quest_hex_info_visibility import install_quest_hex_info_visibility
 from rg_ui.title_flow import install_into_main
 from rg_ui.village_hub import install_village_hub
 from rg_world.location_names import install_quest_location_name_compatibility
@@ -105,6 +106,11 @@ install_hud_top_stat_theme()
 # Dolny HUD pokazuje zawsze POTENCJAL wybranego heksa i daje akcje budowy lub
 # testowego przejmowania, gdy aktywny bohater stoi na tym heksie.
 install_production_hud(_app)
+
+# Pelnoekranowy modal Questa ma pierwszenstwo nad mapa. Gdy jest otwarty,
+# panel szczegolow zaznaczonego heksa znika i wraca dopiero po zamknieciu Questa.
+# Instalujemy to po production_hud, bo ten modul zaklada finalny wrapper heksa.
+install_quest_hex_info_visibility(_app)
 
 # Starszy ekran wsi zostaje pod spodem jako fallback dla malego okna, questow
 # oraz sytuacji, w ktorej zabraknie ktoregos assetu nowego ekranu.
