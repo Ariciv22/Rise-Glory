@@ -67,6 +67,7 @@ jobs:
             rg_engine/production.py \
             rg_engine/quest_location_bridge.py \
             rg_engine/quest_world_bridge.py \
+            rg_engine/world.py \
             rg_ui/city_hub.py \
             rg_ui/font_theme.py \
             rg_ui/hex_info_panel.py \
@@ -81,6 +82,7 @@ jobs:
             rg_ui/dev_menu_input_fix.py \
             rg_ui/production_hud.py \
             rg_ui/production_location_hub.py \
+            rg_ui/world_level_transition.py \
             rg_ui/council_flow.py \
             rg_world/generation.py \
             rg_world/production_visuals.py \
@@ -89,7 +91,7 @@ jobs:
             rg_core/setup.py
 
       - name: Run final quest, developer, production and map regression tests
-        run: python -m pytest -q tests/test_final_quests_01_23.py tests/test_dev_quest_picker.py tests/test_engine_production.py tests/test_map_renderer_chain.py
+        run: python -m pytest -q tests/test_final_quests_01_23.py tests/test_dev_quest_picker.py tests/test_engine_production.py tests/test_engine_world.py tests/test_map_renderer_chain.py tests/test_world_level_transition_regression.py
 
       - name: Run quest offer generation regression tests
         run: |
