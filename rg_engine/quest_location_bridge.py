@@ -4,6 +4,23 @@ import random
 import sys
 
 _INSTALLED = False
+_TRACKED_LOCATIONS: list[dict] = []
+
+
+def clear_tracked_quest_locations() -> None:
+    """Czyści referencje Tablic z poprzedniej wygenerowanej mapy."""
+    _TRACKED_LOCATIONS.clear()
+
+
+def tracked_quest_locations() -> list[dict]:
+    return list(_TRACKED_LOCATIONS)
+
+
+def _track_location(location: dict) -> None:
+    if not isinstance(location, dict):
+        return
+    if all(existing is not location for existing in _TRACKED_LOCATIONS):
+        _TRACKED_LOCATIONS.append(location)
 
 
 def install_quest_location_bridge() -> None:
@@ -13,14 +30,14 @@ def install_quest_location_bridge() -> None:
 
     import rg_content.locations as locations
     from rg_engine.quests import create_offer, draw_quest_id, return_quest_id_to_deck
-    from rg_engine.world import current_world_level
+    from rg_engine.world import current_world_level, register_world_level_change_hook
 
     original_initialize = locations.initialize_location
 
-    def _draw_offer(visible, rng, location_name=None):
+    def _draw_offer(visible, rng, location_name=None, world_level=None):
         blocked = [str(card.get("id")) for card in visible if isinstance(card, dict) and card.get("id")]
         quest_id = draw_quest_id(
-            current_world_level(),
+            int(current_world_level() if world_level is None else world_level),
             unavailable_ids=blocked,
             rng=rng,
             location_name=location_name,
@@ -33,6 +50,26 @@ def install_quest_location_bridge() -> None:
                 return_quest_id_to_deck(str(card["id"]), rng=rng)
         location["quest_offers"] = []
 
+    def _refresh_board(location, level, rng=None):
+        rng = rng or random
+        _release_visible_offers(location, rng)
+        offers = []
+        location_name = location.get("name")
+        for _ in range(3):
+            offer = _draw_offer(
+                offers,
+                rng,
+                location_name=location_name,
+                world_level=level,
+            )
+            if offer is None:
+                break
+            offers.append(offer)
+        location["quest_offers"] = offers
+        location["quest_offer_world_level"] = int(level)
+        location["quest_v2_ready"] = True
+        return location
+
     def initialize_location_v2(location, rng=None):
         rng = rng or random
         # Bazowy initializer odpowiada za sklep, Pomocnikow ORAZ pierwsze trzy
@@ -40,6 +77,7 @@ def install_quest_location_bridge() -> None:
         # losujemy ich drugi raz, bo wtedy pierwsza trojka pozostawalaby
         # zarezerwowana w talii mimo ze nie bylaby juz widoczna graczowi.
         original_initialize(location, rng)
+        _track_location(location)
         level = int(current_world_level() or 1)
 
         if not location.get("quest_v2_ready"):
@@ -50,19 +88,17 @@ def install_quest_location_bridge() -> None:
         if int(location.get("quest_offer_world_level", level) or level) == level:
             return location
 
-        # Po zmianie Poziomu Swiata niewziete karty starego poziomu wracaja do
-        # talii, a Tablica dostaje trzy nowe oferty dla tej samej lokacji.
-        _release_visible_offers(location, rng)
-        offers = []
-        location_name = location.get("name")
-        for _ in range(3):
-            offer = _draw_offer(offers, rng, location_name=location_name)
-            if offer is None:
-                break
-            offers.append(offer)
-        location["quest_offers"] = offers
-        location["quest_offer_world_level"] = level
-        return location
+        # Bezpiecznik dla zapisow/starszych runtime'ow: jesli lokacja zostanie
+        # otwarta juz po awansie, jej Tablica i tak natychmiast dogoni poziom.
+        return _refresh_board(location, level, rng)
+
+    def _world_level_changed(_previous, level):
+        # Decyzja projektowa ALFY: niewziete oferty znikaja NATYCHMIAST po
+        # akcji, ktora awansowala swiat. Przyjete Questy sa w stanie graczy,
+        # wiec ta operacja ich nie dotyka. Zagrozenia/Wydarzenia tez pozostaja.
+        for location in list(_TRACKED_LOCATIONS):
+            if location.get("offers_ready"):
+                _refresh_board(location, int(level), random)
 
     def take_quest_v2(location, player, slot_index, rng=None):
         rng = rng or random
@@ -90,6 +126,7 @@ def install_quest_location_bridge() -> None:
 
     locations.initialize_location = initialize_location_v2
     locations.take_quest = take_quest_v2
+    register_world_level_change_hook(_world_level_changed)
 
     # Te moduly wczesniej zaimportowaly funkcje przez `from ... import`.
     try:
