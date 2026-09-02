@@ -197,7 +197,7 @@ def draw_intro_fallback(screen, index, title_font, font):
     for step in range(18):
         color = 22 + step * 4
         rect = pygame.Rect(step * 38, step * 26, sw - step * 76, sh - step * 52)
-        if rect.width > 0 and rect.height > 0:
+        if rect.width > 0 or rect.height > 0:
             pygame.draw.rect(screen, (color, color - 2, max(12, color - 8)), rect, 1)
 
     title = title_font.render(f"Brak obrazka intro {index + 1}", True, TEXT)
@@ -312,19 +312,22 @@ def _draw_custom_intro_box(screen, font, small_font, index, text, frame_path):
     # Srodki hitboxow trafiaja w geometryczne srodki ozdobnych pol ramki.
     # Pola sa lekko odsuniete od samych krawedzi panelu, wiec oba srodki
     # przesuwamy symetrycznie do wewnatrz: Skip w prawo, Forward w lewo.
+    # Finalny micro-offset z referencji: oba przyciski 5 px w prawo i 6 px w dol.
     button_w = max(1, int(panel.width * 0.15))
     button_h = max(1, int(panel.height * 0.15))
-    button_center_y = panel.y + int(panel.height * 0.875)
+    button_offset_x = 5
+    button_offset_y = 6
+    button_center_y = panel.y + int(panel.height * 0.875) + button_offset_y
 
     skip_rect = pygame.Rect(0, 0, button_w, button_h)
     skip_rect.center = (
-        panel.x + int(panel.width * 0.1175),
+        panel.x + int(panel.width * 0.1175) + button_offset_x,
         button_center_y,
     )
 
     next_rect = pygame.Rect(0, 0, button_w, button_h)
     next_rect.center = (
-        panel.x + int(panel.width * 0.8825),
+        panel.x + int(panel.width * 0.8825) + button_offset_x,
         button_center_y,
     )
 
