@@ -17,9 +17,14 @@ def install_quest_location_bridge() -> None:
 
     original_initialize = locations.initialize_location
 
-    def _draw_offer(visible, rng):
+    def _draw_offer(visible, rng, location_name=None):
         blocked = [str(card.get("id")) for card in visible if isinstance(card, dict) and card.get("id")]
-        quest_id = draw_quest_id(current_world_level(), unavailable_ids=blocked, rng=rng)
+        quest_id = draw_quest_id(
+            current_world_level(),
+            unavailable_ids=blocked,
+            rng=rng,
+            location_name=location_name,
+        )
         return create_offer(quest_id) if quest_id else None
 
     def _release_visible_offers(location, rng):
@@ -30,29 +35,32 @@ def install_quest_location_bridge() -> None:
 
     def initialize_location_v2(location, rng=None):
         rng = rng or random
-        # Stary initializer nadal odpowiada za sklep i Pomocników. Jego stare
-        # Questy-kategorie są tylko tymczasowo tworzone i zaraz zastępowane;
-        # nie podmieniamy jego prywatnego _draw_quest, żeby nie rezerwować kart
-        # nowej talii dwa razy.
+        # Bazowy initializer odpowiada za sklep, Pomocnikow ORAZ pierwsze trzy
+        # finalne Questy przypisane do tej konkretnej Tablicy Ogloszen. Nie
+        # losujemy ich drugi raz, bo wtedy pierwsza trojka pozostawalaby
+        # zarezerwowana w talii mimo ze nie bylaby juz widoczna graczowi.
         original_initialize(location, rng)
         level = int(current_world_level() or 1)
 
-        if location.get("quest_v2_ready") and int(location.get("quest_offer_world_level", level) or level) == level:
+        if not location.get("quest_v2_ready"):
+            location["quest_v2_ready"] = True
+            location["quest_offer_world_level"] = level
             return location
 
-        if location.get("quest_v2_ready"):
-            # Niewzięte karty starego poziomu wracają do właściwej talii. Już
-            # posiadane Questy pozostają u bohaterów zgodnie z zasadami.
-            _release_visible_offers(location, rng)
+        if int(location.get("quest_offer_world_level", level) or level) == level:
+            return location
 
+        # Po zmianie Poziomu Swiata niewziete karty starego poziomu wracaja do
+        # talii, a Tablica dostaje trzy nowe oferty dla tej samej lokacji.
+        _release_visible_offers(location, rng)
         offers = []
+        location_name = location.get("name")
         for _ in range(3):
-            offer = _draw_offer(offers, rng)
+            offer = _draw_offer(offers, rng, location_name=location_name)
             if offer is None:
                 break
             offers.append(offer)
         location["quest_offers"] = offers
-        location["quest_v2_ready"] = True
         location["quest_offer_world_level"] = level
         return location
 
@@ -61,7 +69,7 @@ def install_quest_location_bridge() -> None:
         initialize_location_v2(location, rng)
         offers = location.setdefault("quest_offers", [])
         if slot_index < 0 or slot_index >= len(offers):
-            return False, "Nieprawidłowy slot Questa."
+            return False, "Nieprawidlowy slot Questa."
 
         quest = offers[slot_index]
         success, message = locations.accept_quest_card(player, quest)
@@ -69,7 +77,11 @@ def install_quest_location_bridge() -> None:
             return False, message
 
         visible_without_slot = [offer for index, offer in enumerate(offers) if index != slot_index]
-        replacement = _draw_offer(visible_without_slot, rng)
+        replacement = _draw_offer(
+            visible_without_slot,
+            rng,
+            location_name=location.get("name"),
+        )
         if replacement is None:
             offers.pop(slot_index)
         else:
@@ -79,7 +91,7 @@ def install_quest_location_bridge() -> None:
     locations.initialize_location = initialize_location_v2
     locations.take_quest = take_quest_v2
 
-    # Te moduły wcześniej zaimportowały funkcje przez `from ... import`.
+    # Te moduly wczesniej zaimportowaly funkcje przez `from ... import`.
     try:
         import rg_world.generation as generation
         generation.initialize_location = initialize_location_v2
