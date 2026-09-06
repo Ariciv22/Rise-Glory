@@ -45,4 +45,10 @@ def install_quest_hex_info_visibility(app_module=None) -> None:
     if app_module is not None:
         app_module.draw_hex_info_panel = draw_hex_info_panel_with_quest_visibility
 
+    # Krok 1 przebudowy mapy: tabela graczy jako przycisk po lewej, informacje
+    # o heksie w prawym HUD-zie i Wydarzenia Swiata bez przyciemniania mapy.
+    # Instalujemy dopiero po wrapperze Questa, aby zachowac jego priorytet.
+    from rg_ui.map_step1_layout import install_map_step1_layout
+
+    install_map_step1_layout(app_module)
     _INSTALLED = True
