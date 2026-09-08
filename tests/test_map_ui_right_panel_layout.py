@@ -10,6 +10,7 @@ def test_final_map_ui_moves_hex_info_to_right_panel_and_hides_scoreboard():
 
     assert 'right = game_layout_rects(screen)["right"]' in source
     assert "hex_info_panel.hex_info_panel_rect = right_hex_info_rect" in source
+    assert "app_module.hex_info_panel_rect = right_hex_info_rect" in source
     assert "hud._draw_scoreboard = scoreboard_without_table" in source
     assert "world_state._draw_hex_actions(" in source
     assert "find_action_button(controller, \"end_turn\")" in source
