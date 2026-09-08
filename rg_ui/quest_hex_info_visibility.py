@@ -142,5 +142,10 @@ def install_quest_hex_info_visibility(app_module=None) -> None:
 
     if app_module is not None:
         app_module.draw_hex_info_panel = draw_hex_info_panel_with_quest_visibility
+        # app.py importuje hex_info_panel_rect przez `from ... import`, wiec ma
+        # wlasna referencje do starej funkcji. Bez tej podmiany over_ui() nadal
+        # traktowal dawny panel lezacy nad mapa jak niewidzialny hitbox i
+        # blokowal hover oraz klikniecia heksow po ich zaznaczeniu.
+        app_module.hex_info_panel_rect = right_hex_info_rect
 
     _INSTALLED = True
