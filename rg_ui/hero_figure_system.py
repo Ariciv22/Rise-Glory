@@ -411,13 +411,8 @@ def _draw_player_board_with_figure(screen, hero):
         return controls
     board = player_board._board_rect(screen, source)
 
-    # Wolne pole pomiedzy statystykami po lewej i ekwipunkiem po prawej.
-    target = pygame.Rect(
-        int(board.x + board.width * 0.270),
-        int(board.y + board.height * 0.075),
-        max(1, int(board.width * 0.165)),
-        max(1, int(board.height * 0.510)),
-    )
+    # Portret korzysta z tego samego prostokata, do ktorego pozniej trafi asset ramki.
+    target = player_board.player_board_layout(board)["portrait"]
     rendered = _fit_image(relative_path, target.size)
     if rendered is None:
         return controls
