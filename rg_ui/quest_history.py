@@ -55,9 +55,9 @@ def _draw_tabs(player_board, screen, board, hero):
     global _TAB_RECTS, _PAGE_RECTS
     active_count = len(hero.get("active_quests", []) or [])
     history_count = len(_history_quests(hero))
-    tab_y = 0.646
-    active_rect = player_board._relative_rect(board, 0.282, tab_y, 0.165, 0.038)
-    history_rect = player_board._relative_rect(board, 0.455, tab_y, 0.190, 0.038)
+    layout = player_board.player_board_layout(board)
+    active_rect = layout["quest_tabs"]["active"]
+    history_rect = layout["quest_tabs"]["history"]
     _TAB_RECTS = {"active": active_rect, "history": history_rect}
     font = player_board._font(board, 12, bold=True)
 
@@ -66,8 +66,6 @@ def _draw_tabs(player_board, screen, board, hero):
         ("history", history_rect, f"HISTORIA {history_count}"),
     ):
         selected = _MODE == key
-        pygame.draw.rect(screen, (74, 58, 37) if selected else (33, 31, 28), rect, border_radius=6)
-        pygame.draw.rect(screen, (220, 163, 71) if selected else (105, 89, 61), rect, 2 if selected else 1, border_radius=6)
         player_board._draw_text(
             screen,
             font,
@@ -81,20 +79,37 @@ def _draw_tabs(player_board, screen, board, hero):
     _PAGE_RECTS = {}
     if _MODE != "history" or history_count <= 3:
         return
+
     pages = max(1, math.ceil(history_count / 3))
     page = max(0, min(_HISTORY_PAGE, pages - 1))
-    prev_rect = player_board._relative_rect(board, 0.656, tab_y, 0.035, 0.038)
-    next_rect = player_board._relative_rect(board, 0.752, tab_y, 0.035, 0.038)
-    page_rect = player_board._relative_rect(board, 0.695, tab_y, 0.053, 0.038)
+    pagination = layout["quest_pagination"]
+    prev_rect = pagination["prev"]
+    next_rect = pagination["next"]
+    page_rect = pagination["page"]
     _PAGE_RECTS = {"prev": prev_rect, "next": next_rect}
+
     for rect, label, enabled in (
         (prev_rect, "‹", page > 0),
         (next_rect, "›", page + 1 < pages),
     ):
-        pygame.draw.rect(screen, (62, 51, 36) if enabled else (33, 31, 28), rect, border_radius=5)
-        pygame.draw.rect(screen, (190, 134, 48) if enabled else (78, 72, 62), rect, 1, border_radius=5)
-        player_board._draw_text(screen, font, label, rect.center, (230, 194, 126) if enabled else (100, 95, 86), anchor="center", shadow=False)
-    player_board._draw_text(screen, font, f"{page + 1}/{pages}", page_rect.center, (205, 183, 137), anchor="center", shadow=False)
+        player_board._draw_text(
+            screen,
+            font,
+            label,
+            rect.center,
+            (230, 194, 126) if enabled else (100, 95, 86),
+            anchor="center",
+            shadow=False,
+        )
+    player_board._draw_text(
+        screen,
+        font,
+        f"{page + 1}/{pages}",
+        page_rect.center,
+        (205, 183, 137),
+        anchor="center",
+        shadow=False,
+    )
 
 
 def _draw_history_row_statuses(player_board, screen, board, rows, quests):
@@ -103,18 +118,17 @@ def _draw_history_row_statuses(player_board, screen, board, rows, quests):
         label, color = _status(quest)
         badge = pygame.Rect(0, 0, max(74, int(row.width * 0.105)), max(18, int(row.height * 0.26)))
         badge.topright = (row.right - 8, row.y + 6)
-        pygame.draw.rect(screen, (24, 23, 20), badge, border_radius=5)
-        pygame.draw.rect(screen, color, badge, 1, border_radius=5)
         player_board._draw_text(screen, font, label, badge.center, color, anchor="center", shadow=False)
 
 
 def _draw_empty_history(player_board, screen, board):
     font = player_board._font(board, 14, bold=True)
+    area = player_board.player_board_layout(board)["quest_area"]
     player_board._draw_text(
         screen,
         font,
         "Brak zakończonych Questów.",
-        player_board._point(board, 0.61, 0.80),
+        area.center,
         (170, 158, 132),
         anchor="center",
     )
