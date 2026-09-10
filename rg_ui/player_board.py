@@ -19,6 +19,9 @@ _BOARD_SEARCHED = False
 _SCALED_CACHE = {}
 
 
+STAT_ORDER = ("Walka", "Handel", "Dyplomacja", "Intryga", "Nauka", "Kultura")
+
+
 def open_player_board():
     global _PLAYER_BOARD_OPEN
     _PLAYER_BOARD_OPEN = True
@@ -164,6 +167,87 @@ def _relative_rect(rect, x_ratio, y_ratio, width_ratio, height_ratio):
     )
 
 
+def player_board_layout(board):
+    """Jedyny kontrakt geometrii planszetki bohatera.
+
+    Wszystkie przyszle assety, dane i hitboxy powinny korzystac z tych samych
+    prostokatow. Dzięki temu grafika nie moze odjechac od klikanej strefy.
+    """
+    stat_y = (0.205, 0.256, 0.307, 0.357, 0.408, 0.458)
+    stat_x = (0.103, 0.136, 0.169, 0.201, 0.233)
+    stat_cell_w = 0.028
+    stat_cell_h = 0.038
+    stat_cells = {}
+    for stat, y in zip(STAT_ORDER, stat_y):
+        cells = []
+        for x in stat_x:
+            cell = _relative_rect(board, x - stat_cell_w / 2, y - stat_cell_h / 2, stat_cell_w, stat_cell_h)
+            cells.append(cell)
+        stat_cells[stat] = cells
+
+    wound_centers = [_point(board, x, 0.556) for x in (0.030, 0.055, 0.081, 0.107)]
+    legend_cells = []
+    for y in (0.669, 0.724, 0.780, 0.836, 0.892):
+        for x in (0.031, 0.062, 0.094, 0.126, 0.158, 0.190, 0.222):
+            legend_cells.append(_relative_rect(board, x - 0.0135, y - 0.018, 0.027, 0.036))
+
+    equipment_slots = []
+    for y, height in ((0.066, 0.160), (0.244, 0.160)):
+        for x in (0.466, 0.526, 0.586, 0.646):
+            equipment_slots.append(_relative_rect(board, x, y, 0.055, height))
+
+    helper_slots = [
+        _relative_rect(board, x, 0.486, 0.052, 0.135)
+        for x in (0.466, 0.522, 0.578, 0.634, 0.690)
+    ]
+
+    backpack_slots = []
+    for y in (0.066, 0.158, 0.250, 0.342, 0.434):
+        for x in (0.724, 0.772, 0.820):
+            backpack_slots.append(_relative_rect(board, x, y, 0.043, 0.083))
+
+    quest_rows = [
+        _relative_rect(board, 0.276, 0.694 + index * 0.086, 0.706, 0.078)
+        for index in range(3)
+    ]
+
+    return {
+        "board": pygame.Rect(board),
+        "close": _relative_rect(board, 0.840, 0.012, 0.145, 0.048),
+        "identity": _relative_rect(board, 0.060, 0.028, 0.185, 0.100),
+        "identity_name": _relative_rect(board, 0.082, 0.039, 0.150, 0.038),
+        "identity_class": _relative_rect(board, 0.087, 0.082, 0.145, 0.032),
+        "attributes": _relative_rect(board, 0.018, 0.155, 0.225, 0.330),
+        "stat_cells": stat_cells,
+        "wounds": _relative_rect(board, 0.018, 0.510, 0.105, 0.093),
+        "wound_centers": wound_centers,
+        "gold": _relative_rect(board, 0.127, 0.510, 0.118, 0.093),
+        "gold_value": _point(board, 0.220, 0.556),
+        "legend": _relative_rect(board, 0.018, 0.630, 0.227, 0.320),
+        "legend_cells": legend_cells,
+        "portrait": _relative_rect(board, 0.270, 0.075, 0.165, 0.510),
+        "equipment": _relative_rect(board, 0.455, 0.035, 0.260, 0.395),
+        "equipment_slots": equipment_slots,
+        "helpers": _relative_rect(board, 0.455, 0.455, 0.255, 0.180),
+        "helper_slots": helper_slots,
+        "backpack": _relative_rect(board, 0.715, 0.035, 0.145, 0.600),
+        "backpack_slots": backpack_slots,
+        "materials": _relative_rect(board, 0.875, 0.060, 0.105, 0.405),
+        "food": _relative_rect(board, 0.875, 0.500, 0.105, 0.150),
+        "quest_area": _relative_rect(board, 0.270, 0.640, 0.715, 0.320),
+        "quest_tabs": {
+            "active": _relative_rect(board, 0.282, 0.646, 0.165, 0.038),
+            "history": _relative_rect(board, 0.455, 0.646, 0.190, 0.038),
+        },
+        "quest_pagination": {
+            "prev": _relative_rect(board, 0.656, 0.646, 0.035, 0.038),
+            "page": _relative_rect(board, 0.695, 0.646, 0.053, 0.038),
+            "next": _relative_rect(board, 0.752, 0.646, 0.035, 0.038),
+        },
+        "quest_rows": quest_rows,
+    }
+
+
 def _font(rect, size, bold=False):
     scaled_size = max(11, int(size * rect.height / 941))
     return pygame.font.SysFont("georgia", scaled_size, bold=bold)
@@ -206,32 +290,24 @@ def _wrap(font, text, max_width):
     return lines
 
 
-def _draw_identity(screen, board, hero):
+def _draw_identity(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     name_font = _font(board, 27, bold=True)
     class_font = _font(board, 18, bold=True)
-    _draw_text(screen, name_font, hero.get("name", "Bohater"), _point(board, 0.087, 0.050), (224, 188, 113))
-    _draw_text(
-        screen,
-        class_font,
-        hero.get("archetype_name", hero.get("class", "-")),
-        _point(board, 0.091, 0.096),
-        (202, 166, 99),
-    )
+    _draw_text(screen, name_font, hero.get("name", "Bohater"), layout["identity_name"].topleft, (224, 188, 113))
+    _draw_text(screen, class_font, hero.get("archetype_name", hero.get("class", "-")), layout["identity_class"].topleft, (202, 166, 99))
 
 
-def _draw_stat_markers(screen, board, hero):
-    stat_order = ["Walka", "Handel", "Dyplomacja", "Intryga", "Nauka", "Kultura"]
-    y_positions = [0.205, 0.256, 0.307, 0.357, 0.408, 0.458]
-    x_positions = [0.103, 0.136, 0.169, 0.201, 0.233]
+def _draw_stat_markers(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     scale = board.height / 941
     radius = max(9, int(16 * scale))
-
-    for stat, y_ratio in zip(stat_order, y_positions):
+    for stat in STAT_ORDER:
         value = int(hero.get("stats", {}).get(stat, 0) or 0)
         if value < 1:
             continue
         value = min(5, value)
-        center = _point(board, x_positions[value - 1], y_ratio)
+        center = layout["stat_cells"][stat][value - 1].center
         points = []
         for index in range(6):
             angle = math.radians(60 * index - 30)
@@ -242,48 +318,31 @@ def _draw_stat_markers(screen, board, hero):
         pygame.draw.polygon(screen, (255, 128, 35), points, max(2, int(3 * scale)))
 
 
-def _draw_hearts(screen, board, hero):
+def _draw_hearts(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     heart_font = _font(board, 27, bold=True)
     wounds = max(0, min(MAX_WOUNDS, int(hero.get("wounds", 0) or 0)))
     healthy = MAX_WOUNDS - wounds
-    x_positions = [0.030, 0.055, 0.081, 0.107]
-    for index, x_ratio in enumerate(x_positions):
+    for index, center in enumerate(layout["wound_centers"]):
         color = (190, 38, 38) if index < healthy else (25, 25, 25)
-        _draw_text(screen, heart_font, "♥", _point(board, x_ratio, 0.556), color, anchor="center")
+        _draw_text(screen, heart_font, "♥", center, color, anchor="center")
 
 
-def _draw_gold(screen, board, hero):
+def _draw_gold(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     gold_font = _font(board, 25, bold=True)
-    _draw_text(screen, gold_font, hero.get("gold", 0), _point(board, 0.220, 0.556), (238, 193, 92), anchor="center")
+    _draw_text(screen, gold_font, hero.get("gold", 0), layout["gold_value"], (238, 193, 92), anchor="center")
 
 
-def _draw_legend(screen, board, hero):
+def _draw_legend(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     legend = max(0, min(35, int(hero.get("legend", 0) or 0)))
-    x_positions = [0.031, 0.062, 0.094, 0.126, 0.158, 0.190, 0.222]
-    y_positions = [0.669, 0.724, 0.780, 0.836, 0.892]
-    cell_width = max(10, int(board.width * 0.027))
-    cell_height = max(10, int(board.height * 0.036))
     overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-    cells = []
-
-    for number in range(1, legend + 1):
-        row = (number - 1) // 7
-        column = (number - 1) % 7
-        center = _point(board, x_positions[column], y_positions[row])
-        cell = pygame.Rect(0, 0, cell_width, cell_height)
-        cell.center = center
-        cells.append(cell)
+    for cell in layout["legend_cells"][:legend]:
         pygame.draw.rect(overlay, (173, 112, 30, 105), cell, border_radius=max(1, int(4 * board.height / 941)))
     screen.blit(overlay, (0, 0))
-    for cell in cells:
-        pygame.draw.rect(screen, (224, 164, 67), cell, max(1, int(2 * board.height / 941)))
-
     if legend > 0:
-        row = (legend - 1) // 7
-        column = (legend - 1) % 7
-        center = _point(board, x_positions[column], y_positions[row])
-        current = pygame.Rect(0, 0, cell_width + 4, cell_height + 4)
-        current.center = center
+        current = layout["legend_cells"][legend - 1].inflate(4, 4)
         pygame.draw.rect(screen, (255, 135, 38), current, max(2, int(3 * board.height / 941)))
 
 
@@ -315,7 +374,6 @@ def _equipment_values(hero):
     elif isinstance(equipment, (list, tuple)):
         for index, item in enumerate(equipment[:8]):
             slots[index] = _item_name(item)
-
     if not slots[0] and hero.get("basic_item"):
         slots[0] = _item_name(hero["basic_item"])
     if not slots[1] and hero.get("class_item"):
@@ -349,23 +407,16 @@ def _draw_slot_text(screen, board, rect, value, font_size=13):
         y += line_height
 
 
-def _draw_equipment(screen, board, hero):
-    x_positions = [0.466, 0.526, 0.586, 0.646]
-    rows = [(0.066, 0.160), (0.244, 0.160)]
-    values = _equipment_values(hero)
-    index = 0
-    for y_ratio, height in rows:
-        for x_ratio in x_positions:
-            rect = _relative_rect(board, x_ratio, y_ratio, 0.055, height)
-            _draw_slot_text(screen, board, rect, values[index])
-            index += 1
+def _draw_equipment(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
+    for rect, value in zip(layout["equipment_slots"], _equipment_values(hero)):
+        _draw_slot_text(screen, board, rect, value)
 
 
-def _draw_helpers(screen, board, hero):
+def _draw_helpers(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     helpers = list(hero.get("helpers", []) or [])[:5]
-    x_positions = [0.466, 0.522, 0.578, 0.634, 0.690]
-    for index, helper in enumerate(helpers):
-        rect = _relative_rect(board, x_positions[index], 0.486, 0.052, 0.135)
+    for rect, helper in zip(layout["helper_slots"], helpers):
         _draw_slot_text(screen, board, rect, _item_name(helper), font_size=12)
 
 
@@ -382,18 +433,10 @@ def _collect_backpack_items(hero):
     return result[:15]
 
 
-def _draw_backpack(screen, board, hero):
-    items = _collect_backpack_items(hero)
-    x_positions = [0.724, 0.772, 0.820]
-    y_positions = [0.066, 0.158, 0.250, 0.342, 0.434]
-    index = 0
-    for y_ratio in y_positions:
-        for x_ratio in x_positions:
-            if index >= len(items):
-                return
-            rect = _relative_rect(board, x_ratio, y_ratio, 0.043, 0.083)
-            _draw_slot_text(screen, board, rect, items[index], font_size=10)
-            index += 1
+def _draw_backpack(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
+    for rect, item in zip(layout["backpack_slots"], _collect_backpack_items(hero)):
+        _draw_slot_text(screen, board, rect, item, font_size=10)
 
 
 def _materials_items(hero):
@@ -405,72 +448,62 @@ def _materials_items(hero):
     return []
 
 
-def _draw_materials(screen, board, hero):
+def _draw_materials(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     items = _materials_items(hero)[:10]
     font = _font(board, 12, bold=True)
-    for index, (name, amount) in enumerate(items):
-        y = 0.078 + index * 0.041
-        _draw_text(screen, font, _shorten(font, name, int(board.width * 0.075)), _point(board, 0.885, y), (212, 184, 126))
-        _draw_text(screen, font, amount, _point(board, 0.969, y), (232, 201, 137), anchor="topright")
+    area = layout["materials"]
+    line_h = max(font.get_height() + 4, area.height // 10)
+    y = area.y + 6
+    for name, amount in items:
+        _draw_text(screen, font, _shorten(font, name, max(20, area.width - 44)), (area.x + 6, y), (212, 184, 126))
+        _draw_text(screen, font, amount, (area.right - 6, y), (232, 201, 137), anchor="topright")
+        y += line_h
 
 
-def _draw_food(screen, board, hero):
+def _draw_food(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     food = Counter(_item_name(item) for item in (hero.get("food", []) or []))
     font = _font(board, 11, bold=True)
-    for index, (name, amount) in enumerate(list(food.items())[:3]):
-        y = 0.526 + index * 0.046
-        _draw_text(screen, font, _shorten(font, name, int(board.width * 0.075)), _point(board, 0.885, y), (212, 184, 126))
+    area = layout["food"]
+    line_h = max(font.get_height() + 5, area.height // 3)
+    y = area.y + 5
+    for name, amount in list(food.items())[:3]:
+        _draw_text(screen, font, _shorten(font, name, max(20, area.width - 42)), (area.x + 6, y), (212, 184, 126))
         if amount > 1:
-            _draw_text(screen, font, f"x{amount}", _point(board, 0.968, y), (232, 201, 137), anchor="topright")
+            _draw_text(screen, font, f"x{amount}", (area.right - 6, y), (232, 201, 137), anchor="topright")
+        y += line_h
 
 
 def _quest_row_rects(board, hero):
     quests = list(hero.get("active_quests", []) or [])[:3]
-    return [
-        _relative_rect(board, 0.276, 0.694 + index * 0.086, 0.706, 0.078)
-        for index in range(len(quests))
-    ]
+    return player_board_layout(board)["quest_rows"][: len(quests)]
 
 
-def _draw_quests(screen, board, hero):
+def _draw_quests(screen, board, hero, layout=None):
+    layout = layout or player_board_layout(board)
     quests = list(hero.get("active_quests", []) or [])[:3]
-    rows = _quest_row_rects(board, hero)
+    rows = layout["quest_rows"][: len(quests)]
     title_font = _font(board, 16, bold=True)
     description_font = _font(board, 12)
-    y_positions = [0.716, 0.802, 0.888]
     mouse_pos = pygame.mouse.get_pos()
-
     if not is_quest_details_open():
         for row in rows:
-            if not row.collidepoint(mouse_pos):
-                continue
-            overlay = pygame.Surface(row.size, pygame.SRCALPHA)
-            overlay.fill((196, 137, 48, 32))
-            screen.blit(overlay, row.topleft)
-            pygame.draw.rect(
-                screen,
-                (216, 157, 65),
-                row,
-                max(1, int(2 * board.height / 941)),
-                border_radius=max(2, int(5 * board.height / 941)),
-            )
-
-    for index, quest in enumerate(quests):
+            if row.collidepoint(mouse_pos):
+                overlay = pygame.Surface(row.size, pygame.SRCALPHA)
+                overlay.fill((196, 137, 48, 32))
+                screen.blit(overlay, row.topleft)
+    for index, (quest, row) in enumerate(zip(quests, rows)):
         if isinstance(quest, dict):
             title = quest.get("name") or quest.get("title") or f"Quest {index + 1}"
             description = quest.get("objective") or quest.get("description") or quest.get("deck") or ""
         else:
             title = str(quest)
             description = ""
-        _draw_text(screen, title_font, _shorten(title_font, title, int(board.width * 0.32)), _point(board, 0.316, y_positions[index]), (232, 196, 126))
+        title_y = row.y + max(4, int(row.height * 0.22))
+        _draw_text(screen, title_font, _shorten(title_font, title, int(row.width * 0.46)), (row.x + int(row.width * 0.057), title_y), (232, 196, 126))
         if description:
-            _draw_text(
-                screen,
-                description_font,
-                _shorten(description_font, description, int(board.width * 0.45)),
-                _point(board, 0.316, y_positions[index] + 0.031),
-                MUTED,
-            )
+            _draw_text(screen, description_font, _shorten(description_font, description, int(row.width * 0.64)), (row.x + int(row.width * 0.057), title_y + title_font.get_height() + 2), MUTED)
     return rows
 
 
@@ -478,12 +511,10 @@ def _draw_quest_details(screen, board, quest):
     board_shade = pygame.Surface(board.size, pygame.SRCALPHA)
     board_shade.fill((0, 0, 0, 176))
     screen.blit(board_shade, board.topleft)
-
     panel = _relative_rect(board, 0.305, 0.205, 0.505, 0.500)
     radius = max(8, int(14 * board.height / 941))
     pygame.draw.rect(screen, (12, 11, 10), panel, border_radius=radius)
     pygame.draw.rect(screen, (190, 134, 48), panel, max(2, int(3 * board.height / 941)), border_radius=radius)
-
     if isinstance(quest, dict):
         title = quest.get("name") or quest.get("title") or "Aktywny quest"
         description = quest.get("objective") or quest.get("description") or "Brak opisu zadania."
@@ -494,34 +525,22 @@ def _draw_quest_details(screen, board, quest):
         description = "Brak opisu zadania."
         deck = "Nieznana talia"
         stage = None
-
     title_font = _font(board, 25, bold=True)
     subtitle_font = _font(board, 14, bold=True)
     body_font = _font(board, 15)
     _draw_text(screen, title_font, title, (panel.centerx, panel.y + int(panel.height * 0.10)), (235, 199, 126), anchor="center")
     _draw_text(screen, subtitle_font, f"Talia: {deck}", (panel.centerx, panel.y + int(panel.height * 0.22)), MUTED, anchor="center")
-
     if stage is not None:
         _draw_text(screen, subtitle_font, f"Etap: {stage}", (panel.centerx, panel.y + int(panel.height * 0.29)), (211, 179, 113), anchor="center")
         body_y = panel.y + int(panel.height * 0.38)
     else:
         body_y = panel.y + int(panel.height * 0.32)
-
     max_width = int(panel.width * 0.82)
     for line in _wrap(body_font, description, max_width)[:6]:
         _draw_text(screen, body_font, line, (panel.centerx, body_y), TEXT, anchor="midtop")
         body_y += body_font.get_height() + max(3, int(4 * board.height / 941))
-
     status_font = _font(board, 13, bold=True)
-    _draw_text(
-        screen,
-        status_font,
-        "Status: aktywny",
-        (panel.centerx, panel.bottom - int(panel.height * 0.20)),
-        (216, 170, 83),
-        anchor="center",
-    )
-
+    _draw_text(screen, status_font, "Status: aktywny", (panel.centerx, panel.bottom - int(panel.height * 0.20)), (216, 170, 83), anchor="center")
     close_rect = pygame.Rect(0, 0, int(panel.width * 0.34), max(34, int(panel.height * 0.11)))
     close_rect.center = (panel.centerx, panel.bottom - int(panel.height * 0.085))
     hovered = close_rect.collidepoint(pygame.mouse.get_pos())
@@ -535,34 +554,28 @@ def _draw_quest_details(screen, board, quest):
 
 def draw_player_board(screen, hero):
     board, source_found = _draw_board_background(screen)
+    layout = player_board_layout(board)
     quest_rows = []
     quest_close_rect = None
-
     if not source_found:
         warning_font = _font(board, 24, bold=True)
         detail_font = _font(board, 16)
         _draw_text(screen, warning_font, "Nie znaleziono planszetki gracza", board.center, (230, 180, 80), anchor="center")
-        _draw_text(
-            screen,
-            detail_font,
-            "Oczekiwany plik: ostateczny wyglad planszetki gracza v1",
-            (board.centerx, board.centery + warning_font.get_height() + 10),
-            MUTED,
-            anchor="midtop",
-        )
+        _draw_text(screen, detail_font, "Oczekiwany plik: ostateczny wyglad planszetki gracza v1", (board.centerx, board.centery + warning_font.get_height() + 10), MUTED, anchor="midtop")
     else:
-        _draw_identity(screen, board, hero)
-        _draw_stat_markers(screen, board, hero)
-        _draw_hearts(screen, board, hero)
-        _draw_gold(screen, board, hero)
-        _draw_legend(screen, board, hero)
-        _draw_equipment(screen, board, hero)
-        _draw_helpers(screen, board, hero)
-        _draw_backpack(screen, board, hero)
-        _draw_materials(screen, board, hero)
-        _draw_food(screen, board, hero)
-        quest_rows = _draw_quests(screen, board, hero)
-
+        # Na tym etapie rysujemy tylko dane/markery. Dekoracyjne ramki beda
+        # dokladane pozniej jako assety dokladnie do prostokatow z layoutu.
+        _draw_identity(screen, board, hero, layout)
+        _draw_stat_markers(screen, board, hero, layout)
+        _draw_hearts(screen, board, hero, layout)
+        _draw_gold(screen, board, hero, layout)
+        _draw_legend(screen, board, hero, layout)
+        _draw_equipment(screen, board, hero, layout)
+        _draw_helpers(screen, board, hero, layout)
+        _draw_backpack(screen, board, hero, layout)
+        _draw_materials(screen, board, hero, layout)
+        _draw_food(screen, board, hero, layout)
+        quest_rows = _draw_quests(screen, board, hero, layout)
         selected_index = get_open_quest_index()
         quests = list(hero.get("active_quests", []) or [])[:3]
         if selected_index is not None:
@@ -571,9 +584,22 @@ def draw_player_board(screen, hero):
                 quest_rows = []
             else:
                 close_quest_details()
-
+    hitboxes = {
+        "close": layout["close"],
+        "quest_rows": quest_rows,
+        "quest_tabs": layout["quest_tabs"],
+        "quest_pagination": layout["quest_pagination"],
+        "equipment_slots": layout["equipment_slots"],
+        "helper_slots": layout["helper_slots"],
+        "backpack_slots": layout["backpack_slots"],
+        "materials": layout["materials"],
+        "food": layout["food"],
+        "portrait": layout["portrait"],
+    }
     return {
-        "close_rect": _relative_rect(board, 0.840, 0.012, 0.145, 0.048),
+        "close_rect": layout["close"],
         "quest_rows": quest_rows,
         "quest_close_rect": quest_close_rect,
+        "layout": layout,
+        "hitboxes": hitboxes,
     }
