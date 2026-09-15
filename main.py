@@ -40,6 +40,7 @@ from rg_ui.location_right_panel_content import install_location_right_panel_cont
 from rg_ui.location_ui_refinement import install_location_ui_refinement
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.menu_button_fix import install_menu_button_fix
+from rg_ui.player_board_items import install_player_board_items
 from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.production_hud import install_production_hud
 from rg_ui.production_location_hub import install_production_location_hub
@@ -93,6 +94,11 @@ install_hero_figure_system(_app)
 # Wybory wygladu dostaja wysokie ramki z pelnymi sylwetkami, a aktywny pionek
 # nie ma dodatkowego niebieskiego okregu pod podstawka.
 install_hero_figure_visual_fix()
+
+# Planszetka bohatera korzysta z Grafiki/planszetka_gracza/1.png jako gotowego
+# tla. Ekwipunek, Pomocnicy, Plecak i Materialy sa nadal danymi bohatera, ale
+# sa rysowane dynamicznie w polach planszetki i dostaja klikalne opisy.
+install_player_board_items()
 
 # Heksy nie zmieniaja wygladu przy najechaniu, kliknieciu ani wskazaniu
 # mozliwego ruchu. Interakcje nadal dzialaja logicznie, ale mapa pokazuje
