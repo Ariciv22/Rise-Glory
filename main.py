@@ -41,6 +41,7 @@ from rg_ui.location_ui_refinement import install_location_ui_refinement
 from rg_ui.map_background_fix import install_map_background
 from rg_ui.menu_button_fix import install_menu_button_fix
 from rg_ui.player_board_items import install_player_board_items
+from rg_ui.player_board_return_button import install_player_board_return_button
 from rg_ui.player_config_theme import install_player_config_theme
 from rg_ui.production_hud import install_production_hud
 from rg_ui.production_location_hub import install_production_location_hub
@@ -99,6 +100,10 @@ install_hero_figure_visual_fix()
 # tla. Ekwipunek, Pomocnicy, Plecak i Materialy sa nadal danymi bohatera, ale
 # sa rysowane dynamicznie w polach planszetki i dostaja klikalne opisy.
 install_player_board_items()
+
+# Przycisk Powrot do mapy wraz z hitboxem siedzi w dolnym pasie planszetki.
+# Stary obszar klikalny w prawym gornym rogu nie jest juz uzywany.
+install_player_board_return_button()
 
 # Heksy nie zmieniaja wygladu przy najechaniu, kliknieciu ani wskazaniu
 # mozliwego ruchu. Interakcje nadal dzialaja logicznie, ale mapa pokazuje
